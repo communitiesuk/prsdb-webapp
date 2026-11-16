@@ -35,6 +35,13 @@ class EmailNotificationService<in EmailModel : EmailTemplateModel>(
         }
     }
 
+    fun sendEmailSynchronously(
+        recipientAddress: String,
+        email: EmailModel,
+    ) {
+        emailDeliveryService.deliverEmail(recipientAddress, email)
+    }
+
     fun getLandlordRecipientAddresses(landlord: Landlord): List<String> {
         val recipientAddresses =
             when (landlord) {

@@ -3,6 +3,10 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.ASYNCHRONOUS_EMAIL_SENDING
+import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePassphrasePage
@@ -13,11 +17,13 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
     @Test
     fun `system operator can access generate passphrase page`() {
         featureFlagManager.disableFeature(PASSPHRASE_SMS)
+        featureFlagManager.disableFeature(PASSPHRASE_EMAIL)
         val generatePassphrasePage = navigator.goToGeneratePassphrasePage()
 
         assertThat(generatePassphrasePage.heading).containsText("New passphrase")
         assertEquals(3, generatePassphrasePage.passphrase.split(" ").size)
         assertThat(generatePassphrasePage.sendSmsButton).isHidden()
+        assertThat(generatePassphrasePage.sendEmailButton).isHidden()
     }
 
     @Test
@@ -49,12 +55,12 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
 
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
         assertEquals(passphrase, generatePassphrasePage.passphrase)
-        assertThat(generatePassphrasePage.smsStatus).containsText("The text message has been submitted to 02079460123.")
+        assertThat(generatePassphrasePage.notificationStatus).containsText("The text message has been submitted to 02079460123.")
         assertThat(generatePassphrasePage.sendSmsButton).isHidden()
 
         page.reload()
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
-        assertThat(generatePassphrasePage.smsStatus).isHidden()
+        assertThat(generatePassphrasePage.notificationStatus).isHidden()
         assertThat(generatePassphrasePage.sendSmsButton).isVisible()
     }
 
@@ -75,6 +81,93 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
         generatePassphrasePage.sendSmsButton.clickAndWait()
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
         assertEquals(passphrase, generatePassphrasePage.passphrase)
-        assertThat(generatePassphrasePage.smsStatus).containsText("The text message has been submitted")
+        assertThat(generatePassphrasePage.notificationStatus).containsText("The text message has been submitted")
+    }
+
+    @Test
+    fun `email-only sending works when ordinary emails are queued`(page: Page) {
+        featureFlagManager.enableFeature(PASSPHRASE_EMAIL)
+        featureFlagManager.disableFeature(PASSPHRASE_SMS)
+        featureFlagManager.enableFeature(ASYNCHRONOUS_EMAIL_SENDING)
+        var generatePassphrasePage = navigator.goToGeneratePassphrasePage()
+        val passphrase = generatePassphrasePage.passphrase
+        assertThat(generatePassphrasePage.sendSmsButton).isHidden()
+
+        generatePassphrasePage.emailAddress.fill("recipient@example.com")
+        generatePassphrasePage.sendEmailButton.clickAndWait()
+
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.notificationStatus).containsText("The email has been submitted to recipient@example.com.")
+        assertThat(generatePassphrasePage.sendEmailButton).isHidden()
+    }
+
+    @Test
+    fun `invalid submissions keep both channels available until an email attempt`(page: Page) {
+        featureFlagManager.enableFeature(PASSPHRASE_EMAIL)
+        featureFlagManager.enableFeature(PASSPHRASE_SMS)
+        var generatePassphrasePage = navigator.goToGeneratePassphrasePage()
+        val passphrase = generatePassphrasePage.passphrase
+
+        val smsToken = page.locator("#smsPassphraseToken")
+        val emailToken = page.locator("#emailPassphraseToken")
+        assertThat(smsToken).hasAttribute("name", "passphraseToken")
+        assertThat(emailToken).hasAttribute("name", "passphraseToken")
+        assertThat(emailToken).hasValue(smsToken.inputValue())
+
+        generatePassphrasePage.phoneNumber.fill("invalid")
+        generatePassphrasePage.sendSmsButton.clickAndWait()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.sendEmailButton).isVisible()
+
+        generatePassphrasePage.emailAddress.fill("invalid")
+        generatePassphrasePage.sendEmailButton.clickAndWait()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.emailAddress).hasValue("invalid")
+        assertThat(generatePassphrasePage.sendSmsButton).isVisible()
+
+        generatePassphrasePage.emailAddress.fill("recipient@example.com")
+        generatePassphrasePage.sendEmailButton.clickAndWait()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.notificationStatus).containsText("The email has been submitted")
+        assertThat(generatePassphrasePage.sendEmailButton).isHidden()
+        assertThat(generatePassphrasePage.sendSmsButton).isHidden()
+
+        page.reload()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertThat(generatePassphrasePage.notificationStatus).isHidden()
+        assertThat(generatePassphrasePage.sendEmailButton).isVisible()
+        assertThat(generatePassphrasePage.sendSmsButton).isVisible()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["transient@example.com", "persistent@example.com"])
+    fun `email failure requires generating a new passphrase for either channel`(
+        recipient: String,
+        page: Page,
+    ) {
+        featureFlagManager.enableFeature(PASSPHRASE_EMAIL)
+        featureFlagManager.enableFeature(PASSPHRASE_SMS)
+        var generatePassphrasePage = navigator.goToGeneratePassphrasePage()
+        val passphrase = generatePassphrasePage.passphrase
+
+        generatePassphrasePage.emailAddress.fill(recipient)
+        generatePassphrasePage.sendEmailButton.clickAndWait()
+
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.notificationStatus).containsText(
+            if (recipient.startsWith("transient")) "The email could not be sent" else "We could not confirm whether the email was sent",
+        )
+        assertThat(generatePassphrasePage.sendEmailButton).isHidden()
+        assertThat(generatePassphrasePage.sendSmsButton).isHidden()
+
+        generatePassphrasePage.generateAnotherButton.clickAndWait()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertThat(generatePassphrasePage.sendEmailButton).isVisible()
+        assertThat(generatePassphrasePage.sendSmsButton).isVisible()
     }
 }

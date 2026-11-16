@@ -40,6 +40,16 @@ class EmailNotificationServiceTests {
     }
 
     @Test
+    fun `sendEmailSynchronously delivers directly without consulting the queue flag`() {
+        val email = TestEmail()
+
+        emailNotificationService.sendEmailSynchronously("recipient@example.com", email)
+
+        verify(emailDeliveryService).deliverEmail("recipient@example.com", email)
+        verifyNoInteractions(emailQueueService, featureFlagManager)
+    }
+
+    @Test
     fun `sendEmail delivers the email synchronously when asynchronous sending is disabled`() {
         whenever(featureFlagManager.checkFeature(ASYNCHRONOUS_EMAIL_SENDING)).thenReturn(false)
         val email = TestEmail()

@@ -34,6 +34,8 @@ const val ACTIVE_INACTIVE = "pdjb-844-active-inactive"
 
 const val PASSPHRASE_SMS = "pdjb-2227-passphrase-sms"
 
+const val PASSPHRASE_EMAIL = "pdjb-2227-passphrase-email"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -49,4 +51,5 @@ val featureFlagNames =
         ASYNCHRONOUS_EMAIL_SENDING,
         ACTIVE_INACTIVE,
         PASSPHRASE_SMS,
+        PASSPHRASE_EMAIL,
     )

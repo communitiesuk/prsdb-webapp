@@ -31,6 +31,7 @@ class NotifyEmailDeliveryServiceTests {
     fun setup() {
         notifyClient = mock()
         notifyIdService = mock()
+        whenever(notifyIdService.getNotifyIdValue(org.mockito.kotlin.any<EmailTemplate>())).thenReturn("template-id")
 
         emailDeliveryService = NotifyEmailDeliveryService(notifyClient, notifyIdService, false)
     }
@@ -42,6 +43,15 @@ class NotifyEmailDeliveryServiceTests {
         override fun toHashMap(): HashMap<String, String> = hashMap
 
         constructor() : this(hashMapOf(), EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL)
+    }
+
+    @Test
+    fun `DeliverEmail rejects an unconfigured template without calling Notify`() {
+        whenever(notifyIdService.getNotifyIdValue(EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL)).thenReturn("")
+
+        assertThrows<PersistentEmailSendException> { emailDeliveryService.deliverEmail("recipient@example.com", TestEmailTemplate()) }
+
+        Mockito.verifyNoInteractions(notifyClient)
     }
 
     @Test
