@@ -275,8 +275,8 @@
     "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000000",
-    "prod_id": "00000000-0000-0000-0000-000000000000",
+    "test_id": "23c49498-5e38-481f-84b5-b00e3daca5ca",
+    "prod_id": "c691b63d-a1de-47f7-8080-25233d170f97",
     "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
@@ -289,8 +289,8 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000000",
-    "prod_id": "00000000-0000-0000-0000-000000000000",
+    "test_id": "134132c4-10dd-407a-a839-20ca983ea3c6",
+    "prod_id": "c5fd8d12-fdf7-4792-a725-08a219d6540a",
     "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION_ACCOUNT_DEACTIVATED",
     "subject": "You’re no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md"

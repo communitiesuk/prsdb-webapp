@@ -21,7 +21,7 @@ class LeavePropertyService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
-    private val accountDeactivatedConfirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmationAccountDeactivated>,
+    private val confirmationAccountDeactivatedEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmationAccountDeactivated>,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val currentUserService: CurrentUserService,
@@ -60,7 +60,7 @@ class LeavePropertyService(
             EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {
                 // TODO PDJB-2149: Remove the feature flag check when ACTIVE_INACTIVE is removed
                 if (landlordWasDeactivated && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
-                    accountDeactivatedConfirmationEmailSender.sendEmail(
+                    confirmationAccountDeactivatedEmailSender.sendEmail(
                         currentUser.email,
                         JointLandlordYouLeftConfirmationAccountDeactivated(
                             recipientName = currentUser.name,

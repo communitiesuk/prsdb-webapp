@@ -40,7 +40,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
     private lateinit var confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>
 
     @MockitoBean
-    private lateinit var accountDeactivatedConfirmationEmailSender:
+    private lateinit var confirmationAccountDeactivatedEmailSender:
         EmailNotificationService<JointLandlordYouLeftConfirmationAccountDeactivated>
 
     @Test
@@ -76,7 +76,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
 
         assertTrue(landlordRepository.findById(leavingLandlordId).get().isActive)
         verify(confirmationEmailSender).sendEmail(any(), any())
-        verify(accountDeactivatedConfirmationEmailSender, never()).sendEmail(any(), any())
+        verify(confirmationAccountDeactivatedEmailSender, never()).sendEmail(any(), any())
     }
 
     @Test
@@ -90,7 +90,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
 
         assertFalse(landlordRepository.findById(leavingLandlordId).get().isActive)
         assertTrue(landlordRepository.findById(remainingLandlordId).get().isActive)
-        verify(accountDeactivatedConfirmationEmailSender).sendEmail(any(), any())
+        verify(confirmationAccountDeactivatedEmailSender).sendEmail(any(), any())
         verify(confirmationEmailSender, never()).sendEmail(any(), any())
     }
 
