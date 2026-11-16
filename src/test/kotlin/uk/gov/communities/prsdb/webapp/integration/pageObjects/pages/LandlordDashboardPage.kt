@@ -24,8 +24,12 @@ class LandlordDashboardPage(
     val viewIncompletePropertiesButton = Button.byText(page, "Incomplete property details")
     val viewPropertyRecordsButton = Button.byText(page, "View your property records")
     val viewLandlordRecordButton = Button.byText(page, "View your landlord record")
+
+    // TODO PDJB-2006: Remove addComplianceInformationButton when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
     val addComplianceInformationButton = Button.byText(page, "Compliance actions")
+    val outstandingActionsButton = Button.byText(page, "Outstanding actions")
     val notificationBanner = DashboardNotificationBanner(page)
+    val inactiveLandlordNotificationBanner = InactiveLandlordNotificationBanner(page)
 
     val footer = Footer(page)
 
@@ -38,11 +42,22 @@ class LandlordDashboardPage(
                 "View incomplete property details",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
-        val addComplianceInformationLink =
+        val outstandingActionsLink =
             Link.byText(
                 page,
-                "Compliance actions",
+                "View outstanding actions",
                 selectorOrLocator = ".govuk-notification-banner__link",
             )
+    }
+
+    class InactiveLandlordNotificationBanner(
+        page: Page,
+    ) : NotificationBanner(page) {
+        val reactivateAPropertyLink =
+            Link.byText(page, "reactivate a property", selectorOrLocator = ".govuk-notification-banner__link")
+        val completeADraftLink =
+            Link.byText(page, "complete a draft", selectorOrLocator = ".govuk-notification-banner__link")
+        val registerAPropertyLink =
+            Link.byText(page, "register a property", selectorOrLocator = ".govuk-notification-banner__link")
     }
 }

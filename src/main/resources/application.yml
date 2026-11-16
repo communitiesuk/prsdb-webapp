@@ -32,6 +32,11 @@ spring:
     multipart:
       enabled: false
 
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: fail
+
 one-login:
   jwt:
     public.key: ${ONE_LOGIN_PUBLIC_KEY}
@@ -42,6 +47,25 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
+  allowlist-fallback-address: ${EMAILNOTIFICATIONS_ALLOWLIST_FALLBACK_ADDRESS:}
+
+email-queue:
+  name: ${EMAIL_QUEUE_NAME:}
+  listener:
+    auto-startup: true
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 30
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 900
+
+scan-result-queue:
+  name: ${SCAN_RESULT_QUEUE_NAME:}
+  listener:
+    auto-startup: true
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 30
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 900
 
 os:
   api-key: ${OS_API_KEY}
@@ -54,8 +78,12 @@ epc:
 nft-seed:
   system-operators: ${NFT_SEED_SYSTEM_OPERATORS:150}
   local-council-users: ${NFT_SEED_LOCAL_COUNCIL_USERS:3000}
-  landlords: ${NFT_SEED_LANDLORDS:2820000}
-  properties: ${NFT_SEED_PROPERTIES:4700000}
+  # 0 derives the synthetic landlord population from the portfolio distribution until both property targets are met.
+  landlords: ${NFT_SEED_LANDLORDS:0}
+  # Year-one forecast: 4.9 million eligible properties * 50% uptake, counted as completed registrations.
+  properties: ${NFT_SEED_PROPERTIES:2450000}
+  # Synthetic assumption: retain the existing 90% complete / 10% incomplete mix; ceil(2450000 / 9).
+  incomplete-properties: ${NFT_SEED_INCOMPLETE_PROPERTIES:272223}
   batch-size: ${NFT_SEED_BATCH_SIZE:10000}
   random-seed: ${NFT_SEED_RANDOM_SEED:239}
   # Blank means "now". Set to an ISO date (e.g. 2026-01-01) to make a run fully reproducible.
@@ -63,6 +91,8 @@ nft-seed:
   # Number of fictional addresses to generate before seeding. 0 uses the addresses already in the database (the real
   # NGD data loaded by NgdAddressLoader), which is what deployed NFT does.
   generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:0}
+  # Keep this many eligible addresses unallocated for registration journeys after seeding.
+  minimum-free-addresses: ${NFT_SEED_MINIMUM_FREE_ADDRESSES:0}
 
 server:
   error:
@@ -116,6 +146,8 @@ gov-uk-pay:
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2026-11-01}
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: ${GOV_UK_PAY_MANUAL_INTERVENTION_EMAIL_ADDRESS:Team-PRSDB+payment-manual-intervention@softwire.com}
+  payment-status-retry-delay: 2s
 
 cloudwatch-metrics:
   ecs:
@@ -146,31 +178,40 @@ features:
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "subject-identifier-page"
       enabled: true
-      expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-phase-two"
-      enabled: true
-      expiry-date: "2026-12-31"
-    - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-939-property-registration-phase-three"
+      enabled: false
+      expiry-date: "2027-01-01"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1009-payments"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: true
-      expiry-date: "2026-11-01"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-955-associated-parties"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1666-eic-issue-date"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-973-asynchronous-email-sending"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
+      enabled: false
+      expiry-date: "2027-01-01"
 
 ---
 

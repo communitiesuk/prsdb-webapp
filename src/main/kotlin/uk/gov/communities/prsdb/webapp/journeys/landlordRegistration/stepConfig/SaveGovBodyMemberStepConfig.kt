@@ -32,11 +32,11 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
 
         val address = state.govBodyMemberAddressTask.getAddress()
         val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
-        val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
-        val wentManual = selectFormModel?.address == MANUAL_ADDRESS_CHOSEN
+        // Set by both the select address and no address found steps, so it reflects the user's latest choice
+        val selectedAddress = state.govBodyMemberAddressTask.cachedSelectedAddress
         val manualFormModel =
             state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull
-                ?.takeIf { wentManual }
+                ?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -55,7 +55,7 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 address = address,
                 addressSearchPostcode = lookupFormModel?.postcode,
                 addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
-                selectedAddress = selectFormModel?.address,
+                selectedAddress = selectedAddress,
                 manualAddressLineOne = manualFormModel?.addressLineOne,
                 manualAddressLineTwo = manualFormModel?.addressLineTwo,
                 manualTownOrCity = manualFormModel?.townOrCity,

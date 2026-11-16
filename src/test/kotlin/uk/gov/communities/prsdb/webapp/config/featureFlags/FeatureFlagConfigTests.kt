@@ -17,7 +17,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "failover-test-endpoints",
                 enabled = true,
-                expiryDate = LocalDate.of(2026, 12, 31),
+                expiryDate = LocalDate.of(2027, 1, 1),
             ),
         )
 
@@ -26,7 +26,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "failover-test-endpoints",
                 enabled = true,
-                expiryDate = LocalDate.of(2026, 12, 31),
+                expiryDate = LocalDate.of(2027, 1, 1),
             ),
         )
 

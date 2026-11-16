@@ -25,7 +25,13 @@ class CheckUserRoleStepConfig(
 
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState) =
         when (state.userIsLandlord) {
-            true -> UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD
+            true -> {
+                if (state.propertyOwnershipIdUserIsAlreadyLandlordOn != null) {
+                    UserRoleStatus.USER_IS_ALREADY_LANDLORD_ON_PROPERTY
+                } else {
+                    UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD
+                }
+            }
 
             false -> UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD
 
@@ -36,7 +42,10 @@ class CheckUserRoleStepConfig(
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         val principal = SecurityContextHolder.getContext().authentication!!.principal as OidcUser
-        state.userIsLandlord = userRolesService.getUserHasLandlordRole(principal.name)
+        val userIsLandlord = userRolesService.getUserHasLandlordRole(principal.name)
+        state.userIsLandlord = userIsLandlord
+        state.propertyOwnershipIdUserIsAlreadyLandlordOn =
+            if (userIsLandlord) state.getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt() else null
     }
 }
 
@@ -51,5 +60,6 @@ final class CheckUserRoleStep(
 
 enum class UserRoleStatus {
     USER_IS_ALREADY_REGISTERED_AS_LANDLORD,
+    USER_IS_ALREADY_LANDLORD_ON_PROPERTY,
     USER_NOT_REGISTERED_AS_LANDLORD,
 }

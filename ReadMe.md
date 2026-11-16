@@ -19,17 +19,21 @@ of [testcontainers](https://testcontainers.com/).
 ### Running multiple worktrees in parallel
 
 The local build can be run from multiple git worktrees simultaneously. Each worktree
-needs unique ports to avoid conflicts. Three environment variables in `.env` control this:
+needs unique ports to avoid conflicts. Four environment variables in `.env` control this:
 
-| Variable        | Default | Purpose                   |
-|-----------------|---------|---------------------------|
-| `SERVER_PORT`   | `8080`  | Spring Boot server port   |
-| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port |
-| `REDIS_PORT`    | `6379`  | Host-side Redis port      |
+| Variable         | Default | Purpose                        |
+|------------------|---------|--------------------------------|
+| `SERVER_PORT`    | `8080`  | Spring Boot server port        |
+| `POSTGRES_PORT`  | `5433`  | Host-side PostgreSQL port      |
+| `REDIS_PORT`     | `6379`  | Host-side Redis port           |
+| `ELASTICMQ_PORT` | `9324`  | Host-side ElasticMQ (SQS) port |
 
 When creating a worktree with the `scripts/git-worktrees/new-worktree` script, unique
 ports are assigned automatically. To adjust ports manually, edit `.env` in the worktree
 root.
+
+Worktrees created before `ELASTICMQ_PORT` was introduced need it adding to their `.env` by hand, using the same
+offset as their other ports (e.g. `SERVER_PORT="8085"` → `ELASTICMQ_PORT="9329"`).
 
 #### Playwright CLI for browser testing
 
@@ -143,12 +147,17 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 |------------------------------|---------------------------------|------------------|-------------------------------------------------------------------------------------------------------------|
 | `nft-seed.system-operators`   | `NFT_SEED_SYSTEM_OPERATORS`     | 5                | Number of system operator users to create.                                                                  |
 | `nft-seed.local-council-users`| `NFT_SEED_LOCAL_COUNCIL_USERS`  | 10               | Number of local council users to create.                                                                    |
-| `nft-seed.landlords`          | `NFT_SEED_LANDLORDS`            | 30               | Total number of landlords to create (individual + organisation, ~95%/5% split).                             |
-| `nft-seed.properties`         | `NFT_SEED_PROPERTIES`           | 45               | Total number of properties/property registrations to create.                                               |
+| `nft-seed.landlords`          | `NFT_SEED_LANDLORDS`            | 30               | Total number of landlords to create (individual + organisation, ~95%/5% split). `0` creates as many as needed to meet both property targets using the portfolio distribution. |
+| `nft-seed.properties`         | `NFT_SEED_PROPERTIES`           | 40               | Completed property registrations to create, in addition to the incomplete registrations below.              |
+| `nft-seed.incomplete-properties` | `NFT_SEED_INCOMPLETE_PROPERTIES` | 5             | Incomplete registrations to create, allocated separate addresses from completed properties.                 |
+| `nft-seed.minimum-free-addresses` | `NFT_SEED_MINIMUM_FREE_ADDRESSES` | 0            | Minimum unallocated lookup addresses to retain after seeding.                                                |
 | `nft-seed.batch-size`         | `NFT_SEED_BATCH_SIZE`           | 10               | Batch size for bulk inserts.                                                                                 |
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
 | `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 1000             | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+
+NGD addresses are loaded in supplier CSV order. The seeder reads eligible property addresses in ID order and shuffles
+within each batch; this does not guarantee a geographically representative sample for council-search performance tests.
 
 To test at a larger, more realistic scale locally (e.g. to catch batching/performance issues that don't show up at
 the small `local` defaults), override the scale-related env vars before running, e.g.:
@@ -222,8 +231,10 @@ Flyway runs the migrations.
 Database migrations <will be/ are> run at deployment time for all non-local deployments. This is done using
 the `flywayMigrate` Gradle task. When developing locally using the `local` profile the migrations will run at
 application start up. If you are using the `local` launch profile in IntelliJ, this will also run the `flywayClean` task
-before running the migrations. After the migrations have run Spring Boot will then run the SQL in `data-local.sql` to
-populate the database with seed data.
+before running the migrations. After the migrations have run Spring Boot will then run the SQL scripts listed under
+`spring.sql.init.data-locations` in `application-local.yml` to populate the database with seed data. That list ends
+with the integration tests' `ALWAYS_APPENDED_SCRIPTS` (see `docs/IntegrationTestReadMe.md`), which must stay after the
+ordinary seeds since they fill in data for whatever those inserted.
 
 ### Updating Local Council Data
 
@@ -361,6 +372,15 @@ When you have finished running the service, run `exit` in the server terminal to
 By default, when the service is run locally, it uses the `LocalFileUploader` instead of the `AwsS3FileUploader`.
 You can manually switch by manipulating the profiles and attributes on those classes.
 Currently, there isn't a profile which connects to AWS with an otherwise local build.
+
+#### Virus scanning locally
+
+Deployed environments scan uploaded files with GuardDuty, which sends each scan result to an SQS queue that the async
+worker processes. Locally, `LocalVirusScanSimulator` instead adds a scan result to the `prsdb-scan-result-queue`
+ElasticMQ queue a few seconds after each upload, and the app processes it in the same way.
+
+Uploaded files are reported as clean, so they become downloadable shortly after uploading. If the file name contains
+`virus`, the file is reported as infected instead: it's deleted and the virus scan unsuccessful emails are sent.
 
 ## Releasing
 

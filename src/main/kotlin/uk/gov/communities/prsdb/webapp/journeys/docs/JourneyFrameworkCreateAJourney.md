@@ -78,7 +78,6 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
                     RadiosButtonViewModel(
                         value = false,
                         labelMsgKey = "forms.radios.option.no.label",
-                        hintMsgKey = "forms.occupancy.radios.option.no.hint",
                     ),
                 ),
         )
@@ -505,6 +504,11 @@ companion object {
 ```
 
 The journey factory picks which routing map to serve based on `state.someTask.checkingAnswersFor`.
+
+Each `when` key must match the `urlPath` of the step passed to `getCyaJourneyId(...)` for that change link. If
+that step is inside a task mounted with a route segment, its path includes the task's route (see
+[Task route prefixes](#task-route-prefixes)), so key on e.g.
+`"${TrusteeAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}"` rather than the task's route alone.
 
 ## Define the Journey State
 

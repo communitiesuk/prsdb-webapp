@@ -3,17 +3,22 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
@@ -29,31 +34,23 @@ class PropertyRegistrationCyaStepConfig(
     private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
+    private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
+    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
+    private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        // TODO PDJB-1617: Remove this check once the feature flag is removed and the letting agent journey is fully implemented
-        val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-        if (!isLettingAgentEnabled) {
-            return getContentBeforePdjb1022(state)
-        }
-
-        // TODO PDJB-1617: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
-        return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        if (state.isDelegatedToLettingAgent()) {
             getDelegatedContent(state)
         } else {
             getNonDelegatedContent(state)
         }
-    }
-
-    // TODO PDJB-1617: Remove this method once the feature flag is removed and the letting agent journey is fully implemented
-    private fun getContentBeforePdjb1022(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        return getContent(state, emptyMap())
-    }
 
     private fun getNonDelegatedContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val whoProvides = state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+        val whoProvides =
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
+                ?.whoProvides
         val delegationContent = whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()
         return getContent(state, delegationContent) +
             mapOf(
@@ -92,7 +89,8 @@ class PropertyRegistrationCyaStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val occupancyDetails = occupancyDetailsHelper.getOccupancySummaryList(state)
         val whoProvides =
-            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull
+                ?.whoProvides
         return getBaseContent(state, occupancyDetails) +
             (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
             mapOf(
@@ -113,7 +111,10 @@ class PropertyRegistrationCyaStepConfig(
     ) = mapOf<String, Any?>(
         "submitButtonText" to getSubmitButtonText(),
         "warningTextKey" to "forms.checkPropertyAnswers.warning",
-        "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
+        "propertyName" to
+            state.propertyDetailsTask.addressTask
+                .getAddress()
+                .singleLineAddress,
         "propertyDetails" to getPropertyDetailsSummaryList(state),
         "occupancyDetails" to occupancyDetails,
     )
@@ -131,11 +132,16 @@ class PropertyRegistrationCyaStepConfig(
         licensingDetails: List<SummaryListRowViewModel>,
         tenancyDetails: List<SummaryListRowViewModel>,
         occupancyDetails: List<SummaryListRowViewModel>,
-    ): Map<String, Any?> {
-        return mapOf(
+    ): Map<String, Any?> =
+        mapOf(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
-            "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
-            "ownershipAndLandlordsRows" to
+            "peopleResponsibleForThisPropertyHeadingKey" to
+                if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+                    "forms.checkPropertyAnswers.peopleResponsibleForThisProperty.heading"
+                } else {
+                    "forms.checkPropertyAnswers.ownershipAndLandlords.heading"
+                },
+            "peopleResponsibleForThisPropertyRows" to
                 listOf(
                     getOwnershipTypeRow(state),
                     getJointLandLordsSummaryRow(state),
@@ -151,7 +157,121 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
+        ) + getFreeholdersContent(state) + getSuperiorLandlordsContent(state) + getPropertyManagerContent(state)
+
+    private fun getFreeholdersContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
+        val ownershipType =
+            ownershipStructureTask.ownershipTypeTask.ownershipType
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the ownership type task was complete",
+                )
+        if (!ownershipType.requiresFreeholderRecords()) return emptyMap()
+
+        val freeholdersTask = ownershipStructureTask.freeholdersTask
+        val freeholdersListStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep
+        val headingType = if (ownershipType.isJointFreeholder()) "joint" else "nonJoint"
+        val freeholdersMap =
+            freeholdersTask.freeholdersMap
+                ?.takeIf { it.isNotEmpty() }
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached with no freeholders",
+                )
+        return mapOf(
+            "freeholdersHeadingKey" to "registerProperty.freeholders.checkAnswers.heading.$headingType",
+            "freeholdersChangeLinkKey" to "registerProperty.freeholders.checkAnswers.changeLink.$headingType",
+            "freeholdersChangeUrl" to
+                Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
+            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersMap),
         )
+    }
+
+    private fun getSuperiorLandlordsContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
+        val ownershipType =
+            ownershipStructureTask.ownershipTypeTask.ownershipType
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the ownership type task was complete",
+                )
+        if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyMap()
+
+        val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
+        val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
+        val anyoneInOwnershipChain =
+            anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the anyone in ownership chain step was answered",
+                )
+
+        return if (anyoneInOwnershipChain) {
+            val listStep = superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep
+            mapOf(
+                "superiorLandlordsChangeUrl" to Destination.VisitableStep(listStep, state.getCyaJourneyId(listStep)).toUrlStringOrNull(),
+                "superiorLandlordsCards" to
+                    superiorLandlordSummaryCardHelper.getSummaryCards(
+                        superiorLandlordsTask.superiorLandlordsMap
+                            ?: throw UnrecoverableJourneyStateException(
+                                state.journeyId,
+                                "Check your answers was reached with anyone in ownership chain answered yes but no superior landlords",
+                            ),
+                    ),
+            )
+        } else {
+            mapOf(
+                "superiorLandlordsRows" to
+                    listOf(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
+                            "commonText.no",
+                            Destination.VisitableStep(anyoneInOwnershipChainStep, state.getCyaJourneyId(anyoneInOwnershipChainStep)),
+                        ),
+                    ),
+            )
+        }
+    }
+
+    private fun getPropertyManagerContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
+
+        val propertyManagerTask = state.ownershipAndLandlordsTask.propertyManagerTask
+        val propertyManagerStep = propertyManagerTask.propertyManagerStep
+        val usingPropertyManager =
+            propertyManagerStep.formModelIfReachableOrNull?.usingPropertyManager
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the property manager step was answered",
+                )
+
+        return if (usingPropertyManager) {
+            val checkPropertyManagerStep = propertyManagerTask.checkPropertyManagerStep
+            mapOf(
+                "propertyManagerChangeUrl" to
+                    Destination
+                        .VisitableStep(checkPropertyManagerStep, state.getCyaJourneyId(checkPropertyManagerStep))
+                        .toUrlStringOrNull(),
+                "propertyManagerCards" to
+                    listOf(propertyManagerSummaryCardHelper.getSummaryCard(propertyManagerTask.propertyManagerDetailsStep.formModel)),
+            )
+        } else {
+            mapOf(
+                "propertyManagerRows" to
+                    listOf(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "registerProperty.propertyManager.usingPropertyManager.fieldSetHeading",
+                            "registerProperty.propertyManager.usingPropertyManager.radios.no",
+                            Destination.VisitableStep(propertyManagerStep, state.getCyaJourneyId(propertyManagerStep)),
+                        ),
+                    ),
+            )
+        }
     }
 
     private fun getCorrespondenceRows(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> {
@@ -189,12 +309,12 @@ class PropertyRegistrationCyaStepConfig(
     ): Destination = defaultDestination
 
     private fun hasJointLandlords(state: PropertyRegistrationJourneyState): Boolean =
-        state.ownershipAndLandlordsTask.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+        state.getJointLandlordsTask(featureFlagManager).hasJointLandlordsStep.formModel.notNullValue(
             HasJointLandlordsFormModel::hasJointLandlords,
         )
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
+        val jointLandlordsTask = state.getJointLandlordsTask(featureFlagManager)
         return if (hasJointLandlords(state)) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
@@ -262,12 +382,21 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "propertyDetails.propertyRecord.ownership.ownershipType",
-            ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
-        )
+        // TODO PDJB-2014: replace with rows for the associated parties answers
+        if (featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) {
+            return SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.ownership.ownershipType",
+                OwnershipTypeBeforePdjb955.FREEHOLD,
+                actionUrl = null as String?,
+            )
+        } else {
+            val ownershipTypeStep = state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep
+            return SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.ownership.ownershipType",
+                ownershipTypeStep.formModel.ownershipType,
+                Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
+            )
+        }
     }
 
     private fun getLettingAgentDelegationSummaryContent(

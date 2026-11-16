@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -19,22 +19,22 @@ class OwnershipTypeStepConfig : AbstractRequestableStepConfig<Complete, Ownershi
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
-                        value = OwnershipType.FREEHOLD,
+                        value = OwnershipTypeBeforePdjb955.FREEHOLD,
                         labelMsgKey = "forms.ownershipType.radios.option.freehold.label",
                         hintMsgKey = "forms.ownershipType.radios.option.freehold.hint",
                     ),
                     RadiosButtonViewModel(
-                        value = OwnershipType.LEASEHOLD,
+                        value = OwnershipTypeBeforePdjb955.LEASEHOLD,
                         labelMsgKey = "forms.ownershipType.radios.option.leasehold.label",
                         hintMsgKey = "forms.ownershipType.radios.option.leasehold.hint",
                     ),
                     RadiosButtonViewModel(
-                        value = OwnershipType.SHARE_OF_FREEHOLD,
+                        value = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
                         labelMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.label",
                         hintMsgKey = "forms.ownershipType.radios.option.shareOfFreehold.hint",
                     ),
                     RadiosButtonViewModel(
-                        value = OwnershipType.COMMONHOLD,
+                        value = OwnershipTypeBeforePdjb955.COMMONHOLD,
                         labelMsgKey = "forms.ownershipType.radios.option.commonhold.label",
                         hintMsgKey = "forms.ownershipType.radios.option.commonhold.hint",
                     ),

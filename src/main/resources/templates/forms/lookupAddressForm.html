@@ -1,5 +1,6 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeadingParam" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="postcodeLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="postcodeHint" type="java.lang.String"*/-->
@@ -12,11 +13,11 @@
 <!--/*@thymesVar id="alternativeActionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="alternativeActionText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${fieldSetHeadingParam})}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'lookupAddress',
-                            #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
+                            #{${fieldSetHeading}(${fieldSetHeadingParam})}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
         <th:block th:if="${postcodeFieldWidth != null}">
             <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}}, ${postcodeFieldWidth})}"></div>
         </th:block>

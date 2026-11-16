@@ -1,0 +1,29 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="checkboxOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'ownershipKinds', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
+        <details id="details-content" th:replace="~{fragments/details :: details(#{registerProperty.ownershipKind.details.summary}, ~{::#details-content/content()})}">
+            <div class="govuk-details__text">
+                <p class="govuk-body" th:text="#{registerProperty.ownershipKind.details.paragraph.one}">registerProperty.ownershipKind.details.paragraph.one</p>
+                <p class="govuk-body" th:text="#{registerProperty.ownershipKind.details.paragraph.two}">registerProperty.ownershipKind.details.paragraph.two</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerProperty.ownershipKind.details.bullet.one}">registerProperty.ownershipKind.details.bullet.one</li>
+                    <li th:text="#{registerProperty.ownershipKind.details.bullet.two}">registerProperty.ownershipKind.details.bullet.two</li>
+                </ul>
+                <p class="govuk-body">
+                    <span th:text="#{registerProperty.ownershipKind.details.selectBoth.beforeFreehold}">registerProperty.ownershipKind.details.selectBoth.beforeFreehold</span>
+                    <span class="govuk-!-font-weight-bold" th:text="#{registerProperty.ownershipKind.details.selectBoth.freehold}">registerProperty.ownershipKind.details.selectBoth.freehold</span>
+                    <span th:text="#{registerProperty.ownershipKind.details.selectBoth.and}">registerProperty.ownershipKind.details.selectBoth.and</span>
+                    <span class="govuk-!-font-weight-bold" th:text="#{registerProperty.ownershipKind.details.selectBoth.leasehold}">registerProperty.ownershipKind.details.selectBoth.leasehold</span><span th:text="#{registerProperty.ownershipKind.details.selectBoth.afterLeasehold}">registerProperty.ownershipKind.details.selectBoth.afterLeasehold</span>
+                </p>
+            </div>
+        </details>
+        <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'ownershipKinds', null, ${checkboxOptions})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+</html>

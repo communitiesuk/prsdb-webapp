@@ -4,26 +4,29 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Service
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.body
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
+import java.time.Duration
 
 /**
  * API reference: https://docs.payments.service.gov.uk/api_reference/
  *
  * Locally, requests are served by [uk.gov.communities.prsdb.webapp.local.api.controllers.MockGovUkPayController].
  */
-@PrsdbWebService
+@Service
 class GovUkPayClient(
     @Qualifier("gov-uk-pay-client") private val client: RestClient,
     @Value("\${gov-uk-pay.rate-limit-retry-delays-ms:1000,2000}") private val rateLimitRetryDelaysMs: List<Long>,
+    @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
 ) {
     fun createPayment(request: GovUkPayCreatePaymentRequest): GovUkPayCreatedPayment {
         val payment =
@@ -77,6 +80,20 @@ class GovUkPayClient(
                 .body<GovUkPayPayment>()
         } ?: throw GovUkPayException("GOV.UK Pay get payment response for payment $paymentId had no body")
 
+    fun getPaymentWithRetry(paymentId: String): GovUkPayPayment =
+        try {
+            getPayment(paymentId)
+        } catch (exception: GovUkPayException) {
+            if (!exception.isTransient()) throw exception
+            try {
+                waitBeforeRetrying(paymentStatusRetryDelay)
+                getPayment(paymentId)
+            } catch (retryException: GovUkPayException) {
+                retryException.addSuppressed(exception)
+                throw retryException
+            }
+        }
+
     // GOV.UK Pay rejects rate-limited requests without acting on them, so retrying after a 429 is safe for every endpoint
     // Rate limits: https://docs.payments.service.gov.uk/api_reference/#rate-limits
     private fun <T> sendWithRateLimitRetries(request: () -> T): T {
@@ -86,19 +103,21 @@ class GovUkPayClient(
             } catch (exception: GovUkPayException) {
                 if (exception.httpStatus?.value() != HttpStatus.TOO_MANY_REQUESTS.value()) throw exception
             }
-            waitBeforeRetrying(delayMs)
+            waitBeforeRetrying(Duration.ofMillis(delayMs))
         }
         return send(request)
     }
 
-    private fun waitBeforeRetrying(delayMs: Long) {
+    private fun waitBeforeRetrying(delay: Duration) {
         try {
-            Thread.sleep(delayMs)
+            Thread.sleep(delay)
         } catch (exception: InterruptedException) {
             Thread.currentThread().interrupt()
-            throw GovUkPayException("Interrupted while waiting to retry a rate-limited GOV.UK Pay request", exception)
+            throw GovUkPayException("Interrupted while waiting to retry a GOV.UK Pay request", exception)
         }
     }
+
+    private fun GovUkPayException.isTransient(): Boolean = httpStatus?.is5xxServerError() ?: (cause is ResourceAccessException)
 
     private fun <T> send(request: () -> T): T =
         try {

@@ -1,0 +1,18 @@
+<th:block th:fragment="deactivatedPropertiesPanelContent" th:remove="tag">
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.deactivatedProperties.heading}">landlordDetails.deactivatedProperties.heading</h2>
+
+    <th:block th:unless="${#lists.isEmpty(deactivatedPropertiesList)}">
+        <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row" th:each="property: ${deactivatedPropertiesList}">
+                    <!--/* TODO PDJB-2035: Link the address to the deactivated property record */-->
+                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.address}"></td>
+                    <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.registrationNumber}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <p th:if="${#lists.isEmpty(deactivatedPropertiesList)}" class="govuk-body" data-testid="no-deactivated-properties-msg"
+       th:text="#{landlordDetails.deactivatedProperties.none}">landlordDetails.deactivatedProperties.none</p>
+</th:block>

@@ -3,11 +3,16 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.transaction.Transactional
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -20,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -29,9 +35,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
@@ -45,13 +54,20 @@ class PropertyOwnershipService(
     private val registrationNumberService: RegistrationNumberService,
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
+    private val freeholderService: FreeholderService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
+    private val eicDateService: EicDateService,
+    private val landlordRepository: LandlordRepository,
+    private val activeInactiveService: ActiveInactiveService,
+    // TODO: PDJB-1926: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
 ) {
+    // TODO PDJB-2019: stop populating ownershipTypeBeforePdjb955 and delete the legacy column.
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipType,
@@ -83,36 +99,50 @@ class PropertyOwnershipService(
 
         val correspondenceAddress = addressService.findOrCreateAddress(correspondenceAddressModel)
 
-        return propertyOwnershipRepository.save(
-            PropertyOwnership(
-                ownershipType = ownershipType,
-                currentNumHouseholds = numberOfHouseholds,
-                currentNumTenants = numberOfPeople,
-                isOccupied = isOccupied,
-                registrationNumber = registrationNumber,
-                landlords = mutableSetOf(registeringLandlord),
-                propertyBuildType = propertyBuildType,
-                customPropertyType = customPropertyType,
-                address = address,
-                license = license,
-                correspondenceEmail = correspondenceEmail,
-                correspondenceAddress = correspondenceAddress,
-                renewalDate = renewalDate,
-                isActive = isActive,
-                numBedrooms = numBedrooms,
-                billsIncludedList = billsIncludedList,
-                customBillsIncluded = customBillsIncluded,
-                furnishedStatus = furnishedStatus,
-                rentFrequency = rentFrequency,
-                customRentFrequency = customRentFrequency,
-                rentAmount = rentAmount,
-                markedJointLandlord = markedJointLandlord,
-                licenseProvideLater = licenseProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            ).apply {
-                if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
-            },
-        )
+        registeringLandlord.markAsHavingRegisteredProperty()
+
+        val propertyOwnership =
+            propertyOwnershipRepository.save(
+                PropertyOwnership(
+                    ownershipType = ownershipType,
+                    // TODO PDJB-2019: delete this line with the legacy column (required until then as it is not nullable)
+                    ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
+                    currentNumHouseholds = numberOfHouseholds,
+                    currentNumTenants = numberOfPeople,
+                    isOccupied = isOccupied,
+                    registrationNumber = registrationNumber,
+                    landlords = mutableSetOf(registeringLandlord),
+                    propertyBuildType = propertyBuildType,
+                    customPropertyType = customPropertyType,
+                    address = address,
+                    license = license,
+                    correspondenceEmail = correspondenceEmail,
+                    correspondenceAddress = correspondenceAddress,
+                    renewalDate = renewalDate,
+                    isActive = isActive,
+                    numBedrooms = numBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                    markedJointLandlord = markedJointLandlord,
+                    licenseProvideLater = licenseProvideLater,
+                    tenancyProvideLater = tenancyProvideLater,
+                ).apply {
+                    if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
+                },
+            )
+
+        // TODO PDJB-2015: when ASSOCIATED_PARTIES is on, create the freeholders the landlord gave
+        //  instead of a placeholder. The flag-off journey never asks who they are, so it keeps calling
+        //  createPlaceholderFreeholder until PDJB-2016 removes the flag.
+        if (ownershipType.requiresFreeholderRecords()) {
+            freeholderService.createPlaceholderFreeholder(propertyOwnership)
+        }
+
+        return propertyOwnership
     }
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
@@ -180,7 +210,21 @@ class PropertyOwnershipService(
         return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }
     }
 
-    fun getRegisteredPropertiesForLandlordUser(
+    fun getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId: Long): PropertyOwnership {
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        val propertyOwnership = propertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnershipId)
+
+        if (landlord == null || propertyOwnership == null || propertyOwnership.landlords.none { it.id == landlord.id }) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No inactive property ownership $propertyOwnershipId found for the current landlord",
+            )
+        }
+
+        return propertyOwnership
+    }
+
+    fun getActivePropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =
@@ -190,6 +234,11 @@ class PropertyOwnershipService(
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
+
+    fun getDeactivatedPropertiesForLandlordUser(landlord: Landlord): List<DeactivatedPropertyLandlordViewModel> =
+        propertyOwnershipRepository
+            .findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
+            .map { DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(it) }
 
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,
@@ -282,6 +331,10 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    // TODO PDJB-1992: when ASSOCIATED_PARTIES is on, this should take the landlord's freeholder and
+    //  superior landlord answers (including the yes/no superior landlord question) so that changing the
+    //  ownership type leaves the property in a valid state. The flag-off journey never asks, so it keeps
+    //  falling back on a placeholder freeholder until PDJB-2016 removes the flag.
     @Transactional
     fun updateOwnershipType(
         id: Long,
@@ -291,6 +344,23 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.ownershipType = ownershipType
+        // TODO PDJB-2019: delete this line with the legacy column.
+        propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
+        propertyOwnershipRepository.save(propertyOwnership)
+
+        if (ownershipType.requiresFreeholderRecords()) {
+            if (propertyOwnership.freeholders.isEmpty()) {
+                freeholderService.createPlaceholderFreeholder(propertyOwnership)
+            }
+        } else if (propertyOwnership.freeholders.isNotEmpty()) {
+            freeholderService.clearFreeholders(propertyOwnership)
+        }
+    }
+
+    // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
+    @Transactional
+    fun removePropertyManager(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.propertyManager = null
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -460,6 +530,9 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
+        landlord.markAsHavingRegisteredProperty()
+        landlordRepository.save(landlord)
+        activeInactiveService.reactivateLandlordIfInactive(landlord)
     }
 
     @Transactional
@@ -505,8 +578,39 @@ class PropertyOwnershipService(
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
     }
 
+    fun getOutstandingActionsForLandlord(
+        landlord: Landlord,
+        requestedPageIndex: Int,
+    ): Page<OutstandingActionsDataModel> {
+        // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
+        val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+        // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
+        val isEicIssueDateEnabled = featureFlagManager.checkFeature(EIC_ISSUE_DATE)
+        val allOutstandingActions =
+            retrieveAllActivePropertiesForLandlord(landlord)
+                .map { propertyOwnership ->
+                    val propertyCompliance = propertyOwnership.propertyCompliance
+                    OutstandingActionsDataModel.fromPropertyOwnership(
+                        propertyOwnership,
+                        eicIssueDate = propertyCompliance?.takeIf { isEicIssueDateEnabled }?.let(eicDateService::issueDateFrom),
+                        electricalSafetyExpiryDate =
+                            propertyCompliance?.let {
+                                PropertyComplianceService.getElectricalSafetyExpiryDate(it, eicDateService)
+                            },
+                        isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
+                    )
+                }.filter { it.shouldShowOnOutstandingActionsPage }
+        val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
+        val fromIndex = pageRequest.offset.toInt().coerceAtMost(allOutstandingActions.size)
+        val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allOutstandingActions.size)
+        return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
+    }
+
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
+
+    fun doesLandlordHaveDeactivatedProperties(landlord: Landlord): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 

@@ -13,17 +13,18 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
        (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
+-- TODO PDJB-2028: has_registered_property is left at its default (false); set it for landlords with properties if tests rely on it
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', true, true),
        (2, '09/13/24', '09/13/24', 2, 1, '09/13/2000', true, 07222222222, 'urn:fdc:gov.uk:2022:ABCDE',
         'Co Owner', 'co.owner@example.com', 'England or Wales', true, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, address_id, property_build_type, num_bedrooms, rent_amount, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, true, 1, 0, 0, 3, 2, 1, null, null, false, 'email@example.com', 1, current_date + 365);
+VALUES (1, true, 1, 1, 0, 0, 3, 2, 1, null, null, false, 'email@example.com', 1, current_date + 365);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)

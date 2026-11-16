@@ -27,9 +27,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
@@ -39,6 +38,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
@@ -61,7 +63,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTaskBeforeAssociatedParties
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
@@ -105,7 +107,7 @@ class PropertyRegistrationDataModelFactoryTests {
     private lateinit var mockPropertyDetailsTask: PropertyDetailsTask
 
     @Mock
-    private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
+    private lateinit var mockOwnershipAndLandlordsTaskBeforeAssociatedParties: OwnershipAndLandlordsTaskBeforeAssociatedParties
 
     private lateinit var factory: PropertyRegistrationDataModelFactory
 
@@ -157,13 +159,26 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
+    fun `fromJourneyState converts the beforePdjb955 ownership type answer when the associated parties flag is off`() {
+        // Arrange
+        setupStateForPropertyRegistration(ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD)
+        setupStateForComplianceDataWithNullValues()
+
+        // Act
+        val result = factory.fromJourneyState(mockState)
+
+        // Assert
+        assertEquals(OwnershipType.JOINT_TENANTS, result.ownershipType)
+    }
+
+    @Test
     fun `fromJourneyState returns all compliance fields from state`() {
         // Arrange
         val gasUploadIds = listOf(10L, 20L)
         val gasCertIssueDate = LocalDate(2024, 6, 15)
 
         val electricalUploadIds = listOf(30L)
-        val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
+        val eicrExpiryDate = LocalDate(2029, 3, 20)
 
         val certificateNumber = "1234-5678-9012-3456-7890"
         val epcUrl = "https://epc.example.com/$certificateNumber"
@@ -182,7 +197,7 @@ class PropertyRegistrationDataModelFactoryTests {
             gasUploadIds = gasUploadIds,
             gasCertIssueDate = gasCertIssueDate,
             electricalUploadIds = electricalUploadIds,
-            electricalCertExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
             electricalCertType = CertificateType.Eicr,
             acceptedEpc = acceptedEpc,
             epcUrl = epcUrl,
@@ -200,7 +215,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(gasUploadIds, result.gasSafetyFileUploadIds)
         assertEquals(false, result.gasSafetyCertProvideLater)
         assertEquals(electricalUploadIds, result.electricalSafetyFileUploadIds)
-        assertEquals(electricalSafetyExpiryDate.toJavaLocalDate(), result.electricalSafetyExpiryDate)
+        assertEquals(eicrExpiryDate.toJavaLocalDate(), result.eicrExpiryDate)
         assertEquals(CertificateType.Eicr, result.electricalCertType)
         assertEquals(false, result.electricalSafetyCertProvideLater)
         assertEquals(epcUrl, result.epcCertificateUrl)
@@ -211,6 +226,34 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(meesExemptionReason, result.epcMeesExemptionReason)
         assertEquals(false, result.epcProvideLater)
         assertEquals(false, result.licenseProvideLater)
+    }
+
+    @Test
+    fun `fromJourneyState returns the EIC issue date from state`() {
+        val eicIssueDate = LocalDate(2024, 3, 20)
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = CertificateType.Eic, eicIssueDate = eicIssueDate)
+
+        val result = factory.fromJourneyState(mockState)
+
+        assertEquals(eicIssueDate.toJavaLocalDate(), result.eicIssueDate)
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        assertNull(result.eicExpiryDate)
+        assertNull(result.eicrExpiryDate)
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `fromJourneyState returns the EIC expiry date from state`() {
+        val eicExpiryDate = LocalDate(2029, 3, 20)
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = CertificateType.Eic, eicExpiryDate = eicExpiryDate)
+
+        val result = factory.fromJourneyState(mockState)
+
+        assertEquals(eicExpiryDate.toJavaLocalDate(), result.eicExpiryDate)
+        assertNull(result.eicIssueDate)
+        assertNull(result.eicrExpiryDate)
     }
 
     @Test
@@ -234,7 +277,7 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.PROVIDE_LATER)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
 
         // Act
         val result = factory.fromJourneyState(mockState)
@@ -250,7 +293,7 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.NO_SUPPLY)
 
         // Act
         val result = factory.fromJourneyState(mockState)
@@ -262,29 +305,13 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState returns true when user chose provide later on legacy gas cert step`() {
-        // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome).thenReturn(GasCertOutcome.PROVIDE_LATER)
-
-        // Act
-        val result = factory.fromJourneyState(mockState)
-
-        // Assert
-        assertEquals(true, result.hasGasSupply)
-        assertEquals(true, result.gasSafetyCertProvideLater)
-        assertEquals(false, result.tenancyProvideLater)
-    }
-
-    @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     fun `fromJourneyState returns all provide-later fields as true when delegating to a letting agent`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(null)
         val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
         val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
         whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
@@ -308,9 +335,9 @@ class PropertyRegistrationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
+    fun `fromJourneyState throws when hasGasSupply is null and registration is not delegated to a letting agent`() {
         // Arrange
-        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
+        whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
 
         val mockOccupiedStep = mock<OccupiedStep>()
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
@@ -341,13 +368,15 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
-        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
-        whenever(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        whenever(
+            mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
+        ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
+        whenever(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(
-            OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD },
+            OwnershipTypeFormModel().apply { ownershipType = OwnershipTypeBeforePdjb955.FREEHOLD },
         )
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
-        whenever(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+        whenever(mockState.getJointLandlordsTask(any())).thenReturn(mockJointLandlordsTask)
         val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
         whenever(mockJointLandlordsTask.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
         whenever(mockHasJointLandlordsStep.formModel).thenReturn(
@@ -356,7 +385,9 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mock())
 
         val mockGasDetailsTask = mock<GasSafetyDetailsTask>()
-        whenever(mockGasDetailsTask.gasSupplyOutcome).thenReturn(null)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(null)
         val mockGasTask = mock<GasSafetyTask>()
         whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(mockGasDetailsTask)
         whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
@@ -378,7 +409,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -405,7 +436,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -440,7 +471,7 @@ class PropertyRegistrationDataModelFactoryTests {
         assertNull(result.gasSafetyCertIssueDate)
         assertEquals(emptyList<Long>(), result.gasSafetyFileUploadIds)
         assertEquals(emptyList<Long>(), result.electricalSafetyFileUploadIds)
-        assertNull(result.electricalSafetyExpiryDate)
+        assertNull(result.eicrExpiryDate)
         assertNull(result.electricalCertType)
         assertNull(result.epcCertificateUrl)
         assertNull(result.epcExpiryDate)
@@ -451,7 +482,11 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(true, result.tenancyProvideLater)
     }
 
-    private fun setupStateForPropertyRegistration() {
+    private fun setupStateForPropertyRegistration(
+        // TODO PDJB-2019: remove this parameter once the legacy ownership type column is gone. It
+        //  exists only so that one test can exercise the legacy conversion.
+        ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+    ) {
         val mockOccupiedStep = mock<OccupiedStep>()
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
@@ -486,13 +521,15 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
-        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
-        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
-        whenever(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = ownershipTypeBeforePdjb955 }
+        whenever(
+            mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
+        ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
+        whenever(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
 
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
-        whenever(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+        whenever(mockState.getJointLandlordsTask(any())).thenReturn(mockJointLandlordsTask)
 
         val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
         val hasJointLandlordsFormModel = HasJointLandlordsFormModel().apply { hasJointLandlords = false }
@@ -521,7 +558,10 @@ class PropertyRegistrationDataModelFactoryTests {
         gasUploadIds: List<Long> = emptyList(),
         gasCertIssueDate: LocalDate? = null,
         electricalUploadIds: List<Long> = emptyList(),
-        electricalCertExpiryDate: LocalDate? = null,
+        eicrExpiryDate: LocalDate? = null,
+        eicIssueDate: LocalDate? = null,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         acceptedEpc: EpcDataModel? = null,
         epcUrl: String? = null,
@@ -536,8 +576,9 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(electricalUploadIds)
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
-        whenever(gasSafetyTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
-        whenever(gasSafetyTask.gasCertOutcome).thenReturn(GasCertOutcome.HAS_CERTIFICATE)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -551,7 +592,10 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
         whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+        whenever(electricalSafetyDetailsTask.getEicrExpiryDateIfReachable()).thenReturn(eicrExpiryDate)
+        whenever(electricalSafetyDetailsTask.getEicIssueDateIfReachable()).thenReturn(eicIssueDate)
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        whenever(electricalSafetyDetailsTask.getEicExpiryDateIfReachable()).thenReturn(eicExpiryDate)
 
         if (acceptedEpc != null) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
@@ -601,8 +645,12 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
-        lenient().`when`(gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
-        lenient().`when`(gasSafetyDetailsTask.gasCertOutcome).thenReturn(null)
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        lenient().`when`(gasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        lenient().`when`(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+        lenient().`when`(gasSafetyDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        lenient().`when`(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -613,7 +661,7 @@ class PropertyRegistrationDataModelFactoryTests {
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
         whenever(gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+        whenever(electricalSafetyDetailsTask.getEicrExpiryDateIfReachable()).thenReturn(null)
         whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockGasTask: GasSafetyTask = mock()

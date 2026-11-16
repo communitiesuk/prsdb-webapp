@@ -1,5 +1,6 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeadingParam" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addressLineOneLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addressLineTwoLabel" type="java.lang.String"*/-->
@@ -11,11 +12,11 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showCorrespondenceInset" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${fieldSetHeadingParam})}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='manualAddress',
-                            fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, suppressGroupError=true)}">
+                            fieldSetHeading=#{${fieldSetHeading}(${fieldSetHeadingParam})}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, suppressGroupError=true)}">
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineOneLabel}}, 'addressLineOne', null)}"></div>
         <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${addressLineTwoLabel}}, 'addressLineTwo', null)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${townOrCityLabel}}, 'townOrCity', null, 20)}"></div>

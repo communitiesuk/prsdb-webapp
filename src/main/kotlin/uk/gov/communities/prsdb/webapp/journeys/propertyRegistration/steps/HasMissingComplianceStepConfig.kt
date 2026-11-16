@@ -1,26 +1,22 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 
 @JourneyFrameworkComponent
-class HasMissingComplianceStepConfig(
-    private val featureFlagManager: FeatureFlagManager,
-) : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
+class HasMissingComplianceStepConfig :
+    AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): ConfirmMissingComplianceCheckResult {
         val anyInvalid =
             isGasCertInvalid(state.gasSafetyTask) ||
                 isElectricalCertInvalid(state.electricalSafetyTask) ||
                 isEpcInvalid(state.epcTask)
-        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent(featureFlagManager)) {
+        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent()) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED
@@ -29,12 +25,11 @@ class HasMissingComplianceStepConfig(
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
-            if (state.gasSafetyDetailsTask.gasSupplyOutcome in
-                listOf(GasSupplyOutcome.NO_SUPPLY, GasSupplyOutcome.PROVIDE_LATER, null)
+            if (state.gasSafetyDetailsTask.hasGasSupplyStep.outcome in
+                listOf(HasGasSupplyMode.NO_SUPPLY, HasGasSupplyMode.PROVIDE_LATER, null)
             ) {
                 return false
             }
-            if (state.gasSafetyDetailsTask.gasCertOutcome == GasCertOutcome.PROVIDE_LATER) return false
             val isOutdated = state.gasSafetyDetailsTask.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }

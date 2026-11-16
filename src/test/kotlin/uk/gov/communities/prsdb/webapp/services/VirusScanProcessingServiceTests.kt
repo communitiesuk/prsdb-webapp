@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentScanResultProcessingException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
@@ -126,10 +128,28 @@ class VirusScanProcessingServiceTests {
                 "versionId",
             )
         val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, "")))
 
-        val scanResultStatus = ScanResult.AccessDenied
+        // Act & Assert
+        assertThrows<PersistentScanResultProcessingException> {
+            virusScanProcessingService.processScan(locator, ScanResult.AccessDenied)
+        }
+    }
 
-        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
+    @Test
+    fun `processScan throws an exception when the scanned eTag does not match the file upload`() {
+        // Arrange
+        val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "s3Key", "txt", "eTag", "versionId")
+        val locator = UploadedFileLocator(fileUpload.objectKey, "other-e-tag", fileUpload.versionId)
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, "")))
+
+        // Act & Assert
+        assertThrows<PersistentScanResultProcessingException> {
+            virusScanProcessingService.processScan(locator, ScanResult.NoThreats)
+        }
+        verify(dequarantiner, never()).dequarantineFile(any())
     }
 
     @Test
@@ -157,5 +177,53 @@ class VirusScanProcessingServiceTests {
         verify(dequarantiner).deleteQuarantinedFile(fileUpload)
         verify(dequarantiner, never()).dequarantineFile(any())
         verify(virusScanCallbackRepository).delete(callback)
+    }
+
+    @Test
+    fun `processScan deletes an orphaned quarantined file without throwing`() {
+        // Arrange
+        val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "s3Key", "txt", "eTag", "versionId")
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        whenever(fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)).thenReturn(fileUpload)
+        whenever(dequarantiner.deleteQuarantinedFile(fileUpload)).thenReturn(true)
+
+        // Act & Assert
+        assertDoesNotThrow { virusScanProcessingService.processScan(locator, ScanResult.NoThreats) }
+        verify(dequarantiner).deleteQuarantinedFile(fileUpload)
+    }
+
+    @Test
+    fun `processScan throws when an orphaned quarantined file cannot be deleted`() {
+        // Arrange
+        val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "s3Key", "txt", "eTag", "versionId")
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        whenever(fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)).thenReturn(fileUpload)
+        whenever(dequarantiner.deleteQuarantinedFile(fileUpload)).thenReturn(false)
+
+        // Act & Assert
+        assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, ScanResult.NoThreats) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = FileUploadStatus::class, names = ["QUARANTINED"], mode = EnumSource.Mode.EXCLUDE)
+    fun `processScan ignores a repeated scan result for a file upload that is no longer quarantined`(status: FileUploadStatus) {
+        // Arrange
+        val fileUpload = FileUpload(status, "s3Key", "txt", "eTag", "versionId")
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        whenever(fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)).thenReturn(fileUpload)
+
+        // Act & Assert
+        assertDoesNotThrow { virusScanProcessingService.processScan(locator, ScanResult.NoThreats) }
+        verify(dequarantiner, never()).deleteQuarantinedFile(any())
+    }
+
+    @Test
+    fun `processScan ignores a scan result with no matching file upload`() {
+        // Arrange
+        val locator = UploadedFileLocator("s3Key", "eTag", "versionId")
+
+        // Act & Assert
+        assertDoesNotThrow { virusScanProcessingService.processScan(locator, ScanResult.NoThreats) }
+        verify(dequarantiner, never()).deleteQuarantinedFile(any())
     }
 }

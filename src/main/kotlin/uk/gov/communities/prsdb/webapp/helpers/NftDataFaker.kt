@@ -1,7 +1,13 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import net.datafaker.Faker
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
@@ -16,12 +22,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toInstant
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toLocalDate
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.toTimestamp
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.sql.Date
@@ -29,6 +34,9 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.Random
 import java.util.UUID
@@ -37,6 +45,9 @@ import java.util.concurrent.TimeUnit
 object NftDataFaker {
     private const val DEFAULT_SEED = 239L
     private const val MAX_ADDRESSES_PER_STREET = 30
+
+    // Dates and instants are converted in a fixed zone, so seeding produces the same data whatever the machine's time zone
+    private val SEEDING_ZONE: ZoneId = ZoneOffset.UTC
 
     private var seededRandom = Random(DEFAULT_SEED)
     private var faker = Faker(Locale.UK, seededRandom)
@@ -49,7 +60,7 @@ object NftDataFaker {
     private var runReference: Instant = Instant.now()
 
     /**
-     * Resets all random sources so that a seeding run produces identical data every time.
+     * Resets all random sources so that a seeding run produces identical data for a given seed and reference date.
      * Must be called before seeding starts.
      */
     fun reset(
@@ -62,7 +73,11 @@ object NftDataFaker {
         runReference = reference
     }
 
-    private fun referenceDate(): LocalDate = runReference.toLocalDate()
+    private fun referenceDate(): LocalDate = runReference.toSeedingDate()
+
+    private fun Instant.toSeedingDate(): LocalDate = atZone(SEEDING_ZONE).toLocalDate()
+
+    private fun LocalDate.toSeedingInstant(): Instant = atStartOfDay(SEEDING_ZONE).toInstant()
 
     fun generateBoolean(probabilityTrue: Double = 0.5): Boolean = faker.random().nextDouble() < probabilityTrue
 
@@ -70,8 +85,9 @@ object NftDataFaker {
 
     fun <T> shuffle(values: List<T>): List<T> = values.shuffled(seededRandom)
 
-    fun generatePropertyScenario(): PropertyScenario {
-        val isRegistrationComplete = scenarioRandom.nextDouble() < 0.9
+    fun generatePropertyScenario(completed: Boolean? = null): PropertyScenario {
+        val randomCompletion = scenarioRandom.nextDouble() < 0.9
+        val isRegistrationComplete = completed ?: randomCompletion
         if (!isRegistrationComplete) {
             return PropertyScenario(
                 isRegistrationComplete = false,
@@ -105,7 +121,8 @@ object NftDataFaker {
 
     fun generateNumberLessThan(max: Int): Int = faker.random().nextInt(max)
 
-    fun generateCreatedDate(after: Timestamp = referenceDate().minusYears(1).toTimestamp()): Timestamp = generateDateAfter(after)
+    fun generateCreatedDate(after: Timestamp = Timestamp.from(referenceDate().minusYears(1).toSeedingInstant())): Timestamp =
+        generateDateAfter(after)
 
     fun generateLastModifiedDate(createdDate: Timestamp): Timestamp? =
         if (generateBoolean(probabilityTrue = 0.6)) {
@@ -114,7 +131,12 @@ object NftDataFaker {
             null
         }
 
-    fun generateDateOfBirth(): Date = Date.valueOf(faker.timeAndDate().birthday(18, 120))
+    fun generateDateOfBirth(): Date {
+        val referenceDate = referenceDate()
+        val earliestDateOfBirth = referenceDate.minusYears(120).toEpochDay()
+        val latestDateOfBirth = referenceDate.minusYears(18).toEpochDay()
+        return Date.valueOf(LocalDate.ofEpochDay(faker.random().nextLong(earliestDateOfBirth, latestDateOfBirth)))
+    }
 
     fun generateRenewalDate(anniversary: MonthDay): Date = Date.valueOf(RenewalDateHelper.getRenewalDate(anniversary, referenceDate()))
 
@@ -123,12 +145,11 @@ object NftDataFaker {
         reminderEmailSent: Boolean,
     ): Timestamp {
         val now = referenceDate()
-        val earliestCreatedDate = landlordCreatedDate.coerceAtLeast(now.minusDays(28).toTimestamp())
+        val earliestCreatedDate = landlordCreatedDate.coerceAtLeast(Timestamp.from(now.minusDays(28).toSeedingInstant()))
         return if (reminderEmailSent) {
             val latestCreatedDate =
-                now
-                    .minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong())
-                    .toTimestamp()
+                Timestamp
+                    .from(now.minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()).toSeedingInstant())
                     .coerceAtLeast(earliestCreatedDate)
             Timestamp.from(faker.timeAndDate().between(earliestCreatedDate.toInstant(), latestCreatedDate.toInstant()))
         } else {
@@ -137,7 +158,7 @@ object NftDataFaker {
     }
 
     fun generateLastEmailReminderSentDate(createdDate: Timestamp): Timestamp =
-        Timestamp.valueOf(createdDate.toLocalDateTime().plusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()))
+        Timestamp.from(createdDate.toInstant().plus(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong(), ChronoUnit.DAYS))
 
     fun generateInvitationToken(): UUID = UUID.fromString(faker.internet().uuid())
 
@@ -301,7 +322,9 @@ object NftDataFaker {
             when {
                 // Roughly 60% of organisations have no pending invites; the rest have one to three depending on size.
                 randomDouble < 0.60 -> 0
+
                 randomDouble < 0.85 -> faker.random().nextInt(1, 2)
+
                 else -> faker.random().nextInt(2, 4)
             }
 
@@ -446,7 +469,45 @@ object NftDataFaker {
         return Pair(propertyType, otherPropertyType)
     }
 
+    // TODO PDJB-2019: delete this once the legacy enum and column are gone.
+    fun generateOwnershipTypeBeforePdjb955(): OwnershipTypeBeforePdjb955 = faker.options().option(OwnershipTypeBeforePdjb955::class.java)
+
     fun generateOwnershipType(): OwnershipType = faker.options().option(OwnershipType::class.java)
+
+    // A property that requires freeholder records always gets at least one.
+    fun generateFreeholders(): List<FreeholderDetails> = generateAssociatedParties(faker.random().nextInt(1, 3), ::FreeholderDetails)
+
+    // A property can legitimately have no superior landlords on record, which models the landlord
+    // answering "no" to HasAnySuperiorLandlordsStep.
+    fun generateSuperiorLandlords(): List<SuperiorLandlordDetails> =
+        generateAssociatedParties(faker.random().nextInt(0, 2), ::SuperiorLandlordDetails)
+
+    // The landlord does not always know who the other party is, so some rows are seeded as
+    // "no details known" placeholders. A named party is contactable by email or by post but never
+    // both, because the journey asks for one contact type - see FreeholderContactTypeStep.
+    private fun <T> generateAssociatedParties(
+        count: Int,
+        create: (name: String?, email: String?, hasAddress: Boolean) -> T,
+    ): List<T> =
+        (1..count).map {
+            if (generateBoolean(probabilityTrue = 0.2)) {
+                create(null, null, false)
+            } else {
+                val name = generateName()
+                if (generateBoolean(probabilityTrue = 0.8)) {
+                    create(name, generateEmail(name), false)
+                } else {
+                    create(name, null, true)
+                }
+            }
+        }
+
+    fun generateHasPropertyManager(): Boolean = generateBoolean(probabilityTrue = 0.2)
+
+    fun generatePropertyManager(): PropertyManagerDetails {
+        val name = generateName()
+        return PropertyManagerDetails(name = name, email = generateEmail(name))
+    }
 
     fun generateNumHouseholdsAndTenants(): Pair<Int, Int> {
         val numHouseholds = faker.random().nextInt(1, 10)
@@ -501,14 +562,14 @@ object NftDataFaker {
     fun generateETag(): String = faker.regexify("[a-f0-9]{32}")
 
     fun generatePropertyComplianceData(createdDateTimestamp: Timestamp): PropertyComplianceData {
-        val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
+        val createdDate = Date.valueOf(createdDateTimestamp.toInstant().toSeedingDate())
 
         val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
 
         val gasCertificateSafetyMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
             if (!gasCertificateSafetyMissing) {
-                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
+                generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_MONTHS / 12.0 * 365 * 1.5).toLong())
             } else {
                 null
             }
@@ -519,10 +580,10 @@ object NftDataFaker {
             if (!eicrMissing) {
                 val expiryDate =
                     faker.timeAndDate().between(
-                        createdDate.toLocalDate().minusYears(5).toInstant(),
-                        createdDate.toLocalDate().plusYears(10).toInstant(),
+                        createdDate.toLocalDate().minusYears(5).toSeedingInstant(),
+                        createdDate.toLocalDate().plusYears(10).toSeedingInstant(),
                     )
-                Date.valueOf(expiryDate.toLocalDate())
+                Date.valueOf(expiryDate.toSeedingDate())
             } else {
                 null
             }
@@ -542,10 +603,10 @@ object NftDataFaker {
             if (epcNumber != null) {
                 val expiryDate =
                     faker.timeAndDate().between(
-                        createdDate.toLocalDate().minusYears(5).toInstant(),
-                        createdDate.toLocalDate().plusYears(10).toInstant(),
+                        createdDate.toLocalDate().minusYears(5).toSeedingInstant(),
+                        createdDate.toLocalDate().plusYears(10).toSeedingInstant(),
                     )
-                Date.valueOf(expiryDate.toLocalDate())
+                Date.valueOf(expiryDate.toSeedingDate())
             } else {
                 null
             }
@@ -585,10 +646,20 @@ object NftDataFaker {
                 null
             }
 
+        // EICs store an issue date rather than an expiry date
+        val eicIssueDate =
+            if (electricalCertType == CertificateType.Eic) {
+                electricalSafetyExpiryDate?.let { Date.valueOf(it.toLocalDate().minusYears(EIC_VALIDITY_YEARS.toLong())) }
+            } else {
+                null
+            }
+        val eicrExpiryDate = if (electricalCertType == CertificateType.Eic) null else electricalSafetyExpiryDate
+
         return PropertyComplianceData(
             hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
-            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            eicrExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
             electricalCertType = electricalCertType,
             epcNumber = epcNumber,
             epcExpiryDate = epcExpiryDate,
@@ -600,27 +671,49 @@ object NftDataFaker {
     }
 
     fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
-        issueDate?.after(Date.valueOf(referenceDate().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))) == true
+        issueDate?.let {
+            !CertificateExpiryHelper.isGasIssueDateExpired(
+                it.toLocalDate(),
+                isGas14MonthExpiryEnabled = true,
+                currentDate = referenceDate(),
+            )
+        } == true
+
+    fun isElectricalSafetyCertificateCurrent(
+        expiryDate: Date?,
+        certType: CertificateType?,
+        asOf: Timestamp,
+    ): Boolean {
+        if (expiryDate == null) return false
+        val asOfDate = asOf.toInstant().toSeedingDate()
+        return when (certType) {
+            CertificateType.Eic -> !CertificateExpiryHelper.isEicExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            CertificateType.Eicr -> !CertificateExpiryHelper.isEicrExpiryDateExpired(expiryDate.toLocalDate(), asOfDate)
+            else -> throw IllegalArgumentException("Unexpected electrical certificate type: $certType")
+        }
+    }
 
     fun generateJourneyId(): String = faker.regexify("[a-z0-9]{7}")
 
     fun generateIncompletePropertyJourneyState(address: Address): String {
         val propertyType = generatePropertyAndOtherType()
-        val journeyState =
-            """
-            {
-                "journeyData": {
-                    "lookup-address": {
-                        "houseNameOrNumber":"${address.buildingNumber ?: address.buildingName}", "postcode":"${address.postcode}"
-                    },
-                    "select-address": {"address":"${address.singleLineAddress}"},
-                    "property-type": {"propertyType":"${propertyType.first}","customPropertyType":"${propertyType.second ?: ""}"}
-                },
-                "cachedAddresses":"[{\"singleLineAddress\":\"${address.singleLineAddress}\"}]",
-                "isAddressAlreadyRegistered":"false"
+        return buildJsonObject {
+            putJsonObject("journeyData") {
+                putJsonObject("lookup-address") {
+                    put("houseNameOrNumber", address.buildingNumber ?: address.buildingName.orEmpty())
+                    put("postcode", address.postcode)
+                }
+                putJsonObject("select-address") {
+                    put("address", address.singleLineAddress)
+                }
+                putJsonObject("property-type") {
+                    put("propertyType", propertyType.first.name)
+                    put("customPropertyType", propertyType.second.orEmpty())
+                }
             }
-            """
-        return journeyState
+            put("cachedAddresses", Json.encodeToString(listOf(AddressDataModel.fromAddress(address))))
+            put("isAddressAlreadyRegistered", Json.encodeToString(false))
+        }.toString()
     }
 
     private val otherPropertyTypes = arrayOf("Bungalow", "Maisonette", "Studio", "Loft", "Cottage")
@@ -749,7 +842,7 @@ object NftDataFaker {
     private fun generateDateBefore(
         date: Date,
         maxDaysAgo: Long,
-    ): Date = Date.valueOf(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toLocalDate().toInstant()).toLocalDate())
+    ): Date = Date.valueOf(faker.timeAndDate().past(maxDaysAgo, TimeUnit.DAYS, date.toLocalDate().toSeedingInstant()).toSeedingDate())
 
     private fun generateTimestampBefore(
         date: Timestamp,
@@ -831,6 +924,25 @@ object NftDataFaker {
         val dateOfBirth: Date,
     )
 
+    // A null name, email and address together mean "no details known".
+    data class FreeholderDetails(
+        val name: String?,
+        val email: String?,
+        val hasAddress: Boolean,
+    )
+
+    // A null name, email and address together mean "no details known".
+    data class SuperiorLandlordDetails(
+        val name: String?,
+        val email: String?,
+        val hasAddress: Boolean,
+    )
+
+    data class PropertyManagerDetails(
+        val name: String,
+        val email: String,
+    )
+
     data class PropertyScenario(
         val isRegistrationComplete: Boolean,
         val isOccupied: Boolean,
@@ -848,7 +960,8 @@ object NftDataFaker {
     data class PropertyComplianceData(
         val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
-        val electricalSafetyExpiryDate: Date?,
+        val eicrExpiryDate: Date?,
+        val eicIssueDate: Date?,
         val electricalCertType: CertificateType?,
         val epcNumber: String?,
         val epcExpiryDate: Date?,
@@ -856,5 +969,8 @@ object NftDataFaker {
         val epcEnergyRating: String?,
         val epcExemptionReason: EpcExemptionReason?,
         val epcMeesExemptionReason: MeesExemptionReason?,
-    )
+    ) {
+        val electricalSafetyExpiryDate: Date?
+            get() = eicIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EIC_VALIDITY_YEARS.toLong())) } ?: eicrExpiryDate
+    }
 }

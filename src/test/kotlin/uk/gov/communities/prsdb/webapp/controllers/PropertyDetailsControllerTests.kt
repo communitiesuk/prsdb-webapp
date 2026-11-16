@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
@@ -28,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
 
@@ -53,10 +55,18 @@ class PropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
 
+    // TODO PDJB-2016: remove this mock when the ASSOCIATED_PARTIES feature flag is removed
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
+
     @BeforeEach
     fun setUp() {
+        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+        val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
-            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+            .thenReturn(propertyCompliance)
+        whenever(propertyComplianceService.getComplianceStatus(any()))
+            .thenReturn(complianceStatus)
         whenever(
             notificationBannerViewModelService.getPropertyDetailsNotificationBanner(
                 anyOrNull(),

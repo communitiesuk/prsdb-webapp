@@ -1,36 +1,29 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
 class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun enableFeatureFlags() {
-        featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-    }
-
     @Nested
     inner class TaskListStep {
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`() {
-            navigator.skipToPropertyRegistrationHasJointLandlordsPage()
+            navigator.skipToPropertyRegistrationOwnsPropertyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
-            assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
+            assert(taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.contains("In progress"))
             assert(
                 taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot start yet"),
             )
             assert(
                 taskListPage.getAboutYourPropertyTask(
-                    "Tell us if your property’s occupied",
+                    "Tell us if this property is occupied",
                 ).statusText.contains("Cannot start yet"),
             )
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
@@ -50,10 +43,10 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             navigator.skipToPropertyRegistrationHasGasCertPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
-            assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("Complete"))
-            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Complete"))
+            assert(taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.contains("Complete"))
+            assert(taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Complete"))
-            assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Complete"))
+            assert(taskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("In progress"))
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
@@ -63,63 +56,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
     }
 
     @Nested
-    inner class DelegationToLettingAgent {
-        @Test
-        fun `Delegation task appears with Not started status for occupied property`() {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy()
-                        .withOccupancyStatus(true),
-                )
-
-            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Not\u00A0started"))
-        }
-
-        @Test
-        fun `Delegation task appears with Not needed yet status for unoccupied property`() {
-            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-
-            assertEquals("Not\u00A0needed\u00A0yet", taskListPage.getRentedOutTask("Who will provide these details").statusText.trim())
-        }
-    }
-
-    @Nested
-    inner class DelegationToLettingAgentTaskFlagDisabled {
-        @BeforeEach
-        fun disableDelegateToLettingAgentFlag() {
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-        }
-
-        @Test
-        fun `Delegation task does not appear for occupied property when DELEGATE_TO_LETTING_AGENT feature flag is disabled`() {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy()
-                        .withOccupancyStatus(true),
-                )
-
-            assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
-                "Delegation task should not be visible for occupied property when feature flag is disabled"
-            }
-        }
-
-        @Test
-        fun `Delegation task does not appear for unoccupied property when DELEGATE_TO_LETTING_AGENT feature flag is disabled`() {
-            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-
-            assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
-                "Delegation task should not be visible for unoccupied property when feature flag is disabled"
-            }
-        }
-    }
-
-    @Nested
-    inner class DelegationToLettingAgentTaskFlagEnabled {
-        @BeforeEach
-        fun enableDelegateToLettingAgentFlag() {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-        }
-
+    inner class DelegationToLettingAgentTask {
         @Test
         fun `Delegation task appears with Not started status for occupied property`() {
             val taskListPage =

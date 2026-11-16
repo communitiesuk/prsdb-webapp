@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,7 +47,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -61,7 +65,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -76,7 +83,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -91,7 +101,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -109,7 +122,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -127,7 +143,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -145,56 +164,80 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when all certs are missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when gas and electrical safety certs are missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyMissingCerts()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when gas and epc certs are missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEpcMissingCerts()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when electrical safety and epc certs are missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcMissingCerts()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when gas cert is missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithOnlyGasMissingCert()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when electrical safety cert is missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithOnlyElectricalSafetyMissingCert()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
         fun `returns empty list when epc cert is missing on unoccupied property`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEpcMissingCert()
 
-            assertEquals(emptyList(), service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                emptyList(),
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -209,7 +252,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -224,7 +270,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -245,7 +294,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -260,7 +312,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
 
         @Test
@@ -281,7 +336,10 @@ class NotificationBannerViewModelServiceTests {
                     ),
                 )
 
-            assertEquals(expected, service.getComplianceNotificationMessageKeys(propertyCompliance, landlordView))
+            assertEquals(
+                expected,
+                service.getComplianceNotificationMessageKeys(statusDerivingService.getComplianceStatus(propertyCompliance), landlordView),
+            )
         }
     }
 
@@ -305,7 +363,7 @@ class NotificationBannerViewModelServiceTests {
 
             val banner =
                 service.getPropertyDetailsNotificationBanner(
-                    propertyCompliance = propertyCompliance,
+                    complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance),
                     isLandlordView = true,
                     isOccupied = false,
                     isLicensingProvideLater = false,

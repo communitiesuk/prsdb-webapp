@@ -10,6 +10,7 @@ data class CheckboxButtonViewModel<T>(
     val valueStr: String = value.toString(),
     override val labelMsgKey: String? = null,
     val conditionalFragment: String? = null,
+    val hintMsgKey: String? = null,
 ) : CheckboxViewModel(labelMsgKey)
 
 data class CheckboxDividerViewModel(

@@ -51,42 +51,43 @@ VALUES  (1, '09/13/24', '09/13/24', 1, '1 Landlord Address', 2, 'EG1 1EG'),
         (22, '09/13/24', '09/13/24', 22, 'EPC Provide Later Occupied After Registration', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
+-- TODO PDJB-2028: has_registered_property is left at its default (false); set it for landlords with properties if tests rely on it
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 -- Occupied properties have current_num_tenants > 0, unoccupied have 0
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (2, true, 1, 0, 0, 3, 3, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (3, true, 1, 1, 2, 4, 4, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (4, true, 1, 0, 0, 5, 5, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (5, true, 1, 1, 2, 6, 6, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (6, true, 1, 0, 0, 7, 7, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (7, true, 1, 1, 2, 8, 8, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (8, true, 1, 0, 0, 9, 9, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (9, true, 1, 1, 2, 10, 10, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (10, true, 1, 0, 0, 11, 11, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (11, true, 1, 1, 2, 12, 12, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (12, true, 1, 0, 0, 13, 13, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (13, true, 1, 1, 2, 14, 14, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (14, true, 1, 0, 0, 15, 15, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (15, true, 1, 1, 2, 16, 16, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (16, true, 1, 0, 0, 17, 17, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (17, true, 1, 1, 2, 18, 18, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (18, true, 1, 0, 0, 19, 19, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (19, true, 1, 1, 2, 20, 20, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
-       (20, true, 1, 0, 0, 21, 21, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365);
+VALUES (1, true, 1, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (2, true, 1, 1, 0, 0, 3, 3, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (3, true, 1, 1, 1, 2, 4, 4, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (4, true, 1, 1, 0, 0, 5, 5, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (5, true, 1, 1, 1, 2, 6, 6, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (6, true, 1, 1, 0, 0, 7, 7, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (7, true, 1, 1, 1, 2, 8, 8, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (8, true, 1, 1, 0, 0, 9, 9, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (9, true, 1, 1, 1, 2, 10, 10, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (10, true, 1, 1, 0, 0, 11, 11, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (11, true, 1, 1, 1, 2, 12, 12, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (12, true, 1, 1, 0, 0, 13, 13, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (13, true, 1, 1, 1, 2, 14, 14, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (14, true, 1, 1, 0, 0, 15, 15, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (15, true, 1, 1, 1, 2, 16, 16, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (16, true, 1, 1, 0, 0, 17, 17, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (17, true, 1, 1, 1, 2, 18, 18, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (18, true, 1, 1, 0, 0, 19, 19, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (19, true, 1, 1, 1, 2, 20, 20, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365),
+       (20, true, 1, 1, 0, 0, 21, 21, current_date, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365);
 
 -- 21: occupied AFTER registration (created_date in the past, last_occupied_date = current_date), so the provide-later
 -- deadline has no dated deadline and shows the "within 28 days" message.
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (21, true, 1, 1, 2, 22, 22, current_date - 100, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365);
+VALUES (21, true, 1, 1, 1, 2, 22, 22, current_date - 100, 1, 1, null, null, 2, 1, null, 123.12, current_date, true, 'email@example.com', 1, current_date + 365);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
@@ -114,47 +115,47 @@ VALUES (1, 1, '2025-01-15'),
 -- Gas: occupied=HAS_FAULTS (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
 -- EICR: all valid (expiry in future) so it doesn't interfere
 -- EPC: varies per test case
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
 VALUES
        -- 1: Provide later, occupied
-       (1, 1, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true),
+       (1, 1, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true),
        -- 2: Provide later, unoccupied
-       (2, 2, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true),
+       (2, 2, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true),
        -- 3: Valid, high rating, occupied
-       (3, 3, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
+       (3, 3, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
        -- 4: Valid, high rating, unoccupied
-       (4, 4, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
+       (4, 4, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'c', null, null, true, true, true, null, null, null),
        -- 5: Valid, low rating, has MEES exemption, occupied
-       (5, 5, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
+       (5, 5, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
        -- 6: Valid, low rating, has MEES exemption, unoccupied
-       (6, 6, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
+       (6, 6, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, 0, true, true, true, null, null, null),
        -- 7: Valid, low rating, no exemption, occupied
-       (7, 7, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
+       (7, 7, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
        -- 8: Valid, low rating, no exemption, unoccupied
-       (8, 8, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
+       (8, 8, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date + 30, null, 'g', null, null, true, true, true, null, null, null),
        -- 9: Expired, tenancy before expiry, high rating, occupied
-       (9, 9, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'c', null, null, true, true, true, null, null, null),
+       (9, 9, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'c', null, null, true, true, true, null, null, null),
        -- 10: Expired, tenancy before expiry, high rating, unoccupied
-       (10, 10, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
+       (10, 10, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
        -- 11: Expired, tenancy before expiry, low rating, has MEES exemption, occupied
-       (11, 11, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'g', null, 0, true, true, true, null, null, null),
+       (11, 11, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'g', null, 0, true, true, true, null, null, null),
        -- 12: Expired, tenancy before expiry, low rating, has MEES exemption, unoccupied
-       (12, 12, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'g', null, 0, true, true, true, null, null, null),
+       (12, 12, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'g', null, 0, true, true, true, null, null, null),
        -- 13: Expired, tenancy before expiry, low rating, no exemption, occupied
-       (13, 13, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, true, 'g', null, null, true, true, true, null, null, null),
+       (13, 13, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, true, 'g', null, null, true, true, true, null, null, null),
        -- 14: Expired, tenancy before expiry, low rating, no exemption, unoccupied
-       (14, 14, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'g', null, null, true, true, true, null, null, null),
+       (14, 14, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'g', null, null, true, true, true, null, null, null),
        -- 15: Expired, EPC not in date when tenancy began, occupied
-       (15, 15, '01/01/25', '01/01/25', null, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, false, 'c', null, null, true, true, true, null, null, null),
+       (15, 15, '01/01/25', '01/01/25', null, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, false, 'c', null, null, true, true, true, null, null, null),
        -- 16: Expired, EPC not in date when tenancy began, unoccupied
-       (16, 16, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
+       (16, 16, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, 'https://example.com/epc', current_date - 1, null, 'c', null, null, true, true, true, null, null, null),
        -- 17: No EPC, it is required, occupied
-       (17, 17, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, null),
+       (17, 17, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, null),
        -- 18: No EPC, it is required, unoccupied
-       (18, 18, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, null),
+       (18, 18, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, null),
        -- 19: No EPC, not required (has exemption), occupied
-       (19, 19, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
+       (19, 19, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, 0, null, true, true, true, null, null, null),
        -- 20: No EPC, not required (has exemption), unoccupied
-       (20, 20, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
+       (20, 20, '01/01/25', '01/01/25', (current_date - interval '14 months 1 day')::date, true, current_date + 365, 0, null, null, null, null, 0, null, true, true, true, null, null, null),
        -- 21: Provide later, occupied after registration (no dated deadline)
-       (21, 21, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true);
+       (21, 21, '01/01/25', '01/01/25', null, true, current_date + 365, 0, null, null, null, null, null, null, true, true, true, null, null, true);

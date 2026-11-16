@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import kotlin.jvm.javaClass
 
 @Service
@@ -21,15 +22,23 @@ class NotifyIdService(
 
     private val json: Json = Json { ignoreUnknownKeys = true }
 
-    private val notifyIdMap: Map<EmailTemplate, NotifyIdData> =
-        json
-            .decodeFromString<List<NotifyIdData>>(
-                javaClass
-                    .getResource("/emails/emailTemplates.json")
-                    ?.readText()
-                    ?.replace("\"$notifyIdKeyForEnvironment\"", "\"notifyId\"")
-                    ?: throw IllegalStateException("Email template JSON not found"),
-            ).associateBy { EmailTemplate.valueOf(it.enumName) }
+    private val emailNotifyIdMap: Map<EmailTemplate, NotifyIdData> =
+        loadNotifyIdData("/emails/emailTemplates.json", "Email").associateBy { EmailTemplate.valueOf(it.enumName) }
+
+    private val letterNotifyIdMap: Map<LetterTemplate, NotifyIdData> =
+        loadNotifyIdData("/letters/letterTemplates.json", "Letter").associateBy { LetterTemplate.valueOf(it.enumName) }
+
+    private fun loadNotifyIdData(
+        templateJsonPath: String,
+        templateType: String,
+    ): List<NotifyIdData> =
+        json.decodeFromString<List<NotifyIdData>>(
+            javaClass
+                .getResource(templateJsonPath)
+                ?.readText()
+                ?.replace("\"$notifyIdKeyForEnvironment\"", "\"notifyId\"")
+                ?: throw IllegalStateException("$templateType template JSON not found"),
+        )
 
     @Serializable
     private data class NotifyIdData(
@@ -37,5 +46,7 @@ class NotifyIdService(
         val enumName: String,
     )
 
-    fun getNotifyIdValue(emailTemplate: EmailTemplate): String = notifyIdMap[emailTemplate]!!.notifyId
+    fun getNotifyIdValue(emailTemplate: EmailTemplate): String = emailNotifyIdMap[emailTemplate]!!.notifyId
+
+    fun getNotifyIdValue(letterTemplate: LetterTemplate): String = letterNotifyIdMap[letterTemplate]!!.notifyId
 }

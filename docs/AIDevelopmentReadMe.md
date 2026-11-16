@@ -208,7 +208,7 @@ Skills are structured guides in `.github/skills/` that teach Copilot how to perf
 - **Branches:** `<type>/<TICKET-ID>-<description>` (e.g. `feat/PDJB-632-gas-cert-expired-page`)
 - **Commits:** `TICKET-ID: Description` (e.g. `PDJB-632: Create gas cert expired page`)
 - **Types:** `feat`, `fix`, `chore`, `docs`
-- **Ticket IDs:** `PDJB-###` or `PRSD-####`, or `PDJB-NONE`/`PRSD-NONE` for unticketed work
+- **Ticket IDs:** `PDJB-###`, or `PDJB-NONE` for unticketed work
 
 ### Raising pull requests
 

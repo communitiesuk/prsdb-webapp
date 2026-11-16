@@ -30,6 +30,7 @@ spring:
       data-locations:
         - classpath:data-local.sql
         - classpath:data-metrics-local.sql
+        - classpath:data-placeholder-freeholders.sql
       continue-on-error: true
 
   data:
@@ -72,7 +73,26 @@ local:
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
+  letters:
+    transientExceptionPostcode: TE99 9TF
+    persistentExceptionPostcode: PE99 9PF
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
+  sqs:
+    endpoint: http://localhost:${ELASTICMQ_PORT:9324}
+  virus-scan:
+    simulated-scan-delay-seconds: 5
+
+email-queue:
+  name: prsdb-email-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
+
+scan-result-queue:
+  name: prsdb-scan-result-queue
+  listener:
+    initial-visibility-timeout-seconds: 1
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2
@@ -108,6 +128,8 @@ gov-uk-pay:
   # How long a payment stays in progress after the mock card page, so the payment processing page can be seen. Set it
   # longer than paymentStatusPoller.js keeps checking to see the manual check instead.
   mock-card-entry-delay-seconds: ${MOCK_GOV_UK_PAY_CARD_ENTRY_DELAY_SECONDS:2}
+  mock-failing-calls-from-capture: ${MOCK_GOV_UK_PAY_FAILING_CALLS_FROM_CAPTURE:0}
+  mock-failing-capture-takes-payment: ${MOCK_GOV_UK_PAY_FAILING_CAPTURE_TAKES_PAYMENT:true}
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
@@ -117,31 +139,40 @@ features:
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "subject-identifier-page"
       enabled: true
-      expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-phase-two"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-939-property-registration-phase-three"
       enabled: true
-      expiry-date: "2026-12-31"
-    - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1009-payments"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: true
-      expiry-date: "2026-11-01"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-955-associated-parties"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1666-eic-issue-date"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-973-asynchronous-email-sending"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
+      enabled: true
+      expiry-date: "2027-01-01"
 
 ---
 
@@ -268,6 +299,7 @@ nft-seed:
   system-operators: ${NFT_SEED_SYSTEM_OPERATORS:5}
   local-council-users: ${NFT_SEED_LOCAL_COUNCIL_USERS:10}
   landlords: ${NFT_SEED_LANDLORDS:30}
-  properties: ${NFT_SEED_PROPERTIES:45}
+  properties: ${NFT_SEED_PROPERTIES:40}
+  incomplete-properties: ${NFT_SEED_INCOMPLETE_PROPERTIES:5}
   batch-size: ${NFT_SEED_BATCH_SIZE:10}
   generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:1000}

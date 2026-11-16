@@ -10,13 +10,16 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -74,9 +77,7 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
-            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
-                backStep { journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
-            }
+            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyDetailsTask)
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -90,7 +91,7 @@ class UpdateElectricalSafetyJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
                 }
             }
-            replaceButtons()
+            useContinueButtons(journey.electricalSafetyDetailsTask)
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -108,9 +109,24 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (state.checkingAnswersFor) {
-                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                EicExpiryDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                    configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.eicIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicrExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.eicrExpiryDateStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
@@ -119,7 +135,10 @@ class UpdateElectricalSafetyJourneyFactory(
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
             }
-            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+            configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
                 backDestination { journey.returnToCyaPageDestination }
             }
 
@@ -127,26 +146,8 @@ class UpdateElectricalSafetyJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            replaceButtons()
+            useContinueButtons(journey.electricalSafetyDetailsTask)
         }
-
-    private fun JourneyBuilder<UpdateElectricalSafetyJourney>.replaceButtons() {
-        configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
-            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-        }
-        configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiredStep) {
-            withAdditionalContentProperty {
-                "submitButtonText" to
-                    if (journey.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue"
-            }
-        }
-    }
 
     fun initialiseJourneyState(
         seed: Any?,
