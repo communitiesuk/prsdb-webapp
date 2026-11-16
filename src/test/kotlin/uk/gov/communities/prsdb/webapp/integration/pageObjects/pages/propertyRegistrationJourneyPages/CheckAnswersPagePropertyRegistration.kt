@@ -143,7 +143,7 @@ class CheckAnswersPagePropertyRegistration(
         val propertyAddressRow = getRow(Pattern.compile("^Address$"))
         val ownsPropertyRow = getRow("Do you own this property?")
         val ownershipKindRow = getRow(Pattern.compile("^Ownership type$"))
-        val freeholdTypeRow = getRow("Freeholder type")
+        val freeholdTypeRow = getRow("Freehold type")
         val correspondenceEmailRow = getRow(Pattern.compile("^Email address$"))
         val correspondencePostalAddressRow = getRow(Pattern.compile("^Postal address$"))
 
