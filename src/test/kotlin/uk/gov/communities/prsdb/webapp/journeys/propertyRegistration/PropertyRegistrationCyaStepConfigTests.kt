@@ -297,8 +297,8 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockState.ownershipAndLandlordsTaskBeforeAssociatedParties,
             ).thenReturn(mockOwnershipAndLandlordsTaskBeforeAssociatedParties)
         lenient().`when`(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        lenient().`when`(mockOwnershipAndLandlordsTaskBeforeAssociatedParties.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
         lenient().`when`(mockOwnershipTypeStep.formModel).thenReturn(mockOwnershipTypeFormModel)
-        lenient().`when`(mockState.getJointLandlordsTask(mockFeatureFlagManager)).thenReturn(mockJointLandlordsTask)
         lenient().`when`(mockJointLandlordsTask.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
         lenient().`when`(mockHasJointLandlordsStep.formModel).thenReturn(mockHasJointLandlordsFormModel)
         lenient().`when`(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
@@ -358,6 +358,7 @@ class PropertyRegistrationCyaStepConfigTests {
     private fun setUpAssociatedPartiesOwnership(ownershipType: OwnershipType?) {
         lenient().`when`(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
         lenient().`when`(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        lenient().`when`(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
         lenient().`when`(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
         lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
         lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(ownershipType)
@@ -783,7 +784,7 @@ class PropertyRegistrationCyaStepConfigTests {
             setUpAssociatedPartiesOwnership(OwnershipType.SOLE_FREEHOLD)
         }
 
-        // TODO PDJB-2016: Remove test once ASSOCIATED_PARTIES is released
+        // TODO PDJB-2016: Remove this flag-off test when ASSOCIATED_PARTIES is enabled for all users.
         @Test
         fun `associated parties disabled has no ownership rows and keeps the old ownership type row`() {
             whenever(mockFeatureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
@@ -1241,7 +1242,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
     }
 
-    // TODO PDJB-2016: Remove these tests when the ASSOCIATED_PARTIES flag is removed
+    // TODO PDJB-2016: Remove these flag-off tests when ASSOCIATED_PARTIES is enabled for all users and the flag is removed.
     @Nested
     inner class BeforeAssociatedPartiesContent {
         @BeforeEach
@@ -1276,6 +1277,14 @@ class PropertyRegistrationCyaStepConfigTests {
             assertNull(content["freeholdersChangeLinkKey"])
             assertNull(content["freeholdersChangeUrl"])
             assertNull(content["freeholdersCards"])
+        }
+
+        // TODO PDJB-2016: Remove or update this assertion when ASSOCIATED_PARTIES is enabled
+        @Test
+        fun `associated parties feature flag is checked once for people responsible content`() {
+            stepConfig.getStepSpecificContent(mockState)
+
+            verify(mockFeatureFlagManager).checkFeature(ASSOCIATED_PARTIES)
         }
     }
 
