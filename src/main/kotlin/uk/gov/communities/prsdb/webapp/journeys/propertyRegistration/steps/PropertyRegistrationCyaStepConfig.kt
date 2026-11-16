@@ -169,7 +169,8 @@ class PropertyRegistrationCyaStepConfig(
         } else {
             // TODO PDJB-2016: Remove this branch when ASSOCIATED_PARTIES is removed
             mapOf(
-                "peopleResponsibleForThisPropertyRows" to listOfNotNull(getOwnershipTypeRowBeforeAssociatedParties(state), jointLandlordsRow),
+                "peopleResponsibleForThisPropertyRows" to
+                    listOfNotNull(getOwnershipTypeRowBeforeAssociatedParties(state), jointLandlordsRow),
             )
         }
     }
