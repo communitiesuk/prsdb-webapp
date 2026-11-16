@@ -1,4 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
+
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
@@ -315,6 +316,7 @@ class OutstandingActionViewModelBuilderTests {
             isOccupied: Boolean,
             provideLaterDeadline: LocalDate? = null,
             eicrExpiryDate: LocalDate? = null,
+            eicIssueDate: LocalDate? = null,
         ) = ComplianceStatusDataModel(
             propertyOwnershipId = 1L,
             singleLineAddress = "123 Test Street",
@@ -326,6 +328,7 @@ class OutstandingActionViewModelBuilderTests {
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
             electricalSafetyExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
         )
 
         private fun getElectricalSafetyRow(viewModel: SummaryCardViewModel) =
@@ -420,6 +423,25 @@ class OutstandingActionViewModelBuilderTests {
                 eicrExpiryDate.format(OutstandingActionViewModelBuilder.DATE_FORMATTER),
                 eicrRow.optionalFieldValueParam,
             )
+        }
+
+        @Test
+        fun `expired EIC uses its issue date in the expired row`() {
+            val issueDate = LocalDate.of(2020, 3, 1)
+            val viewModel =
+                fromComplianceDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = true,
+                        eicrExpiryDate = LocalDate.of(2025, 3, 1),
+                        eicIssueDate = issueDate,
+                    ),
+                )
+
+            val row = getElectricalSafetyRow(viewModel)
+            assertNotNull(row)
+            assertEquals("outstandingActions.status.expiredEic", row.fieldValue)
+            assertEquals(issueDate.format(OutstandingActionViewModelBuilder.DATE_FORMATTER), row.optionalFieldValueParam)
         }
 
         @Test

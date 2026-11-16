@@ -2,9 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -61,7 +63,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Nested
-    inner class OwnershipTypeUpdates {
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag - it covers the legacy
+    //  single-question ownership type update, whose change link is only shown while the flag is off.
+    //  PDJB-1992 replaces it with the flag-on ownership update journey.
+    inner class OwnershipTypeBeforePdjb955Updates {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
@@ -81,6 +91,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class ResumingAbandonedUpdateAfterCompletingAnother {
+        private val landlordAccountEmail = "alex.surname@example.com"
+
         @Test
         fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
             page: Page,
@@ -92,13 +104,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
             assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
 
-            // Complete a different update (ownership type) on the same property, bumping its last-modified date
+            // Complete a different update (correspondence email) on the same property, bumping its last-modified date
+            completeCorrespondenceEmailUpdate(page)
             propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-            val updateOwnershipTypePage =
-                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.LEASEHOLD)
-            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Re-enter the abandoned bedrooms update via the change link and submit it
             propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
@@ -114,15 +122,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
-            // The ownership type update below must change the data, otherwise the last-modified date is not bumped
+            // The correspondence email update below must change the data, otherwise the last-modified date is not bumped
             assertNotEquals(
-                OwnershipTypeBeforePdjb955.FREEHOLD,
-                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.ownershipTypeBeforePdjb955,
+                landlordAccountEmail,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
             )
 
             // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
             // step the second step is reachable and its URL is stored in the session
-            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
             propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
             val numberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
@@ -130,18 +138,26 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
             val numberOfPeopleStepUrl = page.url().substringBefore("?")
 
-            // Complete a different update (ownership type) on the same property, bumping its last-modified date
-            propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-            val updateOwnershipTypePage =
-                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.FREEHOLD)
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            // Complete a different update (correspondence email) on the same property, bumping its last-modified date
+            completeCorrespondenceEmailUpdate(page)
 
             // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the
             // property has changed, the stale journey is discarded and restarted, so the number-of-people step is no
             // longer reachable and we are redirected out to the property details page - the earlier progress is gone.
             page.navigate(numberOfPeopleStepUrl)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        }
+
+        private fun completeCorrespondenceEmailUpdate(page: Page) {
+            navigator
+                .goToPropertyDetailsLandlordView(propertyOwnershipId)
+                .propertyDetailsSummaryList.contactEmailAddressRow
+                .clickFirstActionLinkAndWait()
+            val emailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyDetailsUpdate::class, urlArguments)
+            emailPage.submitAccountEmail()
+            val checkAnswersPage =
+                assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments)
+            checkAnswersPage.confirm()
             assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         }
     }

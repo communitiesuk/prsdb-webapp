@@ -24,6 +24,7 @@ import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -35,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -2467,10 +2469,6 @@ class PropertyComplianceServiceTests {
             PropertyComplianceBuilder().withElectricalSafety(LocalDate.now().plusYears(1), certType = null).build()
 
         assertFalse(propertyComplianceService.isElectricalSafetyMissing(propertyCompliance))
-        assertEquals(
-            propertyCompliance.eicrExpiryDate,
-            propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
-        )
     }
 
     @Nested
@@ -2574,36 +2572,76 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `getElectricalSafetyExpiryDate returns the stored date for an EICR`() {
-            val propertyCompliance =
-                PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eicr)
-                    .build()
+        fun `getElectricalSafetyExpiryDate derives the expiry date through the EIC date service for an EIC`() {
+            val derivedExpiryDate = LocalDate.of(2030, 6, 1)
+            val propertyCompliance = PropertyComplianceBuilder().withElectricalCertType(CertificateType.Eic).build()
+            val eicDateService = mock<EicDateService>()
+            whenever(eicDateService.expiryDateFrom(propertyCompliance)).thenReturn(derivedExpiryDate)
 
             assertEquals(
-                LocalDate.of(2030, 6, 1),
-                propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
+                derivedExpiryDate,
+                PropertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
             )
         }
 
         @Test
-        fun `getElectricalSafetyExpiryDate goes through the EIC date service for an EIC`() {
+        fun `getElectricalSafetyExpiryDate returns the stored expiry date for an EICR without using the EIC date service`() {
+            val storedExpiryDate = LocalDate.of(2030, 6, 1)
             val propertyCompliance =
                 PropertyComplianceBuilder()
-                    .withElectricalSafety(expiryDate = LocalDate.of(2030, 6, 1), certType = CertificateType.Eic)
+                    .withElectricalSafety(expiryDate = storedExpiryDate, certType = CertificateType.Eicr)
                     .build()
+            val eicDateService = mock<EicDateService>()
 
             assertEquals(
-                LocalDate.of(2030, 6, 1),
-                propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance),
+                storedExpiryDate,
+                PropertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
             )
+            verify(eicDateService, never()).expiryDateFrom(any())
         }
 
         @Test
-        fun `getElectricalSafetyExpiryDate returns null when there is no cert type`() {
-            val propertyCompliance = PropertyComplianceBuilder().build()
+        fun `getElectricalSafetyExpiryDate returns the stored expiry date when there is no cert type`() {
+            val storedExpiryDate = LocalDate.of(2030, 6, 1)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withElectricalSafety(expiryDate = storedExpiryDate, certType = null)
+                    .build()
+            val eicDateService = mock<EicDateService>()
 
-            assertNull(propertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance))
+            assertEquals(
+                storedExpiryDate,
+                PropertyComplianceService.getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
+            )
+            verify(eicDateService, never()).expiryDateFrom(any())
+        }
+
+        @Test
+        fun `getComplianceStatus uses the EIC expiry date from the EIC date service`() {
+            val expiryDate = LocalDate.of(2000, 6, 1)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eic)
+                    .build()
+
+            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+            assertEquals(expiryDate, complianceStatus.electricalSafetyExpiryDate)
+            assertEquals(ComplianceCertStatus.EXPIRED, complianceStatus.electricalSafetyStatus)
+        }
+
+        @Test
+        fun `getComplianceStatus preserves EICR expiry`() {
+            val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).plusDays(1)
+            val eicrCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eicr)
+                    .build()
+            val eicrStatus = propertyComplianceService.getComplianceStatus(eicrCompliance)
+
+            assertEquals(expiryDate, eicrStatus.electricalSafetyExpiryDate)
         }
     }
 

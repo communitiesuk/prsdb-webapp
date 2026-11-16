@@ -10,13 +10,13 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -24,8 +24,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
@@ -53,6 +54,7 @@ class PropertyOwnershipService(
     private val registrationNumberService: RegistrationNumberService,
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
+    private val freeholderService: FreeholderService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
@@ -60,18 +62,15 @@ class PropertyOwnershipService(
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
+    private val landlordRepository: LandlordRepository,
+    private val activeInactiveService: ActiveInactiveService,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-1957: add a flag-on variant of this method taking the new OwnershipType directly,
-    //  so that the flag-off variant can be deleted wholesale with the flag in PDJB-2016. It must
-    //  still populate ownershipTypeBeforePdjb955, since the column is NOT NULL and
-    //  PropertyDetailsViewModelBase renders it until PDJB-1996.
-    // TODO PDJB-2016 then PDJB-2019, in that order: PDJB-2016 deletes the flag-off variant, leaving
-    //  a single method for PDJB-2019 to stop populating ownershipTypeBeforePdjb955 in.
+    // TODO PDJB-2019: stop populating ownershipTypeBeforePdjb955 and delete the legacy column.
     @Transactional
     fun createPropertyOwnership(
-        ownershipType: OwnershipTypeBeforePdjb955,
+        ownershipType: OwnershipType,
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
@@ -100,37 +99,50 @@ class PropertyOwnershipService(
 
         val correspondenceAddress = addressService.findOrCreateAddress(correspondenceAddressModel)
 
-        return propertyOwnershipRepository.save(
-            PropertyOwnership(
-                ownershipType = OwnershipTypeConverter.convert(ownershipType),
-                ownershipTypeBeforePdjb955 = ownershipType,
-                currentNumHouseholds = numberOfHouseholds,
-                currentNumTenants = numberOfPeople,
-                isOccupied = isOccupied,
-                registrationNumber = registrationNumber,
-                landlords = mutableSetOf(registeringLandlord),
-                propertyBuildType = propertyBuildType,
-                customPropertyType = customPropertyType,
-                address = address,
-                license = license,
-                correspondenceEmail = correspondenceEmail,
-                correspondenceAddress = correspondenceAddress,
-                renewalDate = renewalDate,
-                isActive = isActive,
-                numBedrooms = numBedrooms,
-                billsIncludedList = billsIncludedList,
-                customBillsIncluded = customBillsIncluded,
-                furnishedStatus = furnishedStatus,
-                rentFrequency = rentFrequency,
-                customRentFrequency = customRentFrequency,
-                rentAmount = rentAmount,
-                markedJointLandlord = markedJointLandlord,
-                licenseProvideLater = licenseProvideLater,
-                tenancyProvideLater = tenancyProvideLater,
-            ).apply {
-                if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
-            },
-        )
+        registeringLandlord.markAsHavingRegisteredProperty()
+
+        val propertyOwnership =
+            propertyOwnershipRepository.save(
+                PropertyOwnership(
+                    ownershipType = ownershipType,
+                    // TODO PDJB-2019: delete this line with the legacy column (required until then as it is not nullable)
+                    ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType),
+                    currentNumHouseholds = numberOfHouseholds,
+                    currentNumTenants = numberOfPeople,
+                    isOccupied = isOccupied,
+                    registrationNumber = registrationNumber,
+                    landlords = mutableSetOf(registeringLandlord),
+                    propertyBuildType = propertyBuildType,
+                    customPropertyType = customPropertyType,
+                    address = address,
+                    license = license,
+                    correspondenceEmail = correspondenceEmail,
+                    correspondenceAddress = correspondenceAddress,
+                    renewalDate = renewalDate,
+                    isActive = isActive,
+                    numBedrooms = numBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                    markedJointLandlord = markedJointLandlord,
+                    licenseProvideLater = licenseProvideLater,
+                    tenancyProvideLater = tenancyProvideLater,
+                ).apply {
+                    if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
+                },
+            )
+
+        // TODO PDJB-2015: when ASSOCIATED_PARTIES is on, create the freeholders the landlord gave
+        //  instead of a placeholder. The flag-off journey never asks who they are, so it keeps calling
+        //  createPlaceholderFreeholder until PDJB-2016 removes the flag.
+        if (ownershipType.requiresFreeholderRecords()) {
+            freeholderService.createPlaceholderFreeholder(propertyOwnership)
+        }
+
+        return propertyOwnership
     }
 
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
@@ -198,7 +210,21 @@ class PropertyOwnershipService(
         return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }
     }
 
-    fun getRegisteredPropertiesForLandlordUser(
+    fun getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId: Long): PropertyOwnership {
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        val propertyOwnership = propertyOwnershipRepository.findByIdAndIsActiveFalse(propertyOwnershipId)
+
+        if (landlord == null || propertyOwnership == null || propertyOwnership.landlords.none { it.id == landlord.id }) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No inactive property ownership $propertyOwnershipId found for the current landlord",
+            )
+        }
+
+        return propertyOwnership
+    }
+
+    fun getActivePropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =
@@ -208,6 +234,11 @@ class PropertyOwnershipService(
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
+
+    fun getDeactivatedPropertiesForLandlordUser(landlord: Landlord): List<DeactivatedPropertyLandlordViewModel> =
+        propertyOwnershipRepository
+            .findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
+            .map { DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(it) }
 
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,
@@ -300,20 +331,36 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1957: mirror the flag-on/flag-off split in createPropertyOwnership.
-    // TODO PDJB-1957: changing to a type that no longer requires freeholder records leaves any
-    //  placeholder freeholder behind. Decide what should happen to existing freeholders here
-    //  once the freeholders journey exists.
+    // TODO PDJB-1992: when ASSOCIATED_PARTIES is on, this should take the landlord's freeholder and
+    //  superior landlord answers (including the yes/no superior landlord question) so that changing the
+    //  ownership type leaves the property in a valid state. The flag-off journey never asks, so it keeps
+    //  falling back on a placeholder freeholder until PDJB-2016 removes the flag.
     @Transactional
     fun updateOwnershipType(
         id: Long,
-        ownershipType: OwnershipTypeBeforePdjb955,
+        ownershipType: OwnershipType,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.ownershipTypeBeforePdjb955 = ownershipType
-        propertyOwnership.ownershipType = OwnershipTypeConverter.convert(ownershipType)
+        propertyOwnership.ownershipType = ownershipType
+        // TODO PDJB-2019: delete this line with the legacy column.
+        propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
+        propertyOwnershipRepository.save(propertyOwnership)
+
+        if (ownershipType.requiresFreeholderRecords()) {
+            if (propertyOwnership.freeholders.isEmpty()) {
+                freeholderService.createPlaceholderFreeholder(propertyOwnership)
+            }
+        } else if (propertyOwnership.freeholders.isNotEmpty()) {
+            freeholderService.clearFreeholders(propertyOwnership)
+        }
+    }
+
+    // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
+    @Transactional
+    fun removePropertyManager(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.propertyManager = null
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -483,6 +530,9 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
+        landlord.markAsHavingRegisteredProperty()
+        landlordRepository.save(landlord)
+        activeInactiveService.reactivateLandlordIfInactive(landlord)
     }
 
     @Transactional
@@ -534,13 +584,20 @@ class PropertyOwnershipService(
     ): Page<OutstandingActionsDataModel> {
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled
         val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+        // TODO PDJB-1679: Remove isEicIssueDateEnabled when the EIC_ISSUE_DATE flag is removed
+        val isEicIssueDateEnabled = featureFlagManager.checkFeature(EIC_ISSUE_DATE)
         val allOutstandingActions =
             retrieveAllActivePropertiesForLandlord(landlord)
-                .map {
+                .map { propertyOwnership ->
+                    val propertyCompliance = propertyOwnership.propertyCompliance
                     OutstandingActionsDataModel.fromPropertyOwnership(
-                        it,
-                        it.propertyCompliance?.let(::electricalSafetyExpiryDateOf),
-                        isGas14MonthExpiryEnabled,
+                        propertyOwnership,
+                        eicIssueDate = propertyCompliance?.takeIf { isEicIssueDateEnabled }?.let(eicDateService::issueDateFrom),
+                        electricalSafetyExpiryDate =
+                            propertyCompliance?.let {
+                                PropertyComplianceService.getElectricalSafetyExpiryDate(it, eicDateService)
+                            },
+                        isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                     )
                 }.filter { it.shouldShowOnOutstandingActionsPage }
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_OUTSTANDING_ACTIONS_PAGE)
@@ -549,16 +606,11 @@ class PropertyOwnershipService(
         return PageImpl(allOutstandingActions.subList(fromIndex, toIndex), pageRequest, allOutstandingActions.size.toLong())
     }
 
-    // TODO PDJB-1676: Use PropertyComplianceService.getComplianceStatus instead of repeating the EIC/EICR choice
-    // (PropertyComplianceService can't be injected here as it already depends on this service)
-    private fun electricalSafetyExpiryDateOf(propertyCompliance: PropertyCompliance): LocalDate? =
-        when (propertyCompliance.electricalCertType) {
-            CertificateType.Eic -> eicDateService.expiryDateFrom(propertyCompliance)
-            else -> propertyCompliance.eicrExpiryDate
-        }
-
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
+
+    fun doesLandlordHaveDeactivatedProperties(landlord: Landlord): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 

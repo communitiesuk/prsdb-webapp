@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import kotlin.system.exitProcess
 
+// TODO PDJB-2125: Remove once every environment processes scan results from the scan result queue
 @PrsdbTask("scan-processor")
 class ProcessScanResultTaskApplicationRunner(
     private val context: ApplicationContext,

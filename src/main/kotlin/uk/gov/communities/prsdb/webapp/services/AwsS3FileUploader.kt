@@ -16,6 +16,7 @@ class AwsS3FileUploader(
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
+        fileName: String?,
     ): UploadedFileLocator? {
         inputStream.use { input ->
             val requestBody = AsyncRequestBody.forBlockingInputStream(null)

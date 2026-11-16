@@ -162,7 +162,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total weekly rent agreed with the tenant.")
-                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
+                assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
             @Test
@@ -176,7 +176,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total 4-weekly rent agreed with the tenant.")
-                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
+                assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
             @Test
@@ -190,7 +190,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
-                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
+                assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
             @Test
@@ -198,13 +198,13 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.OTHER)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("What is the monthly rent?")
-                val rentLabel = "Monthly rent"
+                    .containsText("Equivalent monthly rent")
+                val rentLabel = "What is the rent, as a monthly figure in pounds?"
                 BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
                     .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
-                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isVisible()
+                assertThat(rentAmountPage.rentCalculationDetails).isVisible()
             }
         }
     }

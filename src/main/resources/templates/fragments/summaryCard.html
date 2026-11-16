@@ -16,6 +16,9 @@
             <h4 th:case="'h4'" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
                 Title of the summary card
             </h4>
+            <h5 th:case="'h5'" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
+                Title of the summary card
+            </h5>
             <h2 th:case="*" class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
                 Title of the summary card
             </h2>

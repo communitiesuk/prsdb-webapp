@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{reactivateProperty.info.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<main>
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{reactivateProperty.info.heading}">
+            reactivateProperty.info.heading
+        </h1>
+        <p class="govuk-body" th:text="#{reactivateProperty.info.youAreReactivating}">
+            reactivateProperty.info.youAreReactivating
+        </p>
+        <p class="govuk-body" id="property-address">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressLines})}"></th:block>
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{reactivateProperty.info.whatHappensNext.heading}">
+            reactivateProperty.info.whatHappensNext.heading
+        </h2>
+        <p class="govuk-body" th:text="#{reactivateProperty.info.whatHappensNext.paragraph.one}">
+            reactivateProperty.info.whatHappensNext.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{reactivateProperty.info.whatHappensNext.paragraph.two}">
+            reactivateProperty.info.whatHappensNext.paragraph.two
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{reactivateProperty.info.whatHappensNext.bullet.one}">reactivateProperty.info.whatHappensNext.bullet.one</li>
+            <li th:text="#{reactivateProperty.info.whatHappensNext.bullet.two}">reactivateProperty.info.whatHappensNext.bullet.two</li>
+            <li th:text="#{reactivateProperty.info.whatHappensNext.bullet.three}">reactivateProperty.info.whatHappensNext.bullet.three</li>
+            <li th:text="#{reactivateProperty.info.whatHappensNext.bullet.four}">reactivateProperty.info.whatHappensNext.bullet.four</li>
+            <li th:text="#{reactivateProperty.info.whatHappensNext.bullet.five}">reactivateProperty.info.whatHappensNext.bullet.five</li>
+        </ul>
+        <p class="govuk-body" th:text="#{reactivateProperty.info.whatHappensNext.paragraph.three}">
+            reactivateProperty.info.whatHappensNext.paragraph.three
+        </p>
+        <div class="govuk-inset-text" th:text="#{reactivateProperty.info.insetText}">
+            reactivateProperty.info.insetText
+        </div>
+        <form th:action="@{''}" method="post" novalidate>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+        </form>
+    </div>
+</main>
+</html>

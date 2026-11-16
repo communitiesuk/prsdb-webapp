@@ -28,8 +28,8 @@ class PropertyDetailsPageLocalCouncilView(
 
     val landlordSummaryCards: List<LandlordSummaryCard>
         get() {
-            val count = page.locator("#landlord-details .govuk-summary-card").count()
-            return (0 until count).map { LandlordSummaryCard(page.locator("#landlord-details .govuk-summary-card").nth(it)) }
+            val count = page.locator("#people-responsible .govuk-summary-card").count()
+            return (0 until count).map { LandlordSummaryCard(page.locator("#people-responsible .govuk-summary-card").nth(it)) }
         }
 
     class LandlordSummaryCard(
@@ -41,7 +41,7 @@ class PropertyDetailsPageLocalCouncilView(
     class LandlordCardSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
-        val registrationNumberRow = getRow("Landlord Registration Number")
+        val registrationNumberRow = getRow("Landlord number")
         val emailAddressRow = getRow("Email address")
         val contactNumberRow = getRow("Contact number")
         val contactAddressRow = getRow("Contact address")

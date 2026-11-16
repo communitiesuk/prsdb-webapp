@@ -1,17 +1,18 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScanProcessingService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PersistentScanResultProcessingException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 
-@PrsdbTaskService
+@PrsdbScanProcessingService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
     private val virusCallbackHandler: VirusNotificationEmailHandler,
@@ -28,7 +29,7 @@ class VirusScanProcessingService(
         if (callbackDetails.isNotEmpty()) {
             processCertificateScanResult(callbackDetails, scanResultStatus)
         } else {
-            removeOrphanedFileUpload(locator)
+            processScanWithoutCallbacks(locator)
         }
     }
 
@@ -64,28 +65,40 @@ class VirusScanProcessingService(
             }
 
             ScanResult.AccessDenied -> {
-                throw PrsdbWebException(
-                    "GuardDuty does not have access to scan $callbackDetails.fileUpload.objectKey",
+                throw PersistentScanResultProcessingException(
+                    "GuardDuty does not have access to scan ${fileUpload.objectKey}",
                 )
             }
         }
         callbackDetails.forEach { virusScanCallbackRepository.delete(it) }
     }
 
-    private fun removeOrphanedFileUpload(locator: UploadedFileLocator) {
-        val fileUpload =
-            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
+    private fun processScanWithoutCallbacks(locator: UploadedFileLocator) {
+        val fileUpload = fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
-        fileUpload?.let {
-            if (dequarantiner.deleteQuarantinedFile(it)) {
-                throw PrsdbWebException("Deleted orphaned file: ${it.objectKey}")
-            } else {
-                throw PrsdbWebException("Failed to delete orphaned file: ${it.objectKey}")
+        when {
+            fileUpload == null -> {
+                println(
+                    "No file upload found for object key: ${locator.objectKey} and version ID: ${locator.versionId}. " +
+                        "Its scan result has already been processed, or it has no file upload record.",
+                )
+            }
+
+            fileUpload.status != FileUploadStatus.QUARANTINED -> {
+                println(
+                    "File upload ${fileUpload.objectKey} is already ${fileUpload.status}, " +
+                        "so its scan result has already been processed.",
+                )
+            }
+
+            dequarantiner.deleteQuarantinedFile(fileUpload) -> {
+                println("Deleted orphaned file: ${fileUpload.objectKey}")
+            }
+
+            else -> {
+                throw PrsdbWebException("Failed to delete orphaned file: ${fileUpload.objectKey}")
             }
         }
-        throw PrsdbWebException(
-            "No file upload found for object key: ${locator.objectKey} and version ID: ${locator.versionId}",
-        )
     }
 
     private fun getCallbackDetails(certificateFileLocator: UploadedFileLocator): List<VirusScanCallback> {
@@ -97,7 +110,7 @@ class VirusScanProcessingService(
         callbacks.forEach { callback ->
             val fileETag = callback.fileUpload.eTag
             if (fileETag != certificateFileLocator.eTag) {
-                throw PrsdbWebException(
+                throw PersistentScanResultProcessingException(
                     "ETag mismatch for object key: ${certificateFileLocator.objectKey}. " +
                         "Expected: $fileETag, Received: ${certificateFileLocator.eTag}",
                 )

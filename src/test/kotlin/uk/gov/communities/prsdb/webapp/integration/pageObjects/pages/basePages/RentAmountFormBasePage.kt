@@ -20,12 +20,7 @@ abstract class RentAmountFormBasePage(
     val header = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
     val billsExplanationForRentFrequency = Paragraph(page.getByTestId("bills-explanation-for-frequency"))
-    val rentCalculationParagraph =
-        Paragraph(
-            page.getByText(
-                "To work out the monthly equivalent, divide your rent amount by the number of months it covers. For example:",
-            ),
-        )
+    val rentCalculationDetails: Locator = page.locator("details.govuk-details")
 
     val form = RentAmountForm(page)
 

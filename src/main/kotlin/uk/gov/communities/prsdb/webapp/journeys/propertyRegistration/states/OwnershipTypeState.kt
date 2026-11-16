@@ -1,23 +1,28 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeAnswersConverter
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 
-// TODO PDJB-1957: decide which check-your-answers ticket adds the journey answers -> OwnershipType
-//  mapping here.
-// TODO PDJB-2015: once that mapping exists, OwnershipStructureRoutingStepConfig and
-//  PropertyRegistrationDataModelFactory can map and then ask, rather than restating the rules.
+// TODO PDJB-2015: PropertyRegistrationDataModelFactory can now map and then ask, rather than
+//  restating the rules. OwnershipStructureRoutingStepConfig already does.
 interface OwnershipTypeState : JourneyState {
     val ownsPropertyStep: OwnsPropertyStep
     val ownershipKindStep: OwnershipKindStep
     val freeholdTypeStep: FreeholdTypeStep
 
-    // TODO: PDJB-1957: Reassess this ownership-type mapping and centralise the freeholder/joint-freeholder/superior-landlord
-    // checks in one place. This logic is currently duplicated by the journey wiring and should be
-    // consolidated when the single source of truth is introduced.
+    val ownershipType: OwnershipType?
+        get() =
+            OwnershipTypeAnswersConverter.convertOrNull(
+                ownsPropertyStep.outcome,
+                ownershipKindStep.outcome,
+                freeholdTypeStep.outcome,
+            )
+
+    // False until the ownership type task is complete, which is always before the freeholders are asked for.
     val isJointFreeholder: Boolean
-        get() = freeholdTypeStep.outcome in setOf(FreeholdType.JOINT_TENANTS, FreeholdType.TENANTS_IN_COMMON)
+        get() = ownershipType?.isJointFreeholder() ?: false
 }

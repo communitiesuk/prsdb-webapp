@@ -14,4 +14,21 @@ object OwnershipTypeConverter {
             OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD -> OwnershipType.JOINT_TENANTS
             OwnershipTypeBeforePdjb955.COMMONHOLD -> OwnershipType.COMMONHOLD
         }
+
+    // Lossy (ten values to four), but every legacy value round-trips exactly, which is what keeps the
+    // flag-off path's behaviour unchanged. Exhaustive with no else branch so that a new OwnershipType
+    // value fails to compile rather than failing at runtime against a NOT NULL column.
+    fun convertToBeforePdjb955(ownershipType: OwnershipType): OwnershipTypeBeforePdjb955 =
+        when (ownershipType) {
+            OwnershipType.NONE -> OwnershipTypeBeforePdjb955.LEASEHOLD
+            OwnershipType.LEASEHOLD_ONLY -> OwnershipTypeBeforePdjb955.LEASEHOLD
+            OwnershipType.SOLE_FREEHOLD -> OwnershipTypeBeforePdjb955.FREEHOLD
+            OwnershipType.JOINT_TENANTS -> OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD
+            OwnershipType.TENANTS_IN_COMMON -> OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD
+            OwnershipType.COMMONHOLD -> OwnershipTypeBeforePdjb955.COMMONHOLD
+            OwnershipType.SHARE_OF_SOLE_FREEHOLD -> OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD
+            OwnershipType.SHARE_OF_JOINT_TENANTS -> OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD
+            OwnershipType.SHARE_OF_TENANTS_IN_COMMON -> OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD
+            OwnershipType.SHARE_OF_COMMONHOLD -> OwnershipTypeBeforePdjb955.COMMONHOLD
+        }
 }

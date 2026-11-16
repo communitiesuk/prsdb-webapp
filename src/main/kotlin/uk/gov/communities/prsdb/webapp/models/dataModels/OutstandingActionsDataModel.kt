@@ -28,6 +28,7 @@ data class OutstandingActionsDataModel(
         // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled argument
         fun fromPropertyOwnership(
             propertyOwnership: PropertyOwnership,
+            eicIssueDate: LocalDate?,
             electricalSafetyExpiryDate: LocalDate?,
             isGas14MonthExpiryEnabled: Boolean,
         ): OutstandingActionsDataModel =
@@ -41,9 +42,10 @@ data class OutstandingActionsDataModel(
                 complianceStatus =
                     propertyOwnership.propertyCompliance?.let {
                         ComplianceStatusDataModel.fromPropertyCompliance(
-                            it,
-                            electricalSafetyExpiryDate,
-                            isGas14MonthExpiryEnabled,
+                            propertyCompliance = it,
+                            eicIssueDate = eicIssueDate,
+                            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                            isGas14MonthExpiryEnabled = isGas14MonthExpiryEnabled,
                         )
                     },
             )
