@@ -697,7 +697,6 @@ class PropertyRegistrationCyaStepConfigTests {
             // LEASEHOLD_ONLY requires superior-landlord information, so this enables that content.
             lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
-            lenient().`when`(mockFreeholdersTask.journeyId).thenReturn("journey-id")
             lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
             lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
             lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
@@ -705,7 +704,6 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
             lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
             lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
-            lenient().`when`(mockSuperiorLandlordsTask.journeyId).thenReturn("journey-id")
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             lenient().`when`(mockSuperiorLandlordsTask.superiorLandlordsDetailsTask).thenReturn(mockSuperiorLandlordsDetailsTask)
             lenient().`when`(mockSuperiorLandlordsDetailsTask.superiorLandlordsListStep).thenReturn(mockSuperiorLandlordsListStep)
@@ -750,7 +748,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `missing ownership type throws an unrecoverable journey state exception`() {
-            whenever(mockOwnershipTypeTask.journeyId).thenReturn("journey-id")
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
 
             assertThrows<UnrecoverableJourneyStateException> { stepConfig.getStepSpecificContent(mockState) }
@@ -759,6 +757,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `missing anyone in ownership chain answer throws an unrecoverable journey state exception`() {
             // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(null)
 
             // Act & Assert
@@ -768,6 +767,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `answering yes with no superior landlords throws an unrecoverable journey state exception`() {
             // Arrange, the default setup is a journey that should've asked superior landlords
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
                 .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = true))
             whenever(mockSuperiorLandlordsTask.superiorLandlordsMap).thenReturn(null)
@@ -867,7 +867,6 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
             lenient().`when`(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
-            lenient().`when`(mockFreeholdersTask.journeyId).thenReturn("journey-id")
             lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
             lenient().`when`(mockFreeholdersTask.freeholdersDetailsTask).thenReturn(mockFreeholdersDetailsTask)
             lenient().`when`(mockFreeholdersDetailsTask.freeholdersListStep).thenReturn(mockFreeholdersListStep)
@@ -875,7 +874,6 @@ class PropertyRegistrationCyaStepConfigTests {
             lenient().`when`(mockFreeholdersListStep.urlPath).thenReturn(FreeholdersListStep.ROUTE_SEGMENT)
             lenient().`when`(mockState.getCyaJourneyId(mockFreeholdersListStep)).thenReturn("freeholders-change")
             lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
-            lenient().`when`(mockSuperiorLandlordsTask.journeyId).thenReturn("journey-id")
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull)
                 .thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = false))
@@ -902,7 +900,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `missing ownership type throws an unrecoverable journey state exception`() {
             // Arrange
-            whenever(mockOwnershipTypeTask.journeyId).thenReturn("journey-id")
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(null)
 
             // Act & Assert
@@ -912,6 +910,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `missing freeholders throws an unrecoverable journey state exception`() {
             // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockFreeholdersTask.freeholdersMap).thenReturn(null)
 
             // Act & Assert
@@ -921,6 +920,7 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `empty freeholders throws an unrecoverable journey state exception`() {
             // Arrange
+            whenever(mockState.journeyId).thenReturn("journey-id")
             whenever(mockFreeholdersTask.freeholdersMap).thenReturn(emptyMap())
 
             // Act & Assert

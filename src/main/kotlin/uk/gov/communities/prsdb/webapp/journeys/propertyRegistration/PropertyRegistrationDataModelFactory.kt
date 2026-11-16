@@ -11,9 +11,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyoneInOwnershipChain
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholders
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getOwnershipType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlords
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholdersOrNull
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlordsOrNull
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
@@ -58,8 +57,11 @@ class PropertyRegistrationDataModelFactory(
         val isAssociatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES)
         val ownershipType =
             if (isAssociatedPartiesEnabled) {
-                state.ownershipAndLandlordsTask.ownershipStructureTask.ownershipTypeTask
-                    .getOwnershipType()
+                state.ownershipAndLandlordsTask.ownershipStructureTask.ownershipTypeTask.ownershipType
+                    ?: throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "Property registration was submitted before the ownership type task was complete",
+                    )
             } else {
                 OwnershipTypeConverter.convert(
                     state.ownershipAndLandlordsTaskBeforeAssociatedParties.ownershipTypeStep.formModel
@@ -242,10 +244,15 @@ class PropertyRegistrationDataModelFactory(
     ): List<FreeholderDataModel>? {
         if (!ownershipType.requiresFreeholderRecords()) return null
 
-        return state.ownershipAndLandlordsTask.ownershipStructureTask.freeholdersTask
-            .getFreeholders()
-            .values
-            .toList()
+        val freeholders =
+            state.ownershipAndLandlordsTask.ownershipStructureTask.freeholdersTask
+                .getFreeholdersOrNull()
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Property registration was submitted with an ownership type requiring freeholder records but no freeholders",
+                )
+
+        return freeholders.values.toList()
     }
 
     private fun getSuperiorLandlords(
@@ -255,11 +262,21 @@ class PropertyRegistrationDataModelFactory(
         if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyList()
 
         val superiorLandlordsTask = state.ownershipAndLandlordsTask.ownershipStructureTask.superiorLandlordsTask
-        if (!superiorLandlordsTask.anyoneInOwnershipChain) return emptyList()
+        val anyoneInOwnershipChain =
+            superiorLandlordsTask.anyoneInOwnershipChain
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Property registration was submitted before the anyone in ownership chain step was answered",
+                )
+        if (!anyoneInOwnershipChain) return emptyList()
 
-        return superiorLandlordsTask
-            .getSuperiorLandlords()
-            .values
-            .toList()
+        val superiorLandlords =
+            superiorLandlordsTask.getSuperiorLandlordsOrNull()
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Property registration was submitted with anyone in ownership chain answered yes but no superior landlords",
+                )
+
+        return superiorLandlords.values.toList()
     }
 }

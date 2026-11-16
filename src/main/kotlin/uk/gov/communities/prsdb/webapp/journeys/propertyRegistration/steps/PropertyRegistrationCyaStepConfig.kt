@@ -14,9 +14,8 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyoneInOwnershipChain
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholders
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getOwnershipType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlords
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholdersOrNull
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlordsOrNull
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
@@ -167,10 +166,21 @@ class PropertyRegistrationCyaStepConfig(
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
 
         val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
-        val ownershipType = ownershipStructureTask.ownershipTypeTask.getOwnershipType()
+        val ownershipType =
+            ownershipStructureTask.ownershipTypeTask.ownershipType
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the ownership type task was complete",
+                )
         if (!ownershipType.requiresFreeholderRecords()) return emptyMap()
 
         val freeholdersTask = ownershipStructureTask.freeholdersTask
+        val freeholders =
+            freeholdersTask.getFreeholdersOrNull()
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached with an ownership type requiring freeholder records but no freeholders",
+                )
         val freeholdersListStep = freeholdersTask.freeholdersDetailsTask.freeholdersListStep
         val headingType = if (ownershipType.isJointFreeholder()) "joint" else "nonJoint"
         return mapOf(
@@ -178,7 +188,7 @@ class PropertyRegistrationCyaStepConfig(
             "freeholdersChangeLinkKey" to "registerProperty.freeholders.checkAnswers.changeLink.$headingType",
             "freeholdersChangeUrl" to
                 Destination.VisitableStep(freeholdersListStep, state.getCyaJourneyId(freeholdersListStep)).toUrlStringOrNull(),
-            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholdersTask.getFreeholders()),
+            "freeholdersCards" to freeholderSummaryCardHelper.getSummaryCards(freeholders),
         )
     }
 
@@ -186,17 +196,34 @@ class PropertyRegistrationCyaStepConfig(
         if (!featureFlagManager.checkFeature(ASSOCIATED_PARTIES)) return emptyMap()
 
         val ownershipStructureTask = state.ownershipAndLandlordsTask.ownershipStructureTask
-        val ownershipType = ownershipStructureTask.ownershipTypeTask.getOwnershipType()
+        val ownershipType =
+            ownershipStructureTask.ownershipTypeTask.ownershipType
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the ownership type task was complete",
+                )
         if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyMap()
 
         val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
         val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
+        val anyoneInOwnershipChain =
+            superiorLandlordsTask.anyoneInOwnershipChain
+                ?: throw UnrecoverableJourneyStateException(
+                    state.journeyId,
+                    "Check your answers was reached before the anyone in ownership chain step was answered",
+                )
 
-        return if (superiorLandlordsTask.anyoneInOwnershipChain) {
+        return if (anyoneInOwnershipChain) {
+            val superiorLandlords =
+                superiorLandlordsTask.getSuperiorLandlordsOrNull()
+                    ?: throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "Check your answers was reached with anyone in ownership chain answered yes but no superior landlords",
+                    )
             val listStep = superiorLandlordsTask.superiorLandlordsDetailsTask.superiorLandlordsListStep
             mapOf(
                 "superiorLandlordsChangeUrl" to Destination.VisitableStep(listStep, state.getCyaJourneyId(listStep)).toUrlStringOrNull(),
-                "superiorLandlordsCards" to superiorLandlordSummaryCardHelper.getSummaryCards(superiorLandlordsTask.getSuperiorLandlords()),
+                "superiorLandlordsCards" to superiorLandlordSummaryCardHelper.getSummaryCards(superiorLandlords),
             )
         } else {
             mapOf(

@@ -799,15 +799,12 @@ class PropertyRegistrationDataModelFactoryTests {
             whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
             whenever(mockOwnershipAndLandlordsTask.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
             whenever(mockOwnershipStructureTask.ownershipTypeTask).thenReturn(mockOwnershipTypeTask)
-            lenient().`when`(mockOwnershipTypeTask.journeyId).thenReturn("test-journey-id")
             whenever(mockOwnershipTypeTask.ownershipType).thenReturn(ownershipType)
 
             lenient().`when`(mockOwnershipStructureTask.freeholdersTask).thenReturn(mockFreeholdersTask)
-            lenient().`when`(mockFreeholdersTask.journeyId).thenReturn("test-journey-id")
             lenient().`when`(mockFreeholdersTask.freeholdersMap).thenReturn(freeholders)
 
             lenient().`when`(mockOwnershipStructureTask.superiorLandlordsTask).thenReturn(mockSuperiorLandlordsTask)
-            lenient().`when`(mockSuperiorLandlordsTask.journeyId).thenReturn("test-journey-id")
             lenient().`when`(mockSuperiorLandlordsTask.anyoneInOwnershipChainStep).thenReturn(mockAnyoneInOwnershipChainStep)
             lenient().`when`(mockAnyoneInOwnershipChainStep.formModelIfReachableOrNull).thenReturn(
                 anyoneInOwnershipChain?.let { AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = it) },

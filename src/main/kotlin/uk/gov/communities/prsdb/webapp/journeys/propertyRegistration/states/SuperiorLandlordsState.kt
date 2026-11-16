@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsDetailsTask
@@ -15,19 +14,11 @@ interface SuperiorLandlordsState :
     val superiorLandlordsBackRoutingStep: SuperiorLandlordsBackRoutingStep
 }
 
-// Only call this once the ownership type is known to require superior landlord info, as otherwise the step is never asked.
-val SuperiorLandlordsState.anyoneInOwnershipChain: Boolean
-    get() =
-        anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
-            ?: throw UnrecoverableJourneyStateException(
-                journeyId,
-                "The ownership chain was read before the anyone in ownership chain step was answered",
-            )
+// Null until the anyone in ownership chain step is answered, which only happens for ownership types requiring
+// superior landlord info.
+val SuperiorLandlordsState.anyoneInOwnershipChain: Boolean?
+    get() = anyoneInOwnershipChainStep.formModelIfReachableOrNull?.anyoneInOwnershipChain
 
-// Only call this once anyoneInOwnershipChain is known to be true, as otherwise no superior landlords are collected.
-fun SuperiorLandlordsState.getSuperiorLandlords(): Map<Int, SuperiorLandlordDataModel> =
+// Null if none were collected, which is an impossible state once anyoneInOwnershipChain is true.
+fun SuperiorLandlordsState.getSuperiorLandlordsOrNull(): Map<Int, SuperiorLandlordDataModel>? =
     superiorLandlordsMap?.takeIf { it.isNotEmpty() }
-        ?: throw UnrecoverableJourneyStateException(
-            journeyId,
-            "The superior landlords were read with anyone in ownership chain answered yes, but none were collected",
-        )
