@@ -456,7 +456,6 @@ class PropertyRegistrationJourneyFactory(
                         )
                 }
             }
-            // We don't have a section header for these pages, as their titles are the same as the respective page header
             hideCheckAnswersSectionHeader(journey.gasSafetyTask)
             hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
             hideCheckAnswersSectionHeader(journey.epcTask)

@@ -103,9 +103,6 @@ class PropertyReactivationJourneyFactory(
                     nextStep { journey.nextStepAfter(EPC) }
                 }
             }
-            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
-            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
-            hideCheckAnswersSectionHeader(journey.epcTask)
             section {
                 withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
                 task(journey.tenancyDetailsTask) {
@@ -125,6 +122,9 @@ class PropertyReactivationJourneyFactory(
             useContinueButtons(journey.electricalSafetyTask)
             useContinueButtons(journey.epcTask)
             useContinueButtons(journey.tenancyDetailsTask)
+            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
+            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
+            hideCheckAnswersSectionHeader(journey.epcTask)
         }
     }
 

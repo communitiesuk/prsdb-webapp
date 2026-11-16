@@ -242,12 +242,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.form.submitButton).hasText("Continue")
         checkEpcAnswersPage.form.submit()
 
-        val tenancyDetailsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyReactivation::class, urlArguments)
+        assertPageIs(page, NumberOfHouseholdsFormPagePropertyReactivation::class, urlArguments)
     }
 
     @Test
     fun `a landlord can provide tenancy details and every tenancy details button says continue`(page: Page) {
         val numberOfHouseholdsPage = navigateToNumberOfHouseholdsPage(page)
+        assertThat(numberOfHouseholdsPage.sectionHeader).containsText("Tenancy details")
         assertThat(numberOfHouseholdsPage.provideThisLaterButton).isHidden()
         assertThat(numberOfHouseholdsPage.form.submitButton).hasText("Continue")
         numberOfHouseholdsPage.submitNumberOfHouseholds(1)
@@ -279,7 +280,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         rentAmountPage.submitRentAmount("400")
 
         assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
-        assertThat(tenancyDetailsPage.sectionHeader).containsText("Tenancy details")
     }
 
     @Test
