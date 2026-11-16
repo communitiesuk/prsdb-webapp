@@ -71,6 +71,8 @@ class PropertyDetailsControllerTests(
 
     @BeforeEach
     fun setUp() {
+        // TODO PDJB-2016: remove this stubbing when the ASSOCIATED_PARTIES feature flag is removed
+        whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
@@ -204,7 +206,6 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
             whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
 
             mvc
