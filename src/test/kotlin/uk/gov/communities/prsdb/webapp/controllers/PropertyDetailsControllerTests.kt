@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
@@ -33,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -197,7 +197,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails adds cards built from the property's persisted freeholders`() {
             val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
             propertyOwnership.freeholders.add(
-                Freeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
+                createFreeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
             )
             val expectedCards = listOf(SummaryCardViewModel(title = "Freeholder One", summaryList = emptyList()))
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
