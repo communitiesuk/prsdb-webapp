@@ -648,7 +648,7 @@ VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111
        ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, current_date),
        ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, current_date);
 
--- Local-only property examples for the property-record freeholder cards.
+-- Property-record freeholder card fixtures used by integration tests and seeded locally.
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (90, current_timestamp, 1502423354, 0),
        (91, current_timestamp, 1502423355, 0),
