@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.json.JSONException
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -8,7 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
@@ -34,6 +37,11 @@ class NotifySmsNotificationServiceTests {
     @InjectMocks
     private lateinit var service: NotifySmsNotificationService<TestSmsTemplate>
 
+    @BeforeEach
+    fun setUp() {
+        whenever(notifyIdService.getNotifyIdValue(any<SmsTemplate>())).thenReturn("template-id")
+    }
+
     private class TestSmsTemplate(
         private val personalisation: HashMap<String, String> = hashMapOf(),
         override val template: SmsTemplate = mock(),
@@ -46,13 +54,27 @@ class NotifySmsNotificationServiceTests {
         // Arrange
         val personalisation = hashMapOf("first name" to "Alex")
         val sms = TestSmsTemplate(personalisation)
-        whenever(notifyIdService.getNotifyIdValue(sms.template)).thenReturn("template-id")
 
         // Act
         service.sendSms("+447700900123", sms)
 
         // Assert
         verify(notifyClient).sendSms("template-id", "+447700900123", personalisation, null)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", " "])
+    fun `sendSms rejects an unconfigured template without calling Notify`(templateId: String) {
+        // Arrange
+        val sms = TestSmsTemplate()
+        whenever(notifyIdService.getNotifyIdValue(sms.template)).thenReturn(templateId)
+
+        // Act
+        val exception = assertThrows<PersistentSmsSendException> { service.sendSms("+447700900123", sms) }
+
+        // Assert
+        assertTrue(exception.message!!.contains("No Notify template ID"))
+        verifyNoInteractions(notifyClient)
     }
 
     @ParameterizedTest

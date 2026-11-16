@@ -12,3 +12,16 @@ paragraph:
     For postal-only landlords, send this passphrase by post and record it against their customer record. When they later call the
     contact centre and you need them to authenticate, ask them to repeat their passphrase to you and check it matches their customer record.
 generateAnother: Generate another passphrase
+sms:
+  heading: Send this passphrase by text message
+  phoneNumber:
+    label: Telephone number
+    hint: Enter the telephone number from the landlord’s stored contact details. Include the country code for international numbers.
+    error:
+      missing: Enter a telephone number
+      invalid: Enter a valid telephone number
+  send: Send text message
+  accepted: The text message has been submitted to {0,,recipient}. Ask the landlord to read the passphrase back when it arrives.
+  failed: The text message could not be sent. Generate a new passphrase before trying again.
+  unknown: We could not confirm whether the text message was sent. You may need to send again.
+  expired: That passphrase is no longer available to send. A new passphrase has been generated.
