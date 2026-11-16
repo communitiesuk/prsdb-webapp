@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -9,6 +10,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.services.FreeholderService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -71,5 +73,16 @@ class CompleteFreeholdersUpdateStepConfigTests {
         }
 
         verify(journeyState).deleteJourney()
+    }
+
+    @Test
+    fun `resolveNextDestination deletes the journey and returns the default destination`() {
+        val stepConfig = CompleteFreeholdersUpdateStepConfig(freeholderService, propertyOwnershipService)
+        val defaultDestination = Destination.ExternalUrl("/landlord/property-details/1#people-responsible")
+
+        val result = stepConfig.resolveNextDestination(journeyState, defaultDestination)
+
+        verify(journeyState).deleteJourney()
+        assertEquals(defaultDestination, result)
     }
 }

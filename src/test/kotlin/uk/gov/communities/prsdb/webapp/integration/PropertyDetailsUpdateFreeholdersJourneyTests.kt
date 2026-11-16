@@ -75,6 +75,43 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
+    fun `changing a known freeholder to details unknown clears their details without replacing the record`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        originalFreeholder.name = "Existing Freeholder"
+        originalFreeholder.email = "existing@example.com"
+        originalFreeholder.address =
+            addressService.findOrCreateAddress(
+                AddressDataModel.fromManualAddressData(
+                    addressLineOne = "1 Example Street",
+                    townOrCity = "Example City",
+                    postcode = "EX1 1AB",
+                ),
+            )
+        freeholderRepository.save(originalFreeholder)
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        freeholdersListPage.getSummaryCard("Existing Freeholder").getAction("Change").link.clickAndWait()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.getSummaryCard("Unknown freeholder").title).hasText("Unknown freeholder")
+        freeholdersListPage.submit()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertNull(savedFreeholder.name)
+        assertNull(savedFreeholder.email)
+        assertNull(savedFreeholder.address)
+        assertFalse(savedFreeholder.detailsKnown())
+    }
+
+    @Test
     fun `freeholder update list shows the submission warning`(page: Page) {
         featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
