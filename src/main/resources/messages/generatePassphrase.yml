@@ -1,6 +1,7 @@
-banner:
-  heading: New passphrase
-  body: The passphrase is
+heading: New passphrase
+passphrase:
+  label: The passphrase is
+  review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.
 paragraph:
   one: This passphrase helps you to authenticate a landlord over the phone.
   two: >

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -71,6 +72,9 @@ class GeneratePassphraseControllerTests(
                     string(containsString("New passphrase"))
                     string(containsString("The passphrase is"))
                     string(containsString("time anything costume"))
+                    string(containsString("id=\"passphrase-preview\""))
+                    string(not(containsString("govuk-panel--confirmation")))
+                    string(containsString("offensive or inappropriate"))
                 }
             }
     }
