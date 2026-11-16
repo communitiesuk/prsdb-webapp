@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
@@ -177,24 +178,6 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `registerProperty persists a placeholder freeholder when no freeholders were collected`() {
-        // Arrange
-        val registrationDataWithoutParties =
-            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
-                addressModel = AddressDataModel(singleLineAddress = "3 Example Road, EG1 2AB", postcode = "EG1 2AB"),
-                ownershipType = OwnershipType.LEASEHOLD_ONLY,
-                freeholders = null,
-            )
-
-        // Act
-        val propertyOwnership = propertyRegistrationService.registerProperty(registrationDataWithoutParties)
-
-        // Assert
-        assertNull(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).single().name)
-        assertTrue(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).isEmpty())
-    }
-
-    @Test
     fun `registerProperty persists and links the property manager from the registration data`() {
         // Arrange
         val registrationDataWithPropertyManager =
@@ -226,6 +209,30 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
 
         // Assert
         assertNull(propertyOwnershipRepository.findById(propertyOwnership.id).get().propertyManager)
+    }
+
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. The flag-off journey never asks
+    //  who the freeholders are, so PropertyOwnershipService supplies a placeholder when the ownership type
+    //  requires freeholder records.
+    @Nested
+    inner class BeforePdjb955 {
+        @Test
+        fun `registerProperty persists a placeholder freeholder when no freeholders were collected`() {
+            // Arrange
+            val registrationDataWithoutParties =
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                    addressModel = AddressDataModel(singleLineAddress = "3 Example Road, EG1 2AB", postcode = "EG1 2AB"),
+                    ownershipType = OwnershipType.LEASEHOLD_ONLY,
+                    freeholders = null,
+                )
+
+            // Act
+            val propertyOwnership = propertyRegistrationService.registerProperty(registrationDataWithoutParties)
+
+            // Assert
+            assertNull(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).single().name)
+            assertTrue(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).isEmpty())
+        }
     }
 
     // The confirmation email needs a succeeded payment linked to the property, which PaymentService would normally save

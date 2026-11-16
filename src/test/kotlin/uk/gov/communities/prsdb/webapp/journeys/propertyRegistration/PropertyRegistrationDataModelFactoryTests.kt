@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -202,26 +203,11 @@ class PropertyRegistrationDataModelFactoryTests {
         }
     }
 
-    @Test
-    fun `fromJourneyState converts the beforePdjb955 ownership type answer when the associated parties flag is off`() {
-        // Arrange
-        setupStateForPropertyRegistration(ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD)
-        setupStateForComplianceDataWithNullValues()
-
-        // Act
-        val result = factory.fromJourneyState(mockState)
-
-        // Assert
-        assertEquals(OwnershipType.JOINT_TENANTS, result.ownershipType)
-    }
-
     @ParameterizedTest
     @EnumSource(OwnershipType::class)
-    fun `fromJourneyState returns the ownership type derived from the answers when the associated parties flag is on`(
-        ownershipType: OwnershipType,
-    ) {
+    fun `fromJourneyState returns the ownership type derived from the answers`(ownershipType: OwnershipType) {
         // Arrange
-        setupStateForPropertyRegistration(isAssociatedPartiesEnabled = true, ownershipType = ownershipType)
+        setupStateForPropertyRegistration(ownershipType = ownershipType)
         setupStateForComplianceDataWithNullValues()
 
         // Act
@@ -233,9 +219,9 @@ class PropertyRegistrationDataModelFactoryTests {
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
-    fun `fromJourneyState throws when the associated parties flag is on but the ownership type is unanswered`() {
+    fun `fromJourneyState throws when the ownership type is unanswered`() {
         // Arrange
-        setupStateForPropertyRegistration(isAssociatedPartiesEnabled = true, ownershipType = null)
+        setupStateForPropertyRegistration(ownershipType = null)
         setupStateForComplianceDataWithNullValues()
 
         // Act, Assert
@@ -247,7 +233,6 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         val freeholder = FreeholderDataModel(detailsKnown = true, name = "Freda Holder", email = "freda@example.com")
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             freeholders = mapOf(0 to freeholder),
         )
@@ -264,7 +249,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState returns null freeholders when the ownership type does not require freeholder records`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.SOLE_FREEHOLD,
             freeholders = mapOf(0 to FreeholderDataModel(detailsKnown = true, name = "Stale Answer")),
         )
@@ -282,7 +266,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState throws when freeholder records are required but none were collected`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             freeholders = emptyMap(),
         )
@@ -297,7 +280,6 @@ class PropertyRegistrationDataModelFactoryTests {
         // Arrange
         val superiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "Sue Perior")
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             anyoneInOwnershipChain = true,
             superiorLandlords = mapOf(0 to superiorLandlord),
@@ -315,7 +297,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState returns no superior landlords when nobody else is in the ownership chain`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             anyoneInOwnershipChain = false,
         )
@@ -332,7 +313,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState returns no superior landlords when the ownership type does not require them`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.JOINT_TENANTS,
             anyoneInOwnershipChain = true,
             superiorLandlords = mapOf(0 to SuperiorLandlordDataModel(detailsKnown = true, name = "Stale Answer")),
@@ -351,7 +331,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState throws when the anyone in ownership chain step was not answered`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             anyoneInOwnershipChain = null,
         )
@@ -366,7 +345,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState throws when someone else is in the ownership chain but no superior landlords were collected`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             ownershipType = OwnershipType.LEASEHOLD_ONLY,
             anyoneInOwnershipChain = true,
             superiorLandlords = emptyMap(),
@@ -380,7 +358,7 @@ class PropertyRegistrationDataModelFactoryTests {
     @Test
     fun `fromJourneyState throws when the property manager step was not answered`() {
         // Arrange
-        setupStateForPropertyRegistration(isAssociatedPartiesEnabled = true, isUsingPropertyManager = null)
+        setupStateForPropertyRegistration(isUsingPropertyManager = null)
         setupStateForComplianceDataWithNullValues()
 
         // Act, Assert
@@ -391,7 +369,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState returns the property manager when the landlord uses one`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             propertyManager = PropertyManagerDataModel("Pat Manager", "pat@example.com"),
         )
         setupStateForComplianceDataWithNullValues()
@@ -406,7 +383,7 @@ class PropertyRegistrationDataModelFactoryTests {
     @Test
     fun `fromJourneyState returns no property manager when the landlord does not use one`() {
         // Arrange
-        setupStateForPropertyRegistration(isAssociatedPartiesEnabled = true, propertyManager = null)
+        setupStateForPropertyRegistration(propertyManager = null)
         setupStateForComplianceDataWithNullValues()
 
         // Act
@@ -420,7 +397,6 @@ class PropertyRegistrationDataModelFactoryTests {
     fun `fromJourneyState returns no property manager when the landlord answered no but stale details remain`() {
         // Arrange
         setupStateForPropertyRegistration(
-            isAssociatedPartiesEnabled = true,
             propertyManager = null,
             stalePropertyManagerDetails = PropertyManagerDataModel("Stale Manager", "stale@example.com"),
         )
@@ -744,11 +720,31 @@ class PropertyRegistrationDataModelFactoryTests {
         assertEquals(true, result.tenancyProvideLater)
     }
 
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag.
+    @Nested
+    inner class BeforePdjb955 {
+        @Test
+        fun `fromJourneyState converts the beforePdjb955 ownership type answer`() {
+            // Arrange
+            setupStateForPropertyRegistration(
+                isAssociatedPartiesEnabled = false,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.SHARE_OF_FREEHOLD,
+            )
+            setupStateForComplianceDataWithNullValues()
+
+            // Act
+            val result = factory.fromJourneyState(mockState)
+
+            // Assert
+            assertEquals(OwnershipType.JOINT_TENANTS, result.ownershipType)
+        }
+    }
+
     private fun setupStateForPropertyRegistration(
         // TODO PDJB-2019: remove this parameter once the legacy ownership type column is gone. It
         //  exists only so that one test can exercise the legacy conversion.
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
-        isAssociatedPartiesEnabled: Boolean = false,
+        isAssociatedPartiesEnabled: Boolean = true,
         ownershipType: OwnershipType? = OwnershipType.SOLE_FREEHOLD,
         freeholders: Map<Int, FreeholderDataModel>? = mapOf(0 to FreeholderDataModel(detailsKnown = false)),
         anyoneInOwnershipChain: Boolean? = false,
