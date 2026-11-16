@@ -6,9 +6,11 @@ import org.junit.jupiter.api.io.TempDir
 import java.net.InetSocketAddress
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SavedRegistrationHttpContractTests {
@@ -22,6 +24,39 @@ class SavedRegistrationHttpContractTests {
             assertEquals(0, result.exitCode, result.output)
             assertEquals(30, server.requests.size)
             assertEquals(8, server.requests.count { it.first == "POST" })
+        }
+    }
+
+    @Test
+    fun `resumes and saves bedrooms when associated parties adds the joint landlords step`() {
+        SavedServer(nextStep = "has-joint-landlords", nextField = "hasJointLandlords").use { server ->
+            val result = runSimulation(server)
+            assertEquals(0, result.exitCode, result.output)
+            assertEquals(30, server.requests.size)
+            assertEquals(8, server.requests.count { it.first == "POST" })
+        }
+    }
+
+    @Test
+    fun `rejects unexpected next steps and forms inconsistent with the redirected step`() {
+        for (nextStep in listOf("unexpected-step", "has-joint-landlords")) {
+            SavedServer(nextStep = nextStep).use { server ->
+                val result = runSimulation(server)
+                assertEquals(2, result.exitCode, result.output)
+                assertTrue(server.requests.none { it.second.startsWith("/landlord/delete-incomplete-property") })
+            }
+        }
+    }
+
+    @Test
+    fun `keeps file results without verbose scenario progress in the console`() {
+        SavedServer().use { server ->
+            val result = runSimulation(server)
+            assertEquals(0, result.exitCode, result.output)
+            assertFalse(result.output.contains("waiting:"), result.output)
+            Files.walk(outputDirectory).use { paths ->
+                assertTrue(paths.anyMatch { it.fileName.toString() == "simulation.log" && Files.size(it) > 0 })
+            }
         }
     }
 
@@ -83,6 +118,8 @@ class SavedRegistrationHttpContractTests {
         private val deleteTarget: Boolean = true,
         private val loseUnrelated: Boolean = false,
         private val wrongResume: Boolean = false,
+        private val nextStep: String = "ownership-type",
+        private val nextField: String = "ownershipType",
     ) : AutoCloseable {
         val requests = ConcurrentLinkedQueue<Pair<String, String>>()
         private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
@@ -161,7 +198,7 @@ class SavedRegistrationHttpContractTests {
                                 }
                                 path.endsWith("/number-of-bedrooms") -> {
                                     if (saveProgress) bedrooms[id] = fields.getValue("numberOfBedrooms")
-                                    redirect("/landlord/register-property/ownership-type?journeyId=$id")
+                                    redirect("/landlord/register-property/$nextStep?journeyId=$id")
                                 }
                                 path == "/landlord/delete-incomplete-property" -> {
                                     if (fields["wantsToProceed"] != "true") {
@@ -181,7 +218,7 @@ class SavedRegistrationHttpContractTests {
                         body = form("""<input name="propertyType" value="DETACHED_HOUSE">""")
                     path.endsWith("/number-of-bedrooms") ->
                         body = form("""<input name="numberOfBedrooms" value="${bedrooms[id].orEmpty()}">""")
-                    path.endsWith("/ownership-type") -> body = form("""<input name="ownershipType">""")
+                    path.endsWith("/$nextStep") -> body = form("""<input name="$nextField">""")
                     path == "/landlord/delete-incomplete-property" ->
                         body = form("""<input name="wantsToProceed" value="true">""")
                     else -> status = 404

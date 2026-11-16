@@ -162,7 +162,7 @@ val frontendAssetsSpec: CopySpec =
 // constants. The One Login simulator fixtures are shared with the simulator integration tests.
 sourceSets.named("gatling") {
     resources.srcDir("src/test/resources")
-    resources.include("one-login-simulator/*.json", "logback-test.xml")
+    resources.include("one-login-simulator/*.json", "logback-test.xml", "gatling.conf")
 }
 
 gatling {

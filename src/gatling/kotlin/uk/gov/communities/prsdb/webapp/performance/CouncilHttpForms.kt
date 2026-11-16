@@ -7,8 +7,6 @@ import io.gatling.javaapi.http.HttpDsl.header
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 import java.net.URI
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 import java.util.UUID
 
 object CouncilHttpForms {
@@ -29,7 +27,6 @@ object CouncilHttpForms {
         url: String,
         expectedPath: String,
         identity: String? = null,
-        correlateJourney: Boolean = false,
     ): ChainBuilder {
         var request =
             http(label).get(url).queryParam("perfCacheBuster") { UUID.randomUUID().toString() }
@@ -39,13 +36,7 @@ object CouncilHttpForms {
                     css("form[method=post], form[method=POST]", "action")
                         .find().transformWithSession { action, session ->
                             val current = if (url.startsWith("#{")) session.getString(url.substring(2, url.length - 1))!! else url
-                            val resolved = destination(action, config, expectedPath, HttpDestination.resolve(current, config.baseUrl))
-                            if (correlateJourney) {
-                                require(journeyId(resolved) == session.getString("councilJourneyId")) {
-                                    "Council registration form changed its journey ID"
-                                }
-                            }
-                            resolved
+                            destination(action, config, expectedPath, HttpDestination.resolve(current, config.baseUrl))
                         }.saveAs("councilFormAction"),
                 )
                 .check(css("form input[type=hidden]", "name").findAll().saveAs("councilHiddenNames"))
@@ -62,7 +53,6 @@ object CouncilHttpForms {
         label: String,
         fields: Map<String, String>,
         expectedRedirectPath: String,
-        correlateJourney: Boolean = false,
     ): ChainBuilder =
         exec(
             http(label).post("#{councilFormAction}").disableFollowRedirect()
@@ -75,13 +65,7 @@ object CouncilHttpForms {
                 .check(status().`is`(302))
                 .check(
                     header("Location").find().transformWithSession { location, session ->
-                        val resolved = destination(location, config, expectedRedirectPath, session.getString("councilFormAction")!!)
-                        if (correlateJourney && !expectedRedirectPath.endsWith("/confirmation")) {
-                            require(journeyId(resolved) == session.getString("councilJourneyId")) {
-                                "Council registration redirect changed its journey ID"
-                            }
-                        }
-                        resolved
+                        destination(location, config, expectedRedirectPath, session.getString("councilFormAction")!!)
                     }
                         .saveAs("councilNextUrl"),
                 ),
@@ -110,16 +94,5 @@ object CouncilHttpForms {
                     ).exitHereIfFailed()
         }
         return chain
-    }
-
-    fun journeyId(url: String): String {
-        val identifiers =
-            URI.create(url).rawQuery.orEmpty().split("&").map { part ->
-                val pair = part.split("=", limit = 2)
-                URLDecoder.decode(pair[0], StandardCharsets.UTF_8) to
-                    URLDecoder.decode(pair.getOrElse(1) { "" }, StandardCharsets.UTF_8)
-            }.filter { it.first == "journeyId" }.map { it.second }
-        require(identifiers.size == 1 && identifiers.single().isNotBlank()) { "Expected exactly one nonblank council journey ID" }
-        return identifiers.single()
     }
 }

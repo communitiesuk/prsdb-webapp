@@ -142,7 +142,10 @@ object ComplianceUpdateJourney {
                 }.doIf { session -> !session.getBoolean("cuDone") }.then(
                     exec(
                         http { session -> "${prefix}Compliance update ${kind.title}: GET ${step(session)}" }
-                            .get("#{cuCurrent}").disableFollowRedirect()
+                            .get { session ->
+                                val current = requireNotNull(session.getString("cuCurrent"))
+                                if (CertificateChecks.isUploadCheck(step(session))) HttpDestination.withCacheBuster(current) else current
+                            }.disableFollowRedirect()
                             .check(status().`in`(200, 302).saveAs("cuStatus"))
                             .check(header("Location").optional().saveAs("cuRedirect"))
                             .check(header("Set-Cookie").findAll().optional().saveAs("cuCookies"))

@@ -15,15 +15,12 @@ object CouncilManagementJourney {
     fun invitation(
         config: BasicRunConfig,
         councilId: Long,
-        operator: Boolean,
         prefix: String = "",
     ): ChainBuilder {
-        val base = if (operator) "/system-operator" else "/local-council/$councilId"
-        val invite = if (operator) "$base/invite-lc-admin" else "$base/invite-new-user"
+        val invite = "/system-operator/invite-lc-admin"
         val email = "000-gatling-${UUID.randomUUID()}@example.com"
         val fields =
-            mapOf("email" to email, "confirmEmail" to email) +
-                if (operator) mapOf("localCouncilId" to councilId.toString()) else emptyMap()
+            mapOf("email" to email, "confirmEmail" to email, "localCouncilId" to councilId.toString())
         return CouncilHttpForms.form(config, "${prefix}Council invitation: form", invite, invite)
             .exec(CouncilHttpForms.submit(config, "${prefix}Council invitation: send", fields, "$invite/confirmation"))
             .exec(
@@ -31,18 +28,17 @@ object CouncilManagementJourney {
                     .queryParam("perfCacheBuster") { UUID.randomUUID().toString() }.disableFollowRedirect()
                     .check(status().`is`(200)).check(css("main").transform { it.contains(email) }.`is`(true)),
             ).exitHereIfFailed()
-            .exec(cancelInvitation(config, councilId, operator, email, prefix))
+            .exec(cancelInvitation(config, councilId, email, prefix))
     }
 
-    fun cancelInvitation(
+    private fun cancelInvitation(
         config: BasicRunConfig,
         councilId: Long,
-        operator: Boolean,
         email: String,
         prefix: String = "",
     ): ChainBuilder {
         require(email.matches(Regex("000-gatling-[a-zA-Z0-9-]+@example\\.com"))) { "Only synthetic Gatling invitations may be recovered" }
-        val manage = if (operator) "/system-operator/$councilId/manage-users" else "/local-council/$councilId/manage-users"
+        val manage = "/system-operator/$councilId/manage-users"
         return exec { it.remove("councilInvitationCancel") }
             .exec(
                 repeat(20, "councilInvitationPage").on(
@@ -70,7 +66,7 @@ object CouncilManagementJourney {
                 val path = URI.create(location).path
                 val id = path.substringAfterLast('/').toLongOrNull()
                 require(id != null && id > 0 && path.contains("/cancel-invitation/")) { "Unexpected cancellation link" }
-                session.set("councilInvitationCancelPath", if (operator) "/system-operator/cancel-invitation/$id" else path)
+                session.set("councilInvitationCancelPath", "/system-operator/cancel-invitation/$id")
             }
             .exec(
                 http("${prefix}Council invitation: cancellation form").get("#{councilInvitationCancelPath}")
@@ -117,14 +113,12 @@ object CouncilManagementJourney {
 
     fun accessRemoval(
         config: BasicRunConfig,
-        base: String,
         targetId: Long,
         targetName: String,
         prefix: String = "",
-        admin: Boolean = false,
     ): ChainBuilder {
-        val delete = "$base/${if (admin) "delete-admin" else "delete-user"}/$targetId"
-        val edit = "$base/${if (admin) "edit-admin" else "edit-user"}/$targetId"
+        val delete = "/system-operator/delete-admin/$targetId"
+        val edit = "/system-operator/edit-admin/$targetId"
         return CouncilHttpForms.form(config, "${prefix}Council access removal: confirm", delete, delete, targetName)
             .exec(CouncilHttpForms.submit(config, "${prefix}Council access removal: delete", emptyMap(), "$delete/confirmation"))
             .exec(

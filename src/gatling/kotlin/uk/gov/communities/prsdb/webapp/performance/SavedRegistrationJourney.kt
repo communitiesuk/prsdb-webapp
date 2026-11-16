@@ -71,7 +71,16 @@ object SavedRegistrationJourney {
             .exec(submit(config, "$prefix${requestNames[6]}", mapOf("propertyType" to "DETACHED_HOUSE")))
             .exec(form(config, "$prefix${requestNames[7]}", "input[name=numberOfBedrooms]"))
             .exec(submit(config, "$prefix${requestNames[8]}", mapOf("numberOfBedrooms" to "2")))
-            .exec(form(config, "$prefix${requestNames[9]}", "input[name=ownershipType]"))
+            .exec { session ->
+                val field =
+                    when (URI.create(requireNotNull(session.getString("savedNextUrl"))).path) {
+                        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/ownership-type" -> "ownershipType"
+                        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/has-joint-landlords" -> "hasJointLandlords"
+                        else -> error("Unexpected next saved-registration step")
+                    }
+                session.set("savedNextField", field)
+            }.exitHereIfFailed()
+            .exec(form(config, "$prefix${requestNames[9]}", "input[name=#{savedNextField}]"))
             .exec(
                 http("$prefix${requestNames[10]}")
                     .get { HttpDestination.withCacheBuster(HttpDestination.resolve(bedroomsUrl, config.baseUrl)) }

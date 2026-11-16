@@ -35,15 +35,13 @@ object OperatorJourney {
                     prefix,
                 ),
             )
-            .exec(CouncilManagementJourney.invitation(config, fixture.councilId, true, prefix))
+            .exec(CouncilManagementJourney.invitation(config, fixture.councilId, prefix))
             .exec(
                 CouncilManagementJourney.accessRemoval(
                     config,
-                    "/system-operator",
                     fixture.targetId,
                     fixture.targetName,
                     prefix,
-                    admin = true,
                 ),
             )
 

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.performance
 import com.sun.net.httpserver.HttpServer
 import org.junit.jupiter.api.Test
 import java.net.InetSocketAddress
+import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -85,6 +86,22 @@ class ComplianceUpdateHttpContractTests {
     }
 
     @Test
+    fun `scan status polls preserve the journey and use fresh cache busters`() {
+        UpdateServer(scanReadyAfterPolls = 2).use { server ->
+            val result = run(server, mapOf("gatling.contract.scanPollIntervalMillis" to "1"))
+            assertEquals(0, result.exitCode, result.output)
+            assertTrue(server.scanRequests.size >= 6)
+            val cacheBusters =
+                server.scanRequests.map { uri ->
+                    val fields = uri.rawQuery.split("&").associate { it.substringBefore("=") to it.substringAfter("=") }
+                    assertEquals("journey-u", fields["journeyId"])
+                    requireNotNull(fields["perfCacheBuster"]).also { assertTrue(it.isNotBlank()) }
+                }
+            assertEquals(cacheBusters.size, cacheBusters.toSet().size)
+        }
+    }
+
+    @Test
     fun `rejects safe link returned after the scan deadline`() {
         UpdateServer(scanReadyAfterPolls = 0, safeLinkResponseDelayMillis = 20).use { server ->
             val result = run(server, mapOf("gatling.contract.scanWaitLimitMillis" to "10"))
@@ -153,6 +170,7 @@ class ComplianceUpdateHttpContractTests {
         val downloadRequests = ConcurrentLinkedQueue<String>()
         val downloadCredentials = ConcurrentLinkedQueue<String>()
         val posts = ConcurrentLinkedQueue<Map<String, String>>()
+        val scanRequests = ConcurrentLinkedQueue<URI>()
         val completed = mutableSetOf<String>()
         var uploads = 0
         private val scanPolls = mutableMapOf<String, Int>()
@@ -301,6 +319,7 @@ class ComplianceUpdateHttpContractTests {
                     }
                     val polls = scanPolls.merge(step, 1, Int::plus)!!
                     val review = step.startsWith("check-") && step.endsWith("uploads")
+                    if (review) scanRequests.add(uri)
                     val download =
                         if (externalDownloads) "$downloadOrigin/certificate.pdf?$SIGNED_QUERY" else "/local-file/safe/certificate.pdf"
                     val safeLink =

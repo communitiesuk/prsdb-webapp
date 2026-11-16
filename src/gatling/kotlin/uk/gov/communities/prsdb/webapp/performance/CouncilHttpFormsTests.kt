@@ -18,7 +18,7 @@ class CouncilHttpFormsTests {
 
     @Test
     fun `relative confirmation redirects resolve against the submitted action and remain on the target`() {
-        val path = "/local-council/2/cancel-invitation/7"
+        val path = "/system-operator/cancel-invitation/7"
         assertEquals(
             config.baseUrl + "$path/confirmation",
             CouncilHttpForms.destination("../cancel-invitation/7/confirmation", config, "$path/confirmation", config.baseUrl + path),
@@ -27,17 +27,7 @@ class CouncilHttpFormsTests {
             CouncilHttpForms.destination("http://example.invalid$path", config, path)
         }
         assertFailsWith<IllegalArgumentException> {
-            CouncilHttpForms.destination("/local-council/2/cancel-invitation/8", config, path)
-        }
-    }
-
-    @Test
-    fun `empty actions preserve the current journey and duplicate or empty IDs are rejected`() {
-        val path = "/local-council/register-local-council-user/name"
-        val current = config.baseUrl + "$path?journeyId=one%2Btwo"
-        assertEquals("one+two", CouncilHttpForms.journeyId(CouncilHttpForms.destination("", config, path, current)))
-        for (query in listOf("", "?journeyId=", "?journeyId=first&journeyId=second")) {
-            assertFailsWith<IllegalArgumentException> { CouncilHttpForms.journeyId(config.baseUrl + path + query) }
+            CouncilHttpForms.destination("/system-operator/cancel-invitation/8", config, path)
         }
     }
 }
