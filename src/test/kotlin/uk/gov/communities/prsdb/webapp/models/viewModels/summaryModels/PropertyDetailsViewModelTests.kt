@@ -251,29 +251,45 @@ class PropertyDetailsViewModelTests {
         }
     }
 
+    // TODO PDJB-2016: remove this test when the ASSOCIATED_PARTIES feature flag is removed
     @Test
-    fun `the freeholder section is limited to landlord associated parties and eligible ownership types`() {
-        val ineligibleViewModels =
-            listOf(
-                PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                    isLandlordView = false,
-                    messageSource = mockMessageSource,
-                ),
-                PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                    isLandlordView = true,
-                    messageSource = mockMessageSource,
-                    associatedPartiesEnabled = false,
-                ),
-                PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
-                    isLandlordView = true,
-                    messageSource = mockMessageSource,
-                ),
+    fun `the freeholder section is hidden when associated parties are disabled`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = false,
             )
 
-        assertTrue(ineligibleViewModels.none { it.showFreeholderSection })
+        assertFalse(viewModel.showFreeholderSection)
+    }
+
+    // TODO PDJB-1999: update or remove this test when freeholders are shown in the local council view
+    @Test
+    fun `the freeholder section is hidden in the local council view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = true,
+            )
+
+        assertFalse(viewModel.showFreeholderSection)
+    }
+
+    @Test
+    fun `the freeholder section is hidden when the ownership type does not require freeholder records`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = true,
+            )
+
+        assertFalse(viewModel.showFreeholderSection)
     }
 
     @Test
