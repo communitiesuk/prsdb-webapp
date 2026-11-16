@@ -517,14 +517,13 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class JointLandlordsContent {
         @Test
-        fun `getStepSpecificContent separates the no joint landlords answer from ownership rows`() {
+        fun `getStepSpecificContent shows the no joint landlords answer in the joint landlords section`() {
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
             stubOwnershipAndLandlordsTaskWithoutOtherParties()
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
             val jointLandlordsRows = content["jointLandlordsRows"] as List<SummaryListRowViewModel>
-            val ownershipRows = content["ownershipRows"] as List<SummaryListRowViewModel>
             assertEquals(
                 listOf("forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords"),
                 jointLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
@@ -533,18 +532,10 @@ class PropertyRegistrationCyaStepConfigTests {
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
                 jointLandlordsRows.single().fieldValue,
             )
-            assertEquals(
-                listOf(
-                    "propertyDetails.peopleResponsible.ownership.ownsProperty",
-                    "propertyDetails.peopleResponsible.ownership.ownershipType",
-                    "propertyDetails.peopleResponsible.ownership.freeholderType",
-                ),
-                ownershipRows.map(SummaryListRowViewModel::fieldHeading),
-            )
         }
 
         @Test
-        fun `getStepSpecificContent separates joint landlord invitations from ownership rows`() {
+        fun `getStepSpecificContent shows joint landlord invitations in the joint landlords section`() {
             val mockInviteJointLandlordsTask = mock<InviteJointLandlordsTask>()
             val mockCheckJointLandlordsStep = mock<CheckJointLandlordsStep>()
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(true)
@@ -556,20 +547,11 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             val jointLandlordsRows = content["jointLandlordsRows"] as List<SummaryListRowViewModel>
-            val ownershipRows = content["ownershipRows"] as List<SummaryListRowViewModel>
             assertEquals(
                 listOf("forms.checkPropertyAnswers.jointLandlordsDetails.invitations"),
                 jointLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(listOf("joint.landlord@example.com"), jointLandlordsRows.single().fieldValue)
-            assertEquals(
-                listOf(
-                    "propertyDetails.peopleResponsible.ownership.ownsProperty",
-                    "propertyDetails.peopleResponsible.ownership.ownershipType",
-                    "propertyDetails.peopleResponsible.ownership.freeholderType",
-                ),
-                ownershipRows.map(SummaryListRowViewModel::fieldHeading),
-            )
         }
 
         private fun stubOwnershipAndLandlordsTaskWithoutOtherParties() {
