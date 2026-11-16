@@ -28,7 +28,8 @@ class CompleteFreeholdersUpdateStepConfigTests {
     @Test
     fun `completion reconciles the submitted freeholders against the saved snapshot`() {
         val propertyOwnership = createPropertyOwnership()
-        val submittedFreeholders = listOf(FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com"))
+        val submittedFreeholders =
+            listOf(FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com"))
         val snapshot = mapOf(1L to "2025-01-01T00:00:00Z")
         whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
         whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to submittedFreeholders.single()))

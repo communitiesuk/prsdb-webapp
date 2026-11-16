@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceA
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -16,7 +16,7 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
     associatedPartiesEnabled: Boolean = true,
-    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper = FreeholderSummaryCardHelper(),
+    freeholderSummaryCardHelper: FreeholderSummaryCardHelper = FreeholderSummaryCardHelper(),
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,

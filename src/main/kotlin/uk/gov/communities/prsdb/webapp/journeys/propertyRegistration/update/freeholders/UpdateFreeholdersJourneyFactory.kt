@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders
 
-import org.springframework.http.HttpStatus
 import org.springframework.beans.factory.ObjectFactory
+import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
