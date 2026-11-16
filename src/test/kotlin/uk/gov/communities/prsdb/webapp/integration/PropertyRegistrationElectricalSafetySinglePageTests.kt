@@ -2,15 +2,28 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEicrUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EicrExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import java.util.regex.Pattern
 
@@ -28,73 +41,79 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
     }
 
     @Nested
-    inner class CheckElectricalCertUploadsStep {
-        @Test
-        fun `The actions column header text is visually hidden but the header cell is not`(page: Page) {
-            val checkUploadsPage = navigateToCheckUploadsPage(page)
+    inner class CheckElectricalCertUploadsStepTests {
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `The actions column header text is visually hidden but the header cell is not`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page, certificateType)
 
             assertThat(checkUploadsPage.table.actionsHeaderVisuallyHiddenText).hasText("Actions")
             assertThat(checkUploadsPage.table.actionsHeader).not().hasClass(Pattern.compile("govuk-visually-hidden"))
         }
 
-        @Test
-        fun `The remove link includes the file name as visually hidden text`(page: Page) {
-            val checkUploadsPage = navigateToCheckUploadsPage(page)
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `The remove link includes the file name as visually hidden text`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val checkUploadsPage = navigateToCheckUploadsPage(page, certificateType)
 
             assertThat(checkUploadsPage.table.getClickableCell(0, 2).link).hasText("Remove electrical-safety-cert.pdf")
             assertThat(checkUploadsPage.table.getVisuallyHiddenText(0, 2)).hasText("electrical-safety-cert.pdf")
         }
 
-        private fun navigateToCheckUploadsPage(page: Page): CheckElectricalCertUploadsFormPagePropertyRegistration {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
-                )
+        private fun navigateToCheckUploadsPage(
+            page: Page,
+            certificateType: CertificateType,
+        ): CheckElectricalCertUploadsFormBasePage {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(certificateType))
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            return assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+            return assertPageIs(page, checkUploadsPageClass(certificateType))
         }
     }
 
     @Nested
     inner class CheckElectricalSafetyAnswersStep {
-        @Test
-        fun `Cert uploaded EIC - cert type change link navigates to has electrical cert page`(page: Page) {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
-                )
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `Cert uploaded - cert type change link navigates to has electrical cert page`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(certificateType))
             cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
 
         @Test
-        fun `Cert uploaded EIC - expiry date change link navigates to expiry date page`(page: Page) {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
-                )
-            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        fun `Cert uploaded - EICR expiry date change link navigates to expiry date page`(page: Page) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eicr))
+            cyaPage.summaryList.certificateDateRow(CertificateType.Eicr).clickFirstActionLinkAndWait()
+            assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
         }
 
         @Test
-        fun `Cert uploaded EIC - certificate change link navigates to check uploads page`(page: Page) {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
-                )
+        fun `Cert uploaded - EIC date row has a blank value and its change link navigates to issue date page`(page: Page) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eic))
+            // TODO PDJB-1673: Check the row shows the EIC issue date
+            assertThat(cyaPage.summaryList.certificateDateRow(CertificateType.Eic).value).isEmpty()
+            cyaPage.summaryList.certificateDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `Cert uploaded - certificate change link navigates to check uploads page`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(certificateType))
             cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `Cert uploaded EICR - cert type change link navigates to has electrical cert page`(page: Page) {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr(),
-                )
-            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+            assertPageIs(page, checkUploadsPageClass(certificateType))
         }
 
         @Test
@@ -117,19 +136,20 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
 
-        @Test
-        fun `Cert expired - cert type change link navigates to has electrical cert page`(page: Page) {
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired(),
-                )
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `Cert expired - cert type change link navigates to has electrical cert page`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certExpiredSession(certificateType))
             cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
     }
 
     @Nested
-    inner class ElectricalCertExpiryDateStepTests {
+    inner class EicrExpiryDateStepTests {
         @ParameterizedTest(name = "{0}")
         @Suppress("ktlint:standard:max-line-length")
         @MethodSource(
@@ -140,9 +160,112 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
             expectedErrorMessage: String,
         ) {
             val (day, month, year) = dayMonthYear
-            val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationElectricalCertExpiryDatePage()
-            electricalCertExpiryDatePage.submitDate(day, month, year)
-            assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+            val eicrExpiryDatePage = navigator.skipToPropertyRegistrationEicrExpiryDatePage()
+            eicrExpiryDatePage.submitDate(day, month, year)
+            assertThat(eicrExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
+    }
+
+    @Nested
+    inner class EicIssueDateStepTests {
+        @Test
+        fun `Issue date page displays heading`() {
+            val issueDatePage = navigator.skipToPropertyRegistrationEicIssueDatePage()
+
+            assertThat(issueDatePage.heading).containsText("What’s the issue date on the Electrical Installation Certificate (EIC)?")
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.TodayOrPastDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
+        fun `Submitting returns a corresponding error when`(
+            dayMonthYear: Triple<String, String, String>,
+            expectedErrorMessage: String,
+        ) {
+            val (day, month, year) = dayMonthYear
+            val issueDatePage = navigator.skipToPropertyRegistrationEicIssueDatePage()
+            issueDatePage.submitDate(day, month, year)
+            assertThat(issueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+
+        @Test
+        fun `Submitting an issue date more than 5 years ago redirects to the need different certificate page`(page: Page) {
+            val issueDatePage = navigator.skipToPropertyRegistrationEicIssueDatePage()
+            issueDatePage.submitDate(today.minus(DatePeriod(years = 5, days = 1)))
+
+            val eicExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+            assertThat(eicExpiredPage.heading).containsText("You need a different electrical safety certificate")
+        }
+
+        @Test
+        fun `Submitting an issue date exactly 5 years ago redirects to the upload EIC page`(page: Page) {
+            val issueDatePage = navigator.skipToPropertyRegistrationEicIssueDatePage()
+            issueDatePage.submitDate(today.minus(DatePeriod(years = 5)))
+
+            assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
+        }
+    }
+
+    // TODO PDJB-1679: Remove this test class when the EIC_ISSUE_DATE flag is removed
+    @Nested
+    inner class BeforePdjb1671EicExpiryDateStepTests {
+        @Test
+        fun `Submitting EIC navigates to the EIC expiry date page`(page: Page) {
+            navigateToEicExpiryDatePage(page)
+        }
+
+        @Test
+        fun `Submitting a future expiry date redirects to the upload EIC page`(page: Page) {
+            val expiryDatePage = navigateToEicExpiryDatePage(page)
+            expiryDatePage.submitDate(today.plus(DatePeriod(years = 1)))
+
+            assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Submitting a past expiry date redirects to the need different certificate page`(page: Page) {
+            val expiryDatePage = navigateToEicExpiryDatePage(page)
+            expiryDatePage.submitDate(today.minus(DatePeriod(days = 5)))
+
+            assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+        }
+
+        private fun navigateToEicExpiryDatePage(page: Page): EicExpiryDateFormPagePropertyRegistration {
+            featureFlagManager.disableFeature(EIC_ISSUE_DATE)
+
+            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+            hasElectricalCertPage.submitHasEic()
+
+            val expiryDatePage = assertPageIs(page, EicExpiryDateFormPagePropertyRegistration::class)
+            assertThat(expiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate")
+            return expiryDatePage
+        }
+    }
+
+    private fun certUploadedSession(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic()
+            CertificateType.Eicr -> PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr()
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    private fun certExpiredSession(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersEicExpired()
+            CertificateType.Eicr -> PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersEicrExpired()
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    private fun checkUploadsPageClass(certificateType: CertificateType) =
+        when (certificateType) {
+            CertificateType.Eic -> CheckEicUploadsFormPagePropertyRegistration::class
+            CertificateType.Eicr -> CheckEicrUploadsFormPagePropertyRegistration::class
+            else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+        }
+
+    companion object {
+        private val today = DateTimeHelper().getCurrentDateInUK()
     }
 }

@@ -12,9 +12,16 @@ class PaymentFailedStepConfig : AbstractRequestableStepConfig<Nothing, NoInputFo
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
-        mapOf("tryAgainUrl" to Destination(state.paymentSummaryStep).toUrlStringOrNull())
+        mapOf(
+            "tryAgainUrl" to Destination(state.paymentSummaryStep).toUrlStringOrNull(),
+        )
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentFailedForm"
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState) =
+        if (state.paymentOutcome == PaymentOutcome.NOT_COMPLETED) {
+            "forms/paymentNotCompletedForm"
+        } else {
+            "forms/paymentFailedForm"
+        }
 
     override fun mode(state: PropertyRegistrationJourneyState) = null
 }

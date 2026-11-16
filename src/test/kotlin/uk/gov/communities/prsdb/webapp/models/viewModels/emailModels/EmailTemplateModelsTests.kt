@@ -7,13 +7,36 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
+import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.String
 
 class EmailTemplateModelsTests {
+    @ParameterizedTest
+    @CsvSource(
+        "2026-10-30T14:38:42.082Z, 30 October 2026 at 2:38pm (GMT)",
+        "2026-07-01T13:38:00Z, 1 July 2026 at 2:38pm (BST)",
+        "2026-07-01T23:05:00Z, 2 July 2026 at 12:05am (BST)",
+    )
+    fun `manual intervention email formats payment creation time in UK time`(
+        timestamp: String,
+        expected: String,
+    ) {
+        val model =
+            PaymentRequiresManualInterventionEmail(
+                paymentId = "payment-id",
+                paymentReference = "payment-reference",
+                amountInPence = 2000,
+                paymentCreatedAt = Instant.parse(timestamp),
+                reason = "reason",
+            )
+
+        Assertions.assertEquals(expected, model.toHashMap()["payment created at"])
+    }
+
     companion object {
         @JvmStatic
         private fun templateList() =
@@ -181,7 +204,7 @@ class EmailTemplateModelsTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = "1 January 2027",
+                        certificateDate = "1 January 2027",
                     ),
                     "/emails/ComplianceUpdatedConfirmation.md",
                     allowExtraKeys = true,
@@ -255,7 +278,7 @@ class EmailTemplateModelsTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = "1 January 2027",
+                        certificateDate = "1 January 2027",
                         isJointLandlord = true,
                     ),
                     "/emails/JointLandlordComplianceUpdatedConfirmation.md",
@@ -470,7 +493,7 @@ class EmailTemplateModelsTests {
                         registrationNumber = "P-XXXX-YYYY",
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        expiryDate = "1 November 2026",
+                        certificateDate = "1 November 2026",
                         propertyRecordUrl = "https://example.com/property/1",
                     ),
                     "/emails/LettingAgentComplianceUpdateNotification.md",
@@ -496,6 +519,16 @@ class EmailTemplateModelsTests {
                     "/emails/RemoveOrgTeamMemberConfirmation.md",
                 ),
                 EmailTemplateTestData(
+                    PaymentRequiresManualInterventionEmail(
+                        paymentId = "payment-id",
+                        paymentReference = "payment-reference",
+                        amountInPence = 2000,
+                        paymentCreatedAt = Instant.parse("2026-01-01T12:00:00Z"),
+                        reason = "reason",
+                    ),
+                    "/emails/PaymentRequiresManualIntervention.md",
+                ),
+                EmailTemplateTestData(
                     RemoveOrgTeamMemberNotificationEmail(
                         memberName = "Anita Locke",
                         organisationName = "Keystone Living Group",
@@ -517,7 +550,7 @@ class EmailTemplateModelsTests {
     @MethodSource("templateList")
     fun `EmailTemplateModels hashmaps have keys that match the parameters in their markdown templates`(testData: EmailTemplateTestData) {
         // Arrange
-        val emailTemplateMetadata = EmailTemplateMetadataFactory(null)
+        val emailTemplateMetadata = NotifyTemplateMetadataFactory(null, "/emails/emailTemplates.json")
         val storedBody = javaClass.getResource(testData.markdownLocation)?.readText() ?: ""
         val storedMetadata =
             emailTemplateMetadata.metadataList.single { metadata ->
@@ -542,6 +575,42 @@ class EmailTemplateModelsTests {
             } else {
                 modelHashMap.keys.single { key -> key == parameter }
             }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true, false, true, yes",
+        "false, false, true, no",
+        "true, true, true, no",
+        "true, false, false, no",
+    )
+    fun `property registration email shows missing details only when occupied not delegated and details are missing`(
+        isOccupied: Boolean,
+        isDelegatedToLettingAgent: Boolean,
+        licenseProvideLater: Boolean,
+        expectedHasMissingDetails: String,
+    ) {
+        // Arrange
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = isOccupied,
+                isDelegatedToLettingAgent = isDelegatedToLettingAgent,
+                licenseProvideLater = licenseProvideLater,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedHasMissingDetails, hashMap["hasMissingDetails"])
+        if (expectedHasMissingDetails == "yes") {
+            Assertions.assertTrue(hashMap["missingDetailsList"].orEmpty().contains("licensing details"))
+        } else {
+            Assertions.assertEquals("", hashMap["missingDetailsList"])
         }
     }
 

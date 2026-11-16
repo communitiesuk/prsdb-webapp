@@ -3,6 +3,10 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import org.ff4j.core.Feature
 import org.ff4j.core.FlippingStrategy
 import org.ff4j.property.PropertyDate
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlipStrategyConfigModel
@@ -11,6 +15,10 @@ import java.time.LocalDate
 
 class MockFeatureFlagConfig {
     companion object {
+        // TODO: PDJB-1926: Remove this
+        fun createFeatureFlagManagerWithGas14MonthExpiryEnabled(): FeatureFlagManager =
+            mock { on { checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY) } doReturn true }
+
         fun createFlipStrategyConfigModel(
             releaseDate: LocalDate? = null,
             enabledByStrategy: Boolean? = null,

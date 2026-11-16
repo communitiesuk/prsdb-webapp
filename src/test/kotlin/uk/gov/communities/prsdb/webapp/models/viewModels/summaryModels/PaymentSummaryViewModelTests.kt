@@ -14,7 +14,8 @@ class PaymentSummaryViewModelTests {
         val payment =
             MockPaymentData.createPayment(
                 amountInPence = 61,
-                paymentCreatedAt = Instant.parse("2026-12-16T10:00:00Z"),
+                quoteDate = LocalDate.of(2026, 12, 16),
+                paymentCreatedAt = Instant.parse("2026-12-17T10:00:00Z"),
             )
         val renewalDate = LocalDate.of(2027, 12, 16)
 
@@ -30,18 +31,5 @@ class PaymentSummaryViewModelTests {
             ),
             viewModel.rows,
         )
-    }
-
-    @Test
-    fun `from uses the UK date for a payment made just after midnight during British Summer Time`() {
-        // Arrange
-        // 23:30 UTC on 15 June is 00:30 BST on 16 June
-        val payment = MockPaymentData.createPayment(paymentCreatedAt = Instant.parse("2026-06-15T23:30:00Z"))
-
-        // Act
-        val viewModel = PaymentSummaryViewModel.from(payment, LocalDate.of(2027, 6, 16))
-
-        // Assert
-        assertEquals(KotlinLocalDate(2026, 6, 16), viewModel.rows[1].fieldValue)
     }
 }

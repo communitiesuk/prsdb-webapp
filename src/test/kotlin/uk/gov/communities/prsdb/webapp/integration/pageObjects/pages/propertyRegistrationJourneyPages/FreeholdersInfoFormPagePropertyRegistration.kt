@@ -1,0 +1,21 @@
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
+
+import com.microsoft.playwright.Locator
+import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
+
+class FreeholdersInfoFormPagePropertyRegistration(
+    page: Page,
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FreeholdersInfoStep.ROUTE_SEGMENT}") {
+    val heading = Heading(page.locator("h1"))
+    val form = PostForm(page)
+    val helpDetails: Locator = page.locator("details.govuk-details")
+    val backLink = BackLink.default(page)
+
+    fun submit() = form.submit()
+}

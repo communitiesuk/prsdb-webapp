@@ -2,15 +2,18 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createComplianceStatus
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -18,6 +21,24 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ComplianceStatusDataModelTests {
+    @Test
+    fun `a stored expiry date without a cert type is rejected`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withElectricalSafety(certType = null)
+                .build()
+
+        assertThrows<PrsdbWebException> {
+            ComplianceStatusDataModel.fromPropertyCompliance(
+                propertyCompliance = propertyCompliance,
+                eicIssueDate = null,
+                electricalSafetyExpiryDate = propertyCompliance.eicrExpiryDate,
+                isGas14MonthExpiryEnabled = true,
+            )
+        }
+    }
+
     @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
     @MethodSource("provideShouldShowCertCases")
     fun `shouldShowCert returns expected value based on occupancy and cert status`(
@@ -115,7 +136,7 @@ class ComplianceStatusDataModelTests {
                 .build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
@@ -131,7 +152,7 @@ class ComplianceStatusDataModelTests {
                 .toString()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
@@ -153,7 +174,7 @@ class ComplianceStatusDataModelTests {
         val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(
@@ -174,7 +195,7 @@ class ComplianceStatusDataModelTests {
         val propertyCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertNull(complianceStatusDataModel.provideLaterDeadline)
@@ -187,7 +208,7 @@ class ComplianceStatusDataModelTests {
         expectedCertStatus: ComplianceCertStatus,
     ) {
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)

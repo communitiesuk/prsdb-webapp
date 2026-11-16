@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class ConfirmationPageLandlordRegistration(
@@ -17,6 +18,7 @@ class ConfirmationPageLandlordRegistration(
     val goToDashboardLink = Link.byText(page, "Go to dashboard")
     val whatYouCanDoNowHeading =
         Heading(page.getByRole(AriaRole.HEADING, Page.GetByRoleOptions().setName("What you can do now")))
+    val deactivationParagraph = Paragraph.byTestId(page, "deactivation-paragraph")
 
     class LandlordRegistrationConfirmationBanner(
         page: Page,

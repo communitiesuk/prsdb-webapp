@@ -2,9 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.GasCertIssueDateFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 
 class GasCertIssueDateFormPagePropertyRegistration(
     page: Page,
-) : DateFormPage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${GasCertIssueDateStep.ROUTE_SEGMENT}")
+) : GasCertIssueDateFormBasePage(
+        page,
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${GasCertIssueDateStep.ROUTE_SEGMENT}",
+    )

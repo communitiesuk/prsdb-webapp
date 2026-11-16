@@ -18,8 +18,9 @@ VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
+-- TODO PDJB-2028: has_registered_property is left at its default (false); set it for landlords with properties if tests rely on it
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
+                      is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
@@ -31,11 +32,11 @@ INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'LIC123456');
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, property_build_type, license_id,
+INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, property_build_type, license_id,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, true, 1, 0, 0, 2, 2, 1, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
-       (2, true, 1, 1, 2, 3, 3, 1, null, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, current_date + 365),
-       (3, true, 1, 1, 2, 4, 4, 1, null, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, current_date + 365);
+VALUES (1, true, 1, 1, 0, 0, 2, 2, 1, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365),
+       (2, true, 1, 1, 1, 2, 3, 3, 1, null, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, current_date + 365),
+       (3, true, 1, 1, 1, 2, 4, 4, 1, null, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, current_date + 365);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
@@ -48,8 +49,8 @@ VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
 INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
 VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
 
-INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, epc_exemption_reason)
+INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, eicr_expiry_date, electrical_cert_type, epc_exemption_reason)
 VALUES
-       (1, 1, current_date, true, current_date + 365, 0),
-       (2, 2, current_date, true, current_date + 365, 0),
-       (3, 3, current_date, true, current_date + 365, 0);
+       (1, 1, current_date, true, current_date + 365, 0, 0),
+       (2, 2, current_date, true, current_date + 365, 0, 0),
+       (3, 3, current_date, true, current_date + 365, 0, 0);

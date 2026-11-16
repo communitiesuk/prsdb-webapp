@@ -1,43 +1,66 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveEicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
 
 @JourneyFrameworkComponent("propertyRegistrationElectricalSafetyDetailsTask")
 class ElectricalSafetyDetailsTask(
-    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
     override val hasElectricalCertStep: HasElectricalCertStep,
-    override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
-    override val uploadElectricalCertStep: UploadElectricalCertStep,
-    override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
-    override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
-    override val electricalCertExpiredStep: ElectricalCertExpiredStep,
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    override val eicExpiryDateStep: EicExpiryDateStep,
+    override val eicIssueDateStep: EicIssueDateStep,
+    override val hasUploadedEic: HasAnyInCollectionStep,
+    override val uploadEicStep: UploadEicStep,
+    override val checkEicUploadsStep: CheckEicUploadsStep,
+    override val removeEicUploadStep: RemoveEicUploadStep,
+    override val eicExpiredStep: EicExpiredStep,
+    override val eicrExpiryDateStep: EicrExpiryDateStep,
+    override val hasUploadedEicr: HasAnyInCollectionStep,
+    override val uploadEicrStep: UploadEicrStep,
+    override val checkEicrUploadsStep: CheckEicrUploadsStep,
+    override val removeEicrUploadStep: RemoveEicrUploadStep,
+    override val eicrExpiredStep: EicrExpiredStep,
     override val electricalCertMissingStep: ElectricalCertMissingStep,
     override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
+    // TODO PDJB-1679: Remove featureFlagManager
+    private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
 ) : Task<ElectricalSafetyDetailState, ElectricalSafetyDependencies>(journeyStateService),
     ElectricalSafetyDetailState {
     override val taskState: ElectricalSafetyDetailState
         get() = this
+
+    // TODO PDJB-1679: Remove this
+    override val isEicIssueDateEnabled: Boolean
+        get() = featureFlagManager.checkFeature(EIC_ISSUE_DATE)
 
     override val isOccupied: Boolean
         get() = dependencies.isOccupied
@@ -46,8 +69,10 @@ class ElectricalSafetyDetailsTask(
     override val propertyOwnershipId: Long?
         get() = dependencies.propertyOwnershipId
 
-    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
-    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
+    override var eicUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("eicUploadMap", mapOf())
+    override var highestAssignedEicMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedEicMemberId")
+    override var eicrUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("eicrUploadMap", mapOf())
+    override var highestAssignedEicrMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedEicrMemberId")
 
     override fun makeSubJourney(state: ElectricalSafetyDetailState) =
         subJourney(state) {
@@ -55,75 +80,146 @@ class ElectricalSafetyDetailsTask(
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertExpiryDateStep
-                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertExpiryDateStep
+                        HasElectricalCertMode.HAS_EIC ->
+                            // TODO PDJB-1679: Always go to eicIssueDateStep when the EIC_ISSUE_DATE flag is removed
+                            if (journey.isEicIssueDateEnabled) journey.eicIssueDateStep else journey.eicExpiryDateStep
+                        HasElectricalCertMode.HAS_EICR -> journey.eicrExpiryDateStep
                         HasElectricalCertMode.NO_CERTIFICATE -> journey.electricalCertMissingStep
                         HasElectricalCertMode.PROVIDE_THIS_LATER -> journey.provideElectricalCertLaterStep
                     }
                 }
             }
-            step(journey.electricalCertExpiryDateStep) {
-                routeSegment(ElectricalCertExpiryDateStep.ROUTE_SEGMENT)
+            // TODO PDJB-1679: Remove eicExpiryDateStep when the EIC_ISSUE_DATE flag is removed
+            step(journey.eicExpiryDateStep) {
+                routeSegment(EicExpiryDateStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EIC),
-                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EICR),
-                    )
+                    SingleParent(journey.hasElectricalCertStep) {
+                        journey.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC && !journey.isEicIssueDateEnabled
+                    }
                 }
                 nextStep { mode ->
                     when (mode) {
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.electricalCertExpiredStep
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedElectricalCert
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicExpiredStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEic
                     }
                 }
                 savable()
             }
-            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedElectricalCert) {
+            step(journey.eicIssueDateStep) {
+                routeSegment(EicIssueDateStep.ROUTE_SEGMENT)
+                // TODO PDJB-1679: Use hasElectricalCertStep.hasOutcome(HAS_EIC) when the EIC_ISSUE_DATE flag is removed
                 parents {
-                    journey.electricalCertExpiryDateStep.hasOutcome(
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
-                    )
+                    SingleParent(journey.hasElectricalCertStep) {
+                        journey.hasElectricalCertStep.outcome == HasElectricalCertMode.HAS_EIC && journey.isEicIssueDateEnabled
+                    }
                 }
                 nextStep { mode ->
                     when (mode) {
-                        AnyMembers.NO_MEMBERS -> journey.uploadElectricalCertStep
-                        AnyMembers.SOME_MEMBERS -> journey.checkElectricalCertUploadsStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicExpiredStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEic
                     }
                 }
-                stepSpecificInitialisation { collectionMap = journey.electricalUploadMap }
-            }
-            step(journey.uploadElectricalCertStep) {
-                routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
-                parents {
-                    journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
-                }
-                nextStep { journey.checkElectricalCertUploadsStep }
                 savable()
             }
-            step(journey.checkElectricalCertUploadsStep) {
-                routeSegment(CheckElectricalCertUploadsStep.ROUTE_SEGMENT)
-                parents { journey.uploadElectricalCertStep.isComplete() }
+            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedEic) {
+                parents { eicDateStepHasOutcome(journey, ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.uploadEicStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkEicUploadsStep
+                    }
+                }
+                stepSpecificInitialisation { collectionMap = journey.eicUploadMap }
+            }
+            step(journey.uploadEicStep) {
+                routeSegment(UploadEicStep.ROUTE_SEGMENT)
+                parents { eicDateStepHasOutcome(journey, ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE) }
+                nextStep { journey.checkEicUploadsStep }
+                savable()
+            }
+            step(journey.checkEicUploadsStep) {
+                routeSegment(CheckEicUploadsStep.ROUTE_SEGMENT)
+                parents { journey.uploadEicStep.isComplete() }
                 nextStep { exitStep }
                 savable()
             }
-            step(journey.removeElectricalCertUploadStep) {
-                routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
+            step(journey.removeEicUploadStep) {
+                routeSegment(RemoveEicUploadStep.ROUTE_SEGMENT)
                 parents {
-                    journey.hasUploadedElectricalCert.hasOutcome(AnyMembers.SOME_MEMBERS)
+                    journey.hasUploadedEic.hasOutcome(AnyMembers.SOME_MEMBERS)
                 }
-                backStep { journey.checkElectricalCertUploadsStep }
+                backStep { journey.checkEicUploadsStep }
                 nextStep { mode ->
                     when (mode) {
-                        AnyMembers.SOME_MEMBERS -> journey.checkElectricalCertUploadsStep
-                        AnyMembers.NO_MEMBERS -> journey.uploadElectricalCertStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkEicUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadEicStep
                     }
                 }
                 savable()
             }
-            step(journey.electricalCertExpiredStep) {
-                routeSegment(ElectricalCertExpiredStep.ROUTE_SEGMENT)
+            step(journey.eicExpiredStep) {
+                routeSegment(EicExpiredStep.ROUTE_SEGMENT)
+                parents { eicDateStepHasOutcome(journey, ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.eicrExpiryDateStep) {
+                routeSegment(EicrExpiryDateStep.ROUTE_SEGMENT)
+                parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EICR) }
+                nextStep { mode ->
+                    when (mode) {
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.eicrExpiredStep
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedEicr
+                    }
+                }
+                savable()
+            }
+            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedEicr) {
                 parents {
-                    journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
+                    journey.eicrExpiryDateStep.hasOutcome(
+                        ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.uploadEicrStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkEicrUploadsStep
+                    }
+                }
+                stepSpecificInitialisation { collectionMap = journey.eicrUploadMap }
+            }
+            step(journey.uploadEicrStep) {
+                routeSegment(UploadEicrStep.ROUTE_SEGMENT)
+                parents {
+                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
+                }
+                nextStep { journey.checkEicrUploadsStep }
+                savable()
+            }
+            step(journey.checkEicrUploadsStep) {
+                routeSegment(CheckEicrUploadsStep.ROUTE_SEGMENT)
+                parents { journey.uploadEicrStep.isComplete() }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.removeEicrUploadStep) {
+                routeSegment(RemoveEicrUploadStep.ROUTE_SEGMENT)
+                parents {
+                    journey.hasUploadedEicr.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                backStep { journey.checkEicrUploadsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.checkEicrUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadEicrStep
+                    }
+                }
+                savable()
+            }
+            step(journey.eicrExpiredStep) {
+                routeSegment(EicrExpiredStep.ROUTE_SEGMENT)
+                parents {
+                    journey.eicrExpiryDateStep.hasOutcome(ElectricalCertExpiryStatus.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { exitStep }
                 savable()
@@ -145,10 +241,21 @@ class ElectricalSafetyDetailsTask(
                     OrParents(
                         journey.provideElectricalCertLaterStep.isComplete(),
                         journey.electricalCertMissingStep.isComplete(),
-                        journey.electricalCertExpiredStep.isComplete(),
-                        journey.checkElectricalCertUploadsStep.isComplete(),
+                        journey.eicExpiredStep.isComplete(),
+                        journey.checkEicUploadsStep.isComplete(),
+                        journey.eicrExpiredStep.isComplete(),
+                        journey.checkEicrUploadsStep.isComplete(),
                     )
                 }
             }
         }
+
+    // TODO PDJB-1679: Use eicIssueDateStep.hasOutcome directly when the EIC_ISSUE_DATE flag is removed
+    private fun eicDateStepHasOutcome(
+        journey: ElectricalSafetyDetailState,
+        status: ElectricalCertExpiryStatus,
+    ) = OrParents(
+        journey.eicExpiryDateStep.hasOutcome(status),
+        journey.eicIssueDateStep.hasOutcome(status),
+    )
 }

@@ -49,15 +49,25 @@ Interceptors implement `HandlerInterceptor` and are registered via `WebMvcConfig
 @PrsdbWebConfiguration
 class MyInterceptorConfig(private val myService: MyService) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(MyInterceptor(myService))
+        registry
+            .addInterceptor(MyInterceptor(myService))
+            .order(InterceptorOrder.HEADERS_AND_ATTRIBUTES.value)
     }
 }
 ```
 
+Every interceptor must be registered with an explicit `InterceptorOrder`. `preHandle` runs in ascending order and stops
+at the first interceptor that returns `false`, so:
+- `HEADERS_AND_ATTRIBUTES` — interceptors that set response headers or model attributes (run first)
+- `REDIRECT` — interceptors that may redirect and return `false` from `preHandle` (run last)
+
 Existing interceptors:
-- `BackLinkInterceptor` — stores/retrieves back URL via query parameter
-- `MaintenanceInterceptor` — active only with `@Profile("maintenance-mode")`
-- `PasscodeInterceptor` — active only with `@Profile("require-passcode")`
+- `BackLinkInterceptor` (`HEADERS_AND_ATTRIBUTES`) — stores/retrieves back URL via query parameter
+- `PlausibleInterceptor` (`HEADERS_AND_ATTRIBUTES`) — adds Plausible analytics attributes to the model
+- `RobotsTagInterceptor` (`HEADERS_AND_ATTRIBUTES`) — adds `X-Robots-Tag: noindex, nofollow` to every response so search engines don't index the service
+- `MaintenanceInterceptor` (`REDIRECT`) — redirects every request except assets, the healthcheck and the maintenance page itself to the maintenance page. Active only with `@Profile("maintenance-mode")`
+- `PasscodeInterceptor` (`REDIRECT`) — requires users to enter a valid passcode before they can access the landlord registration journey, and redirects users who have already claimed one away from the passcode pages. Active only with `@Profile("require-passcode")`
+- `LettingAgentAccessInterceptor` (`REDIRECT`) — redirects letting agent routes when access is no longer valid
 
 ## Custom Annotations for Config Classes
 

@@ -1,0 +1,113 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+
+@ExtendWith(MockitoExtension::class)
+class EicExpiredStepConfigTests {
+    @Mock
+    lateinit var mockState: ElectricalSafetyDetailState
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    @Mock
+    lateinit var mockEicExpiryDateStep: EicExpiryDateStep
+
+    @Mock
+    lateinit var mockEicIssueDateStep: EicIssueDateStep
+
+    // TODO PDJB-1679: Remove this and the EIC_ISSUE_DATE stubs when the EIC_ISSUE_DATE flag is removed
+    @Mock
+    lateinit var mockFeatureFlagManager: FeatureFlagManager
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `getStepSpecificContent uses the EIC expiry date and links back to the EIC expiry date step when EIC_ISSUE_DATE is disabled`() {
+        val stepConfig = setupStepConfig()
+        val expiryDate = LocalDate(2020, 1, 1)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+        whenever(mockState.getEicExpiryDateIfReachable()).thenReturn(expiryDate)
+        whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
+        whenever(mockEicExpiryDateStep.isStepReachable).thenReturn(true)
+        whenever(mockEicExpiryDateStep.urlPath).thenReturn(EicExpiryDateStep.ROUTE_SEGMENT)
+        whenever(mockState.journeyId).thenReturn("test-journey-id")
+        whenever(mockState.isOccupied).thenReturn(true)
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(expiryDate.toJavaLocalDate(), content["expiryDate"])
+        assertEquals(true, (content["changeExpiryDateUrl"] as String).contains(EicExpiryDateStep.ROUTE_SEGMENT))
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the EIC issue date and links back to the EIC issue date step when EIC_ISSUE_DATE is enabled`() {
+        val stepConfig = setupStepConfig()
+        val issueDate = LocalDate(2020, 1, 1)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
+        whenever(mockState.getEicIssueDateIfReachable()).thenReturn(issueDate)
+        whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
+        whenever(mockEicIssueDateStep.isStepReachable).thenReturn(true)
+        whenever(mockEicIssueDateStep.urlPath).thenReturn(EicIssueDateStep.ROUTE_SEGMENT)
+        whenever(mockState.journeyId).thenReturn("test-journey-id")
+        whenever(mockState.isOccupied).thenReturn(false)
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(issueDate.toJavaLocalDate(), content["issueDate"])
+        assertEquals(true, (content["changeIssueDateUrl"] as String).contains(EicIssueDateStep.ROUTE_SEGMENT))
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `chooseTemplate returns occupied template when isOccupied is true and EIC_ISSUE_DATE is disabled`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+
+        assertEquals("forms/eicExpiredForOccupiedProperty", stepConfig.chooseTemplate(mockState))
+    }
+
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+    @Test
+    fun `chooseTemplate returns unoccupied template when isOccupied is false and EIC_ISSUE_DATE is disabled`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(false)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+
+        assertEquals("forms/eicExpiredForUnoccupiedProperty", stepConfig.chooseTemplate(mockState))
+    }
+
+    @Test
+    fun `chooseTemplate returns occupied need different certificate template when isOccupied is true and EIC_ISSUE_DATE is enabled`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
+
+        assertEquals("forms/eicNeedDifferentCertificateForOccupiedProperty", stepConfig.chooseTemplate(mockState))
+    }
+
+    @Test
+    fun `chooseTemplate returns unoccupied need different certificate template when isOccupied is false and EIC_ISSUE_DATE is enabled`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isOccupied).thenReturn(false)
+        whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
+
+        assertEquals("forms/eicNeedDifferentCertificateForUnoccupiedProperty", stepConfig.chooseTemplate(mockState))
+    }
+
+    private fun setupStepConfig(): EicExpiredStepConfig {
+        val stepConfig = EicExpiredStepConfig(mockFeatureFlagManager)
+        stepConfig.urlPath = EicExpiredStep.ROUTE_SEGMENT
+        stepConfig.validator = AlwaysTrueValidator()
+        return stepConfig
+    }
+}

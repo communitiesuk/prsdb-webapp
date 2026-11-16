@@ -15,12 +15,14 @@ import java.io.InputStream
 @Profile("local")
 class LocalFileUploader(
     private val uploadRepository: FileUploadRepository,
+    private val localVirusScanSimulator: LocalVirusScanSimulator,
 ) : FileUploader {
     private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '\\', ',')
 
     override fun uploadFile(
         objectKey: String,
         inputStream: InputStream,
+        fileName: String?,
     ): UploadedFileLocator? {
         val cleanObjectKey =
             objectKey
@@ -37,11 +39,14 @@ class LocalFileUploader(
             }
         }
 
-        return UploadedFileLocator(
-            objectKey = objectKey,
-            eTag = objectKey,
-            versionId = Clock.System.now().toString(),
-        )
+        val locator =
+            UploadedFileLocator(
+                objectKey = objectKey,
+                eTag = objectKey,
+                versionId = Clock.System.now().toString(),
+            )
+        localVirusScanSimulator.simulateScan(locator, fileName)
+        return locator
     }
 
     private fun makeAllDirectories(cleanObjectKey: String) {

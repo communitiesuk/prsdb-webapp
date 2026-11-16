@@ -12,11 +12,13 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -25,6 +27,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
+import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -112,7 +116,28 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         assertEmailSentToLandlords(landlords, expectedEmail)
-        verify(emailNotificationService, never()).sendEmail(any(), any())
+        verify(emailNotificationService, times(landlords.size)).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `handleCallback for send owner email sends email to the landlords of an inactive property`() {
+        // Arrange
+        val (ownershipId, expectedEmail, landlords) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord@example.com"),
+                isActive = false,
+            )
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToLandlords(landlords, expectedEmail)
     }
 
     @Test
@@ -191,7 +216,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         assertEmailSentToLandlords(landlords, expectedEmail)
-        verify(emailNotificationService, never()).sendEmail(any(), any())
+        verify(emailNotificationService, times(landlords.size)).sendEmail(any(), any())
     }
 
     @Test
@@ -221,6 +246,75 @@ class VirusNotificationEmailHandlerTests {
             eq(lettingAgentEmail),
             eq(expectedEmail),
         )
+    }
+
+    @Test
+    fun `handleCallback only sends emails once the transaction commits`() {
+        // Arrange
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(expectedCertType(CertificateType.GasSafetyCert), listOf("landlord1@example.com"))
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            // Act
+            virusNotificationEmailHandler.handleCallback(
+                VirusScanCallback(mock(), Json.encodeToString<EmailNotificationData>(callbackData)),
+            )
+
+            // Assert
+            verify(emailNotificationService, never()).sendEmail(any(), any())
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(emailNotificationService).sendEmail(eq(landlordRecipientAddress(0)), eq(expectedEmail))
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
+    @Test
+    fun `handleCallback sends the remaining emails when one fails to send`() {
+        // Arrange
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord1@example.com", "landlord2@example.com"),
+            )
+        doThrow(TransientEmailSentException("rate limited"))
+            .whenever(emailNotificationService)
+            .sendEmail(eq(landlordRecipientAddress(0)), any())
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+
+        // Act
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), Json.encodeToString<EmailNotificationData>(callbackData)),
+        )
+
+        // Assert
+        verify(emailNotificationService).sendEmail(eq(landlordRecipientAddress(1)), eq(expectedEmail))
+    }
+
+    @Test
+    fun `handleCallback throws without sending any emails when a landlord has no email recipients`() {
+        // Arrange
+        val (ownershipId, _, landlords) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord1@example.com", "landlord2@example.com"),
+            )
+        whenever(emailNotificationService.getLandlordRecipientAddresses(landlords[1]))
+            .thenThrow(NoLandlordEmailRecipientsException(landlords[1].id))
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            // Act & Assert
+            assertThrows<NoLandlordEmailRecipientsException> {
+                virusNotificationEmailHandler.handleCallback(
+                    VirusScanCallback(mock(), Json.encodeToString<EmailNotificationData>(callbackData)),
+                )
+            }
+            verify(emailNotificationService, never()).sendEmail(any(), any())
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     private fun expectedCertType(certType: CertificateType) =
@@ -293,7 +387,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         verify(emailNotificationService).sendEmail(eq("jane@example.com"), eq(expectedEmail))
-        verify(emailNotificationService, never()).sendEmailToLandlord(any(), any())
+        verify(emailNotificationService, never()).getLandlordRecipientAddresses(any())
         verify(landlordRepository, never()).findById(any())
     }
 
@@ -339,7 +433,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         verify(emailNotificationService).sendEmail(eq(virusMonitoringEmail), eq(expectedEmail))
-        verify(emailNotificationService, never()).sendEmailToLandlord(any(), any())
+        verify(emailNotificationService, never()).getLandlordRecipientAddresses(any())
     }
 
     // TODO PDJB-1919: Remove the legacy (no userId) tests below once all saved notifications have a userId
@@ -365,7 +459,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         verify(emailNotificationService).sendEmail(eq("jane@example.com"), eq(expectedEmail))
-        verify(emailNotificationService, never()).sendEmailToLandlord(any(), any())
+        verify(emailNotificationService, never()).getLandlordRecipientAddresses(any())
     }
 
     @Test
@@ -404,7 +498,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         verify(emailNotificationService).sendEmail(eq("second@example.com"), eq(expectedEmail))
-        verify(emailNotificationService, never()).sendEmailToLandlord(any(), any())
+        verify(emailNotificationService, never()).getLandlordRecipientAddresses(any())
     }
 
     @Test
@@ -445,24 +539,31 @@ class VirusNotificationEmailHandlerTests {
     private fun arrangeOwnedPropertyUploadCallback(
         bodyCertificateType: String,
         emailAddresses: List<String>,
+        isActive: Boolean = true,
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> =
         arrangeOwnedPropertyUploadCallbackForLandlords(
             bodyCertificateType,
             emailAddresses.map { MockLandlordData.createIndividualLandlord(email = it) },
+            isActive,
         )
 
     private fun arrangeOwnedPropertyUploadCallbackForLandlords(
         bodyCertificateType: String,
         landlords: List<Landlord>,
+        isActive: Boolean = true,
     ): Triple<Long, VirusScanUnsuccessfulEmail, List<Landlord>> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 landlords = landlords.toMutableSet(),
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 isOccupied = true,
+                isActive = isActive,
             )
 
-        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+        whenever(propertyOwnershipRepository.findById(ownership.id)).thenReturn(Optional.of(ownership))
+        landlords.forEachIndexed { index, landlord ->
+            whenever(emailNotificationService.getLandlordRecipientAddresses(landlord)).thenReturn(listOf(landlordRecipientAddress(index)))
+        }
 
         return Triple(
             ownership.id,
@@ -474,13 +575,15 @@ class VirusNotificationEmailHandlerTests {
         )
     }
 
+    private fun landlordRecipientAddress(landlordIndex: Int) = "landlord-recipient-$landlordIndex@example.com"
+
     private fun assertEmailSentToLandlords(
         landlords: List<Landlord>,
         expectedEmail: VirusScanUnsuccessfulEmail,
     ) {
-        landlords.forEach { landlord ->
-            verify(emailNotificationService).sendEmailToLandlord(
-                eq(landlord),
+        landlords.indices.forEach { index ->
+            verify(emailNotificationService).sendEmail(
+                eq(landlordRecipientAddress(index)),
                 eq(expectedEmail),
             )
         }

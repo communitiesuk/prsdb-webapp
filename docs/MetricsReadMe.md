@@ -114,20 +114,13 @@ Note that `forms/selectAddressForm.html` and `forms/manualAddressForm.html` are 
 landlord registration, property registration, governing body member address and trustee address
 journeys, so any future fix must tag the update journey without affecting those.
 
-#### Occupancy updates while `DELEGATE_TO_LETTING_AGENT` is enabled
+#### Occupancy updates
 
-With the flag off, the occupancy update is a single page and its `occupied` question page carries the
-`Transaction` tag as normal.
-
-With the flag on, the journey gains a check-your-answers page and — where a property is currently
-occupied *and* delegated to a letting agent — an "are you sure" interruption before it, because making
-the property unoccupied removes the letting agent from the registration. The check-your-answers page is
-the commit step on every variant of that journey, so it is the page that should carry the tag.
-
-**TODO(PDJB-1635):** the check-your-answers page is still a placeholder, so occupancy updates made with
-`DELEGATE_TO_LETTING_AGENT` enabled are intentionally **not counted** for now. The `Transaction` tag
-should be added to the check-your-answers page when it is built. This is not a live gap: the flag gates
-an unreleased journey, and every occupancy update made with the flag off is counted as normal.
+The occupancy update journey ends on a check-your-answers page and — where a property is currently
+occupied *and* delegated to a letting agent — shows an "are you sure" interruption before it, because
+making the property unoccupied removes the letting agent from the registration. The check-your-answers
+page is the commit step on every variant of that journey, and is the only step that carries the tag
+(because it uses `forms/checkAnswersForm`).
 
 ## Cost and cost per transaction
 

@@ -8,6 +8,7 @@ data class SummaryCardViewModel(
     val actions: List<SummaryCardActionViewModel>? = null,
     val cardNumber: String? = null,
     val insetViewModel: ComplianceActionInsetViewModel? = null,
+    val bodyTextKey: String? = null,
 )
 
 data class SummaryCardActionViewModel(

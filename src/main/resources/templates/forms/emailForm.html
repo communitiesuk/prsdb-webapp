@@ -2,13 +2,14 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeadingParam" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='emailAddress', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, fieldSetHeadingLabelTo=${label == null ? 'emailAddress' : null})}">
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}(${fieldSetHeadingParam})}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='emailAddress', fieldSetHeading=#{${fieldSetHeading}(${fieldSetHeadingParam})}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, fieldSetHeadingLabelTo=${label == null ? 'emailAddress' : null})}">
         <div th:replace="~{fragments/forms/emailInput :: emailInput(${label != null ? #messages.msg(label) : null}, 'emailAddress', null)}"></div>
     </th:block>
     <th:block th:if="${showWarning}">

@@ -238,7 +238,7 @@ object IndividualLandlordRegistrationJourney {
                     iterationData.requestNamePrefix,
                     CHECK_ANSWERS_FORM_REQUEST,
                     "registrationNextUrl",
-                    "submittedFilteredJourneyData",
+                    "answersLastChangedAt",
                 ),
             )
             .exec(

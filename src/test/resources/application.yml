@@ -5,6 +5,8 @@ spring:
     aws:
       region:
         static: eu-west-2
+      sqs:
+        queue-not-found-strategy: fail
   mvc:
     format:
       date: "d MMMM yyyy"
@@ -22,6 +24,27 @@ notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
   use-production-notify: false
+  allowlist-fallback-address: ""
+
+email-queue:
+  name: prsdb-email-queue
+  listener:
+    # Started only in PrsdbEmailWorkerApplicationTests; stopping a listener when Spring pauses a cached test context waits for its poll to finish
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
+
+scan-result-queue:
+  name: prsdb-scan-result-queue
+  listener:
+    # Started only in PrsdbScanResultWorkerApplicationTests, for the same reason as the email queue listener
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
 
 argon2:
   iterations: 2
@@ -52,6 +75,8 @@ gov-uk-pay:
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
   read-timeout: 10s
+  manual-intervention-email-address: payments-support@example.com
+  payment-status-retry-delay: 0s
 
 cloudwatch-metrics:
   ecs:
@@ -85,28 +110,37 @@ features:
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "subject-identifier-page"
       enabled: false
-      expiry-date: "2027-03-30"
-    - name: "pdjb-939-property-registration-phase-two"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-939-property-registration-phase-three"
       enabled: false
-      expiry-date: "2026-12-31"
-    - name: "pdjb-1022-delegate-to-letting-agent"
-      enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-238-gatling-post-endpoint"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1009-payments"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1210-multi-user-organisations"
       enabled: false
-      expiry-date: "2026-11-01"
+      expiry-date: "2027-01-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-955-associated-parties"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1666-eic-issue-date"
       enabled: false
-      expiry-date: "2026-12-31"
+      expiry-date: "2027-01-01"
+    - name: "pdjb-973-asynchronous-email-sending"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-844-active-inactive"
+      enabled: false
+      expiry-date: "2027-01-01"

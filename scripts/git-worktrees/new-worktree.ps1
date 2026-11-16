@@ -150,26 +150,27 @@ try {
 }
 
 # Assign unique ports for parallel worktree execution.
-# Derive the offset from the highest SERVER_PORT found in sibling worktrees' .env files,
-# rather than worktree count, to avoid port collisions after worktree removal.
+# Use the smallest offset (>= 1) for which none of the offset ports are already assigned to any port key in
+# sibling worktrees' .env files, so offsets freed by removed worktrees are reused rather than creeping ever higher.
 Push-Location $mainRepoPath
 try {
-    $maxOffset = 0
+    $usedPorts = @{}
     $siblingEnvFiles = Get-ChildItem -Path $workTreeBase -Filter ".env" -Recurse -Depth 1 -ErrorAction SilentlyContinue
     foreach ($siblingEnv in $siblingEnvFiles) {
         if ($siblingEnv.FullName -eq (Join-Path $newWorktreePath ".env")) { continue }
-        $portLine = Get-Content $siblingEnv.FullName | Where-Object { $_ -match '^SERVER_PORT=' } | Select-Object -First 1
-        if ($portLine -match '(\d+)') {
-            $siblingPort = [int]$Matches[1]
-            $offset = $siblingPort - 8080
-            if ($offset -gt $maxOffset) { $maxOffset = $offset }
+        foreach ($line in Get-Content $siblingEnv.FullName) {
+            if ($line -match '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT|ELASTICMQ_PORT)=\D*(\d+)') { $usedPorts[[int]$Matches[2]] = $true }
         }
     }
-    $portOffset = $maxOffset + 1
+    $portOffset = 1
+    while ($usedPorts.ContainsKey(8080 + $portOffset) -or $usedPorts.ContainsKey(5433 + $portOffset) -or $usedPorts.ContainsKey(6379 + $portOffset) -or $usedPorts.ContainsKey(9324 + $portOffset)) {
+        $portOffset++
+    }
 
     $newServerPort = 8080 + $portOffset
     $newPostgresPort = 5433 + $portOffset
     $newRedisPort = 6379 + $portOffset
+    $newElasticMqPort = 9324 + $portOffset
 
     $envFilePath = Join-Path $newWorktreePath ".env"
     if (Test-Path $envFilePath) {
@@ -178,12 +179,13 @@ try {
         $content = $content -replace 'SERVER_PORT="8080"', "SERVER_PORT=`"$newServerPort`""
         $content = $content -replace 'POSTGRES_PORT="5433"', "POSTGRES_PORT=`"$newPostgresPort`""
         $content = $content -replace 'REDIS_PORT="6379"', "REDIS_PORT=`"$newRedisPort`""
+        $content = $content -replace 'ELASTICMQ_PORT="9324"', "ELASTICMQ_PORT=`"$newElasticMqPort`""
         $content = $content -replace 'RDS_URL="jdbc:postgresql://localhost:5433/prsdblocal"', "RDS_URL=`"jdbc:postgresql://localhost:${newPostgresPort}/prsdblocal`""
         $content = $content -replace 'ELASTICACHE_PORT="6379"', "ELASTICACHE_PORT=`"$newRedisPort`""
         $content = $content -replace 'LANDLORD_BASE_URL="http://localhost:8080/landlord"', "LANDLORD_BASE_URL=`"http://localhost:${newServerPort}/landlord`""
         $content = $content -replace 'LOCAL_AUTHORITY_BASE_URL="http://localhost:8080/local-council"', "LOCAL_AUTHORITY_BASE_URL=`"http://localhost:${newServerPort}/local-council`""
         # Append any port keys missing from the copied .env so defaults aren't used
-        $portKeys = [ordered]@{ SERVER_PORT = $newServerPort; POSTGRES_PORT = $newPostgresPort; REDIS_PORT = $newRedisPort }
+        $portKeys = [ordered]@{ SERVER_PORT = $newServerPort; POSTGRES_PORT = $newPostgresPort; REDIS_PORT = $newRedisPort; ELASTICMQ_PORT = $newElasticMqPort }
         foreach ($key in $portKeys.Keys) {
             if ($content -notmatch "(?m)^${key}=") { $content = $content.TrimEnd() + "`n${key}=`"$($portKeys[$key])`"" }
         }
@@ -191,6 +193,7 @@ try {
         Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
         Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
         Write-Host "  REDIS_PORT=$newRedisPort" -ForegroundColor Gray
+        Write-Host "  ELASTICMQ_PORT=$newElasticMqPort" -ForegroundColor Gray
     }
 } finally {
     Pop-Location

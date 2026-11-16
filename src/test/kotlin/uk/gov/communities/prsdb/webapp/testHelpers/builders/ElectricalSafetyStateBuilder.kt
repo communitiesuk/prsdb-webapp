@@ -6,19 +6,25 @@ import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 
 interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<SelfType>> {
     val additionalDataMap: MutableMap<String, String>
@@ -82,29 +88,60 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
         return self()
     }
 
-    fun withElectricalCertExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType {
+    fun withEicIssueDate(issueDate: LocalDate = DateTimeHelper().getCurrentDateInUK()): SelfType {
+        val formModel =
+            TodayOrPastDateFormModel().apply {
+                day = issueDate.dayOfMonth.toString()
+                month = issueDate.monthNumber.toString()
+                year = issueDate.year.toString()
+            }
+        withSubmittedValue(EicIssueDateStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withEicrExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
+        withElectricalCertExpiryDate(EicrExpiryDateStep.ROUTE_SEGMENT, expiryDate)
+
+    fun withEicUploads(uploads: Map<Int, CertificateUpload> = defaultElectricalCertUploads): SelfType {
+        additionalDataMap["eicUploadMap"] = Json.encodeToString(serializer(), uploads)
+        additionalDataMap["highestAssignedEicMemberId"] = Json.encodeToString(serializer(), uploads.keys.max())
+        withSubmittedValue(UploadEicStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(CheckEicUploadsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEicrUploads(uploads: Map<Int, CertificateUpload> = defaultElectricalCertUploads): SelfType {
+        additionalDataMap["eicrUploadMap"] = Json.encodeToString(serializer(), uploads)
+        additionalDataMap["highestAssignedEicrMemberId"] = Json.encodeToString(serializer(), uploads.keys.max())
+        withSubmittedValue(UploadEicrStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(CheckEicrUploadsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEicExpiredAcknowledged(): SelfType {
+        withSubmittedValue(EicExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEicrExpiredAcknowledged(): SelfType {
+        withSubmittedValue(EicrExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    private fun withElectricalCertExpiryDate(
+        routeSegment: String,
+        expiryDate: LocalDate,
+    ): SelfType {
         val formModel =
             AnyDateFormModel().apply {
                 day = expiryDate.dayOfMonth.toString()
                 month = expiryDate.monthNumber.toString()
                 year = expiryDate.year.toString()
             }
-        withSubmittedValue(ElectricalCertExpiryDateStep.ROUTE_SEGMENT, formModel)
+        withSubmittedValue(routeSegment, formModel)
         return self()
     }
 
-    fun withElectricalCertUploads(
-        uploads: Map<Int, CertificateUpload> = mapOf(1 to CertificateUpload(fileUploadId = 1L, fileName = "electrical-safety-cert.pdf")),
-    ): SelfType {
-        additionalDataMap["electricalUploadMap"] = Json.encodeToString(serializer(), uploads)
-        additionalDataMap["nextElectricalUploadMemberId"] = Json.encodeToString(serializer(), (uploads.keys.max()) + 1)
-        withSubmittedValue(UploadElectricalCertStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(CheckElectricalCertUploadsStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
-    fun withElectricalCertExpiredAcknowledged(): SelfType {
-        withSubmittedValue(ElectricalCertExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
+    private val defaultElectricalCertUploads: Map<Int, CertificateUpload>
+        get() = mapOf(1 to CertificateUpload(fileUploadId = 1L, fileName = "electrical-safety-cert.pdf"))
 }

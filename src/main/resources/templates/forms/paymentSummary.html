@@ -1,10 +1,12 @@
-<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel"*/-->
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="annualFee" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="firstChargeableDate" type="java.lang.String"*/-->
 <!--/*@thymesVar id="isPreGratisPeriod" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="propertyFeeGuidanceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="quoteDate" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentSummary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -24,6 +26,11 @@
     <p class="govuk-body" th:text="#{registerProperty.paymentSummary.renewalDateExplanation}">
         registerProperty.paymentSummary.renewalDateExplanation
     </p>
+    <p class="govuk-body">
+        <span th:text="#{registerProperty.paymentSummary.guidance.prefix}">registerProperty.paymentSummary.guidance.prefix</span>
+        <a class="govuk-link" th:href="${propertyFeeGuidanceUrl}" rel="noreferrer noopener" target="_blank"
+           th:text="#{registerProperty.paymentSummary.guidance.link}">registerProperty.paymentSummary.guidance.link</a><span th:remove="tag" th:text="#{registerProperty.paymentSummary.guidance.afterLink}">registerProperty.paymentSummary.guidance.afterLink</span>
+    </p>
 
     <h2 class="govuk-heading-m" th:text="#{registerProperty.paymentSummary.summary.heading}">
         registerProperty.paymentSummary.summary.heading
@@ -34,6 +41,7 @@
         registerProperty.paymentSummary.prnHint
     </div>
 
+    <input type="hidden" name="quoteDate" th:value="${quoteDate}"/>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.paymentSummary.button})}"></button>
 </th:block>
 </html>

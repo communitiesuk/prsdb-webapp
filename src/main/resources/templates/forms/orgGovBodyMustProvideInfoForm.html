@@ -30,12 +30,6 @@
     <h2 class="govuk-heading-m" th:text="#{forms.orgGovBodyMustProvideInfo.getHelp.heading}">
         forms.orgGovBodyMustProvideInfo.getHelp.heading
     </h2>
-    <p class="govuk-body" th:text="#{common.contactDetails.phone}">common.contactDetails.phone</p>
-    <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">common.contactDetails.phoneHours</p>
-    <p class="govuk-body">
-        <span th:text="#{common.contactDetails.emailLabel}">common.contactDetails.emailLabel</span>
-        <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}"
-           th:text="#{common.contactDetails.email}">common.contactDetails.email</a>
-    </p>
+    <p th:replace="~{fragments/contactDetails :: contactDetails}"></p>
 </th:block>
 </html>

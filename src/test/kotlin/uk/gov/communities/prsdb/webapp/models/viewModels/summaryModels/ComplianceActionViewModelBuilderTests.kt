@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+// TODO PDJB-2006: Delete this class when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
 class ComplianceActionViewModelBuilderTests {
     @Test
     fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list for an occupied property`() {

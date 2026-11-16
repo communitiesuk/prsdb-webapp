@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -24,4 +25,15 @@ class CheckElectricalSafetyAnswersSummaryList(
     val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
     val expiryDateRow = getRow("Expiry date")
     val yourCertificateRow = getRow("Your certificate")
+
+    fun certificateDateRow(certificateType: CertificateType) = getRow(certificateDateKey(certificateType))
+
+    companion object {
+        fun certificateDateKey(certificateType: CertificateType) =
+            when (certificateType) {
+                CertificateType.Eic -> "Issue date"
+                CertificateType.Eicr -> "Expiry date"
+                else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+            }
+    }
 }

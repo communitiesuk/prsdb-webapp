@@ -13,7 +13,8 @@ data class ComplianceUpdateConfirmationEmail(
     private val complianceUpdateType: UpdateType,
     private val certificateType: String,
     private val certificateTypeLabel: String,
-    private val expiryDate: String? = null,
+    private val certificateDate: String? = null,
+    private val certificateDateHeading: String = EXPIRY_DATE_HEADING,
     private val deadlineDate: String? = null,
     private val isJointLandlord: Boolean = false,
 ) : EmailTemplateModel {
@@ -25,6 +26,7 @@ data class ComplianceUpdateConfirmationEmail(
                 } else {
                     EmailTemplate.COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
                 }
+
             UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL
             UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL
             UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL
@@ -40,10 +42,16 @@ data class ComplianceUpdateConfirmationEmail(
             "new epc url" to GET_NEW_EPC_URL,
             "certificate type" to certificateType,
             "certificate type label" to certificateTypeLabel,
+            "certificate date heading" to certificateDateHeading,
             // These default to an empty string as not all compliance templates use them, and some EPC's may not have an expiry date
-            "expiry date" to (expiryDate ?: ""),
+            "certificate date" to (certificateDate ?: ""),
             "28 day deadline" to (deadlineDate ?: ""),
         )
+
+    companion object {
+        const val EXPIRY_DATE_HEADING = "Expiry date"
+        const val ISSUE_DATE_HEADING = "Issue date"
+    }
 
     enum class UpdateType {
         CERTIFICATE_ADDED,

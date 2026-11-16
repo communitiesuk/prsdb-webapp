@@ -1,10 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -12,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalSafetyAnswersSummaryList
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import java.util.regex.Pattern
 
@@ -106,6 +109,31 @@ class CheckAnswersPagePropertyRegistration(
 
     val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h4")
 
+    val superiorLandlordsHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Other people in the property’s ownership chain")))
+
+    val superiorLandlordsChangeLink = Link.byText(page, "Add, change or remove people in the ownership chain")
+
+    val freeholdersHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Freeholders$"))))
+
+    val jointFreeholdersHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Joint freeholders$"))))
+
+    val freeholdersChangeLink = Link.byText(page, "Add, change or remove freeholders")
+
+    val jointFreeholdersChangeLink = Link.byText(page, "Add, change or remove joint freeholders")
+
+    val propertyManagerHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Property manager")))
+
+    val propertyManagerChangeLink = Link.byText(page, "Add, change or remove the property manager")
+
+    fun getSummaryCard(
+        title: String,
+        headingLevel: String,
+    ) = SummaryCard(page, title, headingLevel)
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
@@ -129,6 +157,10 @@ class CheckAnswersPagePropertyRegistration(
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
+
+        val anyoneInOwnershipChainRow = getRow("Is there anyone else in the property’s ownership chain?")
+
+        val usingPropertyManagerRow = getRow("Are you using a property manager?")
     }
 
     class ComplianceSummaryList(
@@ -147,5 +179,8 @@ class CheckAnswersPagePropertyRegistration(
         val epcExemptionRow = getRow("Why does this property not need an EPC?")
         val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
         val meesExemptionRow = getRow("Registered exemption")
+
+        fun electricalCertDateRow(certificateType: CertificateType) =
+            getRow(CheckElectricalSafetyAnswersSummaryList.certificateDateKey(certificateType))
     }
 }

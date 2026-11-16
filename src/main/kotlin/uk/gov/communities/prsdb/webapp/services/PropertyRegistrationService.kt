@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -43,13 +42,12 @@ class PropertyRegistrationService(
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentRepository: PaymentRepository,
+    private val activeInactiveService: ActiveInactiveService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
         with(registrationData) {
             val landlord = userToLandlordService.getCurrentLandlordForUser()
-            // TODO PDJB-1860: Derive a landlord's first anniversary from the paid renewal date when available;                                                                                                                                                                                                                                                                      ┃
-            //  retain the existing anniversary, and use today's UK date when registering without payment.
             val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
             val propertyOwnership =
@@ -59,6 +57,8 @@ class PropertyRegistrationService(
                     anniversary,
                     renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
                 )
+
+            activeInactiveService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
@@ -79,7 +79,7 @@ class PropertyRegistrationService(
                 gasSafetyFileUploadIds,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyFileUploadIds,
-                electricalSafetyExpiryDate,
+                eicrExpiryDate,
                 electricalCertType,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcCertificateUrl,
@@ -89,6 +89,9 @@ class PropertyRegistrationService(
                 epcExemptionReason,
                 epcMeesExemptionReason,
                 epcProvideLater = epcProvideLater,
+                eicIssueDate = eicIssueDate,
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                eicExpiryDate = eicExpiryDate,
             )
 
             runAfterTransactionCommits {
@@ -119,6 +122,11 @@ class PropertyRegistrationService(
                     null
                 }
 
+            // TODO PDJB-2015: save the property manager (if provided) and link it to the new property
+            //  ownership, and create the freeholders and superior landlords from the registration
+            //  journey's answers. Those two hold a foreign key to the property ownership, so unlike the
+            //  licence and the property manager they have to be created from the saved result rather
+            //  than passed in.
             propertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
                 isOccupied = isOccupied,
@@ -197,7 +205,6 @@ class PropertyRegistrationService(
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
                 isDelegatedToLettingAgent,
-                isPdjb939PhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO),
                 licenseProvideLater = licenseProvideLater,
                 gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
@@ -220,7 +227,7 @@ class PropertyRegistrationService(
 
         return PropertyRegistrationConfirmationEmail.PaymentDetails(
             amountInPence = payment.amountInPence,
-            paymentDate = payment.paymentCreatedAt.atZone(DateTimeHelper.UK_ZONE).toLocalDate(),
+            paymentDate = payment.quoteDate,
             renewalDate = propertyOwnership.renewalDate,
         )
     }

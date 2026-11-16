@@ -6,11 +6,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb955
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
@@ -63,7 +63,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Nested
-    inner class OwnershipTypeUpdates {
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag - it covers the legacy
+    //  single-question ownership type update, whose change link is only shown while the flag is off.
+    //  PDJB-1992 replaces it with the flag-on ownership update journey.
+    inner class OwnershipTypeBeforePdjb955Updates {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
@@ -73,7 +81,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update Ownership Type page
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+            updateOwnershipTypePage.submitOwnershipType(OwnershipTypeBeforePdjb955.LEASEHOLD)
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
@@ -83,6 +91,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class ResumingAbandonedUpdateAfterCompletingAnother {
+        private val landlordAccountEmail = "alex.surname@example.com"
+
         @Test
         fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
             page: Page,
@@ -94,13 +104,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
             assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
 
-            // Complete a different update (ownership type) on the same property, bumping its last-modified date
+            // Complete a different update (correspondence email) on the same property, bumping its last-modified date
+            completeCorrespondenceEmailUpdate(page)
             propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-            val updateOwnershipTypePage =
-                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
-            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Re-enter the abandoned bedrooms update via the change link and submit it
             propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
@@ -116,15 +122,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
-            // The ownership type update below must change the data, otherwise the last-modified date is not bumped
+            // The correspondence email update below must change the data, otherwise the last-modified date is not bumped
             assertNotEquals(
-                OwnershipType.FREEHOLD,
-                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.ownershipType,
+                landlordAccountEmail,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
             )
 
             // Partially complete (but abandon) a multi-step households-and-tenants update - after submitting the first
             // step the second step is reachable and its URL is stored in the session
-            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
             propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
             val numberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
@@ -132,18 +138,26 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, urlArguments)
             val numberOfPeopleStepUrl = page.url().substringBefore("?")
 
-            // Complete a different update (ownership type) on the same property, bumping its last-modified date
-            propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
-            val updateOwnershipTypePage =
-                assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
-            updateOwnershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            // Complete a different update (correspondence email) on the same property, bumping its last-modified date
+            completeCorrespondenceEmailUpdate(page)
 
             // Attempt to resume the abandoned households-and-tenants update at the number-of-people step. Because the
             // property has changed, the stale journey is discarded and restarted, so the number-of-people step is no
             // longer reachable and we are redirected out to the property details page - the earlier progress is gone.
             page.navigate(numberOfPeopleStepUrl)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        }
+
+        private fun completeCorrespondenceEmailUpdate(page: Page) {
+            navigator
+                .goToPropertyDetailsLandlordView(propertyOwnershipId)
+                .propertyDetailsSummaryList.contactEmailAddressRow
+                .clickFirstActionLinkAndWait()
+            val emailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyDetailsUpdate::class, urlArguments)
+            emailPage.submitAccountEmail()
+            val checkAnswersPage =
+                assertPageIs(page, CorrespondenceEmailCyaPagePropertyDetailsUpdate::class, urlArguments)
+            checkAnswersPage.confirm()
             assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         }
     }
@@ -514,69 +528,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Nested
         inner class OccupancyUpdates {
-            @BeforeEach
-            fun disableDelegateToLettingAgentFlag() {
-                // Without delegation the occupancy journey is a single page with no check answers page
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
-
-            @Test
-            fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
-                // Details page
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                val originalNumberOfBedrooms =
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value
-                        .textContent()
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value).containsText("1")
-                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
-                val updateOccupancyPage =
-                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-                // Update occupancy to vacant and submit directly (single-page update, no check answers page)
-                assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
-                updateOccupancyPage.submitIsVacant()
-
-                propertyDetailsPage =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-                // Check changes have occurred
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                    .containsText(originalNumberOfBedrooms)
-            }
-
-            @Test
-            fun `A property can have its occupancy updated from vacant to occupied`(page: Page) {
-                // Details page
-                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
-                val updateOccupancyPage =
-                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
-
-                // Update occupancy to occupied and submit directly (single-page update, no check answers page)
-                assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
-                updateOccupancyPage.submitIsOccupied()
-                propertyDetailsPage =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
-
-                // The occupancy status is updated and the property defaults to providing tenancy details later
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
-            }
-        }
-
-        @Nested
-        inner class OccupancyUpdatesWithLettingAgentDelegation {
             private val undelegatedPropertyOwnershipId = 4L
             private val undelegatedPropertyUrlArguments =
                 mapOf("propertyOwnershipId" to undelegatedPropertyOwnershipId.toString())
-
-            @BeforeEach
-            fun enableDelegateToLettingAgentFlag() {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
 
             @Test
             fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
@@ -686,6 +640,29 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 val updatedPropertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
                 assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+            }
+
+            @Test
+            fun `a vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
+                val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                val updateOccupancyPage =
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+                updateOccupancyPage.submitIsOccupied()
+
+                val checkAnswersPage =
+                    assertPageIs(
+                        page,
+                        UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                        vacantPropertyUrlArguments,
+                    )
+                checkAnswersPage.confirm()
+
+                val updatedPropertyDetailsPage =
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
             }
 
             @Test

@@ -2,8 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -14,7 +19,13 @@ import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// TODO PDJB-2006: Delete this class when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
 class ComplianceActionsPageTests : IntegrationTest() {
+    @BeforeEach
+    fun disableFeatureFlag() {
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_PHASE_THREE)
+    }
+
     @Nested
     inner class LandlordsWithoutComplianceActions :
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
@@ -24,6 +35,39 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(complianceActionsPage.heading).containsText("Compliance actions")
             assertThat(complianceActionsPage.hintText).isHidden()
             assertThat(complianceActionsPage.insetText).containsText("The certificates for your occupied properties are up to date.")
+        }
+    }
+
+    // TODO: PDJB-1926: Remove this section
+    @Nested
+    inner class LandlordWithThirteenMonthOldGasCert :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-landlord-with-compliance-actions.sql", "data-overlay-gas-cert-issued-13-months-ago.sql"),
+        ) {
+        // 2 Fake Way (property ownership 1) is occupied, has a 13 month old gas cert, and is missing other certs so is always listed
+
+        @Test
+        fun `gas safety row shows expired on date when 14 month expiry is disabled`() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.findSummaryCard("2 Fake Way")
+            val expectedDate =
+                LocalDate
+                    .now()
+                    .minusMonths(13)
+                    .plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY.toLong())
+                    .format(DATE_FORMATTER)
+            assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
+        }
+
+        // TODO: PDJB-1926: Remove this test
+        @Test
+        fun `property details gas safety card shows the certificate as expired when 14 month expiry is disabled`() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            propertyDetailsPage.tabs.goToComplianceInformation()
+            val certificateStatus = propertyDetailsPage.gasSafetyCard.summaryList.certificateStatusRow.value
+            PlaywrightAssertions.assertThat(certificateStatus).containsText("Expired")
         }
     }
 
@@ -112,7 +156,14 @@ class ComplianceActionsPageTests : IntegrationTest() {
         fun `gas safety row shows expired on date for expired certificate`() {
             val complianceActionsPage = navigator.goToComplianceActions()
             val card = complianceActionsPage.findSummaryCard("7 Mythical Drive")
-            val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
+            // The certificate was issued 14 months and 1 day ago
+            val expectedDate =
+                LocalDate
+                    .now()
+                    .minusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+                    .minusDays(1)
+                    .plusMonths(GAS_SAFETY_CERT_VALIDITY_MONTHS.toLong())
+                    .format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
         }
 

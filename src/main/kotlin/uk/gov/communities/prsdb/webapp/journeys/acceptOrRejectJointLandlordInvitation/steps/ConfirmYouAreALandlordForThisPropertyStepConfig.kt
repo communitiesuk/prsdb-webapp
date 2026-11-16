@@ -54,6 +54,10 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): Complete? =
         getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
+    // Re-check the user is not already on the property, as they may have been added while they were in the journey.
+    override fun beforeAttemptingToReachStep(state: AcceptOrRejectJointLandlordInvitationJourneyState): Boolean =
+        !state.isCurrentUserLandlordOnInvitedPropertyOwnership()
+
     override fun afterStepDataIsAdded(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         val token = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
 

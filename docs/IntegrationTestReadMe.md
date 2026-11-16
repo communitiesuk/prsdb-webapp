@@ -27,6 +27,21 @@ every test. The same applies to a migration that renames a preserved table. `Int
 every preserved table exists and holds rows, so a stale entry is caught rather than quietly wiping the table. You can
 check which tables hold reference data by migrating an empty database and looking for non-empty tables.
 
+### Always-appended scripts
+
+`IntegrationTestHelper` appends the scripts in `ALWAYS_APPENDED_SCRIPTS` after whatever scripts a test asks for, so
+they run for every reset without each seed file having to repeat them. These are typically scripts that fill in data
+the migrations could not, because seed data is loaded after the migrations have already run. They must be idempotent,
+since they also run over data a seed script has already set up.
+
+To add one, add it to `ALWAYS_APPENDED_SCRIPTS` in `IntegrationTestHelper` and to `spring.sql.init.data-locations` in
+`application-local.yml` — after the ordinary seeds, so it sees everything they inserted.
+
+These are the only scripts applied implicitly; every other seed is named explicitly by the test. Two seed files are
+not covered and must repeat anything they need: `data-test.sql` and `data-integration.sql` are picked up by
+`spring.sql.init.platform` rather than an explicit `data-locations` list, so there is nowhere to append to. Anything
+added to `ALWAYS_APPENDED_SCRIPTS` has to be mirrored into them by hand.
+
 ## Page Objects (and Components)
 
 We encapsulate logic for interacting with our pages into page objects (as described by [Martin Fowler](https://martinfowler.com/bliki/PageObject.html) and

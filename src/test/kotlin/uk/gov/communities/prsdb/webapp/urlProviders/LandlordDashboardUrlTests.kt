@@ -190,6 +190,7 @@ class LandlordDashboardUrlTests(
                 featureFlagManager = mock(),
                 currentUserService = mockCurrentUserService,
                 paymentRepository = mock(),
+                activeInactiveService = mock(),
             )
 
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(landlord.email)

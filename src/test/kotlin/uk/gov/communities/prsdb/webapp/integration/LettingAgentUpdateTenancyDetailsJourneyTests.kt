@@ -79,4 +79,76 @@ class LettingAgentUpdateTenancyDetailsJourneyTests : IntegrationTestWithMutableD
         assertThat(updatedDetailsPage.summaryList.billsIncludedRow.value).containsText(expectedBillsIncluded)
         assertThat(updatedDetailsPage.summaryList.rentAmountRow.value).containsText(newRentAmount)
     }
+
+    @Test
+    fun `the households and people change links on the check answers page return to the check answers page`(page: Page) {
+        navigateToCheckAnswersPage(page)
+
+        var checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, NumberOfHouseholdsFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .backLink
+            .clickAndWait()
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, HouseholdsNumberOfPeopleFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .backLink
+            .clickAndWait()
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
+        val changedNumberOfPeople = 5
+        assertPageIs(page, HouseholdsNumberOfPeopleFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitNumOfPeople(changedNumberOfPeople)
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        assertThat(checkAnswersPage.summaryList.numberOfPeopleRow).containsText(changedNumberOfPeople.toString())
+    }
+
+    @Test
+    fun `the rent amount change link on the check answers page returns to the check answers page`(page: Page) {
+        navigateToCheckAnswersPage(page)
+
+        var checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.rentAmountRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .backLink
+            .clickAndWait()
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        checkAnswersPage.summaryList.rentAmountRow.clickFirstActionLinkAndWait()
+        val changedRentAmount = "800"
+        assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitRentAmount(changedRentAmount)
+
+        checkAnswersPage =
+            assertPageIs(page, CheckTenancyDetailsAnswersPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        assertThat(checkAnswersPage.summaryList.rentAmountRow).containsText(changedRentAmount)
+    }
+
+    private fun navigateToCheckAnswersPage(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(tenancyProvideLaterToken)
+        detailsPage.summaryList.tenancyRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, NumberOfHouseholdsFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitNumberOfHouseholds(2)
+        assertPageIs(page, HouseholdsNumberOfPeopleFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitNumOfPeople(4)
+        assertPageIs(page, RentIncludesBillsFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitIsNotIncluded()
+        assertPageIs(page, FurnishedStatusFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitFurnishedStatus(FurnishedStatus.FURNISHED)
+        val rentFrequencyPage =
+            assertPageIs(page, RentFrequencyFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+        rentFrequencyPage.form.submit()
+        assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, tenancyProvideLaterUrlArguments)
+            .submitRentAmount("750")
+    }
 }
