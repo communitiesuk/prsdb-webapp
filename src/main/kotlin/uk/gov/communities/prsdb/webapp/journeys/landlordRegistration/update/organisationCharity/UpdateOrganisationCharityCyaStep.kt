@@ -24,6 +24,7 @@ class UpdateOrganisationCharityCyaStepConfig(
         mapOf(
             "title" to "forms.update.checkCharity.pageTitle",
             "showWarning" to true,
+            "warningTextKey" to "forms.update.warning",
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "summaryName" to "forms.update.checkCharity.summaryName",
             "summaryListData" to buildSummaryRows(state),

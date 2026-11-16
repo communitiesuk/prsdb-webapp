@@ -47,10 +47,6 @@ class IndividualLandlord() : Landlord() {
     @Column(name = "individual_date_of_birth")
     var dateOfBirth: LocalDate? = null
 
-    @Column(name = "individual_is_active")
-    var isActive: Boolean = false
-        private set
-
     @Column(name = "individual_is_verified")
     var isVerified: Boolean = false
         private set
@@ -83,7 +79,6 @@ class IndividualLandlord() : Landlord() {
         this.hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice
         this.nonEnglandOrWalesAddress = nonEnglandOrWalesAddress
         this.dateOfBirth = dateOfBirth
-        this.isActive = true
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES

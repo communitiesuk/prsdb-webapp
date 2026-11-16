@@ -120,4 +120,25 @@ class PropertyOwnershipTests {
 
         assertNull(property.provideLaterDeadline)
     }
+
+    @Test
+    fun `deactivate marks the property inactive and sets the deactivation date`() {
+        val property = MockLandlordData.createPropertyOwnership(isActive = true)
+
+        property.deactivate(LocalDate.of(2004, 7, 7))
+
+        assertFalse(property.isActive)
+        assertEquals(LocalDate.of(2004, 7, 7), property.lastDeactivatedDate)
+    }
+
+    @Test
+    fun `reactivate marks the property active and clears the deactivation date`() {
+        val property = MockLandlordData.createPropertyOwnership(isActive = true)
+        property.deactivate(LocalDate.of(2004, 7, 7))
+
+        property.reactivate()
+
+        assertTrue(property.isActive)
+        assertNull(property.lastDeactivatedDate)
+    }
 }

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -13,6 +14,7 @@ class CheckPropertyManagerFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckPropertyManagerStep.ROUTE_SEGMENT}") {
     val form = Form(page)
+    val backLink = BackLink.default(page)
     val propertyManagerCard = PropertyManagerSummaryCard(page)
 
     fun clickChangeAndWait() = propertyManagerCard.getAction("Change").link.clickAndWait()

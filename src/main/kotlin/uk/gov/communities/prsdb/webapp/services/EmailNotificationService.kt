@@ -30,6 +30,12 @@ class EmailNotificationService<in EmailModel : EmailTemplateModel>(
         landlord: Landlord,
         email: EmailModel,
     ) {
+        getLandlordRecipientAddresses(landlord).forEach { recipientAddress ->
+            sendEmail(recipientAddress, email)
+        }
+    }
+
+    fun getLandlordRecipientAddresses(landlord: Landlord): List<String> {
         val recipientAddresses =
             when (landlord) {
                 is IndividualLandlord -> listOf(landlord.email)
@@ -41,8 +47,6 @@ class EmailNotificationService<in EmailModel : EmailTemplateModel>(
             throw NoLandlordEmailRecipientsException(landlord.id)
         }
 
-        recipientAddresses.forEach { recipientAddress ->
-            sendEmail(recipientAddress, email)
-        }
+        return recipientAddresses
     }
 }

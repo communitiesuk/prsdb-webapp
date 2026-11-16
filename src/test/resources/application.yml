@@ -36,6 +36,16 @@ email-queue:
     visibility-timeout-multiplier: 2.0
     max-visibility-timeout-seconds: 10
 
+scan-result-queue:
+  name: prsdb-scan-result-queue
+  listener:
+    # Started only in PrsdbScanResultWorkerApplicationTests, for the same reason as the email queue listener
+    auto-startup: false
+    max-concurrent-messages: 5
+    initial-visibility-timeout-seconds: 1
+    visibility-timeout-multiplier: 2.0
+    max-visibility-timeout-seconds: 10
+
 argon2:
   iterations: 2
   memory: 16384
@@ -104,9 +114,6 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-01-01"
-    - name: "pdjb-939-property-registration-phase-two"
-      enabled: false
-      expiry-date: "2027-01-01"
     - name: "pdjb-939-property-registration-phase-three"
       enabled: false
       expiry-date: "2027-01-01"
@@ -132,7 +139,7 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-973-asynchronous-email-sending"
-      enabled: false
+      enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-844-active-inactive"
       enabled: false

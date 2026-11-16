@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_HEADER
 import uk.gov.communities.prsdb.webapp.config.interceptors.RobotsTagInterceptor.Companion.X_ROBOTS_TAG_VALUE
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
@@ -26,6 +27,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordReg
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.time.Instant
+import java.time.LocalDate
 
 @WebMvcTest(RegisterLandlordController::class)
 class RegisterLandlordControllerTests(
@@ -221,6 +224,73 @@ class RegisterLandlordControllerTests(
                 status { isOk() }
                 model {
                     attribute("showOrgAdminContent", false)
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation sets isOrganisation true for org landlord`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("isOrganisation", true)
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation sets isOrganisation false for individual landlord`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("isOrganisation", false)
+                }
+            }
+    }
+
+    // TODO PDJB-2149: Remove the feature flag checks from these tests and remove mention of the flag in the test names
+    @Test
+    @WithMockUser
+    fun `getConfirmation includes deactivation date 3 months after landlord creation when active inactive enabled`() {
+        val landlord = MockLandlordData.createIndividualLandlord(createdDate = Instant.parse("2026-08-31T12:00:00Z"))
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("deactivationDate", LocalDate.of(2026, 11, 30))
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation does not include deactivation date when active inactive disabled`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attributeDoesNotExist("deactivationDate")
                 }
             }
     }
