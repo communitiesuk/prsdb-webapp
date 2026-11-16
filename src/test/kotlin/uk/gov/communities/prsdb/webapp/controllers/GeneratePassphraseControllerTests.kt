@@ -136,7 +136,10 @@ class GeneratePassphraseControllerTests(
         whenever(passphraseService.generatePassphrase()).thenReturn("time anything costume")
 
         mvc.get(GENERATE_PASSPHRASE_URL).andExpect {
-            content { string(not(containsString("Send text message"))) }
+            content {
+                string(not(containsString("Send text message")))
+                string(not(containsString("Use this passphrase in a letter")))
+            }
         }
     }
 
@@ -151,6 +154,9 @@ class GeneratePassphraseControllerTests(
                 string(containsString("phoneNumber"))
                 string(containsString("_csrf"))
                 string(containsString("action=\"$GENERATE_PASSPHRASE_URL\""))
+                string(containsString("Use this passphrase in a letter"))
+                string(containsString("long-lived secret"))
+                string(not(containsString("What happens next")))
             }
         }
     }
@@ -361,6 +367,7 @@ class GeneratePassphraseControllerTests(
                 string(containsString("Send email"))
                 string(not(containsString("Send text message")))
                 string(containsString("_csrf"))
+                string(containsString("Use this passphrase in a letter"))
             }
         }
     }

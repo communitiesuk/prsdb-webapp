@@ -16,6 +16,7 @@ class GeneratePassphrasePage(
     val sendEmailButton = Button.byText(page, "Send email")
     val sendSmsButton = Button.byText(page, "Send text message")
     val notificationStatus = page.locator("[role='status']")
+    val letterGuidance = page.locator("#passphrase-letter-guidance")
     val passphrase: String
         get() = page.locator("#passphrase-preview strong").textContent()
 }
