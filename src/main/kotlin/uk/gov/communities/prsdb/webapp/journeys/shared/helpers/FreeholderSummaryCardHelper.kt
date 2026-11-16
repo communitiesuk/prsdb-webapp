@@ -58,6 +58,9 @@ class FreeholderSummaryCardHelper {
         if (!allowEmptyContactRows && freeholder.email == null && freeholder.address == null) {
             throw PrsdbWebException("Freeholder $freeholderId has known details but no email or postal address")
         }
+        if (freeholder.email != null && freeholder.address != null) {
+            throw PrsdbWebException("Freeholder $freeholderId has both an email and postal address")
+        }
 
         val showNote =
             showPostalAddressAsNote && freeholder.address != null ||
