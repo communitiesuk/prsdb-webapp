@@ -3,6 +3,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="summaryCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="addAnotherButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
@@ -18,6 +19,9 @@
     <div class="govuk-inset-text" th:if="${insetText}" th:text="#{${insetText}}">insetText</div>
     <th:block th:each="card : ${summaryCards}">
         <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
+    </th:block>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.warning</div>
     </th:block>
 </th:block>
 <th:block id="form-content">

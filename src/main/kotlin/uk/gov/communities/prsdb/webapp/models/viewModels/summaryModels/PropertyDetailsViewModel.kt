@@ -3,7 +3,10 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
 class PropertyDetailsViewModel(
@@ -13,6 +16,7 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
     associatedPartiesEnabled: Boolean = true,
+    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper = FreeholderSummaryCardHelper(),
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
@@ -44,6 +48,37 @@ class PropertyDetailsViewModel(
 
     val peopleResponsibleOwnershipSection: List<SummaryListRowViewModel> =
         if (showPeopleResponsibleOwnership) ownershipAnswerRows() else emptyList()
+
+    val showFreeholdersSection: Boolean =
+        isLandlordView && associatedPartiesEnabled && propertyOwnership.ownershipType.requiresFreeholderRecords()
+
+    val freeholdersHeadingKey: String = "propertyDetails.peopleResponsible.freeholders.heading"
+
+    val freeholdersUpdateLinkTextKey: String =
+        if (propertyOwnership.ownershipType.isJointFreeholder()) {
+            "propertyDetails.peopleResponsible.freeholders.updateJointLink"
+        } else {
+            "propertyDetails.peopleResponsible.freeholders.updateLink"
+        }
+
+    val freeholdersUpdateLink: String? =
+        if (showFreeholdersSection) {
+            UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
+        } else {
+            null
+        }
+
+    val freeholderSummaryCards: List<SummaryCardViewModel> =
+        if (showFreeholdersSection) {
+            freeholderSummaryCardHelper.getSummaryCards(
+                propertyOwnership.freeholders
+                    .sortedBy { it.id }
+                    .mapIndexed { index, freeholder -> (index + 1) to FreeholderDataModel.fromFreeholder(freeholder) }
+                    .toMap(),
+            )
+        } else {
+            emptyList()
+        }
 
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())

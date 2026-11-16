@@ -106,4 +106,15 @@
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.peopleResponsibleOwnershipHeadingKey}}">propertyDetails.peopleResponsible.ownership.heading</h3>
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
                         </th:block>
+                        <th:block th:if="${propertyDetails.showFreeholdersSection}">
+                            <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholdersHeadingKey}}">propertyDetails.peopleResponsible.freeholders.heading</h3>
+                            <th:block th:each="card : ${propertyDetails.freeholderSummaryCards}">
+                                <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+                            </th:block>
+                            <p class="govuk-body">
+                                <a class="govuk-link" th:href="${propertyDetails.freeholdersUpdateLink}" th:text="#{${propertyDetails.freeholdersUpdateLinkTextKey}}">
+                                    propertyDetails.peopleResponsible.freeholders.updateLink
+                                </a>
+                            </p>
+                        </th:block>
 </div>

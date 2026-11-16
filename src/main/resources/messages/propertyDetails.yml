@@ -32,6 +32,11 @@ peopleResponsible:
     ownsProperty: Do you own this property?
     ownershipType: Ownership type
     freeholderType: Freeholder type
+  freeholders:
+    heading: Freeholders
+    updateLink: Add, change or remove freeholders
+    updateJointLink: Add, change or remove joint freeholders
+    notificationInset: We’ll notify anyone you add or remove.
 landlordDetails:
   heading: Landlords
   registeredLandlords:

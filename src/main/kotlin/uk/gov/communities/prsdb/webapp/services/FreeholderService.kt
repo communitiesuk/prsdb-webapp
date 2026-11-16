@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
@@ -14,24 +15,34 @@ class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
     private val addressService: AddressService,
 ) {
+    fun getFreeholdersForProperty(propertyOwnership: PropertyOwnership): List<Freeholder> =
+        freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)
+
+    fun getFreeholderSnapshot(freeholders: List<Freeholder>): Map<Long, String> =
+        freeholders.associate { it.id to it.getMostRecentlyUpdated().toString() }
+
     // Updates the saved freeholders to match the list the user submitted, creating, updating and
     // deleting them one at a time.
     // Returns the newly added freeholders so they can be tracked by the journey and notified.
-    // TODO PDJB-1993: use this to update freeholders.
     // TODO PDJB-2171: also return updated and removed freeholders so they can be tracked by the
     //  journey and notified.
     @Transactional
     fun updateFreeholders(
         propertyOwnership: PropertyOwnership,
         freeholders: List<FreeholderDataModel>,
-    ): List<FreeholderDataModel> {
-        val existingFreeholdersKeyedById =
-            freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).associateBy { it.id }
+        expectedSnapshot: Map<Long, String>,
+    ): List<Freeholder> {
+        val existingFreeholders = getFreeholdersForProperty(propertyOwnership)
+        if (getFreeholderSnapshot(existingFreeholders) != expectedSnapshot) {
+            throw UpdateConflictException("The freeholders have changed since this update session started.")
+        }
+
+        val existingFreeholdersKeyedById = existingFreeholders.associateBy { it.id }
         val submittedIds = freeholders.mapNotNull { it.databaseId }.toSet()
 
         existingFreeholdersKeyedById.values.filter { it.id !in submittedIds }.forEach { removeFreeholder(it) }
 
-        val added = mutableListOf<FreeholderDataModel>()
+        val added = mutableListOf<Freeholder>()
 
         freeholders.forEach { submitted ->
             // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
@@ -39,8 +50,7 @@ class FreeholderService(
             val existingFreeholder = submitted.databaseId?.let { existingFreeholdersKeyedById[it] }
             when {
                 existingFreeholder == null -> {
-                    createFreeholder(propertyOwnership, submitted)
-                    added.add(submitted)
+                    added.add(freeholderRepository.save(toFreeholderEntity(propertyOwnership, submitted)))
                 }
                 detailsHaveChanged(existingFreeholder, submitted) -> updateFreeholder(existingFreeholder, submitted)
                 // An unchanged freeholder matches no branch, so their row is left alone.
@@ -85,15 +95,18 @@ class FreeholderService(
         propertyOwnership: PropertyOwnership,
         freeholder: FreeholderDataModel,
     ) {
-        freeholderRepository.save(
-            Freeholder(
-                propertyOwnership = propertyOwnership,
-                name = freeholder.name,
-                email = freeholder.email,
-                address = freeholder.address?.let { addressService.findOrCreateAddress(it) },
-            ),
-        )
+        freeholderRepository.save(toFreeholderEntity(propertyOwnership, freeholder))
     }
+
+    private fun toFreeholderEntity(
+        propertyOwnership: PropertyOwnership,
+        freeholder: FreeholderDataModel,
+    ) = Freeholder(
+        propertyOwnership = propertyOwnership,
+        name = freeholder.name,
+        email = freeholder.email,
+        address = freeholder.address?.let { addressService.findOrCreateAddress(it) },
+    )
 
     @Transactional
     fun updateFreeholder(
