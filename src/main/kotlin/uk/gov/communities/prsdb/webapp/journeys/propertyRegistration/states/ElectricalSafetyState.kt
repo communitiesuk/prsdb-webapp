@@ -84,10 +84,6 @@ interface ElectricalSafetyDetailState : JourneyState {
             else -> null
         }
 
-    // TODO PDJB-1673: Remove this once the journey shows the EIC issue date rather than an expiry date
-    fun getElectricalCertificateExpiryDateIfReachable() =
-        getEicOrEicrValue({ getEicExpiryDateIfReachable() }, { getEicrExpiryDateIfReachable() })
-
     // TODO PDJB-1679: Remove the expiry date fallback when the EIC_ISSUE_DATE flag is removed
     fun getEicIsOutdated(): Boolean? =
         getEicIssueDateIfReachable()?.let { CertificateExpiryHelper.isEicIssueDateExpired(it.toJavaLocalDate()) }

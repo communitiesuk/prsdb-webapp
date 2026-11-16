@@ -145,6 +145,13 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    fun withEicIssueDate(issueDate: LocalDate = LocalDate.now()): PropertyComplianceBuilder {
+        propertyCompliance.electricalCertType = CertificateType.Eic
+        propertyCompliance.eicrExpiryDate = null
+        propertyCompliance.eicIssueDate = issueDate
+        return this
+    }
+
     private fun setElectricalSafetyExpiryDate(
         expiryDate: LocalDate?,
         certType: CertificateType?,
@@ -165,7 +172,7 @@ class PropertyComplianceBuilder {
     }
 
     // Only sets the cert type, so any date already set stays in the column for the previous type.
-    // To build an EIC with a date, pass certType to withElectricalSafety or withElectricalSafetyExpiryDate instead.
+    // To build an EIC with a date, use withEicIssueDate, or pass certType to withElectricalSafety or withElectricalSafetyExpiryDate.
     fun withElectricalCertType(certType: CertificateType = CertificateType.Eicr): PropertyComplianceBuilder {
         propertyCompliance.electricalCertType = certType
         return this
