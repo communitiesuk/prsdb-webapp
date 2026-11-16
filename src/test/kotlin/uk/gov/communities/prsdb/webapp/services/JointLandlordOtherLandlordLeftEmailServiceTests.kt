@@ -11,39 +11,75 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftDeactivateNotification
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotification
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotificationBeforePdjb844
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 import kotlin.test.assertEquals
 
 class JointLandlordOtherLandlordLeftEmailServiceTests {
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockNotificationEmailServiceBeforePdjb844:
+        EmailNotificationService<JointLandlordOtherLandlordLeftNotificationBeforePdjb844>
     private lateinit var mockNotificationEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftNotification>
-    private lateinit var mockDeactivateNotificationEmailService:
-        EmailNotificationService<JointLandlordOtherLandlordLeftDeactivateNotification>
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
     private lateinit var emailService: JointLandlordOtherLandlordLeftEmailService
 
     @BeforeEach
     fun setup() {
         mockAbsoluteUrlProvider = mock()
+        mockNotificationEmailServiceBeforePdjb844 = mock()
         mockNotificationEmailService = mock()
-        mockDeactivateNotificationEmailService = mock()
         mockFeatureFlagManager = mock()
         emailService =
             JointLandlordOtherLandlordLeftEmailService(
                 mockAbsoluteUrlProvider,
+                mockNotificationEmailServiceBeforePdjb844,
                 mockNotificationEmailService,
-                mockDeactivateNotificationEmailService,
                 mockFeatureFlagManager,
             )
     }
 
     // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
     @Test
-    fun `sendNotificationToRemainingLandlords emails each remaining landlord the original notification when ACTIVE_INACTIVE is disabled`() {
+    fun `sendNotificationToRemainingLandlords emails each remaining landlord the pre-PDJB-844 notification when flag disabled`() {
         whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val previousLandlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val remainingLandlordOne = MockLandlordData.createIndividualLandlord(name = "Bob", email = "bob@example.com")
+        val remainingLandlordTwo =
+            MockLandlordData.createIndividualLandlord(name = "Carol", email = "carol@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 7,
+                landlords = mutableSetOf(remainingLandlordOne, remainingLandlordTwo),
+                address = address,
+            )
+        val propertyRecordUri = URI("https://example.com/landlord/property/7")
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(7)).thenReturn(propertyRecordUri)
+
+        emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
+
+        val emailCaptor = argumentCaptor<JointLandlordOtherLandlordLeftNotificationBeforePdjb844>()
+        verify(mockNotificationEmailServiceBeforePdjb844).sendEmailToLandlord(eq(remainingLandlordOne), emailCaptor.capture())
+        verify(mockNotificationEmailServiceBeforePdjb844).sendEmailToLandlord(eq(remainingLandlordTwo), emailCaptor.capture())
+
+        val bobEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Bob" }
+        assertEquals("Alice", bobEmail.leavingLandlord)
+        assertEquals(address.toMultiLineAddress(), bobEmail.address)
+        assertEquals(propertyRecordUri.toString(), bobEmail.propertyRecordUrl)
+
+        val carolEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Carol" }
+        assertEquals("Alice", carolEmail.leavingLandlord)
+        assertEquals(address.toMultiLineAddress(), carolEmail.address)
+        assertEquals(propertyRecordUri.toString(), carolEmail.propertyRecordUrl)
+
+        verify(mockNotificationEmailService, never()).sendEmailToLandlord(any(), any())
+    }
+
+    @Test
+    fun `sendNotificationToRemainingLandlords emails each remaining landlord with the correct details`() {
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val previousLandlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val remainingLandlordOne = MockLandlordData.createIndividualLandlord(name = "Bob", email = "bob@example.com")
@@ -74,43 +110,7 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
         assertEquals(address.toMultiLineAddress(), carolEmail.address)
         assertEquals(propertyRecordUri.toString(), carolEmail.propertyRecordUrl)
 
-        verify(mockDeactivateNotificationEmailService, never()).sendEmailToLandlord(any(), any())
-    }
-
-    @Test
-    fun `sendNotificationToRemainingLandlords emails each remaining landlord the deactivate notification when flag enabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
-        val previousLandlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
-        val remainingLandlordOne = MockLandlordData.createIndividualLandlord(name = "Bob", email = "bob@example.com")
-        val remainingLandlordTwo =
-            MockLandlordData.createIndividualLandlord(name = "Carol", email = "carol@example.com")
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 7,
-                landlords = mutableSetOf(remainingLandlordOne, remainingLandlordTwo),
-                address = address,
-            )
-        val propertyRecordUri = URI("https://example.com/landlord/property/7")
-        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(7)).thenReturn(propertyRecordUri)
-
-        emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
-
-        val emailCaptor = argumentCaptor<JointLandlordOtherLandlordLeftDeactivateNotification>()
-        verify(mockDeactivateNotificationEmailService).sendEmailToLandlord(eq(remainingLandlordOne), emailCaptor.capture())
-        verify(mockDeactivateNotificationEmailService).sendEmailToLandlord(eq(remainingLandlordTwo), emailCaptor.capture())
-
-        val bobEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Bob" }
-        assertEquals("Alice", bobEmail.leavingLandlord)
-        assertEquals(address.toMultiLineAddress(), bobEmail.address)
-        assertEquals(propertyRecordUri.toString(), bobEmail.propertyRecordUrl)
-
-        val carolEmail = emailCaptor.allValues.single { it.notifiedLandlord == "Carol" }
-        assertEquals("Alice", carolEmail.leavingLandlord)
-        assertEquals(address.toMultiLineAddress(), carolEmail.address)
-        assertEquals(propertyRecordUri.toString(), carolEmail.propertyRecordUrl)
-
-        verify(mockNotificationEmailService, never()).sendEmailToLandlord(any(), any())
+        verify(mockNotificationEmailServiceBeforePdjb844, never()).sendEmailToLandlord(any(), any())
     }
 
     @Test
@@ -123,7 +123,7 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
 
         emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
 
+        verify(mockNotificationEmailServiceBeforePdjb844, never()).sendEmailToLandlord(any(), any())
         verify(mockNotificationEmailService, never()).sendEmailToLandlord(any(), any())
-        verify(mockDeactivateNotificationEmailService, never()).sendEmailToLandlord(any(), any())
     }
 }

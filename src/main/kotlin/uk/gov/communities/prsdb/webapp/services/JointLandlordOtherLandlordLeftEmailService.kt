@@ -5,14 +5,14 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftDeactivateNotification
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotification
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotificationBeforePdjb844
 
 @PrsdbWebService
 class JointLandlordOtherLandlordLeftEmailService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val otherLandlordLeftEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftNotification>,
-    private val otherLandlordLeftDeactivateEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftDeactivateNotification>,
+    private val notificationEmailServiceBeforePdjb844: EmailNotificationService<JointLandlordOtherLandlordLeftNotificationBeforePdjb844>,
+    private val notificationEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftNotification>,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     fun sendNotificationToRemainingLandlords(
@@ -25,9 +25,9 @@ class JointLandlordOtherLandlordLeftEmailService(
             val address = propertyOwnership.address.toMultiLineAddress()
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
             if (isActiveInactiveEnabled) {
-                otherLandlordLeftDeactivateEmailService.sendEmailToLandlord(
+                notificationEmailService.sendEmailToLandlord(
                     otherLandlord,
-                    JointLandlordOtherLandlordLeftDeactivateNotification(
+                    JointLandlordOtherLandlordLeftNotification(
                         leavingLandlord = previousLandlord.name,
                         notifiedLandlord = otherLandlord.name,
                         address = address,
@@ -35,9 +35,9 @@ class JointLandlordOtherLandlordLeftEmailService(
                     ),
                 )
             } else {
-                otherLandlordLeftEmailService.sendEmailToLandlord(
+                notificationEmailServiceBeforePdjb844.sendEmailToLandlord(
                     otherLandlord,
-                    JointLandlordOtherLandlordLeftNotification(
+                    JointLandlordOtherLandlordLeftNotificationBeforePdjb844(
                         leavingLandlord = previousLandlord.name,
                         notifiedLandlord = otherLandlord.name,
                         address = address,

@@ -223,7 +223,7 @@ class LeavePropertyServiceTests {
     }
 
     @Test
-    fun `leavePropertyOwnership sends the account deactivated email when the landlord was deactivated and ACTIVE_INACTIVE is enabled`() {
+    fun `leavePropertyOwnership sends the account deactivated email when the landlord was deactivated`() {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership =

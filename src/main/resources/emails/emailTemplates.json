@@ -270,16 +270,16 @@
   {
     "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
     "prod_id": "1c21afd0-943e-4613-a441-203869e0559a",
-    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
+    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION_BEFORE_PDJB_844",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
-    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
+    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md"
   },
   {
     "test_id": "00000000-0000-0000-0000-000000000000",
     "prod_id": "00000000-0000-0000-0000-000000000000",
-    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_DEACTIVATE_NOTIFICATION",
+    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
-    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftDeactivateNotification.md"
+    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
   },
   {
     "test_id": "df2afd98-4575-45a7-8722-26f763aa8fb1",

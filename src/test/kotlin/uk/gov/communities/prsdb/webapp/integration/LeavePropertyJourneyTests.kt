@@ -95,7 +95,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
     }
 
     @Test
-    fun `confirm page shows the reinvite inset text and no warning when ACTIVE_INACTIVE is enabled`(page: Page) {
+    fun `confirm page shows the reinvite inset text and no warning`(page: Page) {
         featureFlagManager.enable(ACTIVE_INACTIVE)
 
         val confirmPage = navigator.goToLeavePropertyConfirmPage(jointPropertyOwnershipId)
