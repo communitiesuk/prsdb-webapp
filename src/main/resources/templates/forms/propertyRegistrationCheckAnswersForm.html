@@ -14,6 +14,7 @@
 <!--/*@thymesVar id="superiorLandlordsRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="superiorLandlordsChangeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="superiorLandlordsCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="ownershipRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="propertyManagerRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="propertyManagerChangeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyManagerCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
@@ -67,9 +68,15 @@
                 th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}">forms.checkPropertyAnswers.jointLandlordsDetails.heading</h4>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsRows})}"></dl>
         </th:block>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
-        <!--/* TODO PDJB-2014: Add Ownership type header & rows. Until then the placeholder ownership type row above
-                renders under the Joint landlords sub-heading when ASSOCIATED_PARTIES is enabled */-->
+        <th:block th:if="${!#lists.isEmpty(peopleResponsibleForThisPropertyRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${peopleResponsibleForThisPropertyRows})}"></dl>
+        </th:block>
+        <!--/* TODO PDJB-2016: This section no longer needs to be optional once ASSOCIATED_PARTIES is released */-->
+        <th:block th:if="${ownershipRows != null}">
+            <h4 class="govuk-heading-s"
+                th:text="#{propertyDetails.peopleResponsible.ownership.heading}">propertyDetails.peopleResponsible.ownership.heading</h4>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${ownershipRows})}"></dl>
+        </th:block>
         <th:block th:if="${freeholdersCards != null}">
             <h4 class="govuk-heading-s" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h4>
             <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
