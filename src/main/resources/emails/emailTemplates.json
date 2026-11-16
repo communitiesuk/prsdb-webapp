@@ -296,8 +296,8 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000000",
-    "prod_id": "00000000-0000-0000-0000-000000000000",
+    "test_id": "b94f36f7-98f8-49a4-8492-7ebac9b8bfe0",
+    "prod_id": "351fdb3e-3dbf-46a3-9039-6a5650f637ad",
     "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION",
     "subject": "Property deactivated",
     "bodyLocation": "/emails/PropertyDeactivationConfirmation.md"

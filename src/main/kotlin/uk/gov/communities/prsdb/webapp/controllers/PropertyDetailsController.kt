@@ -100,9 +100,9 @@ class PropertyDetailsController(
             )
         modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
         modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        // TODO PDJB-2149: Remove the deregisterPropertyLink and flag attribute when the ACTIVE_INACTIVE flag is removed
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
-        // TODO PDJB-2149: Remove the flag attribute and deregisterPropertyLink when the ACTIVE_INACTIVE flag is removed
         modelAndView.addObject("isActiveInactiveEnabled", featureFlagManager.checkFeature(ACTIVE_INACTIVE))
         modelAndView.addObject(
             "deactivatePropertyLink",
