@@ -1456,18 +1456,6 @@ class PropertyOwnershipServiceTests {
     )
 
     @Test
-    fun `createPropertyOwnership creates a placeholder freeholder when the ownership type requires one`() {
-        // Arrange
-        arrangeCreatePropertyOwnership()
-
-        // Act
-        val propertyOwnership = createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY)
-
-        // Assert
-        verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
-    }
-
-    @Test
     fun `createPropertyOwnership creates no freeholder when the ownership type requires none`() {
         // Arrange
         arrangeCreatePropertyOwnership()
@@ -1571,6 +1559,50 @@ class PropertyOwnershipServiceTests {
         assertNull(result.propertyManager)
     }
 
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag, which removes the last caller of
+    //  createPlaceholderFreeholder. The flag-off journey never asks who the freeholders are, so a placeholder is
+    //  created when the ownership type requires freeholder records. PDJB-1992 changes the updateOwnershipType test
+    //  first, by making the flag-on path use the landlord's own answers instead of a placeholder.
+    @Nested
+    inner class BeforePdjb955 {
+        @Test
+        fun `createPropertyOwnership creates a placeholder freeholder when the ownership type requires one`() {
+            // Arrange
+            arrangeCreatePropertyOwnership()
+
+            // Act
+            val propertyOwnership = createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY)
+
+            // Assert
+            verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
+        }
+
+        @Test
+        fun `updateOwnershipType creates a placeholder freeholder when the new type requires one`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = 1,
+                    ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateOwnershipType(
+                propertyOwnership.id,
+                OwnershipType.LEASEHOLD_ONLY,
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
+        }
+    }
+
+    // TODO PDJB-2019: drop the beforePdjb955 half of this test along with the legacy column.
     @Test
     fun `updateOwnershipType stores the given ownership type and derives the beforePdjb955 one`() {
         // Arrange
@@ -1594,30 +1626,6 @@ class PropertyOwnershipServiceTests {
         // Assert
         assertEquals(OwnershipTypeBeforePdjb955.COMMONHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
         assertEquals(OwnershipType.SHARE_OF_COMMONHOLD, propertyOwnership.ownershipType)
-    }
-
-    @Test
-    fun `updateOwnershipType creates a placeholder freeholder when the new type requires one`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-
-        // Act
-        propertyOwnershipService.updateOwnershipType(
-            propertyOwnership.id,
-            OwnershipType.LEASEHOLD_ONLY,
-            propertyOwnership.getMostRecentlyUpdated(),
-        )
-
-        // Assert
-        verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
     }
 
     @Test
