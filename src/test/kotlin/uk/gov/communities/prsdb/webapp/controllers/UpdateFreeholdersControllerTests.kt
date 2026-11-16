@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -43,6 +44,7 @@ class UpdateFreeholdersControllerTests(
 
     override val formContent = "freeholderId=1"
 
+    // TODO PDJB-2016: Remove this setup and the featureFlagManager mock when the ASSOCIATED_PARTIES flag is removed.
     @BeforeEach
     fun enableAssociatedPartiesFeature() {
         whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
@@ -53,29 +55,34 @@ class UpdateFreeholdersControllerTests(
             .thenReturn(mapOf(FreeholdersListStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
-    @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getUpdateStep returns 404 when associated parties feature is disabled`() {
-        whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
-
-        mvc.get(updateStepRoute).andExpect {
-            status { isNotFound() }
+    // TODO PDJB-2016: Remove this nested class when the ASSOCIATED_PARTIES flag is removed.
+    @Nested
+    inner class BeforePdjb955AssociatedParties {
+        @BeforeEach
+        fun disableAssociatedPartiesFeature() {
+            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
         }
-    }
 
-    @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `postUpdateStep returns 404 when associated parties feature is disabled`() {
-        whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUpdateStep returns 404 when associated parties feature is disabled`() {
+            mvc.get(updateStepRoute).andExpect {
                 status { isNotFound() }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `postUpdateStep returns 404 when associated parties feature is disabled`() {
+            mvc
+                .post(updateStepRoute) {
+                    contentType = MediaType.APPLICATION_FORM_URLENCODED
+                    content = formContent
+                    with(csrf())
+                }.andExpect {
+                    status { isNotFound() }
+                }
+        }
     }
 
     @Test
