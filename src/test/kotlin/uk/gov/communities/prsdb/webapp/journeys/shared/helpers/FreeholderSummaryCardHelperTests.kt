@@ -5,13 +5,12 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 
 class FreeholderSummaryCardHelperTests {
@@ -41,10 +40,8 @@ class FreeholderSummaryCardHelperTests {
     fun `persisted freeholders produce ordered read-only summary cards`() {
         // Arrange
         val propertyOwnership = createPropertyOwnership()
-        val later = Freeholder(propertyOwnership, name = "Zoe Smith", email = "zoe@example.com")
-        val earlier = Freeholder(propertyOwnership)
-        ReflectionTestUtils.setField(later, "id", 2L)
-        ReflectionTestUtils.setField(earlier, "id", 1L)
+        val later = createFreeholder(propertyOwnership, name = "Zoe Smith", email = "zoe@example.com", id = 2L)
+        val earlier = createFreeholder(propertyOwnership, id = 1L)
 
         // Act
         val cards = helper.getSummaryCards(listOf(later, earlier))
@@ -73,9 +70,9 @@ class FreeholderSummaryCardHelperTests {
                     "SG18 9EJ",
                 ),
             )
-        val postal = Freeholder(propertyOwnership, name = "Casey Address", address = postalAddress)
-        val email = Freeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com")
-        val unknown = Freeholder(propertyOwnership)
+        val postal = createFreeholder(propertyOwnership, name = "Casey Address", address = postalAddress)
+        val email = createFreeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com")
+        val unknown = createFreeholder(propertyOwnership)
 
         // Act
         val cards = helper.getSummaryCards(listOf(postal, email, unknown)).associateBy { it.title }
@@ -108,8 +105,7 @@ class FreeholderSummaryCardHelperTests {
     fun `getSummaryCards throws when a persisted freeholder has both email and postal address`() {
         // Arrange
         val address = Address(AddressDataModel.fromManualAddressData("36 Sunnyside Lane", "Biggleswade", "SG18 9EJ"))
-        val freeholder = Freeholder(createPropertyOwnership(), name = "Alex Both", email = "alex@example.com", address = address)
-        ReflectionTestUtils.setField(freeholder, "id", 7L)
+        val freeholder = createFreeholder(name = "Alex Both", email = "alex@example.com", address = address, id = 7L)
 
         // Act & Assert
         val exception = assertThrows<PrsdbWebException> { helper.getSummaryCards(listOf(freeholder)) }
