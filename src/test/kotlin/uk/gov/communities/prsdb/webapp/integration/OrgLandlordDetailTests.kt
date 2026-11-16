@@ -5,6 +5,9 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
@@ -33,13 +36,16 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the org landlord details page has organisation details, contacts and registered properties tabs`(page: Page) {
+    fun `the org landlord details page has organisation details, contacts, active and deactivated properties tabs`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
 
-        assertEquals(3, detailsPage.tabs.tabsList.count())
+        assertEquals(4, detailsPage.tabs.tabsList.count())
 
-        detailsPage.tabs.goToRegisteredProperties()
-        assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+        detailsPage.tabs.goToActiveProperties()
+        assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+
+        detailsPage.tabs.goToDeactivatedProperties()
+        assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
     }
 
     @Test
@@ -51,21 +57,24 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         detailsPage.tabs.goToOrganisationContacts()
         assertEquals("organisation-contacts", detailsPage.tabs.activeTabPanelId)
 
-        detailsPage.tabs.goToRegisteredProperties()
-        assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+        detailsPage.tabs.goToActiveProperties()
+        assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+
+        detailsPage.tabs.goToDeactivatedProperties()
+        assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
 
         detailsPage.tabs.goToOrganisationDetails()
         assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
     }
 
     @Test
-    fun `the registered properties tab shows the landlord properties table`(page: Page) {
+    fun `the active properties tab shows the landlord properties table`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
 
-        detailsPage.tabs.goToRegisteredProperties()
+        detailsPage.tabs.goToActiveProperties()
 
-        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
-        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
+        assertThat(detailsPage.activePropertiesTable.headerRow.getCell(0)).containsText("Property address")
+        assertThat(detailsPage.activePropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
     }
 
     @Test
@@ -180,13 +189,13 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         }
 
         @Test
-        fun `an org editor still sees the registered properties tab and the register a property link`() {
+        fun `an org editor still sees the active properties tab and the register a property link`() {
             val detailsPage = navigator.goToOrgLandlordDetails()
 
-            detailsPage.tabs.goToRegisteredProperties()
+            detailsPage.tabs.goToActiveProperties()
 
-            assertThat(detailsPage.noRegisteredPropertiesMessage).isVisible()
-            assertThat(detailsPage.noRegisteredPropertiesLink).isVisible()
+            assertThat(detailsPage.noActivePropertiesMessage).isVisible()
+            assertThat(detailsPage.registerPropertyLink).isVisible()
         }
     }
 
@@ -214,6 +223,27 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
 
             assertThat(detailsPage.mainContactCard.getAction("Change")).isVisible()
             assertThat(detailsPage.governingBodyMembersLink).isVisible()
+        }
+    }
+
+    // TODO PDJB-2149: Delete this nested class when the ACTIVE_INACTIVE feature flag is removed
+    @Nested
+    inner class ActiveInactiveDisabled : NestedIntegrationTestWithImmutableData("data-local.sql") {
+        @BeforeEach
+        fun disableActiveInactive() {
+            featureFlagManager.disableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Test
+        fun `the org landlord details page has organisation details, contacts and registered properties tabs`(page: Page) {
+            val detailsPage = navigator.goToOrgLandlordDetails()
+
+            assertEquals(3, detailsPage.tabs.tabsList.count())
+
+            detailsPage.tabs.goToRegisteredProperties()
+            assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
+            assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
         }
     }
 }

@@ -15,6 +15,8 @@ interface PropertyOwnershipRepository :
 
     fun findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
+    fun findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlordId: Long): List<PropertyOwnership>
+
     fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
@@ -22,6 +24,8 @@ interface PropertyOwnershipRepository :
     fun findByIdAndIsActiveFalse(id: Long): PropertyOwnership?
 
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): Boolean
+
+    fun existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlordId: Long): Boolean
 
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(
         landlordId: Long,

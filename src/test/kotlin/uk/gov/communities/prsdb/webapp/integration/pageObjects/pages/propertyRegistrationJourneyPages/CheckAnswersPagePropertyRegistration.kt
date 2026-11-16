@@ -37,6 +37,13 @@ class CheckAnswersPagePropertyRegistration(
     val propertyDetailsHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
 
+    private val jointLandlordsHeadingLocator =
+        page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Joint landlords"))
+
+    val jointLandlordsHeading = Heading(jointLandlordsHeadingLocator)
+
+    val jointLandlordsSummaryList = jointLandlordsHeadingLocator.locator("xpath=following-sibling::dl[1]")
+
     private val correspondenceHeadingLocator =
         page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Who the council should contact"))
 
@@ -114,6 +121,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val superiorLandlordsChangeLink = Link.byText(page, "Add, change or remove people in the ownership chain")
 
+    val ownershipHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Ownership$"))))
+
     val freeholdersHeading =
         Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText(Pattern.compile("^Freeholders$"))))
 
@@ -124,6 +134,11 @@ class CheckAnswersPagePropertyRegistration(
 
     val jointFreeholdersChangeLink = Link.byText(page, "Add, change or remove joint freeholders")
 
+    val propertyManagerHeading =
+        Heading(page.locator("h4.govuk-heading-s", Page.LocatorOptions().setHasText("Property manager")))
+
+    val propertyManagerChangeLink = Link.byText(page, "Add, change or remove the property manager")
+
     fun getSummaryCard(
         title: String,
         headingLevel: String,
@@ -133,7 +148,9 @@ class CheckAnswersPagePropertyRegistration(
         page: Page,
     ) : SummaryList(page) {
         val propertyAddressRow = getRow(Pattern.compile("^Address$"))
-        val ownershipRow = getRow("How do you own this property?")
+        val ownsPropertyRow = getRow("Do you own this property?")
+        val ownershipKindRow = getRow(Pattern.compile("^Ownership type$"))
+        val freeholdTypeRow = getRow("Freeholder type")
         val correspondenceEmailRow = getRow(Pattern.compile("^Email address$"))
         val correspondencePostalAddressRow = getRow(Pattern.compile("^Postal address$"))
 
@@ -149,11 +166,16 @@ class CheckAnswersPagePropertyRegistration(
         val rentAmountRow = getRow("Rent amount")
         val billsIncludedRow = getRow("Which bills are included")
 
-        val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
+        val invitationsRow = getRow(Pattern.compile("^Invitations$"))
+
+        // TODO PDJB-2016: Remove when ASSOCIATED_PARTIES is removed
+        val jointLandlordsInvitationsRowBeforePdjb2146 = getRow("Joint landlord invitations")
 
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
 
         val anyoneInOwnershipChainRow = getRow("Is there anyone else in the property’s ownership chain?")
+
+        val usingPropertyManagerRow = getRow("Are you using a property manager?")
     }
 
     class ComplianceSummaryList(

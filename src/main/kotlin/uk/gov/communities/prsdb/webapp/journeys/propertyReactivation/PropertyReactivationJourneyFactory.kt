@@ -24,13 +24,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationTenancyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
@@ -107,10 +108,8 @@ class PropertyReactivationJourneyFactory(
             hideCheckAnswersSectionHeader(journey.epcTask)
             section {
                 withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
-                // TODO PDJB-2041: replace this placeholder step with a task, registering it with task(...)
-                // and updating entryStepFor and completionStepFor
-                step(journey.tenancyDetailsStep) {
-                    routeSegment(ReactivationTenancyDetailsStep.ROUTE_SEGMENT)
+                task(journey.tenancyDetailsTask) {
+                    withDependencies { journey }
                     parents { journey.parentsFor(TENANCY_DETAILS) }
                     nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
                 }
@@ -125,6 +124,7 @@ class PropertyReactivationJourneyFactory(
             useContinueButtons(journey.gasSafetyTask)
             useContinueButtons(journey.electricalSafetyTask)
             useContinueButtons(journey.epcTask)
+            useContinueButtons(journey.tenancyDetailsTask)
         }
     }
 
@@ -147,7 +147,7 @@ class PropertyReactivationJourneyFactory(
             GAS_SAFETY -> gasSafetyTask.firstStep
             ELECTRICAL_SAFETY -> electricalSafetyTask.firstStep
             EPC -> epcTask.firstStep
-            TENANCY_DETAILS -> tenancyDetailsStep
+            TENANCY_DETAILS -> tenancyDetailsTask.firstStep
         }
 
     private fun PropertyReactivationJourneyState.completionStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
@@ -156,7 +156,7 @@ class PropertyReactivationJourneyFactory(
             GAS_SAFETY -> gasSafetyTask.exitStep
             ELECTRICAL_SAFETY -> electricalSafetyTask.exitStep
             EPC -> epcTask.exitStep
-            TENANCY_DETAILS -> tenancyDetailsStep
+            TENANCY_DETAILS -> tenancyDetailsTask.exitStep
         }
 
     private fun PropertyReactivationJourneyState.nextStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
@@ -190,7 +190,7 @@ class PropertyReactivationJourney(
     override val gasSafetyTask: GasSafetyTask,
     override val electricalSafetyTask: ElectricalSafetyTask,
     override val epcTask: EpcTask,
-    override val tenancyDetailsStep: ReactivationTenancyDetailsStep,
+    override val tenancyDetailsTask: TenancyDetailsTask,
     override val checkAnswersStep: ReactivationCheckAnswersStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
@@ -201,6 +201,7 @@ class PropertyReactivationJourney(
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
     override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
     override fun generateJourneyId(seed: Any?): String {
@@ -220,14 +221,15 @@ interface PropertyReactivationJourneyState :
     PropertyOwnershipJourneyState,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
-    EpcDependencies {
+    EpcDependencies,
+    HouseholdsAndTenantsDependencies {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
     val licensingStep: ReactivationLicensingStep
     val gasSafetyTask: GasSafetyTask
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
-    val tenancyDetailsStep: ReactivationTenancyDetailsStep
+    val tenancyDetailsTask: TenancyDetailsTask
     val checkAnswersStep: ReactivationCheckAnswersStep
     var requiredTaskTypes: List<ReactivationTaskType>
     override var propertyOwnershipId: Long

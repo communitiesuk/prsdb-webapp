@@ -317,8 +317,8 @@ occupancy:
     option:
       'yes':
         hint: Includes if the property is let, but tenants have not moved in yet
-  fieldSetHeading: Is your property occupied by tenants?
-  fieldSetHint: What you choose here decides which compliance and rent details you need to add.
+  fieldSetHeading: Is this property occupied by tenants?
+  fieldSetHint: This changes what details are required for this registration
 numberOfHouseholds:
   heading: Households in your property
   questionHeading: How many households are in your property?
@@ -565,6 +565,8 @@ checkPropertyAnswers:
     heading: People responsible for this property
     otherPeopleInOwnershipChain:
       heading: Other people in the property’s ownership chain
+    propertyManager:
+      heading: Property manager
   # TODO PDJB-1307: Move these messages out of forms.yml
   correspondence:
     emailAddress: Email address
@@ -591,7 +593,9 @@ checkPropertyAnswers:
     rentAmount: Rent amount
     customFrequencyRentAmountSuffix: per month
   jointLandlordsDetails:
+    heading: Joint landlords
     invitations: Invitations
+    # TODO PDJB-2016: Remove jointLandlordInvitations when ASSOCIATED_PARTIES is removed
     jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?
     noJointLandlords: No, I am the only landlord for this property
@@ -629,8 +633,6 @@ update:
   ownershipType:
     fieldSetHeading: Update the ownership type for your property
   occupancy:
-    occupied:
-      fieldSetHeading: Update whether your property is occupied by tenants
     lettingAgentInterruption:
       heading: Are you sure you want to change this?
       pageTitle: Are you sure you want to change this property to unoccupied?
@@ -751,7 +753,7 @@ uploadCertificate:
       missing: Select an electrical safety certificate
   label: Upload a file
   error:
-    wrongType: 'The selected file must be a PDF, PNG or JPG'
+    wrongType: 'The selected file must be a PDF, JPEG or PNG'
     tooBig: The selected file must be smaller than 15MB
     unsuccessfulUpload: The selected file could not be uploaded - try again
   noScript: You do not have JavaScript enabled.
