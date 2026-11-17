@@ -2,10 +2,9 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
@@ -51,13 +50,7 @@ class AssociatedPartyNotificationService(
     ): FreeholderAddedToPropertyLetter {
         val landlords =
             propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
-                val email =
-                    when (landlord) {
-                        is IndividualLandlord -> landlord.email
-                        is OrganisationalLandlord -> landlord.wholeOrgEmail
-                        else -> throw IllegalArgumentException("Unknown landlord type")
-                    }
-                "${landlord.name} ($email)"
+                "${landlord.name} (${landlord.getContactEmail()})"
             }
 
         return FreeholderAddedToPropertyLetter(
