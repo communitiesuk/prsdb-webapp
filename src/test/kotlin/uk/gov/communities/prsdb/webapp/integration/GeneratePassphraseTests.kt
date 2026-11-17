@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePassphrasePage
@@ -12,7 +13,7 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
     fun `system operator can access generate passphrase page`() {
         val generatePassphrasePage = navigator.goToGeneratePassphrasePage()
 
-        assertThat(generatePassphrasePage.banner.title).containsText("New passphrase")
+        assertThat(generatePassphrasePage.heading).containsText("New passphrase")
         assertEquals(3, generatePassphrasePage.passphrase.split(" ").size)
     }
 
@@ -23,7 +24,7 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
         generatePassphrasePage.generateAnotherButton.clickAndWait()
 
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
-        assertThat(generatePassphrasePage.banner.title).containsText("New passphrase")
+        assertThat(generatePassphrasePage.heading).containsText("New passphrase")
         assertEquals(3, generatePassphrasePage.passphrase.split(" ").size)
     }
 }

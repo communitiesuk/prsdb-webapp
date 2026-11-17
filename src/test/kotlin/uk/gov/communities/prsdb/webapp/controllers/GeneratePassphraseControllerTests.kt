@@ -71,6 +71,7 @@ class GeneratePassphraseControllerTests(
                     string(containsString("New passphrase"))
                     string(containsString("The passphrase is"))
                     string(containsString("time anything costume"))
+                    string(containsString("Use this passphrase in a letter"))
                 }
             }
     }

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.banner.heading}, ~{::main/content()}, false, null, null)}">
+<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.heading}, ~{::main/content()}, false, null, null)}">
 <main>
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-        <div id="confirmation-banner" th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{generatePassphrase.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <span th:text="#{generatePassphrase.banner.body}" th:remove="tag">generatePassphrase.banner.body</span>
+        <h1 class="govuk-heading-l" th:text="#{generatePassphrase.heading}">generatePassphrase.heading</h1>
+        <div id="passphrase-preview" class="govuk-inset-text">
+            <span th:text="#{generatePassphrase.passphrase.label}" th:remove="tag">generatePassphrase.passphrase.label</span>
             <br>
-            <strong th:text="${passphrase}"></strong>
+            <strong class="govuk-!-font-size-27" th:text="${passphrase}"></strong>
         </div>
-        <section>
-            <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.one}">generatePassphrase.paragraph.one</p>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.two}">generatePassphrase.paragraph.two</p>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.three}">generatePassphrase.paragraph.three</p>
-        </section>
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
+        <p class="govuk-body" th:text="#{generatePassphrase.passphrase.review}">generatePassphrase.passphrase.review</p>
+        <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
             generatePassphrase.generateAnother
         </a>
+        <section id="passphrase-letter-guidance">
+            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.letter.heading}">generatePassphrase.letter.heading</h2>
+            <p class="govuk-body" th:text="#{generatePassphrase.letter.body}">generatePassphrase.letter.body</p>
+        </section>
     </div>
 </main>
 </html>
