@@ -15,24 +15,24 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
 
     override fun getStepSpecificContent(state: FurnishedStatusState) =
         mapOf(
-            "fieldSetHeading" to "forms.furnishedStatus.fieldSetHeading",
-            "fieldSetHint" to "forms.furnishedStatus.fieldSetHint",
+            "fieldSetHeading" to "tenancyDetails.furnishedStatus.fieldSetHeading",
+            "fieldSetHint" to "tenancyDetails.furnishedStatus.fieldSetHint",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = FurnishedStatus.FURNISHED,
-                        labelMsgKey = "forms.furnishedStatus.radios.options.furnished.label",
-                        hintMsgKey = "forms.furnishedStatus.radios.options.furnished.hint",
+                        labelMsgKey = "tenancyDetails.furnishedStatus.radios.options.furnished.label",
+                        hintMsgKey = "tenancyDetails.furnishedStatus.radios.options.furnished.hint",
                     ),
                     RadiosButtonViewModel(
                         value = FurnishedStatus.PART_FURNISHED,
-                        labelMsgKey = "forms.furnishedStatus.radios.options.partFurnished.label",
-                        hintMsgKey = "forms.furnishedStatus.radios.options.partFurnished.hint",
+                        labelMsgKey = "tenancyDetails.furnishedStatus.radios.options.partFurnished.label",
+                        hintMsgKey = "tenancyDetails.furnishedStatus.radios.options.partFurnished.hint",
                     ),
                     RadiosButtonViewModel(
                         value = FurnishedStatus.UNFURNISHED,
-                        labelMsgKey = "forms.furnishedStatus.radios.options.unfurnished.label",
-                        hintMsgKey = "forms.furnishedStatus.radios.options.unfurnished.hint",
+                        labelMsgKey = "tenancyDetails.furnishedStatus.radios.options.unfurnished.label",
+                        hintMsgKey = "tenancyDetails.furnishedStatus.radios.options.unfurnished.hint",
                     ),
                 ),
             "submitButtonText" to "forms.buttons.saveAndContinue",

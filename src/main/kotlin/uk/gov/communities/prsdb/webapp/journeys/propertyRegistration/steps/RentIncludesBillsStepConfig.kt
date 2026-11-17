@@ -14,8 +14,8 @@ class RentIncludesBillsStepConfig : AbstractRequestableStepConfig<YesOrNo, RentI
 
     override fun getStepSpecificContent(state: RentIncludesBillsState) =
         mapOf(
-            "fieldSetHeading" to "forms.rentIncludesBills.fieldSetHeading",
-            "fieldSetHint" to "forms.rentIncludesBills.fieldSetHint",
+            "fieldSetHeading" to "tenancyDetails.rentIncludesBills.fieldSetHeading",
+            "fieldSetHint" to "tenancyDetails.rentIncludesBills.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 

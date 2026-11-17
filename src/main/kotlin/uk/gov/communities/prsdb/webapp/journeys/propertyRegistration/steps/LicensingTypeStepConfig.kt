@@ -20,8 +20,8 @@ class LicensingTypeStepConfig :
     override fun getStepSpecificContent(state: LicensingState): Map<String, Any?> {
         val showProvideThisLater = state.allowProvideLicensingLaterRoute
         return mapOf(
-            "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
-            "fieldSetHint" to "forms.licensingType.fieldSetHint",
+            "fieldSetHeading" to "licensing.licensingType.fieldSetHeading",
+            "fieldSetHint" to "licensing.licensingType.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "showSecondarySubmitButton" to showProvideThisLater,
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
@@ -31,24 +31,24 @@ class LicensingTypeStepConfig :
                 listOf(
                     RadiosButtonViewModel(
                         value = LicensingType.SELECTIVE_LICENCE,
-                        labelMsgKey = "forms.licensingType.radios.option.selectiveLicence.label",
-                        hintMsgKey = "forms.licensingType.radios.option.selectiveLicence.hint",
+                        labelMsgKey = "licensing.licensingType.radios.option.selectiveLicence.label",
+                        hintMsgKey = "licensing.licensingType.radios.option.selectiveLicence.hint",
                     ),
                     // TODO PDJB-1753: Update the CYA and individual follow-up pages to the new licence wording, then can swap .pageLabel for .label
                     RadiosButtonViewModel(
                         value = LicensingType.HMO_MANDATORY_LICENCE,
-                        labelMsgKey = "forms.licensingType.radios.option.hmoMandatory.pageLabel",
-                        hintMsgKey = "forms.licensingType.radios.option.hmoMandatory.hint",
+                        labelMsgKey = "licensing.licensingType.radios.option.hmoMandatory.pageLabel",
+                        hintMsgKey = "licensing.licensingType.radios.option.hmoMandatory.hint",
                     ),
                     RadiosButtonViewModel(
                         value = LicensingType.HMO_ADDITIONAL_LICENCE,
-                        labelMsgKey = "forms.licensingType.radios.option.hmoAdditional.pageLabel",
-                        hintMsgKey = "forms.licensingType.radios.option.hmoAdditional.hint",
+                        labelMsgKey = "licensing.licensingType.radios.option.hmoAdditional.pageLabel",
+                        hintMsgKey = "licensing.licensingType.radios.option.hmoAdditional.hint",
                     ),
                     RadiosDividerViewModel("forms.radios.dividerText"),
                     RadiosButtonViewModel(
                         value = LicensingType.NO_LICENSING,
-                        labelMsgKey = "forms.licensingType.radios.option.noLicensing.label",
+                        labelMsgKey = "licensing.licensingType.radios.option.noLicensing.label",
                     ),
                 ),
         )

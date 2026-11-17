@@ -486,7 +486,7 @@ class PropertyDetailsViewModelTests {
                 viewModel.licensingSection.map { it.fieldHeading },
             )
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+                "licensing.checkAnswers.noLicensing",
                 viewModel.licensingSection.single().fieldValue,
             )
         }
@@ -699,7 +699,8 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"),
         )
         assertEquals(
-            "Message for forms.billsIncluded.checkbox.electricity, Message for forms.billsIncluded.checkbox.water, Cat sitting",
+            "Message for tenancyDetails.billsIncluded.checkbox.electricity, " +
+                "Message for tenancyDetails.billsIncluded.checkbox.water, Cat sitting",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded"),
         )
         assertEquals(
@@ -707,7 +708,7 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"),
         )
         assertEquals(
-            "£200 Message for forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix",
+            "£200 Message for tenancyDetails.checkAnswers.customFrequencyRentAmountSuffix",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount"),
         )
     }

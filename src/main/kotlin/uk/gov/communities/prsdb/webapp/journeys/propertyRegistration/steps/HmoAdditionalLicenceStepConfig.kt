@@ -14,14 +14,14 @@ class HmoAdditionalLicenceStepConfig : AbstractRequestableStepConfig<Complete, H
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.hmoAdditionalLicence.fieldSetHeading",
-            "label" to "forms.hmoAdditionalLicence.label",
-            "detailSummary" to "forms.hmoAdditionalLicence.detail.summary",
+            "fieldSetHeading" to "licensing.hmoAdditionalLicence.fieldSetHeading",
+            "label" to "licensing.hmoAdditionalLicence.label",
+            "detailSummary" to "licensing.hmoAdditionalLicence.detail.summary",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "detailAdditionalContent" to
                 HMOAdditionalDetailModel(
-                    "forms.hmoAdditionalLicence.detail.paragraph.two",
-                    "forms.hmoAdditionalLicence.detail.paragraph.three",
+                    "licensing.hmoAdditionalLicence.detail.paragraph.two",
+                    "licensing.hmoAdditionalLicence.detail.paragraph.three",
                 ),
         )
 
