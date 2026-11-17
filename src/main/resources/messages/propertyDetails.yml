@@ -31,7 +31,7 @@ peopleResponsible:
     heading: Ownership
     ownsProperty: Do you own this property?
     ownershipType: Ownership type
-    freeholderType: Freeholder type
+    freeholdType: Freehold type
 landlordDetails:
   heading: Landlords
   registeredLandlords:

@@ -121,7 +121,7 @@ abstract class PropertyDetailsViewModelBase(
             },
             answers.freeholdType?.let {
                 ownershipAnswerRow(
-                    "propertyDetails.peopleResponsible.ownership.freeholderType",
+                    "propertyDetails.peopleResponsible.ownership.freeholdType",
                     MessageKeyConverter.convert(it),
                 )
             },

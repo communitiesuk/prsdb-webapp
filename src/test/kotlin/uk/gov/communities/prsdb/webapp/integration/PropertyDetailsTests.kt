@@ -239,27 +239,27 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `the ownership answers are shown, omitting the rows for questions that were not asked`(page: Page) {
-                // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, so freeholder type is not asked
+                // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, so freehold type is not asked
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
-                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow).not().isVisible()
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow).not().isVisible()
                 // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
                     .hasAttribute("href", "#")
             }
 
             @Test
-            fun `the ownership answers include the freeholder type for a freehold property`(page: Page) {
+            fun `the ownership answers include the freehold type for a freehold property`(page: Page) {
                 // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Freehold")
-                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholderTypeRow.value).containsText("Sole ownership")
+                assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow.value).containsText("Sole ownership")
             }
 
             @Test

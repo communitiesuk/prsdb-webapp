@@ -856,7 +856,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 listOf(
                     "propertyDetails.peopleResponsible.ownership.ownsProperty",
                     "propertyDetails.peopleResponsible.ownership.ownershipType",
-                    "propertyDetails.peopleResponsible.ownership.freeholderType",
+                    "propertyDetails.peopleResponsible.ownership.freeholdType",
                 ),
                 rows.map { it.fieldHeading },
             )

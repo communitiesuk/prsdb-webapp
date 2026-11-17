@@ -222,7 +222,7 @@ class PropertyRegistrationCyaStepConfig(
                     },
                     answers.freeholdType?.let {
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "propertyDetails.peopleResponsible.ownership.freeholderType",
+                            "propertyDetails.peopleResponsible.ownership.freeholdType",
                             it,
                             Destination.VisitableStep(
                                 ownershipTypeTask.freeholdTypeStep,
