@@ -45,7 +45,6 @@ class AssociatedPartyNotificationService(
         throw PrsdbWebException("Associated party has a name but no email address or postal address")
     }
 
-    // Only called for named freeholders with postal addresses, so the orEmpty fallbacks are never used.
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
