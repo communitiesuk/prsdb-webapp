@@ -124,10 +124,9 @@ Letters are stubbed locally in the same way as emails, and are printed to the co
 Letters whose last address line matches a postcode in `local.letters` in `application-local.yml` always fail, so error handling can be tested.
 
 The `use-notify` profile switches both emails and letters to real Notify calls.
-A Team and guest list key can send emails to approved recipients, but letter requests fail with `Cannot send letters with a team api key`.
-To see `STUB LETTER SENT` in the application console, remove `use-notify` from the active profiles, keep `local`, and restart the app.
-Then complete a new property registration with a named freeholder and postal address. Emails will also be stubbed during this run;
-the current configuration does not support real emails and stub letters in the same run.
+To inspect letter output without calling Notify, keep `local` active, remove `use-notify`, and restart the app.
+Trigger a letter-sending action in the app, then look for `STUB LETTER SENT` in the console to see the recipient, template and personalisation.
+Emails are also stubbed in this configuration; real emails and stub letters cannot be enabled separately.
 
 Real letters must never be sent locally.
 To send test letters through Notify locally, use the `use-notify` profile as described in [Sending emails Locally](#sending-emails-locally) with a test api key.
