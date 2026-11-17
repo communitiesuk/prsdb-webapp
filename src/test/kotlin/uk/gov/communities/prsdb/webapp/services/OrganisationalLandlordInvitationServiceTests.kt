@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getInstantDaysAgoInUK
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrganisationalLandlordInvitation
@@ -248,11 +249,7 @@ class OrganisationalLandlordInvitationServiceTests {
             .thenReturn(mutableListOf(journeyId to token.toString()))
         val expiredInvitation =
             MockLandlordData.createOrganisationalLandlordInvitation(
-                createdDate =
-                    Instant.now().minus(
-                        (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                        ChronoUnit.DAYS,
-                    ),
+                createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
             )
         whenever(mockInvitationRepository.findByToken(token)).thenReturn(expiredInvitation)
 
@@ -460,11 +457,7 @@ class OrganisationalLandlordInvitationServiceTests {
         invitedEmail = email,
         organisationalLandlord = organisation,
         role = EDITOR,
-        createdDate =
-            Instant.now().minus(
-                (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                ChronoUnit.DAYS,
-            ),
+        createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
     )
 
     @Test
@@ -552,11 +545,7 @@ class OrganisationalLandlordInvitationServiceTests {
                 id = 1L,
                 invitedEmail = inviteeEmail,
                 organisationalLandlord = organisation,
-                createdDate =
-                    Instant.now().minus(
-                        (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                        ChronoUnit.DAYS,
-                    ),
+                createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
             )
         whenever(mockInvitationRepository.findById(1L)).thenReturn(Optional.of(invitation))
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
@@ -669,11 +658,7 @@ class OrganisationalLandlordInvitationServiceTests {
                     invitedEmail = "expired@example.com",
                     organisationalLandlord = organisation,
                     role = EDITOR,
-                    createdDate =
-                        Instant.now().minus(
-                            (ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-                            ChronoUnit.DAYS,
-                        ),
+                    createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 ),
                 MockLandlordData.createOrganisationalLandlordInvitation(
                     invitedEmail = "hidden@example.com",
