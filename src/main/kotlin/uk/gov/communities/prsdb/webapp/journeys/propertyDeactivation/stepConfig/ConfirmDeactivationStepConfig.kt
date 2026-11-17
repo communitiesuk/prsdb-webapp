@@ -73,7 +73,7 @@ class ConfirmDeactivationStepConfig(
 
     private fun isCurrentLandlordsLastActiveProperty(propertyOwnershipId: Long): Boolean {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        return !activeInactiveService.hasOtherActiveProperties(landlord.id, propertyOwnershipId)
+        return !activeInactiveService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId)
     }
 }
 

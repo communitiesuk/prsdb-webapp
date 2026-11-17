@@ -30,11 +30,11 @@ class ActiveInactiveService(
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
 
         propertyOwnership.landlords
-            .filterNot { hasOtherActiveProperties(it.id, propertyOwnershipId) }
+            .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
             .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
 
-    fun hasOtherActiveProperties(
+    fun landlordHasOtherActiveProperties(
         landlordId: Long,
         excludingPropertyOwnershipId: Long,
     ): Boolean =

@@ -303,6 +303,13 @@
     "bodyLocation": "/emails/PropertyDeactivationConfirmation.md"
   },
   {
+    "test_id": "1cbfb48f-2905-47f5-acae-b792df5effb3",
+    "prod_id": "b09afdd9-c525-4393-8816-983b9e95042a",
+    "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION_ACCOUNT_DEACTIVATED",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/PropertyDeactivationConfirmationAccountDeactivated.md"
+  },
+  {
     "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
     "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",

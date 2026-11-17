@@ -16,12 +16,6 @@ Deactivated properties are deleted after 5 years, before this you can reactivate
 
 You must have an active property registration if it is occupied by tenants.
 
-((landlord deactivated??# Your landlord account))
-
-((landlord deactivated??You do not have any active properties. Your landlord account has also been deactivated.))
-
-[Sign in to reactivate](((dashboard url)))
-
 ---
 
 This is an automated email – do not reply.

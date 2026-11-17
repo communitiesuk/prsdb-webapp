@@ -40,13 +40,11 @@ class PropertyDeactivationJourneyFactory(
             step(journey.cannotDeactivateStep) {
                 routeSegment(CannotDeactivateStep.ROUTE_SEGMENT)
                 parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.HAS_JOINT_LANDLORDS) }
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 noNextDestination()
             }
             step(journey.confirmDeactivationStep) {
                 routeSegment(ConfirmDeactivationStep.ROUTE_SEGMENT)
                 parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.SINGLE_LANDLORD) }
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextDestination {
                     // TODO PDJB-2035: The property record 404s for inactive properties until it supports them
                     Destination

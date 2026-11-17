@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.DeactivatePropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -23,6 +24,7 @@ class ConfirmPagePropertyDeactivation(
 
     val confirmButton = Button(page.locator("button.govuk-button--warning"))
     val cancelLink = Link.byText(page, "Cancel")
+    val backLink = BackLink.default(page)
 
     fun submitConfirm() {
         confirmButton.clickAndWait()

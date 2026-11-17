@@ -125,7 +125,7 @@ class ConfirmDeactivationStepConfigTests {
     private fun arrangeLandlord(hasOtherActiveProperties: Boolean) {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(mockActiveInactiveService.hasOtherActiveProperties(landlord.id, propertyOwnershipId))
+        whenever(mockActiveInactiveService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId))
             .thenReturn(hasOtherActiveProperties)
     }
 

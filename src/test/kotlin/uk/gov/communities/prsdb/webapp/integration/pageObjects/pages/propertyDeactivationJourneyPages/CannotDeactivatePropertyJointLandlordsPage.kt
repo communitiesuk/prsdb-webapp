@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.DeactivatePropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig.CannotDeactivateStep
@@ -18,4 +19,5 @@ class CannotDeactivatePropertyJointLandlordsPage(
         get() = page.locator("h1")
 
     val leavePropertyLink = Link.byText(page, "I’m no longer a landlord for this property")
+    val backLink = BackLink.default(page)
 }

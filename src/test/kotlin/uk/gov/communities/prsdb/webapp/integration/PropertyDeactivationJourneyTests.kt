@@ -69,6 +69,14 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
+    fun `back link on the confirm page returns to the property record`(page: Page) {
+        val confirmPage = navigator.goToPropertyDeactivationConfirmPage(propertyOwnershipId)
+        confirmPage.backLink.clickAndWait()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+    }
+
+    @Test
     fun `confirm page hides the landlord account section when the landlord has other active properties`(page: Page) {
         val confirmPage = navigator.goToPropertyDeactivationConfirmPage(propertyOwnershipId)
 
@@ -104,6 +112,20 @@ class PropertyDeactivationJointLandlordJourneyTests :
         cannotDeactivatePage.leavePropertyLink.clickAndWait()
 
         assertPageIs(page, ConfirmPageLeaveProperty::class, mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()))
+    }
+
+    @Test
+    fun `back link on the cannot deactivate page returns to the property record`(page: Page) {
+        navigator.navigate(DeactivatePropertyController.getPropertyDeactivationPath(jointPropertyOwnershipId))
+        val cannotDeactivatePage =
+            assertPageIs(
+                page,
+                CannotDeactivatePropertyJointLandlordsPage::class,
+                mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()),
+            )
+        cannotDeactivatePage.backLink.clickAndWait()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()))
     }
 
     @Test
