@@ -8,11 +8,11 @@ Check the details the landlord has provided are correct. The council will use th
 
 ((property address))
 
+***
+
 # Landlords renting out this property
 
 ((landlords))
-
-***
 
 # Your details
 
