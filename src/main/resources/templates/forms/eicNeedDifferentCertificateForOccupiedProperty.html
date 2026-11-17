@@ -21,7 +21,6 @@
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.issueDate.whatToDoNext.heading}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.issueDate.whatToDoNext.heading</h2>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.issueDate.whatToDoNext.occupied.needEicrParagraph}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.issueDate.whatToDoNext.occupied.needEicrParagraph</p>
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.subHeading}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.subHeading</h3>
-            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.warning})}"></div>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.one}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.one</p>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.two}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.two</p>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.three}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.paragraph.three</p>
@@ -35,6 +34,7 @@
                 <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.beforeLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.beforeLink</span>
                 <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.link</a><span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.readMore.afterLink</span>
             </p>
+            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eic.occupied.warning})}"></div>
         </section>
     </th:block>
     <th:block id="form-content">

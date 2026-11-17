@@ -270,6 +270,13 @@
   {
     "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
     "prod_id": "1c21afd0-943e-4613-a441-203869e0559a",
+    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION_BEFORE_PDJB_844",
+    "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md"
+  },
+  {
+    "test_id": "23c49498-5e38-481f-84b5-b00e3daca5ca",
+    "prod_id": "c691b63d-a1de-47f7-8080-25233d170f97",
     "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
@@ -280,6 +287,27 @@
     "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
     "subject": "You’re no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
+  },
+  {
+    "test_id": "134132c4-10dd-407a-a839-20ca983ea3c6",
+    "prod_id": "c5fd8d12-fdf7-4792-a725-08a219d6540a",
+    "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION_ACCOUNT_DEACTIVATED",
+    "subject": "You’re no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md"
+  },
+  {
+    "test_id": "b94f36f7-98f8-49a4-8492-7ebac9b8bfe0",
+    "prod_id": "351fdb3e-3dbf-46a3-9039-6a5650f637ad",
+    "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/PropertyDeactivationConfirmation.md"
+  },
+  {
+    "test_id": "1cbfb48f-2905-47f5-acae-b792df5effb3",
+    "prod_id": "b09afdd9-c525-4393-8816-983b9e95042a",
+    "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION_ACCOUNT_DEACTIVATED",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/PropertyDeactivationConfirmationAccountDeactivated.md"
   },
   {
     "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
