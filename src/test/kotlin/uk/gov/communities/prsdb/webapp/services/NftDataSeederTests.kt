@@ -625,7 +625,7 @@ class NftDataSeederTests(
                 "Expected some $table rows to be contactable by email",
             )
             assertTrue(
-                // A named party with no email is contacted by post
+                // A named party with no email was contacted by post, although their address was not stored
                 jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE name IS NOT NULL AND email IS NULL").isNotEmpty(),
                 "Expected some $table rows to be contactable by post",
             )
