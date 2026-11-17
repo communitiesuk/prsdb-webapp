@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationExpiryEmail
-import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getMiddayInstantInUKDaysAgo
+import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getInstantDaysAgoInUK
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -29,7 +29,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
     private lateinit var expiryService: JointLandlordInvitationExpiryEmailService
 
-    private val expiredCreatedDate: Instant = getMiddayInstantInUKDaysAgo(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
+    private val expiredCreatedDate: Instant = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
 
     @BeforeEach
     fun setup() {

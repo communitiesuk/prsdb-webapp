@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordInvitationStatus
-import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getMiddayInstantInUKDaysAgo
+import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getInstantDaysAgoInUK
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class OrganisationalLandlordInvitationTests {
     @Test
     fun `status returns PENDING when the current day is earlier than the expiry date`() {
-        val createdDate = getMiddayInstantInUKDaysAgo(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS - 1)
+        val createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS - 1)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
         assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
@@ -18,7 +18,7 @@ class OrganisationalLandlordInvitationTests {
 
     @Test
     fun `status returns PENDING when the current day equals the expiry date`() {
-        val createdDate = getMiddayInstantInUKDaysAgo(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS)
+        val createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
         assertEquals(OrganisationalLandlordInvitationStatus.PENDING, invitation.status)
@@ -26,7 +26,7 @@ class OrganisationalLandlordInvitationTests {
 
     @Test
     fun `status returns EXPIRED when the current day is later than the expiry date`() {
-        val createdDate = getMiddayInstantInUKDaysAgo(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
+        val createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
         val invitation = MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate)
 
         assertEquals(OrganisationalLandlordInvitationStatus.EXPIRED, invitation.status)
@@ -41,7 +41,7 @@ class OrganisationalLandlordInvitationTests {
 
     @Test
     fun `status returns HIDDEN when a hidden invitation has also expired`() {
-        val createdDate = getMiddayInstantInUKDaysAgo(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
+        val createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1)
         val invitation =
             MockLandlordData.createOrganisationalLandlordInvitation(createdDate = createdDate, isHidden = true)
 
@@ -52,7 +52,7 @@ class OrganisationalLandlordInvitationTests {
     fun `can be deleted by archive when expired or hidden`() {
         val expiredInvitation =
             MockLandlordData.createOrganisationalLandlordInvitation(
-                createdDate = getMiddayInstantInUKDaysAgo(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
+                createdDate = getInstantDaysAgoInUK(ORGANISATIONAL_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
             )
         val hiddenInvitation = MockLandlordData.createOrganisationalLandlordInvitation(isHidden = true)
         val pendingInvitation = MockLandlordData.createOrganisationalLandlordInvitation()
