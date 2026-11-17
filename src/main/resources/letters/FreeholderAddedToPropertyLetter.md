@@ -4,13 +4,11 @@ A landlord has listed you as a freeholder of a property they’re renting out. T
 
 Check the details the landlord has provided are correct. The council will use these details if they ever need to contact you about this property.
 
-# Details to check
-
 # Property you’re listed as a freeholder for
 
 ((property address))
 
-# Landlords renting out this property:
+# Landlords renting out this property
 
 ((landlords))
 
@@ -32,7 +30,12 @@ If they are wrong, contact the landlord and ask them to correct this property re
 
 # If you cannot contact a landlord
 
-Contact us instead by calling 0303 444 7000. We’re open between 9am and 6pm, Monday to Friday.
+Contact us instead:
+
+Phone: 0303 444 7000
+Monday to Friday, 9am to 6pm
+
+Email: registerrentalproperty@communities.gov.uk
 
 Thank you,
 
