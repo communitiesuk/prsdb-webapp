@@ -421,8 +421,6 @@ update:
         one: You’ve changed this property to being unoccupied.
         two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
         three: You can go back to undo this change.
-  numberOfPeople:
-    fieldSetHeading: Update how many people live in your property
   numberOfBedrooms:
     heading: Update how many bedrooms are in your property
   rentIncludesBills:

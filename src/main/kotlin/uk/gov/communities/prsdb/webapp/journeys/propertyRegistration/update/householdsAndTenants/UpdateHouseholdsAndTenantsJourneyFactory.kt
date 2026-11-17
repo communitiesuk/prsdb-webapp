@@ -101,9 +101,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         }
         configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
                 "submitButtonText" to "forms.buttons.continue"
             }
         }

@@ -774,7 +774,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of people
                 val newNumberOfPeople = 3
-                assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
+                assertThat(updateNumberOfPeoplePage.header).containsText("How many people live here in total?")
                 updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
                 val checkOccupancyAnswersPage =
                     assertPageIs(
