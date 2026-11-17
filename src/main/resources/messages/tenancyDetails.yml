@@ -37,9 +37,9 @@ rentIncludesBills:
   fieldSetHint: For example, energy, broadband, Council Tax or cleaning
 billsIncluded:
   error:
-    missing: Select what you include in the rent
-    somethingElse:
-      missing: Enter the bills and services you include in the rent
+    missing: Select which bills you include in the rent
+    other:
+      missing: Enter the other bills you include in the rent
       tooLong: The description of other bills and services must be 200 characters or fewer
   fieldSetHeading: Which of these do you include in the rent?
   fieldSetHint: Select the bills and services included.
@@ -55,8 +55,8 @@ billsIncluded:
     parking: Parking
     gardening: Gardening
     communalAreasCleaner: Cleaner for communal areas
-    somethingElse: Something else
-    'somethingElse.label': Add the bills and services included in the rent
+    other: Other
+    'other.label': Other bills
 furnishedStatus:
   radios:
     error:
