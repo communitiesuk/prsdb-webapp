@@ -918,7 +918,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update bills included
                 val expectedBillsIncluded = "Gas, Electricity, Water"
-                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Update which of these you include in the rent")
+                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Which bills are included?")
                 billsIncludedPage.selectGasElectricityWater()
                 billsIncludedPage.form.submit()
                 val checkYourAnswersPage =

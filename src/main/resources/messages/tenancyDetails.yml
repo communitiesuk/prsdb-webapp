@@ -41,8 +41,8 @@ billsIncluded:
     other:
       missing: Enter the other bills you include in the rent
       tooLong: The description of other bills and services must be 200 characters or fewer
-  fieldSetHeading: Which of these do you include in the rent?
-  fieldSetHint: Select the bills and services included.
+  fieldSetHeading: Which bills are included?
+  fieldSetHint: Select all that apply
   checkbox:
     gas: Gas
     electricity: Electricity
@@ -50,7 +50,7 @@ billsIncluded:
     councilTax: Council Tax
     landline: Landline
     broadband: Broadband
-    tvLicence: TV licence
+    tvLicence: TV Licence
     cableSatelliteTV: Cable or satellite TV
     parking: Parking
     gardening: Gardening

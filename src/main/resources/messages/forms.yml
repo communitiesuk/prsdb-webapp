@@ -423,8 +423,6 @@ update:
         three: You can go back to undo this change.
   numberOfBedrooms:
     heading: Update how many bedrooms are in your property
-  billsIncluded:
-    fieldSetHeading: Update which of these you include in the rent
   furnishedStatus:
     fieldSetHeading: Update is the property furnished
   rentFrequency:

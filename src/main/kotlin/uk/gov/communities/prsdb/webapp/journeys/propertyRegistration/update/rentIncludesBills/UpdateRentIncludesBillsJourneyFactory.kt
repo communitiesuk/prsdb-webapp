@@ -111,11 +111,8 @@ class UpdateRentIncludesBillsJourneyFactory(
             }
         }
         configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperties {
-                mapOf(
-                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading",
-                    "submitButtonText" to "forms.buttons.continue",
-                )
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
     }

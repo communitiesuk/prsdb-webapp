@@ -163,9 +163,6 @@ class UpdateTenancyDetailsJourneyFactory(
         }
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
-        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading" }
-        }
         configureStep(journey.furnishedStatus) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading" }
         }
