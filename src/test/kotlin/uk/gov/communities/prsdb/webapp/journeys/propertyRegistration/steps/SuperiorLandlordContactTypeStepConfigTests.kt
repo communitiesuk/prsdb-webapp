@@ -104,6 +104,38 @@ class SuperiorLandlordContactTypeStepConfigTests {
     }
 
     @Test
+    fun `resolvePageContent prefills postal address when the superior landlord being changed has a name but no stored contact details`() {
+        // Arrange
+        whenever(mockJourneyState.editingSuperiorLandlord)
+            .thenReturn(SuperiorLandlordDataModel(detailsKnown = true, name = "Name"))
+
+        // Act
+        val result =
+            SuperiorLandlordContactTypeStepConfig()
+                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to SuperiorLandlordContactTypeFormModel()))
+
+        // Assert
+        assertEquals(
+            SuperiorLandlordContactType.POSTAL_ADDRESS,
+            (result[FORM_MODEL_ATTR_NAME] as SuperiorLandlordContactTypeFormModel).contactType,
+        )
+    }
+
+    @Test
+    fun `resolvePageContent leaves the contact type empty when the superior landlord being changed has no known details`() {
+        // Arrange
+        whenever(mockJourneyState.editingSuperiorLandlord).thenReturn(SuperiorLandlordDataModel(detailsKnown = false))
+
+        // Act
+        val result =
+            SuperiorLandlordContactTypeStepConfig()
+                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to SuperiorLandlordContactTypeFormModel()))
+
+        // Assert
+        assertNull((result[FORM_MODEL_ATTR_NAME] as SuperiorLandlordContactTypeFormModel).contactType)
+    }
+
+    @Test
     fun `resolvePageContent does not overwrite a contact type the user has already chosen`() {
         // Arrange
         val formModel = SuperiorLandlordContactTypeFormModel(contactType = SuperiorLandlordContactType.POSTAL_ADDRESS)

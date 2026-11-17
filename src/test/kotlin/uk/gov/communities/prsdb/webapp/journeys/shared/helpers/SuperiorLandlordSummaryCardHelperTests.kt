@@ -88,9 +88,22 @@ class SuperiorLandlordSummaryCardHelperTests {
     }
 
     @Test
-    fun `getSummaryCards throws when a superior landlord with known details has no email or postal address`() {
+    fun `superior landlord with known details but no email or postal address has a card with the postal address note`() {
         val superiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = true, name = "Billie Smith"))
 
-        assertThrows<PrsdbWebException> { helper.getSummaryCards(superiorLandlords) }
+        val card = helper.getSummaryCards(superiorLandlords).single()
+
+        assertEquals("Billie Smith", card.title)
+        assertEquals(emptyList<Any>(), card.summaryList)
+        assertEquals(SuperiorLandlordSummaryCardHelper.DEFAULT_POSTAL_ADDRESS_NOTE_KEY, card.bodyTextKey)
+    }
+
+    @Test
+    fun `getSummaryCards uses the postal address note key it is given`() {
+        val superiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = true, name = "Billie Smith"))
+
+        val card = helper.getSummaryCards(superiorLandlords, postalAddressNoteKey = "some.other.key").single()
+
+        assertEquals("some.other.key", card.bodyTextKey)
     }
 }

@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class FreeholderSummaryCardHelper {
     fun getSummaryCards(
         freeholdersMap: Map<Int, FreeholderDataModel>,
+        postalAddressNoteKey: String = DEFAULT_POSTAL_ADDRESS_NOTE_KEY,
         getActions: (freeholderId: Int) -> List<SummaryCardActionViewModel> = { emptyList() },
     ): List<SummaryCardViewModel> =
         freeholdersMap
@@ -18,10 +19,13 @@ class FreeholderSummaryCardHelper {
             .map { (freeholderId, freeholder) ->
                 val actions = getActions(freeholderId)
                 if (freeholder.detailsKnown) {
+                    val contactRows = getContactRows(freeholder)
                     SummaryCardViewModel(
                         title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
-                        summaryList = getContactRows(freeholder),
+                        summaryList = contactRows,
                         actions = actions,
+                        // A named freeholder with no contact rows was contacted by post, but their address was not stored
+                        bodyTextKey = if (contactRows.isEmpty()) postalAddressNoteKey else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -44,5 +48,9 @@ class FreeholderSummaryCardHelper {
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        ).ifEmpty { throw PrsdbWebException("Freeholder has known details but no email or postal address") }
+        )
+
+    companion object {
+        const val DEFAULT_POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.freeholder.postalAddressNote"
+    }
 }

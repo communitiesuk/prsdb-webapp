@@ -32,6 +32,10 @@ peopleResponsible:
     ownsProperty: Do you own this property?
     ownershipType: Ownership type
     freeholdType: Freehold type
+  freeholder:
+    postalAddressNote: A <strong>postal address</strong> was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.
+  superiorLandlord:
+    postalAddressNote: A <strong>postal address</strong> was provided for this superior landlord. We’ve used this to tell them that they’re named on this registration.
 landlordDetails:
   heading: Landlords
   registeredLandlords:
