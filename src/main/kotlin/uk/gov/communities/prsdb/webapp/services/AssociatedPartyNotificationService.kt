@@ -21,6 +21,7 @@ class AssociatedPartyNotificationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     // TODO PDJB-1987: build the freeholder added email and pass it with buildFreeholderAddedToPropertyLetter to sendNotificationToFreeholder
+    // TODO PDJB-1988: pass the journey's FreeholderDataModel to notifications, since Freeholder will no longer have an address.
     fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
         TODO("Implement freeholder creation notification when its email template is available")
 
