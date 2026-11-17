@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -89,7 +90,7 @@ class AssociatedPartyNotificationServiceTests {
                         createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
                     ),
             )
-        val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com", address = postalAddress)
+        val freeholder = createFreeholderModel(name = "Sarah Thompson", address = postalAddress)
         whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
@@ -107,10 +108,9 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property letter uses journey details without sending an email`() {
+    fun `freeholder added to property notification posts a letter built from journey details when the address is known`() {
         // Arrange
-        val freeholder =
-            createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com", address = postalAddress)
+        val freeholder = createFreeholderModel(name = "Sarah Thompson", address = postalAddress)
         val propertyOwnership =
             createPropertyOwnership(
                 address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
@@ -124,7 +124,7 @@ class AssociatedPartyNotificationServiceTests {
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
-        val outcome = associatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
+        val outcome = associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, propertyOwnership)
 
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
@@ -136,16 +136,73 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property letter is not sent without a name`() {
+    fun `freeholder added to property notification is not sent without a name`() {
         val freeholder = createFreeholderModel(address = postalAddress)
 
         val outcome =
-            associatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(
+            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(
                 freeholder,
                 createPropertyOwnership(),
             )
 
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `freeholder added to property notification sends nothing yet to a freeholder with only an email address`() {
+        // Arrange
+        val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com")
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(
+                freeholder,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertNull(outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `freeholder added to property notification prefers email when both contact methods are present`() {
+        // Arrange
+        val freeholder =
+            createFreeholderModel(
+                name = "Sarah Thompson",
+                email = "sarah@example.com",
+                address = postalAddress,
+            )
+        val service =
+            AssociatedPartyNotificationService(
+                emailNotificationService,
+                letterNotificationService,
+                AbsoluteUrlProvider("example.test", "example.test"),
+            )
+
+        // Act
+        val outcome =
+            service.sendFreeholderAddedToPropertyNotification(
+                freeholder,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertNull(outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `freeholder added to property notification throws when a named freeholder has no contact method`() {
+        // Arrange
+        val freeholder = createFreeholderModel(name = "Sarah Thompson")
+
+        // Act, Assert
+        assertThrows(PrsdbWebException::class.java) {
+            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, createPropertyOwnership())
+        }
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 

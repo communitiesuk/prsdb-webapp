@@ -21,25 +21,31 @@ class AssociatedPartyNotificationService(
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987: build and send the freeholder added email.
-    fun sendFreeholderAddedToPropertyLetter(
+    // TODO PDJB-1987: make the return type non-nullable once the freeholder added email is sent.
+    fun sendFreeholderAddedToPropertyNotification(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
-    ): AssociatedPartyNotificationOutcome {
+    ): AssociatedPartyNotificationOutcome? {
         val name = freeholder.name
         if (name.isNullOrBlank()) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
 
-        val postalAddress =
-            freeholder.address
-                ?: throw PrsdbWebException("Associated party has a name but no postal address")
-        val letter = buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
-        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
-        return AssociatedPartyNotificationOutcome.LETTER_SENT
+        if (!freeholder.email.isNullOrBlank()) {
+            // TODO PDJB-1987: build and send the freeholder added email.
+            return null
+        }
+
+        if (freeholder.address != null) {
+            val letter = buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
+            letterNotificationService.sendLetter(letterAddress(name, freeholder.address), letter)
+            return AssociatedPartyNotificationOutcome.LETTER_SENT
+        }
+
+        throw PrsdbWebException("Associated party has a name but no email address or postal address")
     }
 
-    // Letters are only sent for named freeholders with postal addresses.
+    // Only called for named freeholders with postal addresses, so the orEmpty fallbacks are never used.
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
