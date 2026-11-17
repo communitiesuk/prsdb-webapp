@@ -18,12 +18,15 @@ class SuperiorLandlordSummaryCardHelper {
             .map { (superiorLandlordId, superiorLandlord) ->
                 val actions = getActions(superiorLandlordId)
                 if (superiorLandlord.detailsKnown) {
+                    val contactRows = getContactRows(superiorLandlord)
                     SummaryCardViewModel(
                         title =
                             superiorLandlord.name
                                 ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
-                        summaryList = getContactRows(superiorLandlord),
+                        summaryList = contactRows,
                         actions = actions,
+                        // A named superior landlord with no contact rows was contacted by post, but their address was not stored
+                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -46,5 +49,9 @@ class SuperiorLandlordSummaryCardHelper {
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        ).ifEmpty { throw PrsdbWebException("Superior landlord has known details but no email or postal address") }
+        )
+
+    companion object {
+        const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
+    }
 }
