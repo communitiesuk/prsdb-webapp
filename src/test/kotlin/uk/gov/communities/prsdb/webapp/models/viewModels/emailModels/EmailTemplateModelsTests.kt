@@ -423,6 +423,26 @@ class EmailTemplateModelsTests {
                     "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md",
                 ),
                 EmailTemplateTestData(
+                    PropertyDeactivationConfirmationEmail(
+                        recipientName = "Alice",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        landlordDeactivated = false,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/PropertyDeactivationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeactivationConfirmationEmail(
+                        recipientName = "Alice",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        landlordDeactivated = true,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",
                         propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
