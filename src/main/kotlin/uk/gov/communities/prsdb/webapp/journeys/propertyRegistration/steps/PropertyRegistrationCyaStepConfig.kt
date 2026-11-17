@@ -141,15 +141,15 @@ class PropertyRegistrationCyaStepConfig(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
             "correspondenceRows" to getCorrespondenceRows(state),
             "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
-            "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
+            "rentedOutLicensingHeadingKey" to "licensing.checkAnswers.heading",
             "rentedOutGasHeadingKey" to "checkGasSafety.heading",
             "rentedOutElectricalHeadingKey" to "checkElectricalSafety.heading",
             "rentedOutEpcHeadingKey" to "propertyCompliance.epcTask.checkEpcAnswers.heading",
-            "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.heading",
+            "rentedOutTenancyHeadingKey" to "tenancyDetails.checkAnswers.heading",
             "rentedOutLicensingRows" to licensingDetails,
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
-            "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
+            "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "tenancyDetails.checkAnswers.unoccupiedBodyText" else null,
         ) +
             getPeopleResponsibleForThisPropertyContent(state)
 
@@ -222,7 +222,7 @@ class PropertyRegistrationCyaStepConfig(
                     },
                     answers.freeholdType?.let {
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "propertyDetails.peopleResponsible.ownership.freeholderType",
+                            "propertyDetails.peopleResponsible.ownership.freeholdType",
                             it,
                             Destination.VisitableStep(
                                 ownershipTypeTask.freeholdTypeStep,
@@ -516,8 +516,8 @@ class PropertyRegistrationCyaStepConfig(
         if (licensingType == LicensingType.NO_LICENSING) {
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
+                    "licensing.checkAnswers.licensingType",
+                    "licensing.checkAnswers.noLicensingRequired",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )
@@ -526,8 +526,8 @@ class PropertyRegistrationCyaStepConfig(
         if (!isOccupied && licensingType == LicensingType.PROVIDE_LATER) {
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                    "licensing.checkAnswers.licensingType",
+                    "licensing.checkAnswers.licensingProvideLaterUnoccupied",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )

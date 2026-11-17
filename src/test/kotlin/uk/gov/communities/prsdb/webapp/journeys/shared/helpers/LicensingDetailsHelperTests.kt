@@ -30,7 +30,7 @@ class LicensingDetailsHelperTests {
 
         // Assert
         summaryList.single().let { row ->
-            assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
+            assertEquals("licensing.checkAnswers.licensingType", row.fieldHeading)
             assertEquals(LicensingType.NO_LICENSING, row.fieldValue)
             assertEquals(
                 listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
@@ -52,7 +52,7 @@ class LicensingDetailsHelperTests {
         assertEquals(2, summaryList.size)
 
         summaryList[0].let { row ->
-            assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
+            assertEquals("licensing.checkAnswers.licensingType", row.fieldHeading)
             assertEquals(LicensingType.HMO_MANDATORY_LICENCE, row.fieldValue)
             assertEquals(
                 listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
@@ -80,7 +80,7 @@ class LicensingDetailsHelperTests {
 
         // Assert
         summaryList.single().let { row ->
-            assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
+            assertEquals("licensing.checkAnswers.licensingType", row.fieldHeading)
             assertEquals(LicensingType.PROVIDE_LATER, row.fieldValue)
             assertEquals(
                 listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),

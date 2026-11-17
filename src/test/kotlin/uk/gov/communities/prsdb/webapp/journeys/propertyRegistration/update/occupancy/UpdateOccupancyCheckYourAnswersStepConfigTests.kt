@@ -60,7 +60,7 @@ class UpdateOccupancyCheckYourAnswersStepConfigTests {
             @Suppress("UNCHECKED_CAST")
             val summaryList = content["summaryListData"] as List<SummaryListRowViewModel>
             assertEquals(1, summaryList.size)
-            assertEquals("forms.checkPropertyAnswers.tenancyDetails.occupied", summaryList[0].fieldHeading)
+            assertEquals("tenancyDetails.checkAnswers.occupied", summaryList[0].fieldHeading)
         }
     }
 

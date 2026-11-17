@@ -570,7 +570,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
+                "licensing.checkAnswers.noLicensingRequired",
                 licensingRows.first().fieldValue,
             )
         }
@@ -584,7 +584,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                "licensing.checkAnswers.licensingProvideLaterUnoccupied",
                 licensingRows.first().fieldValue,
             )
         }
@@ -611,7 +611,7 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(
-                "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
+                "tenancyDetails.checkAnswers.unoccupiedBodyText",
                 content["tenancyUnoccupiedBodyTextKey"],
             )
             assertEquals(emptyList<SummaryListRowViewModel>(), content["rentedOutTenancyRows"])
@@ -856,7 +856,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 listOf(
                     "propertyDetails.peopleResponsible.ownership.ownsProperty",
                     "propertyDetails.peopleResponsible.ownership.ownershipType",
-                    "propertyDetails.peopleResponsible.ownership.freeholderType",
+                    "propertyDetails.peopleResponsible.ownership.freeholdType",
                 ),
                 rows.map { it.fieldHeading },
             )

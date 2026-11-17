@@ -16,6 +16,7 @@ personalDetails:
   telephoneNumber: Telephone number
   englandOrWalesResident: UK resident
   contactAddress: Contact address
+  homeAddress: Home address
   country: Country of residence
   nonEnglandOrWalesAddress: Address (outside UK)
   englandOrWalesAddress: UK contact address

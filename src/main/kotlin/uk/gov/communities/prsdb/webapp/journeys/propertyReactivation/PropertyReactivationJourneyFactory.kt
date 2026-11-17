@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
@@ -67,33 +68,48 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED) }
                 noNextDestination()
             }
-            // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
-            // and updating entryStepFor and completionStepFor
-            step(journey.licensingStep) {
-                routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
-                parents { journey.parentsFor(LICENSING) }
-                nextStep { journey.nextStepAfter(LICENSING) }
+            section {
+                withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
+                // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
+                // and updating entryStepFor and completionStepFor
+                step(journey.licensingStep) {
+                    routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
+                    parents { journey.parentsFor(LICENSING) }
+                    nextStep { journey.nextStepAfter(LICENSING) }
+                }
             }
-            task(journey.gasSafetyTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(GAS_SAFETY) }
-                nextStep { journey.nextStepAfter(GAS_SAFETY) }
+            section {
+                withHeadingMessageKey("propertyCompliance.gasSafetyTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.gasSafetyTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(GAS_SAFETY) }
+                    nextStep { journey.nextStepAfter(GAS_SAFETY) }
+                }
             }
-            task(journey.electricalSafetyTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(ELECTRICAL_SAFETY) }
-                nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
+            section {
+                withHeadingMessageKey("propertyCompliance.electricalSafetyTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.electricalSafetyTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(ELECTRICAL_SAFETY) }
+                    nextStep { journey.nextStepAfter(ELECTRICAL_SAFETY) }
+                }
+                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
-            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
-            task(journey.epcTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(EPC) }
-                nextStep { journey.nextStepAfter(EPC) }
+            section {
+                withHeadingMessageKey("propertyCompliance.epcTask.sectionHeading", shouldUseNumbering = false)
+                task(journey.epcTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(EPC) }
+                    nextStep { journey.nextStepAfter(EPC) }
+                }
             }
-            task(journey.tenancyDetailsTask) {
-                withDependencies { journey }
-                parents { journey.parentsFor(TENANCY_DETAILS) }
-                nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
+            section {
+                withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
+                task(journey.tenancyDetailsTask) {
+                    withDependencies { journey }
+                    parents { journey.parentsFor(TENANCY_DETAILS) }
+                    nextStep { journey.nextStepAfter(TENANCY_DETAILS) }
+                }
             }
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
@@ -106,6 +122,9 @@ class PropertyReactivationJourneyFactory(
             useContinueButtons(journey.electricalSafetyTask)
             useContinueButtons(journey.epcTask)
             useContinueButtons(journey.tenancyDetailsTask)
+            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
+            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
+            hideCheckAnswersSectionHeader(journey.epcTask)
         }
     }
 
