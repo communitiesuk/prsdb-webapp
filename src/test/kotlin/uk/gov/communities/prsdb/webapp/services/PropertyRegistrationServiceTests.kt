@@ -593,7 +593,7 @@ class PropertyRegistrationServiceTests {
             },
         )
 
-        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(eq(registrationNumber.number))
+        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(eq(registrationNumber.number), eq(false))
     }
 
     @Test
@@ -1819,7 +1819,10 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
 
         // Assert
-        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(
+            propertyOwnership.registrationNumber.number,
+            false,
+        )
         verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
@@ -1970,6 +1973,27 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockActiveInactiveService).reactivateLandlordIfInactive(landlord)
+    }
+
+    @Test
+    fun `registerProperty records in the session that the landlord was reactivated once the transaction commits`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(mockActiveInactiveService.reactivateLandlordIfInactive(landlord)).thenReturn(true)
+        TransactionSynchronizationManager.initSynchronization()
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+        TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+
+        // Assert
+        verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(
+            propertyOwnership.registrationNumber.number,
+            true,
+        )
     }
 
     private fun stubPropertyOwnershipCreation(

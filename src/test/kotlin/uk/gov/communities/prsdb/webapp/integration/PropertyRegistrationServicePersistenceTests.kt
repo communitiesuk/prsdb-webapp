@@ -130,7 +130,7 @@ class PropertyRegistrationServicePersistenceTests : IntegrationTestWithMutableDa
             }!!
 
         // Assert
-        verify(mockConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+        verify(mockConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number, false)
         verify(confirmationEmailSender).sendEmail(eq(LANDLORD_EMAIL), any())
         verify(lettingAgentInvitationEmailSender).sendEmail(eq(LETTING_AGENT_EMAIL), any())
         verify(jointLandlordInvitationEmailSender).sendEmail(eq(JOINT_LANDLORD_EMAIL), any())

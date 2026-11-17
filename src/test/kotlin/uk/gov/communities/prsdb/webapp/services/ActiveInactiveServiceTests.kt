@@ -94,23 +94,25 @@ class ActiveInactiveServiceTests {
     }
 
     @Test
-    fun `reactivateLandlordIfInactive marks an inactive landlord active, clears the date and saves it`() {
+    fun `reactivateLandlordIfInactive marks an inactive landlord active, clears the date, saves it and returns true`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         landlord.deactivate(ORIGINAL_DATE)
 
-        activeInactiveService.reactivateLandlordIfInactive(landlord)
+        val wasReactivated = activeInactiveService.reactivateLandlordIfInactive(landlord)
 
+        assertTrue(wasReactivated)
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
     }
 
     @Test
-    fun `reactivateLandlordIfInactive makes no change for an already active landlord`() {
+    fun `reactivateLandlordIfInactive makes no change for an already active landlord and returns false`() {
         val landlord = MockLandlordData.createIndividualLandlord()
 
-        activeInactiveService.reactivateLandlordIfInactive(landlord)
+        val wasReactivated = activeInactiveService.reactivateLandlordIfInactive(landlord)
 
+        assertFalse(wasReactivated)
         assertTrue(landlord.isActive)
         verify(landlordRepository, never()).save(any())
     }
