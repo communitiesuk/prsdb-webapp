@@ -907,7 +907,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update rent includes bills to yes
-                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
+                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Does the rent include any bills?")
                 updateRentIncludesBillsPage.submitIsIncluded()
                 val billsIncludedPage =
                     assertPageIs(

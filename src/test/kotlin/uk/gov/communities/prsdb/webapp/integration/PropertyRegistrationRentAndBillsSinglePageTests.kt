@@ -14,7 +14,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         fun `Submitting with no rent included option selected returns an error`(page: Page) {
             val rentIncludesBillsPage = navigator.skipToTenancyDetailsRentIncludesBillsPage()
             rentIncludesBillsPage.form.submit()
-            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select if the rent includes any bills")
         }
     }
 

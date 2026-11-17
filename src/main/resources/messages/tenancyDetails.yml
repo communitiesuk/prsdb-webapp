@@ -32,9 +32,9 @@ numberOfPeople:
 rentIncludesBills:
   radios:
     error:
-      missing: Select whether the rent includes bills
-  fieldSetHeading: Does the rent include bills?
-  fieldSetHint: 'This could include gas, electricity, water, broadband, Council Tax or cleaning.'
+      missing: Select if the rent includes any bills
+  fieldSetHeading: Does the rent include any bills?
+  fieldSetHint: For example, energy, broadband, Council Tax or cleaning
 billsIncluded:
   error:
     missing: Select what you include in the rent

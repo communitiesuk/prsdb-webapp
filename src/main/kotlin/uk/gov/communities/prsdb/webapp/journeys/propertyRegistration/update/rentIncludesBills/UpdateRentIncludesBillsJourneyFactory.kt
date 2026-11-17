@@ -106,11 +106,8 @@ class UpdateRentIncludesBillsJourneyFactory(
 
     private fun JourneyBuilder<UpdateRentIncludesBillsJourney>.replaceHeadingsAndButtons() {
         configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-            withAdditionalContentProperties {
-                mapOf(
-                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading",
-                    "submitButtonText" to "forms.buttons.continue",
-                )
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
         configureStep(journey.rentIncludesBillsTask.billsIncluded) {

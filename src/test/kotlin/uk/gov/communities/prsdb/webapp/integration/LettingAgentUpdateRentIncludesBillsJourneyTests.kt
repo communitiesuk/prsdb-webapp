@@ -41,7 +41,7 @@ class LettingAgentUpdateRentIncludesBillsJourneyTests : IntegrationTestWithMutab
         val rentIncludesBillsFormPage =
             assertPageIs(page, RentIncludesBillsFormPageLettingAgentUpdate::class, urlArguments)
 
-        assertThat(rentIncludesBillsFormPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
+        assertThat(rentIncludesBillsFormPage.form.fieldsetHeading).containsText("Does the rent include any bills?")
         rentIncludesBillsFormPage.submitIsIncluded()
         val billsIncludedFormPage =
             assertPageIs(page, BillsIncludedFormPageLettingAgentUpdate::class, urlArguments)
