@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
@@ -37,6 +37,7 @@ class PropertyRegistrationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val associatedPartyNotificationService: AssociatedPartyNotificationService,
     private val propertyComplianceService: PropertyComplianceService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
@@ -163,24 +164,32 @@ class PropertyRegistrationService(
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
     ) {
-        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
+        sendNotificationAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
             sendConfirmationEmail(registrationData, landlord, propertyOwnership)
         }
 
+        registrationData.freeholders.orEmpty().filter { it.address != null }.forEach { freeholder ->
+            sendNotificationAndLogFailures("the freeholder added-to-property letter for property ownership ${propertyOwnership.id}") {
+                associatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
+            }
+        }
+
         lettingAgentInvitation?.let { invitation ->
-            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)
             }
         }
 
         jointLandlordInvitations.forEach { invitation ->
-            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationEmail(invitation)
             }
         }
 
         if (jointLandlordInvitations.isNotEmpty()) {
-            sendEmailAndLogFailures("the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures(
+                "the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}",
+            ) {
                 jointLandlordInvitationService.sendInvitationConfirmationEmails(
                     jointLandlordInvitations.map { it.invitedEmail },
                     propertyOwnership,

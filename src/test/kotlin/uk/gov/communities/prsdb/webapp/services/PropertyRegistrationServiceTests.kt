@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -90,6 +91,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
+
+    @Mock
+    private lateinit var mockAssociatedPartyNotificationService: AssociatedPartyNotificationService
 
     @Mock
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
@@ -1772,10 +1776,17 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty creates the invitations but neither sets the last PRN registered this session nor sends emails before commit`() {
+    fun `registerProperty creates invitations but sends no notifications before commit`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholderWithAddress =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val freeholderWithoutAddress = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(createLettingAgentInvitation(propertyOwnership))
@@ -1784,12 +1795,15 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.initSynchronization()
 
         // Act
-        propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        propertyRegistrationService.registerProperty(
+            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithoutAddress)),
+        )
 
         // Assert
         verify(mockLettingAgentAccessService).createInvitation(propertyOwnership, LETTING_AGENT_EMAIL)
         verify(mockJointLandlordInvitationService).createInvitations(JOINT_LANDLORD_EMAILS, propertyOwnership, landlord)
         verifyNoMoreInteractions(mockJointLandlordInvitationService)
+        verifyNoInteractions(mockAssociatedPartyNotificationService)
         verifyNoInteractions(
             mockConfirmationEmailSender,
             mockDelegateToLettingAgentEmailService,
@@ -1798,10 +1812,17 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sets the last PRN registered this session and sends every email once the transaction it is part of commits`() {
+    fun `registerProperty sends notifications after the transaction it is part of commits`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholderWithAddress =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val freeholderWithoutAddress = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         val currentUserEmail = "admin@example.com"
@@ -1815,12 +1836,17 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.initSynchronization()
 
         // Act
-        propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        propertyRegistrationService.registerProperty(
+            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithoutAddress)),
+        )
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
 
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
         verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
+        verify(mockAssociatedPartyNotificationService).sendFreeholderAddedToPropertyLetter(freeholderWithAddress, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService, never())
+            .sendFreeholderAddedToPropertyLetter(freeholderWithoutAddress, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -1839,10 +1865,16 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty still returns the property and sends the other emails when an email fails to send`() {
+    fun `registerProperty still returns the property and sends other notifications when a notification fails to send`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
@@ -1854,9 +1886,14 @@ class PropertyRegistrationServiceTests {
         whenever(mockJointLandlordInvitationService.sendInvitationEmail(any()))
             .thenThrow(RuntimeException("Email failed to send"))
             .thenAnswer { }
+        whenever(mockAssociatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(any(), any()))
+            .thenThrow(RuntimeException("Letter failed to send"))
 
         // Act
-        val registeredPropertyOwnership = propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        val registeredPropertyOwnership =
+            propertyRegistrationService.registerProperty(
+                registrationDataWithInvitations.copy(freeholders = listOf(freeholder)),
+            )
 
         // Assert
         assertEquals(propertyOwnership, registeredPropertyOwnership)

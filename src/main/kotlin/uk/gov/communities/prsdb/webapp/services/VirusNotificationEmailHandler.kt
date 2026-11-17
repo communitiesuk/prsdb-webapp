@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -153,7 +153,7 @@ class VirusNotificationEmailHandler(
         recipientAddress: String,
         email: VirusScanUnsuccessfulEmail,
     ) = runAfterTransactionCommits {
-        sendEmailAndLogFailures("a virus scan unsuccessful email") {
+        sendNotificationAndLogFailures("a virus scan unsuccessful email") {
             emailNotificationService.sendEmail(recipientAddress, email)
         }
     }

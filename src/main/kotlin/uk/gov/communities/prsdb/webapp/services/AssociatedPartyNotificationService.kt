@@ -21,11 +21,25 @@ class AssociatedPartyNotificationService(
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987: build the freeholder added email and pass it with buildFreeholderAddedToPropertyLetter to sendNotificationToFreeholder
-    fun sendCreationNotificationForFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =
-        TODO("Implement freeholder creation notification when its email template is available")
+    // TODO PDJB-1987: build and send the freeholder added email.
+    fun sendFreeholderAddedToPropertyLetter(
+        freeholder: FreeholderDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): AssociatedPartyNotificationOutcome {
+        val name = freeholder.name
+        if (name.isNullOrBlank()) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
+        }
 
-    // The letter is only sent by sendNotification when the freeholder has a name and postal address
+        val postalAddress =
+            freeholder.address
+                ?: throw PrsdbWebException("Associated party has a name but no postal address")
+        val letter = buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
+        letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
+        return AssociatedPartyNotificationOutcome.LETTER_SENT
+    }
+
+    // Letters are only sent for named freeholders with postal addresses.
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
@@ -46,7 +60,7 @@ class AssociatedPartyNotificationService(
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlords,
             freeholderAddress = freeholder.address?.toMultiLineAddress().orEmpty(),
-            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
         )
     }
 

@@ -7,10 +7,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
-import kotlin.String
 
 @PrsdbWebService
 class LeavePropertyService(
@@ -47,7 +46,9 @@ class LeavePropertyService(
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
         TransactionHelper.runAfterTransactionCommits {
-            EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the leave property confirmation email for property ownership ${propertyOwnership.id}",
+            ) {
                 confirmationEmailSender.sendEmail(
                     currentUser.email,
                     JointLandlordYouLeftConfirmation(
@@ -57,7 +58,9 @@ class LeavePropertyService(
                 )
             }
             // TODO: PDJB-1274: Update emails to account for other users in the org
-            EmailHelper.sendEmailAndLogFailures("the swap to individual nudge email for property ownership ${propertyOwnership.id}") {
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the swap to individual nudge email for property ownership ${propertyOwnership.id}",
+            ) {
                 swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
             }
         }

@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
-import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class AssociatedPartyNotificationServiceTests {
@@ -62,7 +61,7 @@ class AssociatedPartyNotificationServiceTests {
             propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
             freeholderAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
-            privacyNoticeUrl = "https://example.test/privacy-notice",
+            privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val postalAddress = AddressDataModel(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
 
@@ -91,8 +90,8 @@ class AssociatedPartyNotificationServiceTests {
                     ),
             )
         val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com", address = postalAddress)
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
-            .thenReturn(URI("https://example.test/privacy-notice"))
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+            .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
         val result = associatedPartyNotificationService.buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
@@ -108,13 +107,45 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `creation notification for a freeholder fails explicitly until implemented`() {
-        val freeholder = createFreeholderModel()
+    fun `freeholder added to property letter uses journey details without sending an email`() {
+        // Arrange
+        val freeholder =
+            createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com", address = postalAddress)
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        val expectedLetter =
+            expectedFreeholderAddedToPropertyLetter.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)"),
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+            .thenReturn("example.test/landlord/privacy-notice")
 
-        assertThrows(NotImplementedError::class.java) {
-            associatedPartyNotificationService.sendCreationNotificationForFreeholder(freeholder)
-        }
+        // Act
+        val outcome = associatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
 
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            expectedLetter,
+        )
+        verifyNoInteractions(emailNotificationService)
+    }
+
+    @Test
+    fun `freeholder added to property letter is not sent without a name`() {
+        val freeholder = createFreeholderModel(address = postalAddress)
+
+        val outcome =
+            associatedPartyNotificationService.sendFreeholderAddedToPropertyLetter(
+                freeholder,
+                createPropertyOwnership(),
+            )
+
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
