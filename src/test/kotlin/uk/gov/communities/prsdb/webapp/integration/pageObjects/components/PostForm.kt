@@ -5,8 +5,10 @@ import com.microsoft.playwright.Page
 
 open class PostForm(
     parentLocator: Locator,
-) : Form(parentLocator) {
+    formSelector: String = "form",
+) : Form(parentLocator, formSelector) {
     constructor(page: Page) : this(page.locator("html"))
 
-    val csrfToken: String = locator.locator("input[name='_csrf']").inputValue()
+    val csrfToken: String
+        get() = locator.locator("input[name='_csrf']").inputValue()
 }
