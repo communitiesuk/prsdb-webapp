@@ -17,7 +17,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.SuperiorLandlordRepository
@@ -30,19 +29,14 @@ class SuperiorLandlordServiceTests {
     @Mock
     private lateinit var superiorLandlordRepository: SuperiorLandlordRepository
 
-    @Mock
-    private lateinit var addressService: AddressService
-
     @InjectMocks
     private lateinit var superiorLandlordService: SuperiorLandlordService
 
     @Test
-    fun `createSuperiorLandlords saves a postal address superior landlord with its resolved address`() {
+    fun `createSuperiorLandlords saves a postal address superior landlord with only their name`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val address = Address(addressDataModel)
-        whenever(addressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
 
         // Act
         superiorLandlordService.createSuperiorLandlords(
@@ -61,7 +55,6 @@ class SuperiorLandlordServiceTests {
         verify(superiorLandlordRepository).save(captor.capture())
         assertEquals("Alice Superior", captor.firstValue.name)
         assertNull(captor.firstValue.email)
-        assertEquals(address, captor.firstValue.address)
         assertEquals(propertyOwnership, captor.firstValue.propertyOwnership)
         assertTrue(captor.firstValue.detailsKnown())
     }
@@ -82,13 +75,11 @@ class SuperiorLandlordServiceTests {
         verify(superiorLandlordRepository).save(captor.capture())
         assertNull(captor.firstValue.name)
         assertNull(captor.firstValue.email)
-        assertNull(captor.firstValue.address)
         assertFalse(captor.firstValue.detailsKnown())
-        verifyNoInteractions(addressService)
     }
 
     @Test
-    fun `createSuperiorLandlords saves an email superior landlord without resolving an address`() {
+    fun `createSuperiorLandlords saves an email superior landlord with their name and email`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
 
@@ -102,8 +93,7 @@ class SuperiorLandlordServiceTests {
         val captor = argumentCaptor<SuperiorLandlord>()
         verify(superiorLandlordRepository).save(captor.capture())
         assertEquals("Bob Superior", captor.firstValue.name)
-        assertNull(captor.firstValue.address)
-        verifyNoInteractions(addressService)
+        assertEquals("bob@example.com", captor.firstValue.email)
     }
 
     @Test
@@ -134,7 +124,6 @@ class SuperiorLandlordServiceTests {
 
         // Assert
         verifyNoInteractions(superiorLandlordRepository)
-        verifyNoInteractions(addressService)
     }
 
     @Test
@@ -143,8 +132,6 @@ class SuperiorLandlordServiceTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val existing = SuperiorLandlord(propertyOwnership, name = "Old Name", email = "old@example.com")
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val address = Address(addressDataModel)
-        whenever(addressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
 
         // Act
         superiorLandlordService.updateSuperiorLandlord(
@@ -154,51 +141,6 @@ class SuperiorLandlordServiceTests {
 
         // Assert
         assertEquals("New Name", existing.name)
-        assertEquals(address, existing.address)
-        verify(superiorLandlordRepository).save(existing)
-    }
-
-    @Test
-    fun `updateSuperiorLandlord clears the address when the superior landlord switches to an email`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val existing =
-            SuperiorLandlord(
-                propertyOwnership,
-                name = "Alice Superior",
-                address = Address(AddressDataModel("1 Example Road, EG1 2AB")),
-            )
-
-        // Act
-        superiorLandlordService.updateSuperiorLandlord(
-            existing,
-            SuperiorLandlordDataModel(detailsKnown = true, name = "Alice Superior", email = "alice@example.com"),
-        )
-
-        // Assert
-        assertEquals("alice@example.com", existing.email)
-        assertNull(existing.address)
-        verifyNoInteractions(addressService)
-    }
-
-    @Test
-    fun `updateSuperiorLandlord keeps an unchanged manual address instead of saving a duplicate`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val address = Address(addressDataModel)
-        val existing = SuperiorLandlord(propertyOwnership, name = "Old Name", address = address)
-
-        // Act
-        superiorLandlordService.updateSuperiorLandlord(
-            existing,
-            SuperiorLandlordDataModel(detailsKnown = true, name = "New Name", address = addressDataModel),
-        )
-
-        // Assert
-        assertEquals("New Name", existing.name)
-        assertEquals(address, existing.address)
-        verifyNoInteractions(addressService)
         verify(superiorLandlordRepository).save(existing)
     }
 
@@ -298,20 +240,32 @@ class SuperiorLandlordServiceTests {
     }
 
     @Test
-    fun `updateSuperiorLandlords leaves one with an unchanged manual address alone`() {
+    fun `updateSuperiorLandlords leaves an untouched postal superior landlord alone`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        // A manual address has no UPRN, so it is compared on the address the user sees
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val untouched =
-            savedSuperiorLandlord(
-                propertyOwnership,
-                id = 1,
-                name = "Bob Superior",
-                address = Address(addressDataModel),
-            )
+        val untouched = savedSuperiorLandlord(propertyOwnership, id = 1, name = "Bob Superior")
         whenever(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id))
             .thenReturn(listOf(untouched))
+
+        // Act
+        val added =
+            superiorLandlordService.updateSuperiorLandlords(
+                propertyOwnership,
+                listOf(SuperiorLandlordDataModel(databaseId = 1, detailsKnown = true, name = "Bob Superior")),
+            )
+
+        // Assert
+        assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
+        verify(superiorLandlordRepository, never()).save(any())
+    }
+
+    @Test
+    fun `updateSuperiorLandlords updates a postal superior landlord whose address was re-entered`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val existing = savedSuperiorLandlord(propertyOwnership, id = 1, name = "Bob Superior")
+        whenever(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id))
+            .thenReturn(listOf(existing))
 
         // Act
         val added =
@@ -322,85 +276,14 @@ class SuperiorLandlordServiceTests {
                         databaseId = 1,
                         detailsKnown = true,
                         name = "Bob Superior",
-                        address = addressDataModel,
-                    ),
-                ),
-            )
-
-        // Assert
-        // Rewriting it would mint a duplicate address row, as findOrCreateAddress always saves a
-        // manual address
-        assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
-        verify(superiorLandlordRepository, never()).save(any())
-        verifyNoInteractions(addressService)
-    }
-
-    @Test
-    fun `updateSuperiorLandlords leaves an unchanged superior landlord at the same UPRN alone`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB", uprn = 123456)
-        val existing =
-            savedSuperiorLandlord(
-                propertyOwnership,
-                id = 1,
-                name = "Alice Superior",
-                address = Address(addressDataModel),
-            )
-        whenever(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id))
-            .thenReturn(listOf(existing))
-
-        // Act
-        val added =
-            superiorLandlordService.updateSuperiorLandlords(
-                propertyOwnership,
-                listOf(
-                    SuperiorLandlordDataModel(
-                        databaseId = 1,
-                        detailsKnown = true,
-                        name = "Alice Superior",
-                        address = addressDataModel,
+                        address = AddressDataModel("1 Example Road, EG1 2AB"),
                     ),
                 ),
             )
 
         // Assert
         assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
-        verifyNoInteractions(addressService)
-        verify(superiorLandlordRepository, never()).save(any())
-    }
-
-    @Test
-    fun `updateSuperiorLandlords treats a changed manual address as changed`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        // Neither manually entered address has a UPRN, so they are compared on the address itself
-        val savedAddress = AddressDataModel("1 Example Road, EG1 2AB")
-        val amendedAddress = AddressDataModel("2 Example Road, EG1 2AB")
-        val existing =
-            savedSuperiorLandlord(
-                propertyOwnership,
-                id = 1,
-                name = "Alice Superior",
-                address = Address(savedAddress),
-            )
-        whenever(superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyOwnership.id))
-            .thenReturn(listOf(existing))
-        whenever(addressService.findOrCreateAddress(amendedAddress)).thenReturn(Address(amendedAddress))
-        val resubmitted =
-            SuperiorLandlordDataModel(
-                databaseId = 1,
-                detailsKnown = true,
-                name = "Alice Superior",
-                address = amendedAddress,
-            )
-
-        // Act
-        val added = superiorLandlordService.updateSuperiorLandlords(propertyOwnership, listOf(resubmitted))
-
-        // Assert
         verify(superiorLandlordRepository).save(existing)
-        assertEquals(emptyList<SuperiorLandlordDataModel>(), added)
     }
 
     @Test
@@ -502,7 +385,6 @@ class SuperiorLandlordServiceTests {
         id: Long,
         name: String? = null,
         email: String? = null,
-        address: Address? = null,
-    ) = SuperiorLandlord(propertyOwnership, name = name, email = email, address = address)
+    ) = SuperiorLandlord(propertyOwnership, name = name, email = email)
         .also { ReflectionTestUtils.setField(it, "id", id) }
 }

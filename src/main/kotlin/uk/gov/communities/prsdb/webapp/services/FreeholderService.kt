@@ -2,17 +2,14 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @PrsdbWebService
 class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
-    private val addressService: AddressService,
 ) {
     // Updates the saved freeholders to match the list the user submitted, creating, updating and
     // deleting them one at a time.
@@ -51,27 +48,14 @@ class FreeholderService(
         return added
     }
 
+    // Postal addresses aren't stored, so an address in the submitted model means the user entered one in this journey
     private fun detailsHaveChanged(
         existing: Freeholder,
         submitted: FreeholderDataModel,
     ): Boolean =
         existing.name != submitted.name ||
             existing.email != submitted.email ||
-            addressHasChanged(existing.address, submitted.address)
-
-    // Two looked up addresses can be compared on UPRN. A manually entered one has none, so fall back
-    // to the address the user sees: the same single line address means they did not change their
-    // answer, so the freeholder does not need contacting again.
-    private fun addressHasChanged(
-        existing: Address?,
-        submitted: AddressDataModel?,
-    ): Boolean =
-        when {
-            existing == null && submitted == null -> false
-            existing == null || submitted == null -> true
-            existing.uprn != null && submitted.uprn != null -> existing.uprn != submitted.uprn
-            else -> existing.singleLineAddress != submitted.singleLineAddress
-        }
+            submitted.address != null
 
     @Transactional
     fun createFreeholders(
@@ -91,7 +75,6 @@ class FreeholderService(
                 propertyOwnership = propertyOwnership,
                 name = freeholder.name,
                 email = freeholder.email,
-                address = freeholder.address?.let { addressService.findOrCreateAddress(it) },
             ),
         )
     }
@@ -103,11 +86,6 @@ class FreeholderService(
     ) {
         freeholder.name = updatedDetails.name
         freeholder.email = updatedDetails.email
-        // Only re-resolve the address when it has changed: findOrCreateAddress saves a new row for
-        // every manual address, so reassigning an unchanged one would leave a duplicate behind.
-        if (addressHasChanged(freeholder.address, updatedDetails.address)) {
-            freeholder.address = updatedDetails.address?.let { addressService.findOrCreateAddress(it) }
-        }
         freeholderRepository.save(freeholder)
     }
 
