@@ -110,6 +110,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
@@ -455,16 +456,9 @@ class PropertyRegistrationJourneyFactory(
                         )
                 }
             }
-            // We don't have a section header for these pages, as their titles are the same as the respective page header
-            listOf(
-                journey.gasSafetyTask.checkGasSafetyAnswersStep,
-                journey.electricalSafetyTask.checkElectricalSafetyAnswersStep,
-                journey.epcTask.checkEpcAnswersStep,
-            ).forEach { checkAnswersStep ->
-                configureStep(checkAnswersStep) {
-                    withAdditionalContentProperty { "sectionHeaderInfo" to null }
-                }
-            }
+            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
+            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
+            hideCheckAnswersSectionHeader(journey.epcTask)
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
@@ -555,7 +549,7 @@ class PropertyRegistrationJourneyFactory(
                 saveProgress()
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
+                withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {
@@ -581,7 +575,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.gasSafetyTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
                     withDependencies { journey }
                     parents { journey.licensingTask.isComplete() }
@@ -590,7 +584,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.electricalSafetyTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.electricalSafetyTask) {
                     withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
@@ -601,7 +595,7 @@ class PropertyRegistrationJourneyFactory(
                 useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.epcTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.epcTask) {
                     withDependencies { journey }
                     parents { journey.electricalSafetyTask.isComplete() }
@@ -611,7 +605,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
+                withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
                 task(journey.tenancyDetailsTask) {
                     withDependencies { journey }
                     parents {
