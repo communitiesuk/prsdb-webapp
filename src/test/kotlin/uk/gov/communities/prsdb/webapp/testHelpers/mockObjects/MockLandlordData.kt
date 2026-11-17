@@ -267,13 +267,11 @@ class MockLandlordData {
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
                     renewalDate = renewalDate,
+                    paidForUntil = paidForUntil ?: renewalDate,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
-            if (paidForUntil != null) {
-                propertyOwnership.paidForUntil = paidForUntil
-            }
 
             val newOwnershipLinks = ReflectionTestUtils.getField(propertyOwnership, "ownershipLinks") as Set<*>
             landlords.forEach { landlord ->

@@ -176,10 +176,8 @@ class PropertyOwnershipService(
 
     fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
-    // Looked up regardless of active status so this can also be called for an inactive (deactivated) property,
-    // e.g. during a reactivation payment flow.
     fun getPropertyPaidForUntil(propertyOwnershipId: Long): LocalDate =
-        getPropertyOwnershipRegardlessOfActiveStatus(propertyOwnershipId).paidForUntil
+        retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId).paidForUntil
 
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
@@ -261,7 +259,7 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
-    private fun getPropertyOwnershipRegardlessOfActiveStatus(propertyOwnershipId: Long): PropertyOwnership =
+    private fun retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId: Long): PropertyOwnership =
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
@@ -528,15 +526,13 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // Looked up regardless of active status (see getPropertyPaidForUntil above) so this can also be called for an
-    // inactive (deactivated) property during a reactivation payment flow.
     @Transactional
     fun updatePaidForUntil(
         propertyOwnershipId: Long,
         paidForUntil: LocalDate,
     ) {
-        val propertyOwnership = getPropertyOwnershipRegardlessOfActiveStatus(propertyOwnershipId)
-        propertyOwnership.paidForUntil = paidForUntil
+        val propertyOwnership = retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId)
+        propertyOwnership.updatePaidForUntil(paidForUntil)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

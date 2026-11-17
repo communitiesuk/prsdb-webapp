@@ -150,6 +150,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     // Only changes when a payment is taken, whereas renewalDate can also change at other times (e.g. reactivation).
     @Column(name = "paid_for_until", nullable = false)
     lateinit var paidForUntil: LocalDate
+        private set
 
     constructor(
         ownershipType: OwnershipType,
@@ -254,5 +255,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     fun reactivate() {
         isActive = true
         lastDeactivatedDate = null
+    }
+
+    fun updatePaidForUntil(newPaidForUntil: LocalDate) {
+        paidForUntil = newPaidForUntil
     }
 }

@@ -769,7 +769,6 @@ class NftDataSeeder(
         propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.setInt(24, NftDataFaker.generateOwnershipTypeBeforePdjb955().ordinal)
         propertyOwnershipStmt.setLongOrNull(25, propertyManagerIdIfManaged)
-        // Seeded properties have a successful payment for the period ending on their renewal date (see paymentStmt below).
         propertyOwnershipStmt.setDate(26, renewalDate)
         propertyOwnershipStmt.addBatch()
 
