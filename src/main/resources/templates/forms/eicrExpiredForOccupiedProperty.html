@@ -30,8 +30,8 @@
             </ul>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.beforeLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.beforeLink</span>
-                <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link</a>
-                <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink</span>
             </p>
             <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.warning})}"></div>
         </section>
