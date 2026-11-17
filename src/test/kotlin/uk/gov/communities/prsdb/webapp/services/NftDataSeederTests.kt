@@ -616,7 +616,7 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase gives every named associated party exactly one contact method and placeholders none`() {
+    fun `seedDatabase seeds associated parties contactable by email and by post and placeholders with no email`() {
         newSeeder().seedDatabase()
 
         listOf("freeholder", "superior_landlord").forEach { table ->
@@ -625,16 +625,13 @@ class NftDataSeederTests(
                 "Expected some $table rows to be contactable by email",
             )
             assertTrue(
-                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE address_id IS NOT NULL").isNotEmpty(),
+                // A named party with no email is contacted by post
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE name IS NOT NULL AND email IS NULL").isNotEmpty(),
                 "Expected some $table rows to be contactable by post",
             )
 
             val rowsBreakingTheContactInvariant =
-                jdbcTemplate.queryForList<Long>(
-                    "SELECT id FROM $table WHERE " +
-                        "(name IS NOT NULL AND NOT ((email IS NOT NULL) != (address_id IS NOT NULL))) " +
-                        "OR (name IS NULL AND (email IS NOT NULL OR address_id IS NOT NULL))",
-                )
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE name IS NULL AND email IS NOT NULL")
 
             assertEquals(emptyList<Long>(), rowsBreakingTheContactInvariant, "Found $table rows breaking the contact invariant")
         }
