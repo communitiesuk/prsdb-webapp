@@ -39,6 +39,7 @@ class AbsoluteUrlProvider(
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
 
+    // TODO PDJB-2234: Use the final privacy notice URL for letters and emails, accessible without logging in.
     fun buildLandlordPrivacyNoticeUri(): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
