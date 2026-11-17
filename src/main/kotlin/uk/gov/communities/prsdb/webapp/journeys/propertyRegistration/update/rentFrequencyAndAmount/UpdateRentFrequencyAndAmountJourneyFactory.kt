@@ -69,9 +69,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
                 withAdditionalContentProperty {
-                    "heading" to "forms.update.rentFrequency.heading"
-                }
-                withAdditionalContentProperty {
                     "submitButtonText" to "forms.buttons.continue"
                 }
             }
@@ -109,9 +106,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 else -> {
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)
                     configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-                        withAdditionalContentProperty {
-                            "heading" to "forms.update.rentFrequency.heading"
-                        }
                         withAdditionalContentProperty {
                             "submitButtonText" to "forms.buttons.continue"
                         }

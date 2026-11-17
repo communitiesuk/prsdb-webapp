@@ -89,7 +89,7 @@ rentFrequency:
         label: Monthly
         hint: You collect rent on the same date each month
       fourWeekly:
-        label: 4 weekly
+        label: Every 4 weeks
         hint: You collect rent every 28 days
       weekly:
         label: Weekly

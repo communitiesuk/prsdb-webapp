@@ -163,9 +163,6 @@ class UpdateTenancyDetailsJourneyFactory(
         }
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
-        configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-            withAdditionalContentProperty { "heading" to "forms.update.rentFrequency.heading" }
-        }
         configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
             withAdditionalContentProperty { "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading() }
         }
