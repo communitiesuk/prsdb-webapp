@@ -18,6 +18,7 @@ class FreeholderService(
     // deleting them one at a time.
     // Returns the newly added freeholders so they can be tracked by the journey and notified.
     // TODO PDJB-1993: use this to update freeholders.
+    // TODO PDJB-960: send an added-to-property letter to newly added freeholders with an address.
     // TODO PDJB-2171: also return updated and removed freeholders so they can be tracked by the
     //  journey and notified.
     @Transactional
