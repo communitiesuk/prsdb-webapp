@@ -8,16 +8,13 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
-import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SuperiorLandlordRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -35,9 +32,6 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     @Autowired
     private lateinit var propertyManagerRepository: PropertyManagerRepository
-
-    @Autowired
-    private lateinit var addressRepository: AddressRepository
 
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
@@ -80,45 +74,30 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         propertyOwnershipService.updateOwnershipType(propertyOwnershipId, ownershipType, lastModifiedDate)
     }
 
-    private fun countAddressesWithId(addressId: Long) =
-        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM address WHERE id = ?", Int::class.java, addressId)!!
-
     private fun inTransaction(block: () -> Unit) = TransactionTemplate(transactionManager).executeWithoutResult { block() }
 
     private fun <T : Any> inTransactionReturning(block: () -> T): T = TransactionTemplate(transactionManager).execute { block() }!!
 
     @Test
-    fun `deleting a property ownership deletes its associated parties but not their addresses`() {
+    fun `deleting a property ownership deletes its associated parties`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
-        val freeholderId =
-            inTransactionReturning {
-                val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
-                // Referenced only by the freeholder, so the delete orphans it
-                val freeholderAddress =
-                    addressRepository.save(
-                        Address(AddressDataModel(singleLineAddress = "1 Freeholder Way, EG1 2AB", postcode = "EG1 2AB")),
-                    )
-                val freeholder =
-                    freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder", address = freeholderAddress))
-                propertyOwnership.freeholders.add(freeholder)
-                // A superior landlord with no name, email or address: "no details known"
-                propertyOwnership.superiorLandlords.add(superiorLandlordRepository.save(SuperiorLandlord(propertyOwnership)))
-                propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
-                propertyOwnershipRepository.save(propertyOwnership)
-                freeholder.id
-            }
+        inTransaction {
+            val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+            propertyOwnership.freeholders.add(freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder")))
+            // A superior landlord with no name or email: "no details known"
+            propertyOwnership.superiorLandlords.add(superiorLandlordRepository.save(SuperiorLandlord(propertyOwnership)))
+            propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
+            propertyOwnershipRepository.save(propertyOwnership)
+        }
         assertEquals(1, countRowsIn("property_manager"))
-        val freeholderAddressId =
-            jdbcTemplate.queryForObject("SELECT address_id FROM freeholder WHERE id = ?", Long::class.java, freeholderId)!!
         val superiorLandlord =
             jdbcTemplate.queryForMap(
-                "SELECT name, email, address_id FROM superior_landlord WHERE property_ownership_id = ?",
+                "SELECT name, email FROM superior_landlord WHERE property_ownership_id = ?",
                 propertyOwnershipId,
             )
         assertNull(superiorLandlord["name"])
         assertNull(superiorLandlord["email"])
-        assertNull(superiorLandlord["address_id"])
 
         // Act
         inTransaction {
@@ -129,8 +108,6 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         assertEquals(0, countRowsFor("freeholder", propertyOwnershipId))
         assertEquals(0, countRowsFor("superior_landlord", propertyOwnershipId))
         assertEquals(0, countRowsIn("property_manager"))
-        // Addresses are never deleted, even once nothing references them
-        assertEquals(1, countAddressesWithId(freeholderAddressId))
     }
 
     @Test
@@ -161,12 +138,11 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         assertEquals(1, countRowsFor("freeholder", propertyOwnershipId))
         val freeholder =
             jdbcTemplate.queryForMap(
-                "SELECT name, email, address_id FROM freeholder WHERE property_ownership_id = ?",
+                "SELECT name, email FROM freeholder WHERE property_ownership_id = ?",
                 propertyOwnershipId,
             )
         assertNull(freeholder["name"])
         assertNull(freeholder["email"])
-        assertNull(freeholder["address_id"])
     }
 
     @Test

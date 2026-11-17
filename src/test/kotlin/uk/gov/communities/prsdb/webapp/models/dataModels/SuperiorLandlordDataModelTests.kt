@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -34,18 +33,17 @@ class SuperiorLandlordDataModelTests {
     }
 
     @Test
-    fun `fromSuperiorLandlord maps a postal address superior landlord`() {
+    fun `fromSuperiorLandlord maps a postal superior landlord with only their name`() {
         // Arrange
-        val address = Address(AddressDataModel("1 Example Road, EG1 2AB"))
-        val superiorLandlord =
-            SuperiorLandlord(MockLandlordData.createPropertyOwnership(), name = "Bob Superior", address = address)
+        val superiorLandlord = SuperiorLandlord(MockLandlordData.createPropertyOwnership(), name = "Bob Superior")
 
         // Act
         val dataModel = SuperiorLandlordDataModel.fromSuperiorLandlord(superiorLandlord)
 
         // Assert
-        assertEquals("1 Example Road, EG1 2AB", dataModel.address?.singleLineAddress)
+        assertTrue(dataModel.detailsKnown)
         assertNull(dataModel.email)
+        assertNull(dataModel.address)
     }
 
     @Test
