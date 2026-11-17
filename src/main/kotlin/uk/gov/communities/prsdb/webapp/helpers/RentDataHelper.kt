@@ -15,7 +15,7 @@ class RentDataHelper {
             var formattedRentAmount = "£$rentAmount"
             if (hasCustomRentFrequency(rentFrequency)) {
                 val perMonthSuffix =
-                    messageSource.getMessageForKey("forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+                    messageSource.getMessageForKey("tenancyDetails.checkAnswers.customFrequencyRentAmountSuffix")
                 formattedRentAmount += " $perMonthSuffix"
             }
             return formattedRentAmount

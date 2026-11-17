@@ -97,10 +97,16 @@ class PropertyRegistrationTaskListStepConfig(
                 "rented-out",
                 buildList {
                     add(whoProvidesDetailsItem(state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.rentedOut.licensing", state.licensingTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.gasSafety", state.gasSafetyTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.electricalSafety", state.electricalSafetyTask, state))
-                    add(rentedOutComplianceItem("registerProperty.taskList.epc", state.epcTask, state))
+                    add(rentedOutComplianceItem("licensing.sectionHeading", state.licensingTask, state))
+                    add(rentedOutComplianceItem("propertyCompliance.gasSafetyTask.sectionHeading", state.gasSafetyTask, state))
+                    add(
+                        rentedOutComplianceItem(
+                            "propertyCompliance.electricalSafetyTask.sectionHeading",
+                            state.electricalSafetyTask,
+                            state,
+                        ),
+                    )
+                    add(rentedOutComplianceItem("propertyCompliance.epcTask.sectionHeading", state.epcTask, state))
                     add(tenancyDetailsItem(state))
                 },
             ),
@@ -123,15 +129,15 @@ class PropertyRegistrationTaskListStepConfig(
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
             TaskListItemViewModel(
-                nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
+                nameKey = "tenancyDetails.sectionHeading",
                 status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET),
                 hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint",
                 url = null,
             )
         } else if (state.isDelegatedToLettingAgent()) {
-            notRequiredLettingAgentItem("registerProperty.taskList.rentedOut.tenancyDetails")
+            notRequiredLettingAgentItem("tenancyDetails.sectionHeading")
         } else {
-            TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
+            TaskListItemViewModel.fromTask("tenancyDetails.sectionHeading", state.tenancyDetailsTask)
         }
 
     private fun whoProvidesDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =

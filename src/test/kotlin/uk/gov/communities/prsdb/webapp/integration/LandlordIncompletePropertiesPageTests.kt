@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.LocatorAssertions
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -82,7 +83,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.viewRegisteredPropertiesLink.clickAndWait()
             val detailsPage = assertPageIs(page, LandlordDetailsPage::class)
-            assertEquals("registered-properties", detailsPage.tabs.activeTabPanelId)
+            assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
         }
 
         @Test

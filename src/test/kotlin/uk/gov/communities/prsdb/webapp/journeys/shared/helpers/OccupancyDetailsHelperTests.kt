@@ -158,12 +158,12 @@ class OccupancyDetailsHelperTests {
         val rows = helper.getCheckYourAnswersSummaryList(mockOccupationState, mockMessageSource)
 
         assertEquals(6, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.households", rows[0].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.people", rows[1].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.furnishedStatus", rows[2].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills", rows[3].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentFrequency", rows[4].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentAmount", rows[5].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.households", rows[0].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.people", rows[1].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.furnishedStatus", rows[2].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.rentIncludesBills", rows[3].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.rentFrequency", rows[4].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.rentAmount", rows[5].fieldHeading)
     }
 
     @Test
@@ -177,8 +177,8 @@ class OccupancyDetailsHelperTests {
         val rows = helper.getCheckYourAnswersSummaryList(mockOccupationState, mockMessageSource)
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
+        assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.provideLater", rows[0].fieldValue)
     }
 
     @Test
@@ -190,7 +190,7 @@ class OccupancyDetailsHelperTests {
         val rows = helper.getCheckYourTenancyDetailsAnswersSummaryList(mockTenancyState, mockMessageSource)
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
     }
 
     @Test
@@ -206,8 +206,8 @@ class OccupancyDetailsHelperTests {
             )
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
+        assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("tenancyDetails.checkAnswers.provideLater", rows[0].fieldValue)
         assertEquals(true, rows[0].actions[0].url.contains("journeyId=journey-123"))
     }
 }
