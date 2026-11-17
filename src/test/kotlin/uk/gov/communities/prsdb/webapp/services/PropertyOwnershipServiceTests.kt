@@ -38,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -72,6 +73,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -744,7 +746,7 @@ class PropertyOwnershipServiceTests {
                 mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
             ).thenReturn(landlordsProperties)
 
-            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(ACTIVE_PROPERTIES_FRAGMENT))
                 .thenReturn(expectedCurrentUrlKey)
 
             val expectedResults: List<RegisteredPropertyLandlordViewModel> =
@@ -774,9 +776,9 @@ class PropertyOwnershipServiceTests {
                 )
 
             val result =
-                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
                     currentLandlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 )
 
             assertTrue(result.size == 2)
@@ -832,6 +834,38 @@ class PropertyOwnershipServiceTests {
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
+        }
+    }
+
+    @Nested
+    inner class GetDeactivatedPropertiesForLandlordUser {
+        @Test
+        fun `Returns the landlord's deactivated properties as view models`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val deactivatedProperty =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord),
+                    address = MockLandlordData.createAddress("6 Mythical Place, FA1 1AK"),
+                    registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 7654321),
+                    isActive = false,
+                )
+            whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id))
+                .thenReturn(listOf(deactivatedProperty))
+
+            val result = propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord)
+
+            assertEquals(
+                listOf(
+                    DeactivatedPropertyLandlordViewModel(
+                        address = "6 Mythical Place, FA1 1AK",
+                        registrationNumber =
+                            RegistrationNumberDataModel
+                                .fromRegistrationNumber(deactivatedProperty.registrationNumber)
+                                .toString(),
+                    ),
+                ),
+                result,
+            )
         }
     }
 

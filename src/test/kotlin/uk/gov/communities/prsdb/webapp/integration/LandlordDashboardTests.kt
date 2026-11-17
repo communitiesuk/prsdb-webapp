@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -41,7 +42,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewPropertyRecordsButton.clickAndWait()
         val detailsPage = assertPageIs(page, LandlordDetailsPage::class)
-        assertEquals("registered-properties", detailsPage.tabs.activeTabPanelId)
+        assertEquals(ACTIVE_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
     }
 
     @Test
