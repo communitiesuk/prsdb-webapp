@@ -36,10 +36,10 @@ class RentDataHelper {
 
         fun getUpdateRentAmountHeading(rentFrequency: RentFrequency): String =
             when (rentFrequency) {
-                RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
-                RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
-                RentFrequency.OTHER -> "forms.update.rentAmount.other.fieldSetHeading"
-                else -> "forms.update.rentAmount.monthly.fieldSetHeading"
+                RentFrequency.WEEKLY -> "tenancyDetails.rentAmount.heading.weekly"
+                RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentAmount.heading.fourWeekly"
+                RentFrequency.OTHER -> "tenancyDetails.rentAmount.heading.other"
+                else -> "tenancyDetails.rentAmount.heading.monthly"
             }
     }
 }
