@@ -7,15 +7,15 @@
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='rentFrequency', fieldSetHeading=#{${heading}}, fieldSetHint=null, conditionalFieldName='customRentFrequency')}">
-        <details id="details" th:replace="~{fragments/details :: details(#{forms.rentFrequency.details.summary}, ~{::#details/content()})}">
+        <details id="details" th:replace="~{fragments/details :: details(#{tenancyDetails.rentFrequency.details.summary}, ~{::#details/content()})}">
             <div class="govuk-details__text">
-                <p class="govuk-body" th:text="#{forms.rentFrequency.details.paragraph.one}">forms.rentFrequency.details.paragraph.one</p>
-                <p class="govuk-body" th:text="#{forms.rentFrequency.details.paragraph.two}">forms.rentFrequency.details.paragraph.two</p>
+                <p class="govuk-body" th:text="#{tenancyDetails.rentFrequency.details.paragraph.one}">tenancyDetails.rentFrequency.details.paragraph.one</p>
+                <p class="govuk-body" th:text="#{tenancyDetails.rentFrequency.details.paragraph.two}">tenancyDetails.rentFrequency.details.paragraph.two</p>
                 <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{forms.rentFrequency.details.bullet.one}">forms.rentFrequency.details.bullet.one</li>
-                    <li th:text="#{forms.rentFrequency.details.bullet.two}">forms.rentFrequency.details.bullet.two</li>
+                    <li th:text="#{tenancyDetails.rentFrequency.details.bullet.one}">tenancyDetails.rentFrequency.details.bullet.one</li>
+                    <li th:text="#{tenancyDetails.rentFrequency.details.bullet.two}">tenancyDetails.rentFrequency.details.bullet.two</li>
                 </ul>
-                <p class="govuk-body" th:text="#{forms.rentFrequency.details.paragraph.three}">forms.rentFrequency.details.paragraph.three</p>
+                <p class="govuk-body" th:text="#{tenancyDetails.rentFrequency.details.paragraph.three}">tenancyDetails.rentFrequency.details.paragraph.three</p>
             </div>
         </details>
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'rentFrequency', null, ${radioOptions})}"></th:block>

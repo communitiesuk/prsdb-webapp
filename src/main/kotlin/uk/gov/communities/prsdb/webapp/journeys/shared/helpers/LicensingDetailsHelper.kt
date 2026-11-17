@@ -16,7 +16,7 @@ class LicensingDetailsHelper {
         licensingState.getLicensingType().let { licensingType ->
             listOfNotNull(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    "licensing.checkAnswers.licensingType",
                     licensingType,
                     Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
                 ),

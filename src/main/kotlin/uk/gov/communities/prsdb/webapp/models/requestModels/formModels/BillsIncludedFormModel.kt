@@ -13,7 +13,7 @@ class BillsIncludedFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.billsIncluded.error.missing",
+                messageKey = "tenancyDetails.billsIncluded.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "notAllFalse",
             ),
@@ -24,12 +24,12 @@ class BillsIncludedFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.billsIncluded.error.somethingElse.missing",
+                messageKey = "tenancyDetails.billsIncluded.error.somethingElse.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isCustomBillsIncludedNotBlank",
             ),
             ConstraintDescriptor(
-                messageKey = "forms.billsIncluded.error.somethingElse.tooLong",
+                messageKey = "tenancyDetails.billsIncluded.error.somethingElse.tooLong",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isCustomBillsIncludedNotTooLong",
             ),

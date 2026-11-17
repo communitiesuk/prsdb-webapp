@@ -899,7 +899,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `changing the freeholder type to one with joint freeholders pushes through the freeholders task`(page: Page) {
+        fun `changing the freehold type to one with joint freeholders pushes through the freeholders task`(page: Page) {
             val checkAnswersPage = goToCheckAnswers(page)
 
             checkAnswersPage.summaryList.freeholdTypeRow.clickFirstActionLinkAndWait()

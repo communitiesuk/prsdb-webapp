@@ -116,7 +116,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         // Assert
         val tenancyItem =
             taskListViewModel.taskSections[1].tasks.find {
-                it.nameKey == "registerProperty.taskList.rentedOut.tenancyDetails"
+                it.nameKey == "tenancyDetails.sectionHeading"
             }
         assertEquals("taskList.status.notNeededYet", tenancyItem?.status?.textKey)
         assertEquals("registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint", tenancyItem?.hintKey)
@@ -135,7 +135,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         // Assert
         val tenancyItem =
             taskListViewModel.taskSections[1].tasks.find {
-                it.nameKey == "registerProperty.taskList.rentedOut.tenancyDetails"
+                it.nameKey == "tenancyDetails.sectionHeading"
             }
         assertEquals("taskList.status.cannotStart", tenancyItem?.status?.textKey)
         assertNull(tenancyItem?.url)

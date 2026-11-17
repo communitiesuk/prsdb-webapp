@@ -16,8 +16,8 @@ class HouseholdStepConfig :
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholds.heading",
-            "label" to "forms.numberOfHouseholds.label",
+            "fieldSetHeading" to "tenancyDetails.numberOfHouseholds.heading",
+            "label" to "tenancyDetails.numberOfHouseholds.label",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
