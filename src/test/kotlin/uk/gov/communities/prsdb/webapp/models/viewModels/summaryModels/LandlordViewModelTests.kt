@@ -55,7 +55,7 @@ class LandlordViewModelTests {
                 "landlordDetails.personalDetails.oneLoginVerified",
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.contactAddress",
+                "landlordDetails.personalDetails.homeAddress",
             )
 
         assertIterableEquals(expectedHeaderList, headerList)
@@ -221,7 +221,7 @@ class LandlordViewModelTests {
         // Assert
         val addressString =
             viewModel.personalDetails
-                .single { it.fieldHeading == "landlordDetails.personalDetails.contactAddress" }
+                .single { it.fieldHeading == "landlordDetails.personalDetails.homeAddress" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
     }
@@ -296,7 +296,7 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.emailAddress",
                 "landlordDetails.personalDetails.telephoneNumber",
-                "landlordDetails.personalDetails.contactAddress",
+                "landlordDetails.personalDetails.homeAddress",
             )
         val changeableByUnverifiedLandlordsPersonalDetailKeys =
             listOf(
