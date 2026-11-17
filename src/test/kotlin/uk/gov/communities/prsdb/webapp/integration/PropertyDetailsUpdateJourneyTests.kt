@@ -1079,7 +1079,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Update furnished status
                 val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
                 assertThat(updateFurnishedStatusPage.form.fieldsetHeading)
-                    .containsText("Update is the property furnished")
+                    .containsText("How is the property furnished?")
                 updateFurnishedStatusPage.submitFurnishedStatus(newFurnishedStatus)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)

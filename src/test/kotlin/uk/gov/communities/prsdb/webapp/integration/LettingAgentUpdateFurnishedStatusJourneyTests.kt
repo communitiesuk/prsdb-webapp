@@ -25,7 +25,7 @@ class LettingAgentUpdateFurnishedStatusJourneyTests : IntegrationTestWithMutable
         val furnishedStatusFormPage =
             assertPageIs(page, FurnishedStatusFormPageLettingAgentUpdate::class, urlArguments)
 
-        assertThat(furnishedStatusFormPage.form.fieldsetHeading).containsText("Update is the property furnished")
+        assertThat(furnishedStatusFormPage.form.fieldsetHeading).containsText("How is the property furnished?")
         furnishedStatusFormPage.submitFurnishedStatus(FurnishedStatus.PART_FURNISHED)
 
         propertyDetailsPage =

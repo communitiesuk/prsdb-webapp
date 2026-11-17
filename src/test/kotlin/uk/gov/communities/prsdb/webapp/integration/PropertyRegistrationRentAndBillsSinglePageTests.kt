@@ -71,7 +71,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             furnishedStatusPage.form.submit()
             assertThat(
                 furnishedStatusPage.form.getErrorMessage(),
-            ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+            ).containsText("Select how the property is furnished")
         }
 
         @Test
