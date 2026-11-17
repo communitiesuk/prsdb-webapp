@@ -14,6 +14,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.EIC_VALIDITY_YEARS
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -30,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LicenceNumberFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.UploadCertificateFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.AlreadyRegisteredPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.BillsIncludedFormPagePropertyReactivation
@@ -55,20 +59,24 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasEpcFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HmoAdditionalLicenceFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HmoMandatoryLicenceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.IsEpcRequiredFormPagePropertyReactivation
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingTypeFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfHouseholdsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfPeopleFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentAmountFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentFrequencyFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentIncludesBillsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.SelectiveLicenceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicrFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.nio.file.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
@@ -95,9 +103,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(infoPage.heading).containsText("Reactivate your property")
         infoPage.submit()
 
-        val licensingPage = assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments)
-        assertThat(licensingPage.heading).containsText("PDJB-2037")
-        licensingPage.submit()
+        val licensingPage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        licensingPage.submitLicensingType(LicensingType.NO_LICENSING)
 
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
         hasGasSupplyPage.submitHasNoGasSupply()
@@ -292,7 +299,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
-        val licensingPage = assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments)
+        val licensingPage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
         licensingPage.backLink.clickAndWait()
 
         assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
@@ -302,7 +309,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `the back links into and out of the gas safety task return to the adjacent steps`(page: Page) {
         val hasGasSupplyPage = navigateToHasGasSupplyPage(page)
         hasGasSupplyPage.backLink.clickAndWait()
-        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments).submitLicensingType(LicensingType.NO_LICENSING)
 
         assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasNoGasSupply()
         assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyReactivation::class, urlArguments).form.submit()
@@ -404,6 +411,92 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
     }
 
+    @ParameterizedTest
+    @EnumSource(
+        value = LicensingType::class,
+        names = ["SELECTIVE_LICENCE", "HMO_MANDATORY_LICENCE", "HMO_ADDITIONAL_LICENCE"],
+    )
+    fun `licence number branches continue and retain their answers`(
+        type: LicensingType,
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        assertTrue(page.url().substringBefore("?").endsWith("/licensing/licensing-type"))
+        assertThat(typePage.form.submitButton).hasCount(1)
+        assertThat(typePage.form.submitButton).hasText("Continue")
+        assertThat(typePage.provideThisLaterButton).isHidden()
+        assertThat(typePage.form.sectionHeader).containsText("Tell us if your property needs a licence")
+        typePage.submitLicensingType(type)
+
+        var numberPage = assertLicenceNumberPage(page, type)
+        assertThat(numberPage.form.submitButton).hasText("Continue")
+        assertThat(numberPage.form.submitButton).hasCount(1)
+        numberPage.submitLicenseNumber("LIC-123")
+
+        val gasPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
+        assertEquals(
+            true,
+            jdbcTemplate.queryForObject(
+                "SELECT license_provide_later AND license_id IS NULL FROM property_ownership WHERE id = ?",
+                Boolean::class.java,
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            ),
+        )
+        gasPage.backLink.clickAndWait()
+        numberPage = assertLicenceNumberPage(page, type)
+        assertThat(numberPage.form.licenceNumberInput).hasValue("LIC-123")
+        numberPage.backLink.clickAndWait()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `licensing type retains its validation`(page: Page) {
+        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        typePage.form.submitPrimaryButton()
+        assertThat(typePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+    }
+
+    @Test
+    fun `no licence continues to check answers without saving the property`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        val propertyId = INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER
+        jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = false WHERE id = ?", propertyId)
+        jdbcTemplate.update(
+            "UPDATE property_compliance SET gas_safety_cert_provide_later = false, " +
+                "electrical_safety_cert_provide_later = false, epc_provide_later = false WHERE property_ownership_id = ?",
+            propertyId,
+        )
+        navigator.goToPropertyReactivationInfoPage(propertyId).submit()
+        val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        typePage.submitLicensingType(LicensingType.NO_LICENSING)
+
+        val checkAnswers = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        assertEquals(
+            true,
+            jdbcTemplate.queryForObject(
+                "SELECT license_provide_later AND license_id IS NULL FROM property_ownership WHERE id = ?",
+                Boolean::class.java,
+                propertyId,
+            ),
+        )
+        checkAnswers.backLink.clickAndWait()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `the licensing task landing route opens the licensing type page`(page: Page) {
+        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+
+        page.navigate(page.url().replace("/licensing/licensing-type", "/licensing"))
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
     @Test
     fun `a landlord receives a 404 for an active property`() {
         val response = navigator.navigate(ReactivatePropertyController.getPropertyReactivationPath(ACTIVE_PROPERTY))
@@ -435,7 +528,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     private fun navigateToHasGasSupplyPage(page: Page): HasGasSupplyFormPagePropertyReactivation {
         navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
-        assertPageIs(page, LicensingFormPagePropertyReactivation::class, urlArguments).submit()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments).submitLicensingType(LicensingType.NO_LICENSING)
         return assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
     }
 
@@ -469,6 +562,20 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         rentFrequencyPage.form.submit()
         assertPageIs(page, RentAmountFormPagePropertyReactivation::class, urlArguments).submitRentAmount("400")
     }
+
+    private fun assertLicenceNumberPage(
+        page: Page,
+        type: LicensingType,
+    ): LicenceNumberFormPage =
+        when (type) {
+            LicensingType.SELECTIVE_LICENCE ->
+                assertPageIs(page, SelectiveLicenceFormPagePropertyReactivation::class, urlArguments)
+            LicensingType.HMO_MANDATORY_LICENCE ->
+                assertPageIs(page, HmoMandatoryLicenceFormPagePropertyReactivation::class, urlArguments)
+            LicensingType.HMO_ADDITIONAL_LICENCE ->
+                assertPageIs(page, HmoAdditionalLicenceFormPagePropertyReactivation::class, urlArguments)
+            else -> error("Unexpected licensing type $type")
+        }
 
     private fun submitHasCertificate(
         hasElectricalCertPage: HasElectricalCertFormPagePropertyReactivation,

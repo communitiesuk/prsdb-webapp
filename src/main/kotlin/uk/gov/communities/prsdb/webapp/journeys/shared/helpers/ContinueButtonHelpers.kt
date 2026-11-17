@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 
 private fun JourneyBuilder<*>.useSubmitButtonText(
     vararg steps: JourneyStep<*, *, *>,
@@ -44,6 +45,15 @@ fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyTask) {
     useContinueButtons(task.gasSafetyDetailsTask)
     useContinueButtons(task.checkGasSafetyAnswersStep)
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: LicensingTask) {
+    useContinueButtons(
+        task.licensingTypeStep,
+        task.selectiveLicenceStep,
+        task.hmoMandatoryLicenceStep,
+        task.hmoAdditionalLicenceStep,
+    )
 }
 
 fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyDetailsTask) {
