@@ -6,6 +6,16 @@ You should register for Notify-prod using your MHCLG email address.
 
 Note: When running the app locally we stub the calls to notify by default.
 
+## Formatting templates
+Follow [Notify's formatting guidance for emails and letters](https://www.notifications.service.gov.uk/using-notify/formatting)
+when writing markdown templates. Notify supports a limited set of Markdown features, and support differs between emails and letters:
+- Use `# Heading` for headings in both emails and letters. `## Subheading` is supported for emails, not letters.
+- Both support bullet points and numbered steps.
+- Use `***` on its own line to insert a page break in a letter.
+- Bold, italics and underlined text are not supported.
+
+Check the letter PDF preview in Notify after changing formatting, especially page breaks that could split related content.
+
 ## Emails
 ### Creating emails
 When creating a new email you should do so in a markdown file in `src/main/resources/emails`.
