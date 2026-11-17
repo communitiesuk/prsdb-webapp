@@ -8,6 +8,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
@@ -37,6 +38,15 @@ class AbsoluteUrlProvider(
     }
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
+
+    fun buildLandlordPrivacyNoticeUri(): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath("/$PRIVACY_NOTICE_PATH_SEGMENT")
+            .replaceQuery(null)
+            .fragment(null)
+            .build()
+            .toUri()
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 

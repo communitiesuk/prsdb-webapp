@@ -4,21 +4,48 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
 
 @PrsdbWebService
 class AssociatedPartyNotificationService(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987, PDJB-1988: implement once the freeholder creation email and letter templates are available
+    // TODO PDJB-1987: build the freeholder added email and pass it with buildFreeholderAddedToPropertyLetter to sendNotificationToFreeholder
     fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
-        TODO("Implement freeholder creation notification when its email and letter templates are available")
+        TODO("Implement freeholder creation notification when its email template is available")
+
+    // The letter is only sent by sendNotification when the freeholder has a name and postal address
+    internal fun buildFreeholderAddedToPropertyLetter(freeholder: Freeholder): FreeholderAddedToPropertyLetter {
+        val propertyOwnership = freeholder.propertyOwnership
+        val landlords =
+            propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
+                val email =
+                    when (landlord) {
+                        is IndividualLandlord -> landlord.email
+                        is OrganisationalLandlord -> landlord.wholeOrgEmail
+                        else -> throw IllegalArgumentException("Unknown landlord type")
+                    }
+                "${landlord.name} ($email)"
+            }
+
+        return FreeholderAddedToPropertyLetter(
+            freeholderName = freeholder.name.orEmpty(),
+            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            landlords = landlords,
+            freeholderAddress = freeholder.address?.toMultiLineAddress().orEmpty(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
+        )
+    }
 
     // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =

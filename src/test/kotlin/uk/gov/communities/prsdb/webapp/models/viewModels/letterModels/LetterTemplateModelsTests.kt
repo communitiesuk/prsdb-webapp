@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.letterModels
 
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.services.NotifyLetterNotificationService
@@ -11,7 +12,16 @@ class LetterTemplateModelsTests {
         @JvmStatic
         private fun templateList() =
             listOf(
-                LetterTemplateTestData(ExampleLetter("Jill"), "/letters/ExampleLetter.md"),
+                LetterTemplateTestData(
+                    FreeholderAddedToPropertyLetter(
+                        freeholderName = "Sarah Thompson",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                        freeholderAddress = "18 Market Street\nBristol\nBS1 4DJ",
+                        privacyNoticeUrl = "https://example.test/privacy-notice",
+                    ),
+                    "/letters/FreeholderAddedToPropertyLetter.md",
+                ),
             )
     }
 
@@ -20,6 +30,28 @@ class LetterTemplateModelsTests {
         val markdownLocation: String,
     ) {
         override fun toString(): String = model.javaClass.simpleName
+    }
+
+    @Test
+    fun `freeholder added to property letter formats landlords as bullets and preserves multiline addresses`() {
+        val letter =
+            FreeholderAddedToPropertyLetter(
+                freeholderName = "Sarah Thompson",
+                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                landlords = listOf("Jamie Jameson (jamie@example.com)", "Tommy Cat (tommy@example.com)"),
+                freeholderAddress = "18 Market Street\nBristol\nBS1 4DJ",
+                privacyNoticeUrl = "https://example.test/privacy-notice",
+            )
+
+        val personalisation = letter.toHashMap()
+
+        Assertions.assertEquals(
+            "* Jamie Jameson (jamie@example.com)\n* Tommy Cat (tommy@example.com)",
+            personalisation["landlords"],
+        )
+        Assertions.assertEquals("12 Real Street\nBristol\nBS8 1AA", personalisation["property address"])
+        Assertions.assertEquals("18 Market Street\nBristol\nBS1 4DJ", personalisation["freeholder address"])
+        Assertions.assertEquals("https://example.test/privacy-notice", personalisation["privacyNotice"])
     }
 
     @ParameterizedTest(name = "{0} keys match markdown")

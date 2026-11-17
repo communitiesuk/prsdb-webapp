@@ -3,9 +3,13 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.kotlin.mock
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
@@ -15,13 +19,19 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.ExampleLetter
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createSuperiorLandlord
+import java.net.URI
 
+@ExtendWith(MockitoExtension::class)
 class AssociatedPartyNotificationServiceTests {
     private class TestEmail : EmailTemplateModel {
         override val template = EmailTemplate.JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL
@@ -29,14 +39,70 @@ class AssociatedPartyNotificationServiceTests {
         override fun toHashMap(): HashMap<String, String> = hashMapOf()
     }
 
-    private val emailNotificationService: EmailNotificationService<EmailTemplateModel> = mock()
-    private val letterNotificationService: LetterNotificationService<LetterTemplateModel> = mock()
-    private val associatedPartyNotificationService =
-        AssociatedPartyNotificationService(emailNotificationService, letterNotificationService)
+    private class TestLetter : LetterTemplateModel {
+        override val template = LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER
+
+        override fun toHashMap(): HashMap<String, String> = hashMapOf()
+    }
+
+    @Mock
+    private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
+
+    @Mock
+    private lateinit var letterNotificationService: LetterNotificationService<LetterTemplateModel>
+
+    @Mock
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @InjectMocks
+    private lateinit var associatedPartyNotificationService: AssociatedPartyNotificationService
 
     private val email = TestEmail()
-    private val letter = ExampleLetter("Sarah")
+    private val letter = TestLetter()
+    private val expectedFreeholderAddedToPropertyLetter =
+        FreeholderAddedToPropertyLetter(
+            freeholderName = "Sarah Thompson",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            landlords = listOf("Jamie Jameson (jamie@example.com)"),
+            freeholderAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
+            privacyNoticeUrl = "https://example.test/privacy-notice",
+        )
     private val postalAddress = createAddress(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
+
+    @Test
+    fun `buildFreeholderAddedToPropertyLetter includes the property and registered individual and organisational landlords`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords =
+                    mutableSetOf(
+                        createOrgLandlord(name = "Zebra Homes", email = "contact@zebra.example", registrantEmail = "admin@zebra.example"),
+                        createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
+                    ),
+            )
+        val freeholder =
+            createFreeholder(
+                propertyOwnership = propertyOwnership,
+                name = "Sarah Thompson",
+                email = "sarah@example.com",
+                address = postalAddress,
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
+            .thenReturn(URI("https://example.test/privacy-notice"))
+
+        // Act
+        val result = associatedPartyNotificationService.buildFreeholderAddedToPropertyLetter(freeholder)
+
+        // Assert
+        assertEquals(
+            expectedFreeholderAddedToPropertyLetter.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)", "Zebra Homes (contact@zebra.example)"),
+            ),
+            result,
+        )
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
 
     @Test
     fun `creation notification for a freeholder fails explicitly until implemented`() {
