@@ -444,8 +444,6 @@ update:
       fieldSetHeading: Update your monthly rent
     other:
       fieldSetHeading: Update your monthly rent
-  licensingType:
-    fieldSetHeading: Update the type of licensing you have for your property
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers
