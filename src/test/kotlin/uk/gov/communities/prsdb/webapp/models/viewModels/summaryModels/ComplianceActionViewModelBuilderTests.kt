@@ -357,6 +357,7 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied: Boolean,
             provideLaterDeadline: LocalDate? = null,
             eicrExpiryDate: LocalDate? = null,
+            eicIssueDate: LocalDate? = null,
         ) = ComplianceStatusDataModel(
             propertyOwnershipId = 1L,
             singleLineAddress = "123 Test Street",
@@ -368,6 +369,7 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
             electricalSafetyExpiryDate = eicrExpiryDate,
+            eicIssueDate = eicIssueDate,
         )
 
         private fun getElectricalSafetyRow(viewModel: SummaryCardViewModel) =
@@ -461,6 +463,28 @@ class ComplianceActionViewModelBuilderTests {
             assertEquals(
                 eicrExpiryDate.format(ComplianceActionViewModelBuilder.DATE_FORMATTER),
                 eicrRow.optionalFieldValueParam,
+            )
+        }
+
+        @Test
+        fun `occupied property with expired EIC shows electrical row with expired EIC message and issue date`() {
+            val issueDate = LocalDate.of(2019, 3, 1)
+            val viewModel =
+                ComplianceActionViewModelBuilder.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = true,
+                        eicrExpiryDate = issueDate.plusYears(5),
+                        eicIssueDate = issueDate,
+                    ),
+                )
+
+            val electricalRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(electricalRow)
+            assertEquals("complianceActions.status.expiredEic", electricalRow.fieldValue)
+            assertEquals(
+                issueDate.format(ComplianceActionViewModelBuilder.DATE_FORMATTER),
+                electricalRow.optionalFieldValueParam,
             )
         }
 
