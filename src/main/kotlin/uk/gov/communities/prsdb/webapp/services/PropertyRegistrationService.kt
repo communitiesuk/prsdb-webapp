@@ -168,8 +168,10 @@ class PropertyRegistrationService(
             sendConfirmationEmail(registrationData, landlord, propertyOwnership)
         }
 
-        registrationData.freeholders.orEmpty().forEach { freeholder ->
-            sendNotificationAndLogFailures("the freeholder added-to-property notification for property ownership ${propertyOwnership.id}") {
+        registrationData.freeholders.orEmpty().forEachIndexed { index, freeholder ->
+            sendNotificationAndLogFailures(
+                "the freeholder ${index + 1} added-to-property notification for property ownership ${propertyOwnership.id}",
+            ) {
                 associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, propertyOwnership)
             }
         }
