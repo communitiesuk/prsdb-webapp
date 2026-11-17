@@ -56,7 +56,9 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         fun `Submitting with no licensingType selected returns an error`() {
             val licensingTypePage = navigator.skipToPropertyRegistrationOccupiedLicensingTypePage()
             licensingTypePage.form.submitPrimaryButton()
-            assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
+            assertThat(
+                licensingTypePage.form.getErrorMessage(),
+            ).containsText("Select this property’s licence, or select ‘This property does not need a licence’")
         }
 
         @Test
