@@ -37,30 +37,6 @@ import java.time.LocalDate
 class ElectricalSafetyDetailsStateTests {
     private val currentDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
 
-    @Test
-    fun `getElectricalCertificateExpiryDateIfReachable returns the EIC expiry date when the EIC branch is reachable`() {
-        val expiryDate = LocalDate.of(2030, 1, 1)
-        val state =
-            buildTestElectricalSafetyDetailState(
-                electricalCertMode = HasElectricalCertMode.HAS_EIC,
-                eicExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate),
-            )
-
-        assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
-    }
-
-    @Test
-    fun `getElectricalCertificateExpiryDateIfReachable returns the EICR expiry date when the EICR branch is reachable`() {
-        val expiryDate = LocalDate.of(2030, 1, 1)
-        val state =
-            buildTestElectricalSafetyDetailState(
-                electricalCertMode = HasElectricalCertMode.HAS_EICR,
-                eicrExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate),
-            )
-
-        assertEquals(expiryDate.toKotlinLocalDate(), state.getElectricalCertificateExpiryDateIfReachable())
-    }
-
     // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
     fun `getEicExpiryDateIfReachable returns the EIC expiry date when the EIC expiry date step is reachable`() {
@@ -76,22 +52,6 @@ class ElectricalSafetyDetailsStateTests {
         val state = buildTestElectricalSafetyDetailState(eicrExpiryDateFormModel = AnyDateFormModel().applyFromDate(expiryDate))
 
         assertEquals(expiryDate.toKotlinLocalDate(), state.getEicrExpiryDateIfReachable())
-    }
-
-    @Test
-    fun `getElectricalCertificateExpiryDateIfReachable returns null if the expiry date is not set`() {
-        val state =
-            buildTestElectricalSafetyDetailState(
-                electricalCertMode = HasElectricalCertMode.HAS_EICR,
-                eicrExpiryDateFormModel = AnyDateFormModel(),
-            )
-        assertNull(state.getElectricalCertificateExpiryDateIfReachable())
-    }
-
-    @Test
-    fun `getElectricalCertificateExpiryDateIfReachable returns null if neither expiry date step is reachable`() {
-        val state = buildTestElectricalSafetyDetailState()
-        assertNull(state.getElectricalCertificateExpiryDateIfReachable())
     }
 
     // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed

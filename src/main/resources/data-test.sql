@@ -538,44 +538,44 @@ UPDATE landlord l
 SET has_registered_property = true
 WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
--- TODO PDJB-1673: Add some EIC example data (electrical_cert_type = 1 with an eic_issue_date)
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 eicr_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 eicr_expiry_date, electrical_cert_type, eic_issue_date, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
                                  has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
-VALUES (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
+-- EIC examples (electrical_cert_type = 1, valid for 5 years from eic_issue_date): PO 6 valid, PO 7 expired
+VALUES (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, 1, '2026-01-15',
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15',
         null, 'c', null, null, true, true, true),
-       (2, 7, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null,
+       (2, 7, '2026-04-14', '2026-04-14', '2024-06-01', true, null, 1, '2019-06-01',
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14',
         false, 'c', null, null, true, true, true),
-       (3, 8, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, 0, null, true, true, true),
-       (4, 9, '2026-04-14', '2026-04-14', null, false, null, null,
+       (3, 8, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, null, 0, null, true, true, true),
+       (4, 9, '2026-04-14', '2026-04-14', null, false, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
         null, 'f', null, 0, true, true, true),
-       (5, 10, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, true, true, true),
-       (6, 11, '2026-04-14', '2026-04-14', null, false, null, null,
+       (5, 10, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, null, true, true, true),
+       (6, 11, '2026-04-14', '2026-04-14', null, false, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
         null, 'g', null, null, true, true, true),
-       (7, 12, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
+       (7, 12, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15',
         null, 'c', null, null, true, true, true),
-       (8, 13, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null,
+       (8, 13, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14',
         false, 'c', null, null, true, true, true),
-       (9, 14, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, 0, null, true, true, true),
-       (10, 15, '2026-04-14', '2026-04-14', null, false, null, null,
+       (9, 14, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, null, 0, null, true, true, true),
+       (10, 15, '2026-04-14', '2026-04-14', null, false, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
         null, 'f', null, 0, true, true, true),
-       (11, 16, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, true, true, true),
-       (12, 17, '2026-04-14', '2026-04-14', null, false, null, null,
+       (11, 16, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, null, true, true, true),
+       (12, 17, '2026-04-14', '2026-04-14', null, false, null, null, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
         null, 'g', null, null, true, true, true),
-       (13, 1, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (14, 2, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (15, 3, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (16, 4, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
+       (13, 1, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (14, 2, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (15, 3, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (16, 4, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
