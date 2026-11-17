@@ -154,7 +154,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+            LandlordRegistrationConfirmationEmail(
+                createdLandlordRegNum.toString(),
+                absoluteLandlordUrl,
+                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+            ),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -225,7 +229,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+            LandlordRegistrationConfirmationEmail(
+                createdLandlordRegNum.toString(),
+                absoluteLandlordUrl,
+                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+            ),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -277,7 +285,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+            LandlordRegistrationConfirmationEmail(
+                createdLandlordRegNum.toString(),
+                absoluteLandlordUrl,
+                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+            ),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -378,6 +390,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
                 prsdURL = absoluteLandlordUrl,
                 // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
                 isMultiUserOrganisationsEnabled = true,
+                deactivationDate = getExpectedDeactivationDate(createdOrgLandlord.createdDate),
             ),
         )
 
@@ -1156,10 +1169,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualPostcode = manualPostcode,
     )
 
-    private fun formatExpectedDeactivationDate(createdDate: Instant): String =
+    private fun getExpectedDeactivationDate(createdDate: Instant): LocalDate =
         createdDate
             .atZone(DateTimeHelper.UK_ZONE)
             .toLocalDate()
             .plusMonths(3)
+
+    private fun formatExpectedDeactivationDate(createdDate: Instant): String =
+        getExpectedDeactivationDate(createdDate)
             .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 }
