@@ -74,7 +74,7 @@ Locally, ElasticMQ (started by `docker-compose.local.yml`) is used in place of S
 We have unit tests for the emails in `EmailTemplateModelsTests`.
 
 #### Testing against notify templates
-`NotifyTemplateTests` checks that the email and letter templates in notify match the templates in the codebase.
+`NotifyTemplateTests` checks that the email, letter and SMS templates in Notify match the templates in the codebase.
 Every template is checked against both Notify-integration and Notify-prod, so a template that has only been updated in one of them is caught before it reaches production.
 The tests are built into our pipelines so run whenever a PR is made.
 

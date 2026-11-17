@@ -24,6 +24,9 @@ class NotifySmsNotificationService<SmsModel : SmsTemplateModel>(
     ) {
         val smsParameters = sms.toHashMap()
         val idValue = notifyIdService.getNotifyIdValue(sms.template)
+        if (idValue.isBlank()) {
+            throw PersistentSmsSendException("No Notify template ID is configured for ${sms.template}. No SMS was sent.")
+        }
         try {
             notificationClient.sendSms(idValue, phoneNumber, smsParameters, null)
         } catch (notifyException: NotificationClientException) {
