@@ -75,3 +75,10 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+checkAnswers:
+  heading: Tell us if the property needs a license
+  licensingType: Licensing type
+  noLicensing: None
+  noLicensingRequired: This property does not need a licence
+  licensingProvideLater: Provide this later
+  licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)

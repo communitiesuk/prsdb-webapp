@@ -356,11 +356,6 @@ checkPropertyAnswers:
     localCouncil: Local council
     type: Property type
     bedrooms: Number of bedrooms
-    licensingType: Licensing type
-    noLicensing: None
-    noLicensingRequired: This property does not need a licence
-    licensingProvideLater: Provide this later
-    licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
     heading: Ownership and landlords
   peopleResponsibleForThisProperty:
@@ -378,22 +373,6 @@ checkPropertyAnswers:
     question: Is this property occupied by tenants?
   rentedOut:
     heading: How your property’s rented out
-    licensing:
-      heading: Tell us if the property needs a license
-  tenancyDetails:
-    heading: Tenancy details
-    tenancyDetailsRow: Tenancy details
-    occupied: Occupied by tenants
-    households: Number of households
-    provideLater: Provide this later
-    unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
-    people: Number of tenants
-    rentIncludesBills: Rent includes bills
-    billsIncluded: Which bills are included
-    furnishedStatus: Furniture provided
-    rentFrequency: When rent is paid
-    rentAmount: Rent amount
-    customFrequencyRentAmountSuffix: per month
   jointLandlordsDetails:
     heading: Joint landlords
     invitations: Invitations

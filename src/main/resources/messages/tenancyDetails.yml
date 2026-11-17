@@ -158,3 +158,17 @@ provideTenancyDetailsLater:
       one: how many people are living in the property
       two: if you’ve provided furniture
       three: how much the rent is
+checkAnswers:
+  heading: Tenancy details
+  tenancyDetailsRow: Tenancy details
+  occupied: Occupied by tenants
+  households: Number of households
+  provideLater: Provide this later
+  unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
+  people: Number of tenants
+  rentIncludesBills: Rent includes bills
+  billsIncluded: Which bills are included
+  furnishedStatus: Furniture provided
+  rentFrequency: When rent is paid
+  rentAmount: Rent amount
+  customFrequencyRentAmountSuffix: per month

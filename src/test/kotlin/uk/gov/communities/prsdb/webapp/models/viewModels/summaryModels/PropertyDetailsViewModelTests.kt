@@ -486,7 +486,7 @@ class PropertyDetailsViewModelTests {
                 viewModel.licensingSection.map { it.fieldHeading },
             )
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+                "licensing.checkAnswers.noLicensing",
                 viewModel.licensingSection.single().fieldValue,
             )
         }
@@ -708,7 +708,7 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"),
         )
         assertEquals(
-            "£200 Message for forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix",
+            "£200 Message for tenancyDetails.checkAnswers.customFrequencyRentAmountSuffix",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount"),
         )
     }

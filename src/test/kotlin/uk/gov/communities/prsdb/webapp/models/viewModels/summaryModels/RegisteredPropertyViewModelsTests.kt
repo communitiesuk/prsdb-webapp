@@ -36,7 +36,7 @@ class RegisteredPropertyViewModelsTests {
             val expectedLocalCouncil = localCouncil.name
             val expectedRegistrationNumber =
                 RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString()
-            val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
+            val expectedPropertyLicence = "licensing.checkAnswers.noLicensing"
             val expectedIsTenantedMessageKey = "commonText.no"
             val expectedRecordLink =
                 PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
@@ -77,7 +77,7 @@ class RegisteredPropertyViewModelsTests {
             "SELECTIVE_LICENCE,licensing.licensingType.radios.option.selectiveLicence.label",
             "HMO_MANDATORY_LICENCE,licensing.licensingType.radios.option.hmoMandatory.label",
             "HMO_ADDITIONAL_LICENCE,licensing.licensingType.radios.option.hmoAdditional.label",
-            "NO_LICENSING,forms.checkPropertyAnswers.propertyDetails.noLicensing",
+            "NO_LICENSING,licensing.checkAnswers.noLicensing",
         )
         fun `Returns correct licensing display name for licence`(
             licensingType: LicensingType,
@@ -98,7 +98,7 @@ class RegisteredPropertyViewModelsTests {
 
             val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
-            assertEquals(result.licenseTypeMessageKey, "forms.checkPropertyAnswers.propertyDetails.noLicensing")
+            assertEquals(result.licenseTypeMessageKey, "licensing.checkAnswers.noLicensing")
         }
     }
 

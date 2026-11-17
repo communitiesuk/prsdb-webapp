@@ -145,8 +145,8 @@ class MessageKeyConverter {
                 LicensingType.SELECTIVE_LICENCE -> "licensing.licensingType.radios.option.selectiveLicence.label"
                 LicensingType.HMO_MANDATORY_LICENCE -> "licensing.licensingType.radios.option.hmoMandatory.label"
                 LicensingType.HMO_ADDITIONAL_LICENCE -> "licensing.licensingType.radios.option.hmoAdditional.label"
-                LicensingType.NO_LICENSING -> "forms.checkPropertyAnswers.propertyDetails.noLicensing"
-                LicensingType.PROVIDE_LATER -> "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater"
+                LicensingType.NO_LICENSING -> "licensing.checkAnswers.noLicensing"
+                LicensingType.PROVIDE_LATER -> "licensing.checkAnswers.licensingProvideLater"
             }
 
         private fun convertOwnershipType(ownershipType: OwnershipTypeBeforePdjb955): String =
