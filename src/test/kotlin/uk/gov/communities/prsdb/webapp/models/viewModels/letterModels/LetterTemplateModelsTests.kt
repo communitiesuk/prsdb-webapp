@@ -33,7 +33,7 @@ class LetterTemplateModelsTests {
     }
 
     @Test
-    fun `freeholder added to property letter formats landlords as bullets and preserves multiline addresses`() {
+    fun `Freeholder added to property letter formats landlords as bullets and preserves multiline addresses`() {
         val letter =
             FreeholderAddedToPropertyLetter(
                 freeholderName = "Sarah Thompson",
