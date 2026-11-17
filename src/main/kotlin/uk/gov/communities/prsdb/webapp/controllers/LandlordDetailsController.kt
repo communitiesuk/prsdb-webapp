@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveLandlordNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
@@ -35,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
 @PrsdbController
 @RequestMapping
@@ -46,6 +48,7 @@ class LandlordDetailsController(
     private val organisationPermissionsProvider: OrganisationPermissionsProvider,
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
+    private val usersIncompletePropertyService: UsersIncompletePropertyService,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -71,11 +74,12 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
+        val showInactiveLandlordBanner = shouldShowInactiveLandlordVariant(landlord)
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = !showInactiveLandlordBanner)
 
         model.addAttribute("landlord", landlordViewModel)
 
-        addUserLandlordDetailsSharedAttributes(landlord, model)
+        addUserLandlordDetailsSharedAttributes(landlord, model, showInactiveLandlordBanner)
 
         return "individualLandlordDetailsView"
     }
@@ -85,23 +89,26 @@ class LandlordDetailsController(
         model: Model,
     ): String {
         val canPerformOrgAdminActions = organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()
+        val showInactiveLandlordBanner = shouldShowInactiveLandlordVariant(orgLandlord)
+        val canChangeRecord = canPerformOrgAdminActions && !showInactiveLandlordBanner
 
         model.addAttribute(
             "orgLandlord",
-            OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = canPerformOrgAdminActions),
+            OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = canChangeRecord),
         )
         model.addAttribute(
             "orgLandlordContacts",
             OrganisationalLandlordContactsViewModel(
                 orgLandlord,
                 orgLandlord.governingBodyMembers,
-                withChangeLinks = canPerformOrgAdminActions,
+                withChangeLinks = canChangeRecord,
             ),
         )
         model.addAttribute("isLandlordView", true)
+        // TODO PDJB-2030: Hide the delete link when the deregistration journey is removed
         model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
-        addUserLandlordDetailsSharedAttributes(orgLandlord, model)
+        addUserLandlordDetailsSharedAttributes(orgLandlord, model, showInactiveLandlordBanner)
         model.addAttribute(
             "deleteLandlordRecordUrl",
             DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
@@ -113,7 +120,25 @@ class LandlordDetailsController(
     private fun addUserLandlordDetailsSharedAttributes(
         landlord: Landlord,
         model: Model,
+        showInactiveLandlordBanner: Boolean,
     ) {
+        model.addAttribute("showInactiveLandlordBanner", showInactiveLandlordBanner)
+        if (showInactiveLandlordBanner) {
+            model.addAttribute(
+                "inactiveLandlordNotificationBannerViewModel",
+                InactiveLandlordNotificationBannerViewModel(
+                    isOrganisation = landlord is OrganisationalLandlord,
+                    hasDeactivatedProperties = propertyOwnershipService.doesLandlordHaveDeactivatedProperties(landlord),
+                    hasIncompleteProperties = usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount() > 0,
+                ),
+            )
+            model.addAttribute(
+                "deactivatedPropertiesUrl",
+                "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE#$DEACTIVATED_PROPERTIES_FRAGMENT",
+            )
+            model.addAttribute("viewIncompletePropertiesUrl", LandlordController.INCOMPLETE_PROPERTIES_URL)
+        }
+
         // TODO PDJB-2149: Remove this check, the else branch and the isActiveInactiveEnabled attribute when the
         //  ACTIVE_INACTIVE feature flag is removed, and always use ACTIVE_PROPERTIES_FRAGMENT
         val isActiveInactiveEnabled = featureFlagManager.checkFeature(ACTIVE_INACTIVE)
@@ -147,6 +172,10 @@ class LandlordDetailsController(
         model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
+
+    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+    private fun shouldShowInactiveLandlordVariant(landlord: Landlord): Boolean =
+        featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
     @GetMapping(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)

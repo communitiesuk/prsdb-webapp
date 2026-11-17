@@ -52,7 +52,7 @@ class PropertyReactivationJourneyFactory(
             step(journey.infoStep) {
                 routeSegment(ReactivationInfoStep.ROUTE_SEGMENT)
                 initialStep()
-                // TODO PDJB-2034: go back to the deactivated property record
+                // TODO PDJB-2035: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
                 nextStep { mode ->
                     when (mode) {
