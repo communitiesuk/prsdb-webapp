@@ -123,11 +123,17 @@ Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `rec
 Letters are stubbed locally in the same way as emails, and are printed to the console instead.
 Letters whose last address line matches a postcode in `local.letters` in `application-local.yml` always fail, so error handling can be tested.
 
+The `use-notify` profile switches both emails and letters to real Notify calls.
+A Team and guest list key can send emails to approved recipients, but letter requests fail with `Cannot send letters with a team api key`.
+To see `STUB LETTER SENT` in the application console, remove `use-notify` from the active profiles, keep `local`, and restart the app.
+Then complete a new property registration with a named freeholder and postal address. Emails will also be stubbed during this run;
+the current configuration does not support real emails and stub letters in the same run.
+
 Real letters must never be sent locally.
 To send test letters through Notify locally, use the `use-notify` profile as described in [Sending emails Locally](#sending-emails-locally) with a test api key.
 Letters use the same `EMAILNOTIFICATIONS_APIKEY` as emails, so check the key's
 [api key type](https://docs.notifications.service.gov.uk/java.html#api-keys) first:
-- **Test** - Notify accepts the letter and shows it in the dashboard, but never prints or posts it. This is the only type to use locally.
+- **Test** - Notify simulates sending the letter, but it does not appear in the dashboard and is never printed or posted. This is the only type to use locally.
 - **Team and guest list** - Notify rejects the letter, as letters cannot be restricted to team members. If your key is this type, you need a test key to send test letters.
 - **Live** - Notify prints and posts the letter. Never use a live key locally.
 
