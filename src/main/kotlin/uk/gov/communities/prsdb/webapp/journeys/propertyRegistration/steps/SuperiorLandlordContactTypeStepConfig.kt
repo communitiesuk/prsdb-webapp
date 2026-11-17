@@ -47,8 +47,7 @@ class SuperiorLandlordContactTypeStepConfig :
         prepopulatedFormModel.contactType =
             when {
                 editingSuperiorLandlord.email != null -> SuperiorLandlordContactType.EMAIL
-                // A named superior landlord with no email was contacted by post, but their address was not stored
-                editingSuperiorLandlord.detailsKnown -> SuperiorLandlordContactType.POSTAL_ADDRESS
+                editingSuperiorLandlord.address != null -> SuperiorLandlordContactType.POSTAL_ADDRESS
                 else -> null
             }
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)

@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class SuperiorLandlordSummaryCardHelper {
     fun getSummaryCards(
         superiorLandlordsMap: Map<Int, SuperiorLandlordDataModel>,
-        postalAddressNoteKey: String = DEFAULT_POSTAL_ADDRESS_NOTE_KEY,
         getActions: (superiorLandlordId: Int) -> List<SummaryCardActionViewModel> = { emptyList() },
     ): List<SummaryCardViewModel> =
         superiorLandlordsMap
@@ -27,7 +26,7 @@ class SuperiorLandlordSummaryCardHelper {
                         summaryList = contactRows,
                         actions = actions,
                         // A named superior landlord with no contact rows was contacted by post, but their address was not stored
-                        bodyTextKey = if (contactRows.isEmpty()) postalAddressNoteKey else null,
+                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -53,6 +52,6 @@ class SuperiorLandlordSummaryCardHelper {
         )
 
     companion object {
-        const val DEFAULT_POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
+        const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
     }
 }

@@ -117,18 +117,6 @@ class FreeholderSummaryCardHelperTests {
         // Assert
         assertEquals("Billie Smith", card.title)
         assertEquals(emptyList<Any>(), card.summaryList)
-        assertEquals(FreeholderSummaryCardHelper.DEFAULT_POSTAL_ADDRESS_NOTE_KEY, card.bodyTextKey)
-    }
-
-    @Test
-    fun `getSummaryCards uses the postal address note key it is given`() {
-        // Arrange
-        val freeholders = mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Billie Smith"))
-
-        // Act
-        val card = helper.getSummaryCards(freeholders, postalAddressNoteKey = "some.other.key").single()
-
-        // Assert
-        assertEquals("some.other.key", card.bodyTextKey)
+        assertEquals(FreeholderSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, card.bodyTextKey)
     }
 }

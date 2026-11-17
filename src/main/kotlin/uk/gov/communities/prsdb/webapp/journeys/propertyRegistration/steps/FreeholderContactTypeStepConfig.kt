@@ -47,8 +47,7 @@ class FreeholderContactTypeStepConfig :
         prepopulatedFormModel.contactType =
             when {
                 editingFreeholder.email != null -> FreeholderContactType.EMAIL
-                // A named freeholder with no email was contacted by post, but their address was not stored
-                editingFreeholder.detailsKnown -> FreeholderContactType.POSTAL_ADDRESS
+                editingFreeholder.address != null -> FreeholderContactType.POSTAL_ADDRESS
                 else -> null
             }
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)

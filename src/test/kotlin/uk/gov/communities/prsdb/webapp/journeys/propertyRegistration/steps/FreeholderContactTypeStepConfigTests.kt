@@ -101,38 +101,6 @@ class FreeholderContactTypeStepConfigTests {
     }
 
     @Test
-    fun `resolvePageContent prefills postal address when the freeholder being changed has a name but no stored contact details`() {
-        // Arrange
-        whenever(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(detailsKnown = true, name = "Name"))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertEquals(
-            FreeholderContactType.POSTAL_ADDRESS,
-            (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType,
-        )
-    }
-
-    @Test
-    fun `resolvePageContent leaves the contact type empty when the freeholder being changed has no known details`() {
-        // Arrange
-        whenever(mockJourneyState.editingFreeholder).thenReturn(FreeholderDataModel(detailsKnown = false))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertNull((result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
-    }
-
-    @Test
     fun `resolvePageContent does not overwrite a contact type the user has already chosen`() {
         // Arrange
         val formModel = FreeholderContactTypeFormModel(contactType = FreeholderContactType.POSTAL_ADDRESS)

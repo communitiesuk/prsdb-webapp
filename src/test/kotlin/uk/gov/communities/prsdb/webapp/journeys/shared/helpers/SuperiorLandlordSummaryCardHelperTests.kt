@@ -95,15 +95,6 @@ class SuperiorLandlordSummaryCardHelperTests {
 
         assertEquals("Billie Smith", card.title)
         assertEquals(emptyList<Any>(), card.summaryList)
-        assertEquals(SuperiorLandlordSummaryCardHelper.DEFAULT_POSTAL_ADDRESS_NOTE_KEY, card.bodyTextKey)
-    }
-
-    @Test
-    fun `getSummaryCards uses the postal address note key it is given`() {
-        val superiorLandlords = mapOf(1 to SuperiorLandlordDataModel(detailsKnown = true, name = "Billie Smith"))
-
-        val card = helper.getSummaryCards(superiorLandlords, postalAddressNoteKey = "some.other.key").single()
-
-        assertEquals("some.other.key", card.bodyTextKey)
+        assertEquals(SuperiorLandlordSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, card.bodyTextKey)
     }
 }
