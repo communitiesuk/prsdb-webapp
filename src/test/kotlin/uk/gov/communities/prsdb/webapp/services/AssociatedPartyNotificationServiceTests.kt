@@ -11,12 +11,12 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.ExampleLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 
 class AssociatedPartyNotificationServiceTests {
     private class TestEmail : EmailTemplateModel {
@@ -70,7 +70,7 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `creation notification for a property manager fails explicitly until implemented`() {
-        val propertyManager = createPropertyManager()
+        val propertyManager = PropertyManagerDataModel(name = "Alex Jones", email = "alex.jones@example.com")
 
         assertThrows(NotImplementedError::class.java) {
             associatedPartyNotificationService.sendCreationNotificationForPropertyManager(propertyManager)

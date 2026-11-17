@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -25,7 +25,7 @@ class AssociatedPartyNotificationService(
         TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
     // TODO PDJB-1991: implement once the property manager creation email template is available
-    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManager): AssociatedPartyNotificationOutcome =
+    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
         TODO("Implement property manager creation notification when its email template is available")
 
     internal fun sendNotificationToFreeholder(
