@@ -55,6 +55,13 @@ class ActiveInactiveService(
     }
 
     @Transactional
+    fun deactivateLandlordIfNoActiveProperties(landlord: Landlord) {
+        if (landlord.isActive && !propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
+            markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
+        }
+    }
+
+    @Transactional
     fun reactivateLandlord(landlord: Landlord) {
         check(!landlord.isActive) { "Landlord ${landlord.id} is already active" }
 
