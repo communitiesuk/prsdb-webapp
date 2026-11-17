@@ -15,57 +15,57 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
 
     override fun getStepSpecificContent(state: RentIncludesBillsState) =
         mapOf(
-            "fieldSetHeading" to "forms.billsIncluded.fieldSetHeading",
-            "fieldSetHint" to "forms.billsIncluded.fieldSetHint",
+            "fieldSetHeading" to "tenancyDetails.billsIncluded.fieldSetHeading",
+            "fieldSetHint" to "tenancyDetails.billsIncluded.fieldSetHint",
             "checkboxOptions" to
                 listOf(
                     CheckboxButtonViewModel(
                         value = BillsIncluded.GAS,
-                        labelMsgKey = "forms.billsIncluded.checkbox.gas",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.gas",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.ELECTRICITY,
-                        labelMsgKey = "forms.billsIncluded.checkbox.electricity",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.electricity",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.WATER,
-                        labelMsgKey = "forms.billsIncluded.checkbox.water",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.water",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.COUNCIL_TAX,
-                        labelMsgKey = "forms.billsIncluded.checkbox.councilTax",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.councilTax",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.LANDLINE,
-                        labelMsgKey = "forms.billsIncluded.checkbox.landline",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.landline",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.BROADBAND,
-                        labelMsgKey = "forms.billsIncluded.checkbox.broadband",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.broadband",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.TV_LICENCE,
-                        labelMsgKey = "forms.billsIncluded.checkbox.tvLicence",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.tvLicence",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.CABLE_OR_SATELLITE_TV,
-                        labelMsgKey = "forms.billsIncluded.checkbox.cableSatelliteTV",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.cableSatelliteTV",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.PARKING,
-                        labelMsgKey = "forms.billsIncluded.checkbox.parking",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.parking",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.GARDENING,
-                        labelMsgKey = "forms.billsIncluded.checkbox.gardening",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.gardening",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS,
-                        labelMsgKey = "forms.billsIncluded.checkbox.communalAreasCleaner",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.communalAreasCleaner",
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.SOMETHING_ELSE,
-                        labelMsgKey = "forms.billsIncluded.checkbox.somethingElse",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.somethingElse",
                         conditionalFragment = "customBillsIncludedInput",
                     ),
                 ),

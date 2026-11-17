@@ -13,11 +13,11 @@ class NumberOfPeopleFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.numberOfPeople.input.error.invalidFormat",
+                messageKey = "tenancyDetails.numberOfPeople.input.error.invalidFormat",
                 validatorType = PositiveIntegerValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.numberOfPeople.input.error.invalidNumber",
+                messageKey = "tenancyDetails.numberOfPeople.input.error.invalidNumber",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isNotLessThanNumberOfHouseholds",
             ),
@@ -46,7 +46,7 @@ class NewNumberOfPeopleFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.numberOfPeople.input.error.invalidFormat",
+                messageKey = "tenancyDetails.numberOfPeople.input.error.invalidFormat",
                 validatorType = PositiveIntegerValidator::class,
             ),
         ],

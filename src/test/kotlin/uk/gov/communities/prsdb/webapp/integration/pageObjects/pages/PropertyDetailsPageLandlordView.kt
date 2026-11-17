@@ -62,7 +62,7 @@ class PropertyDetailsPageLandlordView(
     ) : SummaryList(page.locator("#people-responsible")) {
         val ownsPropertyRow = getRow("Do you own this property?")
         val ownershipTypeRow = getRow("Ownership type")
-        val freeholderTypeRow = getRow("Freeholder type")
+        val freeholdTypeRow = getRow("Freehold type")
     }
 
     class LandlordSummaryCard(

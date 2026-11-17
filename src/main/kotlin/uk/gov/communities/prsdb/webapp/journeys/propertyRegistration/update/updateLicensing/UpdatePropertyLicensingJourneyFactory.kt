@@ -87,11 +87,6 @@ class UpdateLicensingJourneyFactory(
 
                 else -> {
                     checkAnswerTask(journey.licensingTask, { journey })
-                    configureStep(journey.licensingTask.licensingTypeStep) {
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
-                        }
-                    }
                 }
             }
             useContinueButtons(journey.licensingTask)
@@ -125,11 +120,6 @@ class UpdateLicensingJourneyFactory(
                     Destination
                         .ExternalUrl(returnUrl)
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.licensing")
-                }
-            }
-            configureStep(journey.licensingTask.licensingTypeStep) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                 }
             }
             useContinueButtons(journey.licensingTask)
