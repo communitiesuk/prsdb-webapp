@@ -77,9 +77,8 @@ class ActiveInactiveServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
 
-        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
 
-        assertTrue(result)
         assertFalse(landlord.isActive)
         assertEquals(today(), landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
@@ -90,9 +89,8 @@ class ActiveInactiveServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(true)
 
-        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
 
-        assertFalse(result)
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
@@ -103,9 +101,8 @@ class ActiveInactiveServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         landlord.deactivate(ORIGINAL_DATE)
 
-        val result = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
 
-        assertFalse(result)
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
     }

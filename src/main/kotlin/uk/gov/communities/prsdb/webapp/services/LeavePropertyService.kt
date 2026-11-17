@@ -54,7 +54,8 @@ class LeavePropertyService(
         val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
-        val landlordWasDeactivated = activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        val landlordWasDeactivated = !landlord.isActive
 
         TransactionHelper.runAfterTransactionCommits {
             EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {

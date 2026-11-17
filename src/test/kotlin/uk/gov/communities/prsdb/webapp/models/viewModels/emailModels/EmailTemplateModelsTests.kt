@@ -411,6 +411,17 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordOtherLandlordLeftNotification.md",
                 ),
+                // TODO PDJB-2149: Remove this entry when the ACTIVE_INACTIVE flag is removed
+                EmailTemplateTestData(
+                    JointLandlordOtherLandlordLeftNotification(
+                        leavingLandlord = "Alice",
+                        notifiedLandlord = "Bob",
+                        address = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                        useBeforePdjb844Template = true,
+                    ),
+                    "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md",
+                ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",

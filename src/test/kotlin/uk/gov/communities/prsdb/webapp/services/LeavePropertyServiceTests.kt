@@ -10,9 +10,9 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isA
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmationAccountDeactivated
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -233,7 +234,9 @@ class LeavePropertyServiceTests {
             )
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
-        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(true)
+        doAnswer { landlord.deactivate(LocalDate.now()) }
+            .whenever(mockActiveInactiveService)
+            .deactivateLandlordIfNoActiveProperties(landlord)
         whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(DASHBOARD_URL))
 
@@ -247,7 +250,7 @@ class LeavePropertyServiceTests {
                 dashboardUrl = DASHBOARD_URL,
             ),
         )
-        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmation>())
+        verify(emailSender, never()).sendEmail(any(), any<JointLandlordYouLeftConfirmation>())
     }
 
     @Test
@@ -259,12 +262,11 @@ class LeavePropertyServiceTests {
             )
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
-        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(false)
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
-        verify(emailSender).sendEmail(eq("alice@example.com"), isA<JointLandlordYouLeftConfirmation>())
-        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmationAccountDeactivated>())
+        verify(emailSender).sendEmail(eq("alice@example.com"), any<JointLandlordYouLeftConfirmation>())
+        verify(emailSender, never()).sendEmail(any(), any<JointLandlordYouLeftConfirmationAccountDeactivated>())
     }
 
     // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
@@ -277,13 +279,15 @@ class LeavePropertyServiceTests {
             )
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
-        whenever(mockActiveInactiveService.deactivateLandlordIfNoActiveProperties(landlord)).thenReturn(true)
+        doAnswer { landlord.deactivate(LocalDate.now()) }
+            .whenever(mockActiveInactiveService)
+            .deactivateLandlordIfNoActiveProperties(landlord)
         whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
-        verify(emailSender).sendEmail(eq("alice@example.com"), isA<JointLandlordYouLeftConfirmation>())
-        verify(emailSender, never()).sendEmail(any(), isA<JointLandlordYouLeftConfirmationAccountDeactivated>())
+        verify(emailSender).sendEmail(eq("alice@example.com"), any<JointLandlordYouLeftConfirmation>())
+        verify(emailSender, never()).sendEmail(any(), any<JointLandlordYouLeftConfirmationAccountDeactivated>())
     }
 
     @Test
