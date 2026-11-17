@@ -1,13 +1,14 @@
 sectionHeading: Tenancy details
 numberOfHouseholds:
-  heading: Households in your property
-  questionHeading: How many households are in your property?
+  heading: Number of households
+  questionHeading: How many households live in this property?
   paragraph:
-    one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.
-    two: 'A household is one person living alone or a family living together. A family includes people who are:'
-    three: Unrelated adults (who are not a couple) are separate households.
-  bullet:
-    point:
+    one: A household is one person living alone or a family living together.
+    two: Unrelated adults (who are not a couple) are separate households.
+  details:
+    summary: Help with who to count as a family
+    paragraph: 'A family includes people who are:'
+    bullet:
       one: married
       two: related (like aunts or cousins)
       three: living together as a couple

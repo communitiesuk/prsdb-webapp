@@ -163,9 +163,6 @@ class UpdateTenancyDetailsJourneyFactory(
         }
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
-        configureStep(journey.householdsAndTenantsTask.households) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading" }
-        }
         configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading" }
         }

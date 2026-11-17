@@ -96,9 +96,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     private fun JourneyBuilder<UpdateHouseholdsAndTenantsJourney>.replaceHeadingsAndButtons() {
         configureStep(journey.householdsAndTenantsTask.households) {
             withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
                 "submitButtonText" to "forms.buttons.continue"
             }
         }
