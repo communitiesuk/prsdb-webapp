@@ -8,10 +8,10 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -42,11 +42,18 @@ class AbsoluteUrlProvider(
     fun buildLandlordPrivacyNoticeUri(): URI =
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
-            .replacePath("/$PRIVACY_NOTICE_PATH_SEGMENT")
+            .replacePath(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
             .replaceQuery(null)
             .fragment(null)
             .build()
             .toUri()
+
+    fun buildLandlordPrivacyNoticeDisplayUrl(): String =
+        buildLandlordPrivacyNoticeUri()
+            .toString()
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .removePrefix("www.")
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 

@@ -13,12 +13,21 @@ import java.util.UUID
 class AbsoluteUrlProviderTests {
     @ParameterizedTest
     @ValueSource(strings = ["https://example.test", "https://example.test/landlord"])
-    fun `buildLandlordPrivacyNoticeUri uses the landlord host and unprefixed privacy notice route`(landlordBaseUrl: String) {
+    fun `buildLandlordPrivacyNoticeUri uses the landlord host and public landlord privacy notice route`(landlordBaseUrl: String) {
         val provider = createProvider(landlordBaseUrl = landlordBaseUrl)
 
         val uri = provider.buildLandlordPrivacyNoticeUri()
 
-        assertThat(uri.toString()).isEqualTo("https://example.test/privacy-notice")
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/privacy-notice")
+    }
+
+    @Test
+    fun `buildLandlordPrivacyNoticeDisplayUrl strips the scheme and www prefix for the letter copy`() {
+        val provider = createProvider(landlordBaseUrl = "https://www.example.test/landlord")
+
+        val url = provider.buildLandlordPrivacyNoticeDisplayUrl()
+
+        assertThat(url).isEqualTo("example.test/landlord/privacy-notice")
     }
 
     @Test

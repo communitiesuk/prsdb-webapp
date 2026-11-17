@@ -18,7 +18,7 @@ class LetterTemplateModelsTests {
                         propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
                         landlords = listOf("Jamie Jameson (jamie@example.com)"),
                         freeholderAddress = "18 Market Street\nBristol\nBS1 4DJ",
-                        privacyNoticeUrl = "https://example.test/privacy-notice",
+                        privacyNoticeUrl = "example.test/landlord/privacy-notice",
                     ),
                     "/letters/FreeholderAddedToPropertyLetter.md",
                 ),
@@ -40,7 +40,7 @@ class LetterTemplateModelsTests {
                 propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
                 landlords = listOf("Jamie Jameson (jamie@example.com)", "Tommy Cat (tommy@example.com)"),
                 freeholderAddress = "18 Market Street\nBristol\nBS1 4DJ",
-                privacyNoticeUrl = "https://example.test/privacy-notice",
+                privacyNoticeUrl = "example.test/landlord/privacy-notice",
             )
 
         val personalisation = letter.toHashMap()
@@ -51,7 +51,7 @@ class LetterTemplateModelsTests {
         )
         Assertions.assertEquals("12 Real Street\nBristol\nBS8 1AA", personalisation["property address"])
         Assertions.assertEquals("18 Market Street\nBristol\nBS1 4DJ", personalisation["freeholder address"])
-        Assertions.assertEquals("https://example.test/privacy-notice", personalisation["privacyNotice"])
+        Assertions.assertEquals("example.test/landlord/privacy-notice", personalisation["privacyNotice"])
     }
 
     @ParameterizedTest(name = "{0} keys match markdown")
