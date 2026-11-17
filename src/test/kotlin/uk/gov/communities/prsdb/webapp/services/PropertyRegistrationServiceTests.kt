@@ -20,6 +20,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
@@ -44,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
@@ -72,6 +75,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyManagerService: PropertyManagerService
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -439,6 +445,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -544,6 +553,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -1317,6 +1329,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1371,6 +1386,126 @@ class PropertyRegistrationServiceTests {
             correspondenceAddressModel = anyOrNull(),
             renewalDate = any(),
             paidForUntil = any(),
+            freeholders = anyOrNull(),
+            superiorLandlords = any(),
+            propertyManager = anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `registerProperty creates and links a property manager when one was given`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val propertyManager = PropertyManager("Pat Manager", "pat@example.com")
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockPropertyManagerService.createPropertyManager("Pat Manager", "pat@example.com")).thenReturn(propertyManager)
+        arrangeCreatePropertyOwnershipWithAnyArguments(MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord)))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                addressModel = addressDataModel,
+                propertyManager = PropertyManagerDataModel("Pat Manager", "pat@example.com"),
+            ),
+        )
+
+        // Assert
+        verify(mockPropertyManagerService).createPropertyManager("Pat Manager", "pat@example.com")
+        verifyPropertyManagerPassedToCreatePropertyOwnership(propertyManager)
+    }
+
+    @Test
+    fun `registerProperty does not create a property manager when none was given`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        arrangeCreatePropertyOwnershipWithAnyArguments(MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord)))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(addressModel = addressDataModel),
+        )
+
+        // Assert
+        verifyNoInteractions(mockPropertyManagerService)
+        verifyPropertyManagerPassedToCreatePropertyOwnership(null)
+    }
+
+    private fun arrangeCreatePropertyOwnershipWithAnyArguments(propertyOwnership: PropertyOwnership) {
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                isOccupied = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                registeringLandlord = any(),
+                anniversary = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
+                tenancyProvideLater = anyOrNull(),
+                correspondenceEmail = anyOrNull(),
+                correspondenceAddressModel = anyOrNull(),
+                renewalDate = any(),
+                paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
+            ),
+        ).thenReturn(propertyOwnership)
+    }
+
+    private fun verifyPropertyManagerPassedToCreatePropertyOwnership(propertyManager: PropertyManager?) {
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            registeringLandlord = any(),
+            anniversary = any(),
+            propertyBuildType = any(),
+            address = any(),
+            license = anyOrNull(),
+            isActive = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            markedJointLandlord = any(),
+            licenseProvideLater = anyOrNull(),
+            tenancyProvideLater = anyOrNull(),
+            correspondenceEmail = anyOrNull(),
+            correspondenceAddressModel = anyOrNull(),
+            renewalDate = any(),
+            paidForUntil = any(),
+            freeholders = anyOrNull(),
+            superiorLandlords = any(),
+            propertyManager = if (propertyManager == null) isNull() else eq(propertyManager),
         )
     }
 
@@ -1418,6 +1553,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -1472,6 +1610,9 @@ class PropertyRegistrationServiceTests {
             correspondenceAddressModel = anyOrNull(),
             renewalDate = any(),
             paidForUntil = any(),
+            freeholders = anyOrNull(),
+            superiorLandlords = any(),
+            propertyManager = anyOrNull(),
         )
     }
 
@@ -1516,6 +1657,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
@@ -1590,6 +1734,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
@@ -1868,6 +2015,9 @@ class PropertyRegistrationServiceTests {
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
                 paidForUntil = any(),
+                freeholders = anyOrNull(),
+                superiorLandlords = any(),
+                propertyManager = anyOrNull(),
             ),
         ).thenReturn(propertyOwnership)
     }

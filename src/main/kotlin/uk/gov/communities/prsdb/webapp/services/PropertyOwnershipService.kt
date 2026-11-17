@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
@@ -37,8 +38,10 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -55,6 +58,7 @@ class PropertyOwnershipService(
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val freeholderService: FreeholderService,
+    private val superiorLandlordService: SuperiorLandlordService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
@@ -95,6 +99,9 @@ class PropertyOwnershipService(
         correspondenceAddressModel: AddressDataModel,
         renewalDate: LocalDate = RenewalDateHelper.getRenewalDate(anniversary),
         paidForUntil: LocalDate = renewalDate,
+        freeholders: List<FreeholderDataModel>? = null,
+        superiorLandlords: List<SuperiorLandlordDataModel> = emptyList(),
+        propertyManager: PropertyManager? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
@@ -134,14 +141,29 @@ class PropertyOwnershipService(
                     paidForUntil = paidForUntil,
                 ).apply {
                     if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
+                    this.propertyManager = propertyManager
                 },
             )
 
-        // TODO PDJB-2015: when ASSOCIATED_PARTIES is on, create the freeholders the landlord gave
-        //  instead of a placeholder. The flag-off journey never asks who they are, so it keeps calling
-        //  createPlaceholderFreeholder until PDJB-2016 removes the flag.
         if (ownershipType.requiresFreeholderRecords()) {
-            freeholderService.createPlaceholderFreeholder(propertyOwnership)
+            when {
+                // TODO PDJB-2016: delete this branch with the flag. The flag-off journey never asks who
+                //  the freeholders are, so we use createPlaceholderFreeholder to supply one if required
+                //  by the OwnershipType.
+                freeholders == null -> freeholderService.createPlaceholderFreeholder(propertyOwnership)
+                freeholders.isEmpty() ->
+                    throw IllegalArgumentException(
+                        "An ownership type requiring freeholder records cannot be registered with no freeholders",
+                    )
+
+                else -> freeholderService.createFreeholders(propertyOwnership, freeholders)
+            }
+        }
+
+        // Unlike freeholders, superior landlords are not gated on the ownership type here: the caller is
+        // responsible for only supplying them for ownership types that require superior landlord info.
+        if (superiorLandlords.isNotEmpty()) {
+            superiorLandlordService.createSuperiorLandlords(propertyOwnership, superiorLandlords)
         }
 
         return propertyOwnership
@@ -628,6 +650,9 @@ class PropertyOwnershipService(
 
     fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
+
+    fun doesLandlordHaveDeactivatedProperties(landlord: Landlord): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 
