@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
-import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
-import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
 
@@ -17,11 +17,11 @@ class AssociatedPartyNotificationService(
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
 ) {
     // TODO PDJB-1987, PDJB-1988: implement once the freeholder creation email and letter templates are available
-    fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
+    fun sendCreationNotificationForFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =
         TODO("Implement freeholder creation notification when its email and letter templates are available")
 
     // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
-    fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
+    fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlordDataModel): AssociatedPartyNotificationOutcome =
         TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
     // TODO PDJB-1991: implement once the property manager creation email template is available
@@ -29,13 +29,13 @@ class AssociatedPartyNotificationService(
         TODO("Implement property manager creation notification when its email template is available")
 
     internal fun sendNotificationToFreeholder(
-        freeholder: Freeholder,
+        freeholder: FreeholderDataModel,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
 
     internal fun sendNotificationToSuperiorLandlord(
-        superiorLandlord: SuperiorLandlord,
+        superiorLandlord: SuperiorLandlordDataModel,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome =
@@ -44,7 +44,7 @@ class AssociatedPartyNotificationService(
     private fun sendNotification(
         name: String?,
         emailAddress: String?,
-        postalAddress: Address?,
+        postalAddress: AddressDataModel?,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome {
@@ -67,7 +67,7 @@ class AssociatedPartyNotificationService(
 
     private fun letterAddress(
         name: String,
-        address: Address,
+        address: AddressDataModel,
     ): LetterAddressDataModel {
         val addressLines = listOf(name) + address.toMultiLineAddress().lines()
 
