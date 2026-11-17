@@ -494,6 +494,24 @@ class LandlordDetailsControllerTests(
             assertFalse(bannerViewModel.hasDeactivatedProperties)
             assertFalse(bannerViewModel.hasIncompleteProperties)
         }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails is not blocked for an inactive landlord`() {
+            whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+            }
+        }
     }
 
     @Nested
