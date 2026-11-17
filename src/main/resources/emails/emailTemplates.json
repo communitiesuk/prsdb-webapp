@@ -23,6 +23,13 @@
   {
     "test_id": "52b635dd-2a57-4f90-a2ca-f2c3f84bd36c",
     "prod_id": "b04f9192-3c44-4877-b174-d396b658d493",
+    "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844",
+    "subject": "You have registered as a landlord",
+    "bodyLocation": "/emails/LandlordRegistrationConfirmationBefore844.md"
+  },
+  {
+    "test_id": "1a0b2de3-55ef-49b1-9d15-c3ad059aabcb",
+    "prod_id": "620ce926-2f48-4a67-a899-daa0b42d1c59",
     "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "You have registered as a landlord",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
@@ -312,6 +319,13 @@
   {
     "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
     "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
+    "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844",
+    "subject": "Confirmation of landlord registration",
+    "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmationBefore844.md"
+  },
+  {
+    "test_id": "91f760ab-08b4-4aa0-8277-6df27cf366ee",
+    "prod_id": "59248af4-feef-4141-b71b-a1e45c21c66c",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Confirmation of landlord registration",
     "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"
