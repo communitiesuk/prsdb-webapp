@@ -76,7 +76,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.nio.file.Path
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
@@ -428,9 +427,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
-        assertTrue(page.url().substringBefore("?").endsWith("/licensing/licensing-type"))
         assertThat(typePage.form.submitButton).hasCount(1)
         assertThat(typePage.form.submitButton).hasText("Continue")
         assertThat(typePage.provideThisLaterButton).isHidden()
@@ -460,7 +458,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `licensing type retains its validation`(page: Page) {
-        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
+        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
         typePage.form.submitPrimaryButton()
         assertThat(typePage.form.getErrorMessage())
@@ -468,7 +466,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `no licence continues to check answers without saving the property`(
+    fun `choosing no licence does not persist the answer before final submission`(
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
@@ -493,15 +491,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             ),
         )
         checkAnswers.backLink.clickAndWait()
-        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
-    }
-
-    @Test
-    fun `the licensing task landing route opens the licensing type page`(page: Page) {
-        navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
-        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
-
-        page.navigate(page.url().replace("/licensing/licensing-type", "/licensing"))
         assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
     }
 

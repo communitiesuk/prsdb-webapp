@@ -1706,7 +1706,7 @@ class Navigator(
         isPropertyAlreadyRegistered: Boolean = false,
     ) = navigateToPropertyReactivationStepAfterInfo(
         propertyOwnershipId,
-        "licensing/${LicensingTypeStep.ROUTE_SEGMENT}",
+        LicensingTypeStep.ROUTE_SEGMENT,
         isPropertyAlreadyRegistered,
     )
 

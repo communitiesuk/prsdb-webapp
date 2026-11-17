@@ -71,7 +71,7 @@ class PropertyReactivationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
-                task(journey.licensingTask, routeSegment = "licensing") {
+                task(journey.licensingTask) {
                     withDependencies { journey }
                     parents { journey.parentsFor(LICENSING) }
                     nextStep { journey.nextStepAfter(LICENSING) }

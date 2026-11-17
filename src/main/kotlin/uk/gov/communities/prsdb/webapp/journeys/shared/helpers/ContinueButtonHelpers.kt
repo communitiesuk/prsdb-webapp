@@ -33,6 +33,15 @@ private fun JourneyBuilder<*>.useContinueWithoutCertButtons(
     if (isOccupied()) continueWithoutCertMessageKey else "forms.buttons.continue"
 }
 
+fun JourneyBuilder<*>.useContinueButtons(task: LicensingTask) {
+    useContinueButtons(
+        task.licensingTypeStep,
+        task.selectiveLicenceStep,
+        task.hmoMandatoryLicenceStep,
+        task.hmoAdditionalLicenceStep,
+    )
+}
+
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
     useContinueButtons(task.hasGasSupplyStep, task.hasGasCertStep, task.gasCertIssueDateStep, task.checkGasCertUploadsStep)
     useContinueWithoutCertButtons(
@@ -45,15 +54,6 @@ fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyTask) {
     useContinueButtons(task.gasSafetyDetailsTask)
     useContinueButtons(task.checkGasSafetyAnswersStep)
-}
-
-fun JourneyBuilder<*>.useContinueButtons(task: LicensingTask) {
-    useContinueButtons(
-        task.licensingTypeStep,
-        task.selectiveLicenceStep,
-        task.hmoMandatoryLicenceStep,
-        task.hmoAdditionalLicenceStep,
-    )
 }
 
 fun JourneyBuilder<*>.useContinueButtons(task: ElectricalSafetyDetailsTask) {

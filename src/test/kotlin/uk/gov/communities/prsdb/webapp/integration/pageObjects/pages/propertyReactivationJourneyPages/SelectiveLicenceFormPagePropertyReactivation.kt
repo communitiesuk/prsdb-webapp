@@ -11,5 +11,5 @@ class SelectiveLicenceFormPagePropertyReactivation(
 ) : LicenceNumberFormPage(
         page,
         ReactivatePropertyController.getPropertyReactivationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/licensing/${SelectiveLicenceStep.ROUTE_SEGMENT}",
+            "/${SelectiveLicenceStep.ROUTE_SEGMENT}",
     )

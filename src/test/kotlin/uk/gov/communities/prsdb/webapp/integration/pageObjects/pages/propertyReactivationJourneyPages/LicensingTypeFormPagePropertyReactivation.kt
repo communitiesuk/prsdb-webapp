@@ -12,7 +12,7 @@ class LicensingTypeFormPagePropertyReactivation(
 ) : LicensingTypeFormPage(
         page,
         ReactivatePropertyController.getPropertyReactivationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/licensing/${LicensingTypeStep.ROUTE_SEGMENT}",
+            "/${LicensingTypeStep.ROUTE_SEGMENT}",
     ) {
     val backLink = BackLink.default(page)
 }

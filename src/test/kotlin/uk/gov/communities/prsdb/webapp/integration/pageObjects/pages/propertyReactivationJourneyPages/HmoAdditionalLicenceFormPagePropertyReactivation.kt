@@ -11,5 +11,5 @@ class HmoAdditionalLicenceFormPagePropertyReactivation(
 ) : LicenceNumberFormPage(
         page,
         ReactivatePropertyController.getPropertyReactivationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/licensing/${HmoAdditionalLicenceStep.ROUTE_SEGMENT}",
+            "/${HmoAdditionalLicenceStep.ROUTE_SEGMENT}",
     )
