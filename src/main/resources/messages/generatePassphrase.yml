@@ -2,6 +2,9 @@ heading: New passphrase
 passphrase:
   label: The passphrase is
   review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.
+  readBack: Ask the landlord to read the passphrase back when it arrives.
+successBanner:
+  title: Success
 letter:
   heading: Use this passphrase in a letter
   body: >
@@ -9,3 +12,16 @@ letter:
     This is a long-lived secret: when they call the contact centre in future, ask them to repeat it
     and check it matches their customer record.
 generateAnother: Generate another passphrase
+sms:
+  heading: Send this passphrase by text message
+  phoneNumber:
+    label: Telephone number
+    hint: Enter the mobile telephone number from the landlord’s stored contact details. Include the country code for international numbers.
+    error:
+      missing: Enter a telephone number
+      invalid: Enter a valid mobile telephone number
+  send: Send text message
+  accepted: The text message has been submitted to {0,,recipient}.
+  failed: The text message could not be sent. Generate a new passphrase before trying again.
+  unknown: We could not confirm whether the text message was sent. You may need to send again.
+  expired: That passphrase is no longer available to send. A new passphrase has been generated.
