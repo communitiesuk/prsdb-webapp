@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -23,8 +24,7 @@ class FreeholderSummaryCardHelper {
                         title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
                         summaryList = contactRows,
                         actions = actions,
-                        // A named freeholder with no contact rows was contacted by post, but their address was not stored
-                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
+                        bodyTextKey = if (freeholder.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -35,6 +35,14 @@ class FreeholderSummaryCardHelper {
                     )
                 }
             }
+
+    fun getSummaryCards(freeholders: Collection<Freeholder>): List<SummaryCardViewModel> =
+        getSummaryCards(
+            freeholders
+                .sortedBy { it.id }
+                .withIndex()
+                .associate { (index, freeholder) -> index to FreeholderDataModel.fromFreeholder(freeholder) },
+        )
 
     private fun getContactRows(freeholder: FreeholderDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(

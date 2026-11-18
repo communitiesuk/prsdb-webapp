@@ -163,21 +163,6 @@ class UpdateTenancyDetailsJourneyFactory(
         }
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
-        configureStep(journey.householdsAndTenantsTask.households) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading" }
-        }
-        configureStep(journey.householdsAndTenantsTask.tenants) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading" }
-        }
-        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading" }
-        }
-        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading" }
-        }
-        configureStep(journey.furnishedStatus) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading" }
-        }
         configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
             withAdditionalContentProperty { "heading" to "forms.update.rentFrequency.heading" }
         }

@@ -45,6 +45,18 @@ class PropertyDetailsViewModel(
     val peopleResponsibleOwnershipSection: List<SummaryListRowViewModel> =
         if (showPeopleResponsibleOwnership) ownershipAnswerRows() else emptyList()
 
+    val showFreeholderSection: Boolean =
+        showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
+
+    private val freeholderHeadingType = if (propertyOwnership.ownershipType.isJointFreeholder()) "joint" else "nonJoint"
+
+    val freeholderSectionHeadingKey: String = "registerProperty.freeholders.checkAnswers.heading.$freeholderHeadingType"
+
+    val freeholderSectionLinkTextKey: String = "registerProperty.freeholders.checkAnswers.changeLink.$freeholderHeadingType"
+
+    // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
+    val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
 
