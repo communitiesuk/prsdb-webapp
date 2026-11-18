@@ -44,8 +44,6 @@ class AbsoluteUrlProvider(
         UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
             .replacePath(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
-            .replaceQuery(null)
-            .fragment(null)
             .build()
             .toUri()
 
