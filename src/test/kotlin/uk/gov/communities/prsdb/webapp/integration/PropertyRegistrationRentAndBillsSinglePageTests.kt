@@ -14,7 +14,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         fun `Submitting with no rent included option selected returns an error`(page: Page) {
             val rentIncludesBillsPage = navigator.skipToTenancyDetailsRentIncludesBillsPage()
             rentIncludesBillsPage.form.submit()
-            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select if the rent includes any bills")
         }
     }
 
@@ -24,7 +24,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         fun `Submitting with no bills included selected returns an error`() {
             val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
             billsIncludedPage.form.submit()
-            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select what you include in the rent")
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select which bills you include in the rent")
         }
 
         @Test
@@ -42,7 +42,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             billsIncludedPage.selectGasElectricityWater()
             billsIncludedPage.selectSomethingElseCheckbox()
             billsIncludedPage.form.submit()
-            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the bills and services you include in the rent")
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the other bills you include in the rent")
         }
 
         @Test
@@ -71,7 +71,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             furnishedStatusPage.form.submit()
             assertThat(
                 furnishedStatusPage.form.getErrorMessage(),
-            ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+            ).containsText("Select how the property is furnished")
         }
 
         @Test
