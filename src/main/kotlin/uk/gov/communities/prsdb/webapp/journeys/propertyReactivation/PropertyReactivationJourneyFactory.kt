@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.Reactivatio
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.GAS_SAFETY
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.LICENSING
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.TENANCY_DETAILS
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.CompleteReactivationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
@@ -59,10 +59,10 @@ class PropertyReactivationJourneyFactory(
                 initialStep()
                 // TODO PDJB-2034: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
-                nextDestination { mode ->
+                nextStep { mode ->
                     when (mode) {
-                        ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.destinationAfterInfo()
-                        ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED -> Destination(journey.alreadyRegisteredStep)
+                        ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.stepAfterInfo()
+                        ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED -> journey.alreadyRegisteredStep
                     }
                 }
             }
@@ -121,6 +121,10 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.checkAnswersParents() }
                 nextUrl { confirmationUrl(propertyOwnershipId) }
             }
+            step(journey.completeReactivationStep) {
+                parents { journey.completeReactivationParents() }
+                nextUrl { confirmationUrl(propertyOwnershipId) }
+            }
             useContinueButtons(journey.gasSafetyTask)
             useContinueButtons(journey.electricalSafetyTask)
             useContinueButtons(journey.epcTask)
@@ -165,10 +169,8 @@ class PropertyReactivationJourneyFactory(
     private fun PropertyReactivationJourneyState.nextStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         requiredTaskTypes.filter { it > taskType }.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
 
-    // TODO PDJB-2044: also reactivate the property when no tasks are required and we go straight to confirmation
-    private fun PropertyReactivationJourneyState.destinationAfterInfo(): Destination =
-        requiredTaskTypes.minOrNull()?.let { Destination(entryStepFor(it)) }
-            ?: Destination.ExternalUrl(confirmationUrl(propertyOwnershipId))
+    private fun PropertyReactivationJourneyState.stepAfterInfo(): JourneyStep<*, *, *> =
+        requiredTaskTypes.minOrNull()?.let { entryStepFor(it) } ?: completeReactivationStep
 
     private fun confirmationUrl(propertyOwnershipId: Long) =
         "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
@@ -188,6 +190,9 @@ class PropertyReactivationJourneyFactory(
                 ?: return SingleParent(infoStep) { false }
         return SingleParent(previousStep) { previousStep.outcome != null }
     }
+
+    private fun PropertyReactivationJourneyState.completeReactivationParents(): Parentage =
+        SingleParent(infoStep) { requiredTaskTypes.isEmpty() && infoStep.outcome == ReactivationInfoMode.PROPERTY_AVAILABLE }
 }
 
 @JourneyFrameworkComponent
@@ -200,6 +205,7 @@ class PropertyReactivationJourney(
     override val epcTask: EpcTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val checkAnswersStep: ReactivationCheckAnswersStep,
+    override val completeReactivationStep: CompleteReactivationStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyReactivationJourneyState>,
@@ -249,6 +255,7 @@ interface PropertyReactivationJourneyState :
     val epcTask: EpcTask
     val tenancyDetailsTask: TenancyDetailsTask
     val checkAnswersStep: ReactivationCheckAnswersStep
+    val completeReactivationStep: CompleteReactivationStep
     var requiredTaskTypes: List<ReactivationTaskType>
     override var propertyOwnershipId: Long
     override var isOccupied: Boolean
