@@ -303,11 +303,10 @@ class PropertyDetailsViewModelTests {
                 ),
             )
 
-        ownershipTypes.forEachIndexed { index, (ownershipType, headingKey, linkTextKey) ->
-            val propertyId = 100L + index
+        ownershipTypes.forEach { (ownershipType, headingKey, linkTextKey) ->
             val viewModel =
                 PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = ownershipType, id = propertyId),
+                    createOccupiedPropertyOwnership(ownershipType = ownershipType),
                     isLandlordView = true,
                     messageSource = mockMessageSource,
                 )

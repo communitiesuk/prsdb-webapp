@@ -658,8 +658,6 @@ ON CONFLICT DO NOTHING;
 INSERT INTO address (id, created_date, uprn, single_line_address, local_council_id, postcode, building_name, building_number, street_name)
 VALUES (61, current_timestamp, NULL, 'Joint Freeholders House, PRSDB Road, JF1 1AA', 1, 'JF1 1AA', 'Joint Freeholders House', NULL, 'PRSDB Road'),
        (62, current_timestamp, NULL, 'Non-Joint Freeholders House, PRSDB Road, NF1 1AA', 1, 'NF1 1AA', 'Non-Joint Freeholders House', NULL, 'PRSDB Road'),
-       (63, current_timestamp, NULL, '12 Joint Freeholder Road, JF1 2AA', 1, 'JF1 2AA', NULL, '12', 'Joint Freeholder Road'),
-       (64, current_timestamp, NULL, '12 Non-Joint Freeholder Road, NF1 2AA', 1, 'NF1 2AA', NULL, '12', 'Non-Joint Freeholder Road'),
        (65, current_timestamp, NULL, 'No Freeholders House, PRSDB Road, NF1 3AA', 1, 'NF1 3AA', 'No Freeholders House', NULL, 'PRSDB Road')
 ON CONFLICT DO NOTHING;
 

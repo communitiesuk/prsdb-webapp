@@ -397,8 +397,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     inner class EnableFeatureFlags {
         @ParameterizedTest
         @CsvSource(
-            "false, NONE, NONE, false, NONE",
-            "true, LEASEHOLD_ONLY, NONE, false, LEASEHOLD_ONLY",
+            "false, , , false, NONE",
+            "true, LEASEHOLD_ONLY, , false, LEASEHOLD_ONLY",
             "true, FREEHOLD_ONLY, JOINT_TENANTS, true, JOINT_TENANTS",
             "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, true, TENANTS_IN_COMMON",
             "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, true, SHARE_OF_JOINT_TENANTS",
@@ -406,8 +406,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
         fun `registered freeholders appear on the property record`(
             ownsProperty: Boolean,
-            ownershipKind: String,
-            freeholdType: String,
+            ownershipKind: OwnershipKind?,
+            freeholdType: FreeholdType?,
             joint: Boolean,
             expectedOwnershipType: OwnershipType,
             page: Page,
@@ -438,9 +438,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     .withFreeholders(freeholders)
                     .withFreeholdersInfoComplete()
                     .withFreeholdersListComplete()
-            if (ownershipKind != "NONE") builder.withOwnershipKind(OwnershipKind.valueOf(ownershipKind))
-            if (freeholdType != "NONE") builder.withFreeholdType(FreeholdType.valueOf(freeholdType))
-            if (ownershipKind != "FREEHOLD_ONLY") builder.withAnyoneInOwnershipChain(false)
+            if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
+            if (freeholdType != null) builder.withFreeholdType(freeholdType)
+            if (ownershipKind != OwnershipKind.FREEHOLD_ONLY) builder.withAnyoneInOwnershipChain(false)
 
             val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
