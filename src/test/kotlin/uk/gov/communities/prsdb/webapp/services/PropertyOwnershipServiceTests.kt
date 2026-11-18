@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -110,6 +111,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockSuperiorLandlordService: SuperiorLandlordService
+
+    @Mock
+    private lateinit var mockPropertyManagerService: PropertyManagerService
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
@@ -1910,6 +1914,82 @@ class PropertyOwnershipServiceTests {
             "The property ownership record has been updated since this update session started.",
             exception.message,
         )
+    }
+
+    @Nested
+    inner class UpdatePropertyManager {
+        private lateinit var propertyOwnership: PropertyOwnership
+
+        @BeforeEach
+        fun setUp() {
+            propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+        }
+
+        @Test
+        fun `updatePropertyManager links a newly created property manager when one is provided`() {
+            // Arrange
+            val newPropertyManager = PropertyManager("New Agent", "new@example.com")
+            whenever(mockPropertyManagerService.createPropertyManager("New Agent", "new@example.com")).thenReturn(newPropertyManager)
+
+            // Act
+            propertyOwnershipService.updatePropertyManager(
+                propertyOwnership.id,
+                PropertyManagerDataModel("New Agent", "new@example.com"),
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertSame(newPropertyManager, propertyOwnership.propertyManager)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updatePropertyManager replaces an existing property manager with a new one`() {
+            // Arrange
+            propertyOwnership.propertyManager = PropertyManager("Old Agent", "old@example.com")
+            val newPropertyManager = PropertyManager("New Agent", "new@example.com")
+            whenever(mockPropertyManagerService.createPropertyManager("New Agent", "new@example.com")).thenReturn(newPropertyManager)
+
+            // Act
+            propertyOwnershipService.updatePropertyManager(
+                propertyOwnership.id,
+                PropertyManagerDataModel("New Agent", "new@example.com"),
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertSame(newPropertyManager, propertyOwnership.propertyManager)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updatePropertyManager removes the property manager when none is provided`() {
+            // Arrange
+            propertyOwnership.propertyManager = PropertyManager("Old Agent", "old@example.com")
+
+            // Act
+            propertyOwnershipService.updatePropertyManager(propertyOwnership.id, null, propertyOwnership.getMostRecentlyUpdated())
+
+            // Assert
+            assertNull(propertyOwnership.propertyManager)
+            verifyNoInteractions(mockPropertyManagerService)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updatePropertyManager throws UpdateConflictException if modified dates conflict`() {
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updatePropertyManager(
+                    propertyOwnership.id,
+                    PropertyManagerDataModel("New Agent", "new@example.com"),
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+            verifyNoInteractions(mockPropertyManagerService)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
     }
 
     @Nested

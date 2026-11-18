@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -59,6 +60,7 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val freeholderService: FreeholderService,
     private val superiorLandlordService: SuperiorLandlordService,
+    private val propertyManagerService: PropertyManagerService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
@@ -393,6 +395,20 @@ class PropertyOwnershipService(
     @Transactional
     fun removePropertyManager(propertyOwnership: PropertyOwnership) {
         propertyOwnership.propertyManager = null
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    // Replacing or clearing the reference deletes the previous property manager row through orphanRemoval.
+    @Transactional
+    fun updatePropertyManager(
+        id: Long,
+        propertyManager: PropertyManagerDataModel?,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.propertyManager =
+            propertyManager?.let { propertyManagerService.createPropertyManager(it.name, it.email) }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
