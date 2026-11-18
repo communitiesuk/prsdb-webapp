@@ -15,15 +15,14 @@ class ReactivationInfoStepConfig(
 ) : AbstractRequestableStepConfig<ReactivationInfoMode, NoInputFormModel, PropertyReactivationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: PropertyReactivationJourneyState) =
-        mapOf(
-            "addressLines" to
-                propertyOwnershipService
-                    .getInactivePropertyOwnershipForCurrentLandlord(state.propertyOwnershipId)
-                    .address
-                    .toMultiLineAddress()
-                    .split("\n"),
+    override fun getStepSpecificContent(state: PropertyReactivationJourneyState): Map<String, Any?> {
+        val address = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(state.propertyOwnershipId).address
+        return mapOf(
+            "addressLines" to address.toMultiLineAddress().split("\n"),
+            // With no details to provide, this page's button completes the reactivation (unless the address is taken)
+            "isTransaction" to (state.requiredTaskTypes.isEmpty() && !isAddressOwned(address.uprn)),
         )
+    }
 
     override fun chooseTemplate(state: PropertyReactivationJourneyState) = "forms/reactivatePropertyInfoForm"
 
@@ -42,8 +41,10 @@ class ReactivationInfoStepConfig(
                 .getInactivePropertyOwnershipForCurrentLandlord(state.propertyOwnershipId)
                 .address
                 .uprn
-        state.isPropertyAlreadyRegistered = uprn?.let { addressAvailabilityService.isAddressOwned(it) } ?: false
+        state.isPropertyAlreadyRegistered = isAddressOwned(uprn)
     }
+
+    private fun isAddressOwned(uprn: Long?) = uprn?.let { addressAvailabilityService.isAddressOwned(it) } ?: false
 }
 
 @JourneyFrameworkComponent

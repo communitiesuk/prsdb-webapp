@@ -123,17 +123,6 @@ making the property unoccupied removes the letting agent from the registration. 
 page is the commit step on every variant of that journey, and is the only step that carries the tag
 (because it uses `forms/checkAnswersForm`).
 
-#### Property reactivation with no details to provide
-
-When an inactive property needs no further details, the reactivation journey goes straight from the
-`info` page to the confirmation page and skips the check-your-answers page that carries the `Transaction`
-tag. The `info` page's Continue button can't be tagged: whether the property's address has since been
-registered by someone else (which leads to the `already-registered` page instead) is only known after the
-button is pressed, so tagging it would also count reactivations that can't go ahead.
-
-**Decision:** reactivations with no details to provide are intentionally **not counted**. Reactivations
-that go through the check-your-answers page are counted as normal.
-
 ## Cost and cost per transaction
 
 The deployed `AwsCostExplorerMetricsClient` calls Cost Explorer's `GetCostAndUsage` operation in
