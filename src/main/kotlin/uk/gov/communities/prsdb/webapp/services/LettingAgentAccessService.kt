@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_AUTHORISED_ACCESS_TOKENS
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import java.util.UUID
 
-@PrsdbWebService
+@Service
 class LettingAgentAccessService(
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val session: HttpSession,

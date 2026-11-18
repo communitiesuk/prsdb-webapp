@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LetterNotificationStubServ
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -45,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -108,6 +110,8 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                ActiveInactiveService::class.simpleBeanName,
+                LettingAgentAccessService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
                 JointLandlordInvitationDeletionService::class.simpleBeanName,
