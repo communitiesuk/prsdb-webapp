@@ -20,7 +20,7 @@ Check the details the landlord has provided are correct. The council will use th
 
 ((freeholder address))
 
-Your details are not displayed publicly — only councils and the property’s landlords can see them. Read more about how we handle your data by going to ((privacyNotice))
+Your details are not displayed publicly — only councils and the property’s landlords can see them. Read more about how we handle your data by going to ((privacy notice))
 
 # What to do next
 

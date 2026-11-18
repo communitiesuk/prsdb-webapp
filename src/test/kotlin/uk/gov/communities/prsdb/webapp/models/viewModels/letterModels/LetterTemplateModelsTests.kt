@@ -51,7 +51,7 @@ class LetterTemplateModelsTests {
         )
         Assertions.assertEquals("12 Real Street\nBristol\nBS8 1AA", personalisation["property address"])
         Assertions.assertEquals("18 Market Street\nBristol\nBS1 4DJ", personalisation["freeholder address"])
-        Assertions.assertEquals("example.test/landlord/privacy-notice", personalisation["privacyNotice"])
+        Assertions.assertEquals("example.test/landlord/privacy-notice", personalisation["privacy notice"])
     }
 
     @ParameterizedTest(name = "{0} keys match markdown")

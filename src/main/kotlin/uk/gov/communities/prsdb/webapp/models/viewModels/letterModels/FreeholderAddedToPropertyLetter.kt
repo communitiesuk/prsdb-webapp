@@ -17,6 +17,6 @@ data class FreeholderAddedToPropertyLetter(
             "property address" to propertyAddress,
             "landlords" to formatAsBulletList(landlords),
             "freeholder address" to freeholderAddress,
-            "privacyNotice" to privacyNoticeUrl,
+            "privacy notice" to privacyNoticeUrl,
         )
 }
