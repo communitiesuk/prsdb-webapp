@@ -1,3 +1,9 @@
+instructions: |
+  The app generates the worktree's branch name, which may not follow the `branch-and-commit-naming` skill. Before the
+  first commit in a worktree session, if the branch name doesn't follow that convention, ask the user for the ticket ID if
+  you don't already know it, and rename the branch with `git branch -m <branch>`. Don't use the app's `rename_branch`
+  tool, which adds the app's branch prefix.
+
 scripts:
   - name: Set up worktree
     command: node scripts/git-worktrees/copilot-app-worktree.mjs
