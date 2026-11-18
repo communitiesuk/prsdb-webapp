@@ -233,10 +233,10 @@ paymentNotCompleted:
     heading: What you need to do
     paragraph: Try the payment again to complete your property registration.
 whoProvidesRentalDetails:
-  heading: Who will provide details about how your property’s rented out
+  heading: Who will provide details about how this property is rented out
   intro: 'To register your property, we need details about:'
   bullet:
-    licensing: if your property needs a license
+    licensing: if your property needs a licence
     complianceCertificates: compliance certificates
     tenancy: the current tenancy
   lettingAgentParagraph: If you’re using a letting agent or property manager, you can choose for them to provide these details for you. They can also keep these details up to date.
