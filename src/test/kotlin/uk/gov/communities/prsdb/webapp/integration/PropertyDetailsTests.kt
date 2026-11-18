@@ -420,11 +420,12 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the property tab has no change links, letting agent panel or deregister link`(page: Page) {
+            fun `the property tab has no change links, letting agent panel, deactivate link or deregister link`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.actionLinks).hasCount(0)
                 assertThat(detailsPage.delegateToLettingAgentLink).isHidden()
+                assertThat(detailsPage.deactivatePropertyLink).isHidden()
                 assertThat(detailsPage.deregisterPropertyLink).isHidden()
             }
 

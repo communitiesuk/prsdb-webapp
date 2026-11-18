@@ -307,6 +307,7 @@ class PropertyDetailsControllerTests(
             val propertyOwnership = createPropertyOwnership()
 
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnership.id)).thenReturn(propertyOwnership)
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
@@ -357,6 +358,7 @@ class PropertyDetailsControllerTests(
             val propertyOwnership = createPropertyOwnership()
 
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnership.id)).thenReturn(propertyOwnership)
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
