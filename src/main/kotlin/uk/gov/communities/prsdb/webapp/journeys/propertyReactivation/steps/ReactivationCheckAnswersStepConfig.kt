@@ -27,20 +27,29 @@ class ReactivationCheckAnswersStepConfig(
         val showEpc = ReactivationTaskType.EPC in requiredTaskTypes
         val showTenancyDetails = ReactivationTaskType.TENANCY_DETAILS in requiredTaskTypes
 
-        // TODO PDJB-2042: add licensing rows once the licensing task (PDJB-2037) is merged
-        return buildMap {
-            put("propertyName", propertyOwnership.address.singleLineAddress)
-            put("showGasSafety", showGasSafety)
-            put("showElectricalSafety", showElectricalSafety)
-            put("showEpc", showEpc)
-            put("showTenancyDetails", showTenancyDetails)
-            if (showGasSafety) putAll(complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask))
-            if (showElectricalSafety) putAll(complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask))
-            if (showEpc) putAll(complianceDetailsHelper.getEpcCyaContent(state, state.epcTask))
-            if (showTenancyDetails) {
-                put("tenancyRows", occupancyDetailsHelper.getTenancyDetailsSummaryList(state, state.tenancyDetailsTask, messageSource))
+        val gasSafetyContent = if (showGasSafety) complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask) else emptyMap()
+        val electricalSafetyContent =
+            if (showElectricalSafety) {
+                complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+            } else {
+                emptyMap()
             }
-        }
+        val epcContent = if (showEpc) complianceDetailsHelper.getEpcCyaContent(state, state.epcTask) else emptyMap()
+        val tenancyContent =
+            if (showTenancyDetails) {
+                mapOf("tenancyRows" to occupancyDetailsHelper.getTenancyDetailsSummaryList(state, state.tenancyDetailsTask, messageSource))
+            } else {
+                emptyMap()
+            }
+
+        // TODO PDJB-2042: add licensing rows once the licensing task (PDJB-2037) is merged
+        return mapOf(
+            "propertyName" to propertyOwnership.address.singleLineAddress,
+            "showGasSafety" to showGasSafety,
+            "showElectricalSafety" to showElectricalSafety,
+            "showEpc" to showEpc,
+            "showTenancyDetails" to showTenancyDetails,
+        ) + gasSafetyContent + electricalSafetyContent + epcContent + tenancyContent
     }
 }
 
