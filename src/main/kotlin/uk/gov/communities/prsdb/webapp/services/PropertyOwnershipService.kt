@@ -98,6 +98,7 @@ class PropertyOwnershipService(
         correspondenceEmail: String,
         correspondenceAddressModel: AddressDataModel,
         renewalDate: LocalDate = RenewalDateHelper.getRenewalDate(anniversary),
+        paidForUntil: LocalDate = renewalDate,
         freeholders: List<FreeholderDataModel>? = null,
         superiorLandlords: List<SuperiorLandlordDataModel> = emptyList(),
         propertyManager: PropertyManager? = null,
@@ -137,6 +138,7 @@ class PropertyOwnershipService(
                     markedJointLandlord = markedJointLandlord,
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
+                    paidForUntil = paidForUntil,
                 ).apply {
                     if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
                     this.propertyManager = propertyManager
@@ -196,6 +198,9 @@ class PropertyOwnershipService(
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
 
     fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
+
+    fun getPropertyPaidForUntil(propertyOwnershipId: Long): LocalDate =
+        retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId).paidForUntil
 
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
@@ -281,6 +286,11 @@ class PropertyOwnershipService(
 
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
+
+    private fun retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId: Long): PropertyOwnership =
+        propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
+        }
 
     fun searchForProperties(
         searchTerm: String,
@@ -541,6 +551,16 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updatePaidForUntil(
+        propertyOwnershipId: Long,
+        paidForUntil: LocalDate,
+    ) {
+        val propertyOwnership = retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId)
+        propertyOwnership.updatePaidForUntil(paidForUntil)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
