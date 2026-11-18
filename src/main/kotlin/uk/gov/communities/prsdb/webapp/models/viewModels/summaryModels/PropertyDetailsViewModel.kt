@@ -57,6 +57,14 @@ class PropertyDetailsViewModel(
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
     val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
 
+    val showSuperiorLandlordSection: Boolean =
+        showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()
+
+    val hasSuperiorLandlords: Boolean = propertyOwnership.superiorLandlords.isNotEmpty()
+
+    // TODO PDJB-1994: Replace this placeholder URL with the superior landlord update journey route.
+    val superiorLandlordSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
 

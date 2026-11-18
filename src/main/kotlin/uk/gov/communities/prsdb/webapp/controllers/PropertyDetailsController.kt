@@ -25,7 +25,9 @@ import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentControl
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
@@ -33,6 +35,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -46,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
+    private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
@@ -91,6 +96,32 @@ class PropertyDetailsController(
                 "freeholderSummaryCards",
                 freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
             )
+        }
+        if (propertyDetails.showSuperiorLandlordSection) {
+            if (propertyDetails.hasSuperiorLandlords) {
+                modelAndView.addObject(
+                    "superiorLandlordSummaryCards",
+                    superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
+                )
+            } else {
+                modelAndView.addObject(
+                    "noSuperiorLandlordsSummaryList",
+                    listOf(
+                        SummaryListRowViewModel(
+                            fieldHeading = "registerProperty.superiorLandlords.checkAnwers.anyoneInOwnershipChain",
+                            // Resolves as 'No'
+                            fieldValue = MessageKeyConverter.convert(false),
+                            actions =
+                                listOf(
+                                    SummaryListRowActionsViewModel(
+                                        "forms.links.change",
+                                        propertyDetails.superiorLandlordSectionUpdateUrl,
+                                    ),
+                                ),
+                        ),
+                    ),
+                )
+            }
         }
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
