@@ -77,7 +77,7 @@ class LicensingTypeStepConfigTests {
     }
 
     @Test
-    fun `mode throws UnrecoverableJourneyStateException when licensingType is PROVIDE_LATER but allowProvideLicensingLaterRoute is false`() {
+    fun `mode rejects PROVIDE_LATER when route is disabled`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.allowProvideLicensingLaterRoute).thenReturn(false)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
