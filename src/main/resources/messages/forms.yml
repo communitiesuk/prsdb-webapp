@@ -426,18 +426,8 @@ update:
       insetText: We’ll notify anyone you add or remove.
     remove:
       insetText: If you’ve given this property manager access, you’ll need to remove this on the property registration page.
-  numberOfHouseholds:
-    fieldSetHeading: Update how many households live in your property
-  numberOfPeople:
-    fieldSetHeading: Update how many people live in your property
   numberOfBedrooms:
     heading: Update how many bedrooms are in your property
-  rentIncludesBills:
-    fieldSetHeading: Update whether the rent includes bills
-  billsIncluded:
-    fieldSetHeading: Update which of these you include in the rent
-  furnishedStatus:
-    fieldSetHeading: Update is the property furnished
   rentFrequency:
     heading: Update when you charge rent
   rentAmount:

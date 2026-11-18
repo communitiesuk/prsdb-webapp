@@ -284,7 +284,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -1718,7 +1717,7 @@ class Navigator(
         isPropertyAlreadyRegistered: Boolean = false,
     ) = navigateToPropertyReactivationStepAfterInfo(
         propertyOwnershipId,
-        ReactivationLicensingStep.ROUTE_SEGMENT,
+        LicensingTypeStep.ROUTE_SEGMENT,
         isPropertyAlreadyRegistered,
     )
 

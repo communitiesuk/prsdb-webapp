@@ -16,8 +16,6 @@ class TenantsStepConfig : AbstractRequestableStepConfig<Complete, NewNumberOfPeo
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
             "fieldSetHeading" to "tenancyDetails.numberOfPeople.fieldSetHeading",
-            "fieldSetHint" to "tenancyDetails.numberOfPeople.fieldSetHint",
-            "label" to "tenancyDetails.numberOfPeople.label",
         )
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String = "forms/numberOfPeopleForm"

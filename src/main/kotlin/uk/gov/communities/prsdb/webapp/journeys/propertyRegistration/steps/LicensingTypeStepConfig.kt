@@ -59,14 +59,7 @@ class LicensingTypeStepConfig :
     override fun mode(state: LicensingState) =
         getFormModelFromStateOrNull(state)?.let { formModel ->
             if (formModel.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                if (state.allowProvideLicensingLaterRoute) {
-                    LicensingTypeMode.PROVIDE_LATER
-                } else {
-                    throw UnrecoverableJourneyStateException(
-                        state.journeyId,
-                        "The 'Provide this later' route is not available for this journey",
-                    )
-                }
+                provideLaterModeIfAllowed(state)
             } else {
                 formModel.licensingType?.let { licensingType ->
                     when (licensingType) {
@@ -74,10 +67,20 @@ class LicensingTypeStepConfig :
                         LicensingType.HMO_MANDATORY_LICENCE -> LicensingTypeMode.HMO_MANDATORY_LICENCE
                         LicensingType.HMO_ADDITIONAL_LICENCE -> LicensingTypeMode.HMO_ADDITIONAL_LICENCE
                         LicensingType.NO_LICENSING -> LicensingTypeMode.NO_LICENSING
-                        LicensingType.PROVIDE_LATER -> LicensingTypeMode.PROVIDE_LATER
+                        LicensingType.PROVIDE_LATER -> provideLaterModeIfAllowed(state)
                     }
                 }
             }
+        }
+
+    private fun provideLaterModeIfAllowed(state: LicensingState): LicensingTypeMode =
+        if (state.allowProvideLicensingLaterRoute) {
+            LicensingTypeMode.PROVIDE_LATER
+        } else {
+            throw UnrecoverableJourneyStateException(
+                state.journeyId,
+                "The 'Provide this later' route is not available for this journey",
+            )
         }
 }
 
