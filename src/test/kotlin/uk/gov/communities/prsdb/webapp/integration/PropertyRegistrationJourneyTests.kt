@@ -199,8 +199,108 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val absoluteLandlordUrl = "www.example.com/landlord"
+abstract class PropertyRegistrationIntegrationTestBase : IntegrationTestWithMutableData("data-local.sql") {
+    protected val absoluteLandlordUrl = "www.example.com/landlord"
+
+    @MockitoSpyBean
+    protected lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @MockitoSpyBean
+    protected lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
+
+    @MockitoBean
+    protected lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+
+    @MockitoBean
+    protected lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    protected lateinit var govUkPayClient: GovUkPayClient
+
+    @Autowired
+    protected lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
+
+    @Autowired
+    protected lateinit var prsdbUserRepository: PrsdbUserRepository
+
+    protected val loggedInUserId = "urn:fdc:gov.uk:2022:UVWXY"
+
+    @Volatile
+    protected var govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+
+    @BeforeEach
+    fun setupRegistrationPayment() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        whenever(
+            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
+        ).thenReturn(URI("http://localhost/invite/test-token"))
+        whenever(
+            absoluteUrlProvider.buildPropertyDetailsUri(any()),
+        ).thenReturn(URI("http://localhost/property-details/1"))
+        whenever(
+            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
+        ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
+        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any(), any())).thenAnswer { invocation ->
+            URI(
+                "http://localhost:$port${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}" +
+                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}" +
+                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${invocation.getArgument<String>(1)}",
+            )
+        }
+        whenever(govUkPayClient.createPayment(any())).thenAnswer { invocation ->
+            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
+            MockGovUkPayData.createGovUkPayCreatedPayment(
+                paymentId = "test-payment-${UUID.randomUUID()}",
+                amount = request.amount,
+                reference = request.reference,
+                nextUrl = request.returnUrl,
+            )
+        }
+        govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
+        }
+    }
+
+    protected fun stubGovUkPayPaymentStatus(status: GovUkPayPaymentStatus) {
+        govUkPayPaymentStatus = status
+    }
+
+    protected fun ensureIncompletePropertyExistsForCurrentJourney(page: Page): String {
+        val journeyId =
+            UriComponentsBuilder
+                .fromUriString(page.url())
+                .build()
+                .queryParams
+                .getFirst(JourneyIdProvider.PARAMETER_NAME)
+                ?: error("No journey ID in ${page.url()}")
+        if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
+            val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
+            val savedJourneyState =
+                savedJourneyStateRepository.findByJourneyIdAndUser_Id(journeyId, loggedInUserId)
+                    ?: savedJourneyStateRepository.save(SavedJourneyState(user, journeyId))
+            landlordIncompletePropertiesRepository.save(LandlordIncompleteProperty(user, savedJourneyState))
+        }
+        return journeyId
+    }
+
+    protected fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
+        submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
+        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    protected fun submitPaymentSummaryAndWaitForRedirectTo(
+        page: Page,
+        routeSegment: String,
+    ) {
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        ensureIncompletePropertyExistsForCurrentJourney(page)
+        paymentSummaryPage.form.submit()
+        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$routeSegment") }
+    }
+}
+
+class PropertyRegistrationJourneyTests : PropertyRegistrationIntegrationTestBase() {
 
     private fun verifyConfirmationEmailSent(
         expectedPrn: String,
@@ -229,9 +329,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private val electricalSafetyHeader = "Electrical safety certificate"
     private val epcSectionHeader = "Energy performance certificate (EPC)"
 
-    @MockitoSpyBean
-    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
-
     @Autowired
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
 
@@ -244,12 +341,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoSpyBean
     private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
-    @MockitoSpyBean
-    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
-
-    @MockitoBean
-    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
-
     @MockitoBean
     private lateinit var jointLandlordInvitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>
 
@@ -257,13 +348,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var epcRegisterClient: EpcRegisterClient
 
     @MockitoBean
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
-    @MockitoBean
     private lateinit var fileDownloader: FileDownloader
-
-    @MockitoBean
-    private lateinit var govUkPayClient: GovUkPayClient
 
     @MockitoSpyBean
     private lateinit var addressAvailabilityService: AddressAvailabilityService
@@ -273,92 +358,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Autowired
     private lateinit var paymentRepository: PaymentRepository
-
-    @Autowired
-    private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
-
-    @Autowired
-    private lateinit var prsdbUserRepository: PrsdbUserRepository
-
-    private val loggedInUserId = "urn:fdc:gov.uk:2022:UVWXY"
-
-    // Read on server threads
-    @Volatile
-    private var govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-
-    @BeforeEach
-    fun setup() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
-        whenever(
-            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
-        ).thenReturn(URI("http://localhost/invite/test-token"))
-        whenever(
-            absoluteUrlProvider.buildPropertyDetailsUri(any()),
-        ).thenReturn(URI("http://localhost/property-details/1"))
-        whenever(
-            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
-        ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
-        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any(), any())).thenAnswer { invocation ->
-            URI(
-                "http://localhost:$port${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}" +
-                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}" +
-                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${invocation.getArgument<String>(1)}",
-            )
-        }
-        // The fake GOV.UK Pay sends the user straight back to the return URL, as if they had completed the card details pages
-        whenever(govUkPayClient.createPayment(any())).thenAnswer { invocation ->
-            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
-            MockGovUkPayData.createGovUkPayCreatedPayment(
-                paymentId = "test-payment-${UUID.randomUUID()}",
-                amount = request.amount,
-                reference = request.reference,
-                nextUrl = request.returnUrl,
-            )
-        }
-        govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
-            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
-        }
-    }
-
-    private fun stubGovUkPayPaymentStatus(status: GovUkPayPaymentStatus) {
-        govUkPayPaymentStatus = status
-    }
-
-    // Journeys seeded through the test session controller never create a LandlordIncompleteProperty, which the
-    // payment service needs to link the payment to the journey
-    private fun ensureIncompletePropertyExistsForCurrentJourney(page: Page): String {
-        val journeyId =
-            UriComponentsBuilder
-                .fromUriString(page.url())
-                .build()
-                .queryParams
-                .getFirst(JourneyIdProvider.PARAMETER_NAME)
-                ?: error("No journey ID in ${page.url()}")
-        if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
-            val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
-            val savedJourneyState =
-                savedJourneyStateRepository.findByJourneyIdAndUser_Id(journeyId, loggedInUserId)
-                    ?: savedJourneyStateRepository.save(SavedJourneyState(user, journeyId))
-            landlordIncompletePropertiesRepository.save(LandlordIncompleteProperty(user, savedJourneyState))
-        }
-        return journeyId
-    }
-
-    private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
-        submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
-        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
-    }
-
-    private fun submitPaymentSummaryAndWaitForRedirectTo(
-        page: Page,
-        routeSegment: String,
-    ) {
-        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-        ensureIncompletePropertyExistsForCurrentJourney(page)
-        paymentSummaryPage.form.submit()
-        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$routeSegment") }
-    }
 
     private fun submitPaymentSummary(page: Page): PaymentReturnFormPagePropertyRegistration {
         val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
@@ -3263,69 +3262,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 }
 
-class RegisterAndCheckDetailsTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val absoluteLandlordUrl = "www.example.com/landlord"
-
-    @MockitoSpyBean
-    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
-
-    @MockitoBean
-    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
-
-    @MockitoBean
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
-    @MockitoBean
-    private lateinit var govUkPayClient: GovUkPayClient
-
-    @Autowired
-    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
-
-    @Autowired
-    private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
-
-    @Autowired
-    private lateinit var prsdbUserRepository: PrsdbUserRepository
-
-    private val loggedInUserId = "urn:fdc:gov.uk:2022:UVWXY"
-
-    @Volatile
-    private var govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-
-    @BeforeEach
-    fun setupPayment() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
-        whenever(
-            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
-        ).thenReturn(URI("http://localhost/invite/test-token"))
-        whenever(
-            absoluteUrlProvider.buildPropertyDetailsUri(any()),
-        ).thenReturn(URI("http://localhost/property-details/1"))
-        whenever(
-            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
-        ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
-        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any(), any())).thenAnswer { invocation ->
-            URI(
-                "http://localhost:$port${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}" +
-                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}" +
-                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${invocation.getArgument<String>(1)}",
-            )
-        }
-        whenever(govUkPayClient.createPayment(any())).thenAnswer { invocation ->
-            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
-            MockGovUkPayData.createGovUkPayCreatedPayment(
-                paymentId = "test-payment-${UUID.randomUUID()}",
-                amount = request.amount,
-                reference = request.reference,
-                nextUrl = request.returnUrl,
-            )
-        }
-        govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
-            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
-        }
-    }
-
+class RegisterAndCheckDetailsTests : PropertyRegistrationIntegrationTestBase() {
     @ParameterizedTest
     @CsvSource(
         "false, , , NONE",
@@ -3448,28 +3385,4 @@ class RegisterAndCheckDetailsTests : IntegrationTestWithMutableData("data-local.
         assertThat(detailsPage.freeholderSection).hasCount(0)
     }
 
-    private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
-        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-        ensureIncompletePropertyExistsForCurrentJourney(page)
-        paymentSummaryPage.form.submit()
-        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") }
-        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
-    }
-
-    private fun ensureIncompletePropertyExistsForCurrentJourney(page: Page) {
-        val journeyId =
-            UriComponentsBuilder
-                .fromUriString(page.url())
-                .build()
-                .queryParams
-                .getFirst(JourneyIdProvider.PARAMETER_NAME)
-                ?: error("No journey ID in ${page.url()}")
-        if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
-            val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
-            val savedJourneyState =
-                savedJourneyStateRepository.findByJourneyIdAndUser_Id(journeyId, loggedInUserId)
-                    ?: savedJourneyStateRepository.save(SavedJourneyState(user, journeyId))
-            landlordIncompletePropertiesRepository.save(LandlordIncompleteProperty(user, savedJourneyState))
-        }
-    }
 }
