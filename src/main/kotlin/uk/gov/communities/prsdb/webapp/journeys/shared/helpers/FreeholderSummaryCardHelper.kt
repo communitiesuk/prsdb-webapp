@@ -32,16 +32,13 @@ class FreeholderSummaryCardHelper {
                     freeholder.id.toString(),
                     FreeholderDataModel.fromFreeholder(freeholder),
                     emptyList(),
-                    replacePostalAddressWithNote = true,
                 )
             }
 
-    // On the property record, a postal address is replaced by a note saying it was used to contact the freeholder.
     private fun buildSummaryCard(
         freeholderId: String,
         freeholder: FreeholderDataModel,
         actions: List<SummaryCardActionViewModel>,
-        replacePostalAddressWithNote: Boolean = false,
     ): SummaryCardViewModel {
         if (!freeholder.detailsKnown) {
             return SummaryCardViewModel(
@@ -57,25 +54,22 @@ class FreeholderSummaryCardHelper {
             throw PrsdbWebException("Freeholder $freeholderId has both an email and postal address")
         }
 
-        val showNote =
-            freeholder.email == null && (replacePostalAddressWithNote || freeholder.address == null)
+        // Postal addresses aren't stored, so a saved freeholder contacted by post has neither an email nor an address
+        val showNote = freeholder.email == null && freeholder.address == null
         return SummaryCardViewModel(
             title = name,
-            summaryList = getContactRows(freeholder, replacePostalAddressWithNote),
+            summaryList = getContactRows(freeholder),
             actions = actions,
             bodyTextKey = if (showNote) POSTAL_ADDRESS_NOTE_KEY else null,
         )
     }
 
-    private fun getContactRows(
-        freeholder: FreeholderDataModel,
-        replacePostalAddressWithNote: Boolean,
-    ): List<SummaryListRowViewModel> =
+    private fun getContactRows(freeholder: FreeholderDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(
             freeholder.email?.let {
                 SummaryListRowViewModel(fieldHeading = "registerProperty.freeholders.list.emailAddress", fieldValue = it)
             },
-            freeholder.address?.takeIf { !replacePostalAddressWithNote }?.let {
+            freeholder.address?.let {
                 SummaryListRowViewModel(
                     fieldHeading = "registerProperty.freeholders.list.postalAddress",
                     fieldValue = it.toMultiLineAddress().split("\n"),
