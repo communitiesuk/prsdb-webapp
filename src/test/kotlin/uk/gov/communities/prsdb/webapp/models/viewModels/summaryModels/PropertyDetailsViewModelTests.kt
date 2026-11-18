@@ -337,7 +337,7 @@ class PropertyDetailsViewModelTests {
         assertFalse(viewModel.hasPropertyManager)
         val row = viewModel.propertyManagerNotUsedRows.single()
         assertEquals("registerProperty.propertyManager.usingPropertyManager.fieldSetHeading", row.fieldHeading)
-        assertEquals("propertyDetails.peopleResponsible.propertyManager.notUsing", row.fieldValue)
+        assertEquals("registerProperty.propertyManager.usingPropertyManager.radios.no", row.fieldValue)
         // TODO PDJB-1995: assert the real update route once the property manager update journey exists
         assertEquals("#", row.actions.single().url)
     }

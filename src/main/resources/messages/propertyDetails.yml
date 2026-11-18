@@ -43,8 +43,6 @@ peopleResponsible:
   superiorLandlord:
     # TODO PDJB-1997 / PDJB-1994: Confirm the wording of postalAddressNote for superior landlords
     postalAddressNote: A <strong>postal address</strong> was provided for this superior landlord. We’ve used this to tell them that they’re named on this registration.
-  propertyManager:
-    notUsing: No, I manage this property myself
 landlordDetails:
   heading: Landlords
   registeredLandlords:

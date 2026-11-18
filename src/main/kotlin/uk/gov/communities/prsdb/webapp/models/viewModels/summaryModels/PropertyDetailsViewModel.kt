@@ -77,7 +77,7 @@ class PropertyDetailsViewModel(
             listOf(
                 rowWithViewTypeSpecificChangeLink(
                     key = "registerProperty.propertyManager.usingPropertyManager.fieldSetHeading",
-                    value = "propertyDetails.peopleResponsible.propertyManager.notUsing",
+                    value = "registerProperty.propertyManager.usingPropertyManager.radios.no",
                     landlordActionLink = propertyManagerUpdateUrl,
                 ),
             )

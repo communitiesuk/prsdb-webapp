@@ -350,7 +350,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
-                    .containsText("No, I manage this property myself")
+                    .containsText("No, I manage this property (or another joint landlord does)")
                 // TODO PDJB-1995: assert the real update route once the property manager update journey exists
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
                     .hasAttribute("href", "#")
