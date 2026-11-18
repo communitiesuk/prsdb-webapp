@@ -73,8 +73,8 @@ class OccupancyDetailsHelper {
                 if (householdsStep.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow",
-                            "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+                            "tenancyDetails.checkAnswers.tenancyDetailsRow",
+                            "tenancyDetails.checkAnswers.provideLater",
                             provideLaterDestination
                                 ?: Destination.VisitableStep(
                                     householdsStep,
@@ -87,14 +87,14 @@ class OccupancyDetailsHelper {
                 val tenantsStep = householdsAndTenantsState.tenants
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.households",
+                        "tenancyDetails.checkAnswers.households",
                         householdsStep.formModel.numberOfHouseholds,
                         Destination.VisitableStep(householdsStep, state.getCyaJourneyId(householdsStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.people",
+                        "tenancyDetails.checkAnswers.people",
                         tenantsStep.formModel.numberOfPeople,
                         Destination.VisitableStep(tenantsStep, state.getCyaJourneyId(tenantsStep)),
                     ),
@@ -113,7 +113,7 @@ class OccupancyDetailsHelper {
                 val rentIncludesBills = rentIncludesBillsState.doesRentIncludeBills()
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
+                        "tenancyDetails.checkAnswers.rentIncludesBills",
                         rentIncludesBills,
                         Destination.VisitableStep(rentIncludesBillsStep, state.getCyaJourneyId(rentIncludesBillsStep)),
                     ),
@@ -121,7 +121,7 @@ class OccupancyDetailsHelper {
                 if (rentIncludesBills) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
+                            "tenancyDetails.checkAnswers.billsIncluded",
                             rentIncludesBillsState.getBillsIncluded(messageSource),
                             Destination.VisitableStep(billsIncludedStep, state.getCyaJourneyId(billsIncludedStep)),
                         ),
@@ -146,7 +146,7 @@ class OccupancyDetailsHelper {
         val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
         val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
         return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
+            "tenancyDetails.checkAnswers.rentFrequency",
             RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
             Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
         )
@@ -159,7 +159,7 @@ class OccupancyDetailsHelper {
     ): SummaryListRowViewModel {
         val rentAmountStep = rentFrequencyAndAmountState.rentAmount
         return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
+            "tenancyDetails.checkAnswers.rentAmount",
             rentFrequencyAndAmountState.getRentAmount(messageSource),
             Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
         )
@@ -169,7 +169,7 @@ class OccupancyDetailsHelper {
         isOccupied: Boolean,
         occupiedStep: RequestableStep<*, *, *>,
         childJourneyId: String,
-        labelKey: String = "forms.checkPropertyAnswers.tenancyDetails.occupied",
+        labelKey: String = "tenancyDetails.checkAnswers.occupied",
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             labelKey,
@@ -198,7 +198,7 @@ class OccupancyDetailsHelper {
                 val furnishedStatusStep = state.furnishedStatus
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
+                        "tenancyDetails.checkAnswers.furnishedStatus",
                         furnishedStatusStep.formModel.furnishedStatus,
                         Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),
@@ -218,7 +218,7 @@ class OccupancyDetailsHelper {
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
+                        "tenancyDetails.checkAnswers.furnishedStatus",
                         furnishedStatusStep.formModel.furnishedStatus,
                         Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),

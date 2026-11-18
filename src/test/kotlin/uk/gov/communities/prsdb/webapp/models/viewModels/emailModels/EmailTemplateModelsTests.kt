@@ -395,6 +395,54 @@ class EmailTemplateModelsTests {
                     "/emails/SwapToIndividualNudge.md",
                 ),
                 EmailTemplateTestData(
+                    JointLandlordYouLeftConfirmationAccountDeactivated(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordOtherLandlordLeftNotification(
+                        leavingLandlord = "Alice",
+                        notifiedLandlord = "Bob",
+                        address = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordOtherLandlordLeftNotification.md",
+                ),
+                // TODO PDJB-2149: Remove this entry when the ACTIVE_INACTIVE flag is removed
+                EmailTemplateTestData(
+                    JointLandlordOtherLandlordLeftNotification(
+                        leavingLandlord = "Alice",
+                        notifiedLandlord = "Bob",
+                        address = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                        useBeforePdjb844Template = true,
+                    ),
+                    "/emails/JointLandlordOtherLandlordLeftNotificationBeforePdjb844.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeactivationConfirmationEmail(
+                        recipientName = "Alice",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        landlordDeactivated = false,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/PropertyDeactivationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeactivationConfirmationEmail(
+                        recipientName = "Alice",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        landlordDeactivated = true,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",
                         propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",

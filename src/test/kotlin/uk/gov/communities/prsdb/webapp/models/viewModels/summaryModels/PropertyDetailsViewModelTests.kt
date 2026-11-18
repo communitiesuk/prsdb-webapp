@@ -258,7 +258,7 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.peopleResponsible.ownership.ownsProperty",
                 "propertyDetails.peopleResponsible.ownership.ownershipType",
-                "propertyDetails.peopleResponsible.ownership.freeholderType",
+                "propertyDetails.peopleResponsible.ownership.freeholdType",
             ),
             viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading },
         )
@@ -555,7 +555,7 @@ class PropertyDetailsViewModelTests {
                 viewModel.licensingSection.map { it.fieldHeading },
             )
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.noLicensing",
+                "licensing.checkAnswers.noLicensing",
                 viewModel.licensingSection.single().fieldValue,
             )
         }
@@ -768,7 +768,8 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"),
         )
         assertEquals(
-            "Message for forms.billsIncluded.checkbox.electricity, Message for forms.billsIncluded.checkbox.water, Cat sitting",
+            "Message for tenancyDetails.billsIncluded.checkbox.electricity, " +
+                "Message for tenancyDetails.billsIncluded.checkbox.water, Cat sitting",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded"),
         )
         assertEquals(
@@ -776,7 +777,7 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"),
         )
         assertEquals(
-            "£200 Message for forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix",
+            "£200 Message for tenancyDetails.checkAnswers.customFrequencyRentAmountSuffix",
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount"),
         )
     }
@@ -838,7 +839,7 @@ class PropertyDetailsViewModelTests {
     companion object {
         private const val OWNS_PROPERTY = "propertyDetails.peopleResponsible.ownership.ownsProperty"
         private const val OWNERSHIP_TYPE = "propertyDetails.peopleResponsible.ownership.ownershipType"
-        private const val FREEHOLDER_TYPE = "propertyDetails.peopleResponsible.ownership.freeholderType"
+        private const val FREEHOLD_TYPE = "propertyDetails.peopleResponsible.ownership.freeholdType"
 
         private const val YES = "commonText.yes"
         private const val NO = "commonText.no"
@@ -852,8 +853,8 @@ class PropertyDetailsViewModelTests {
         private const val TENANTS_IN_COMMON = "registerProperty.freeholdType.radios.option.tenantsInCommon.label"
         private const val COMMONHOLD = "registerProperty.freeholdType.radios.option.commonhold.label"
 
-        // The freeholder type row is omitted where there is no freehold to describe, and both the
-        // ownership type and freeholder type rows where the landlord does not own the property.
+        // The freehold type row is omitted where there is no freehold to describe, and both the
+        // ownership type and freehold type rows where the landlord does not own the property.
         @JvmStatic
         fun provideExpectedOwnershipAnswerRows() =
             listOf(
@@ -864,35 +865,35 @@ class PropertyDetailsViewModelTests {
                 ),
                 Arguments.of(
                     OwnershipType.SOLE_FREEHOLD,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLD_TYPE to SOLE_OWNERSHIP),
                 ),
                 Arguments.of(
                     OwnershipType.JOINT_TENANTS,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLD_TYPE to JOINT_TENANTS),
                 ),
                 Arguments.of(
                     OwnershipType.TENANTS_IN_COMMON,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLD_TYPE to TENANTS_IN_COMMON),
                 ),
                 Arguments.of(
                     OwnershipType.COMMONHOLD,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD, FREEHOLD_TYPE to COMMONHOLD),
                 ),
                 Arguments.of(
                     OwnershipType.SHARE_OF_SOLE_FREEHOLD,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to SOLE_OWNERSHIP),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLD_TYPE to SOLE_OWNERSHIP),
                 ),
                 Arguments.of(
                     OwnershipType.SHARE_OF_JOINT_TENANTS,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to JOINT_TENANTS),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLD_TYPE to JOINT_TENANTS),
                 ),
                 Arguments.of(
                     OwnershipType.SHARE_OF_TENANTS_IN_COMMON,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to TENANTS_IN_COMMON),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLD_TYPE to TENANTS_IN_COMMON),
                 ),
                 Arguments.of(
                     OwnershipType.SHARE_OF_COMMONHOLD,
-                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLDER_TYPE to COMMONHOLD),
+                    listOf(OWNS_PROPERTY to YES, OWNERSHIP_TYPE to FREEHOLD_AND_LEASEHOLD, FREEHOLD_TYPE to COMMONHOLD),
                 ),
             )
     }

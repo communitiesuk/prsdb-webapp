@@ -191,9 +191,9 @@ class NftDataSeederDao(
     fun prepareFreeholderStatement(): PreparedStatement {
         val query =
             """
-            INSERT INTO freeholder 
-            (created_date, property_ownership_id, name, email, address_id) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO freeholder
+            (created_date, property_ownership_id, name, email)
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -201,9 +201,9 @@ class NftDataSeederDao(
     fun prepareSuperiorLandlordStatement(): PreparedStatement {
         val query =
             """
-            INSERT INTO superior_landlord 
-            (created_date, property_ownership_id, name, email, address_id) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO superior_landlord
+            (created_date, property_ownership_id, name, email)
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }

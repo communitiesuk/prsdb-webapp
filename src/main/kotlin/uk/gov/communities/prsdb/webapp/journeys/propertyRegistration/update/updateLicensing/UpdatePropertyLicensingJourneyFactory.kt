@@ -87,9 +87,6 @@ class UpdateLicensingJourneyFactory(
                 else -> {
                     checkAnswerTask(journey.licensingTask, { journey })
                     configureStep(journey.licensingTask.licensingTypeStep) {
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
-                        }
                         withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
                     }
                 }
@@ -136,9 +133,6 @@ class UpdateLicensingJourneyFactory(
                 }
             }
             configureStep(journey.licensingTask.licensingTypeStep) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
-                }
                 withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
             }
             configureStep(journey.licensingTask.selectiveLicenceStep) {

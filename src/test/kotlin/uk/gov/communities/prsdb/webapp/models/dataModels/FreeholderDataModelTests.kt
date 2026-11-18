@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -35,65 +33,17 @@ class FreeholderDataModelTests {
     }
 
     @Test
-    fun `fromFreeholder maps a postal address freeholder`() {
+    fun `fromFreeholder maps a postal freeholder with only their name`() {
         // Arrange
-        val address = Address(AddressDataModel("1 Example Road, EG1 2AB"))
-        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), name = "Bob Freeholder", address = address)
+        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), name = "Bob Freeholder")
 
         // Act
         val dataModel = FreeholderDataModel.fromFreeholder(freeholder)
 
         // Assert
-        assertEquals("1 Example Road, EG1 2AB", dataModel.address?.singleLineAddress)
+        assertTrue(dataModel.detailsKnown)
         assertNull(dataModel.email)
-    }
-
-    @Test
-    fun `fromFreeholder prepopulates address lookup details for a looked up address`() {
-        // Arrange
-        val addressDataModel =
-            AddressDataModel(
-                singleLineAddress = "1 Example Road, Exampleton, EG1 2AB",
-                uprn = 123456,
-                buildingNumber = "1",
-                streetName = "Example Road",
-                townName = "Exampleton",
-                postcode = "EG1 2AB",
-            )
-        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), address = Address(addressDataModel))
-
-        // Act
-        val dataModel = FreeholderDataModel.fromFreeholder(freeholder)
-
-        // Assert
-        assertEquals("EG1 2AB", dataModel.addressSearchPostcode)
-        assertEquals("1", dataModel.addressSearchHouseNameOrNumber)
-        assertEquals("1 Example Road, Exampleton, EG1 2AB", dataModel.selectedAddress)
-    }
-
-    @Test
-    fun `fromFreeholder prepopulates manual address fields from the persisted address`() {
-        // Arrange
-        val addressDataModel =
-            AddressDataModel.fromManualAddressData(
-                addressLineOne = "1 Example Road",
-                addressLineTwo = "Flat 2",
-                townOrCity = "Exampleton",
-                county = "Example County",
-                postcode = "EG1 2AB",
-            )
-        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), address = Address(addressDataModel))
-
-        // Act
-        val dataModel = FreeholderDataModel.fromFreeholder(freeholder)
-
-        // Assert
-        assertEquals(MANUAL_ADDRESS_CHOSEN, dataModel.selectedAddress)
-        assertEquals("1 Example Road", dataModel.manualAddressLineOne)
-        assertEquals("Flat 2", dataModel.manualAddressLineTwo)
-        assertEquals("Exampleton", dataModel.manualTownOrCity)
-        assertEquals("Example County", dataModel.manualCounty)
-        assertEquals("EG1 2AB", dataModel.manualPostcode)
+        assertNull(dataModel.address)
     }
 
     @Test

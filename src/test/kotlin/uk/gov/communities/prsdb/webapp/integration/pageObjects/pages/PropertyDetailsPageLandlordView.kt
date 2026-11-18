@@ -21,6 +21,11 @@ class PropertyDetailsPageLandlordView(
         ),
     ) {
     val deregisterPropertyLink = Link.byText(page, "Deregister property")
+    val deactivatePropertyLink = Link.byText(page, "Deactivate this property")
+
+    val deactivationSuccessBanner: Locator
+        get() = page.locator("#deactivation-success-banner")
+
     val delegateToLettingAgentLink = Link.byText(page, "Allow your letting agent or property manager to update details")
     val removeLettingAgentLink = Link.byText(page, "Remove your letting agent or property manager")
     val inviteJointLandlordLink = Link.byText(page, "invite them to join the property")
@@ -62,7 +67,7 @@ class PropertyDetailsPageLandlordView(
     ) : SummaryList(page.locator("#people-responsible")) {
         val ownsPropertyRow = getRow("Do you own this property?")
         val ownershipTypeRow = getRow("Ownership type")
-        val freeholderTypeRow = getRow("Freeholder type")
+        val freeholdTypeRow = getRow("Freehold type")
     }
 
     class LandlordSummaryCard(

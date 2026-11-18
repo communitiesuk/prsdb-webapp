@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -25,6 +26,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadEicFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.regex.Pattern
 
 class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -97,10 +100,10 @@ class PropertyRegistrationElectricalSafetySinglePageTests : IntegrationTestWithI
         }
 
         @Test
-        fun `Cert uploaded - EIC date row has a blank value and its change link navigates to issue date page`(page: Page) {
+        fun `Cert uploaded - EIC date row shows the issue date and its change link navigates to issue date page`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(certUploadedSession(CertificateType.Eic))
-            // TODO PDJB-1673: Check the row shows the EIC issue date
-            assertThat(cyaPage.summaryList.certificateDateRow(CertificateType.Eic).value).isEmpty()
+            val expectedIssueDate = today.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+            assertThat(cyaPage.summaryList.certificateDateRow(CertificateType.Eic).value).containsText(expectedIssueDate)
             cyaPage.summaryList.certificateDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
             assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
         }

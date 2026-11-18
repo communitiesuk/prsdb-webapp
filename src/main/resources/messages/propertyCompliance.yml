@@ -3,6 +3,7 @@ uploadedFile:
   virusScanPendingWithName: "{0} (Pending virus scan)"
   virusScanFailed: Not added (virus scan failed)
 gasSafetyTask:
+  sectionHeading: Gas safety certificate
   gasSupply:
     heading: Does the property have a gas supply or any gas appliances?
     error:
@@ -135,11 +136,11 @@ gasSafetyTask:
       whenToProvide:
         paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and complete this section within 28 days of a tenant moving in.
 electricalSafetyTask:
+  sectionHeading: Electrical safety certificate
   electricalCert:
     error:
       missing: Select which electrical safety certificate you have
     heading: Which electrical safety certificate do you have for this property?
-    hint: You must check a rental property’s electrics every 5 years
     radios:
       eicLabel: Electrical Installation Certificate (EIC)
       eicHint: Issued when a property is built or rewired
@@ -194,7 +195,7 @@ electricalSafetyTask:
       afterLink: .
     whenToAdd:
       heading: 'When you’ll need to add your electrical safety certificate'
-      paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
+      paragraph: 'You can continue to finish your registration and get a rental property number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
@@ -221,13 +222,13 @@ electricalSafetyTask:
         whatToDoNext:
           heading: What to do next
           unoccupied:
-            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that this property’s electrics are safe.
             learnHow:
               beforeLink: Learn how to get an EICR by reading the
               link: electrical safety standards for rented properties (opens in new tab)
               afterLink: .
           occupied:
-            needEicrParagraph: You need a valid Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that this property’s electrics are safe.
       occupied:
         # TODO PDJB-1679: Remove noValidCertParagraph when the EIC_ISSUE_DATE flag is removed
         noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
@@ -293,6 +294,7 @@ electricalSafetyTask:
           heading: You must upload an electrical safety certificate to this service
           paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
+  sectionHeading: Energy performance certificate (EPC)
   confirmEpcDetailsFromUprn:
     error:
       missing: Select if you want to use the EPC we found for your property
