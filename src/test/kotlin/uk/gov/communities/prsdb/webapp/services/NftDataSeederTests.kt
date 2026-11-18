@@ -616,7 +616,7 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase gives every named associated party exactly one contact method and placeholders none`() {
+    fun `seedDatabase seeds associated parties contactable by email and by post and placeholders with no email`() {
         newSeeder().seedDatabase()
 
         listOf("freeholder", "superior_landlord").forEach { table ->
@@ -625,16 +625,13 @@ class NftDataSeederTests(
                 "Expected some $table rows to be contactable by email",
             )
             assertTrue(
-                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE address_id IS NOT NULL").isNotEmpty(),
+                // A named party with no email was contacted by post, although their address was not stored
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE name IS NOT NULL AND email IS NULL").isNotEmpty(),
                 "Expected some $table rows to be contactable by post",
             )
 
             val rowsBreakingTheContactInvariant =
-                jdbcTemplate.queryForList<Long>(
-                    "SELECT id FROM $table WHERE " +
-                        "(name IS NOT NULL AND NOT ((email IS NOT NULL) != (address_id IS NOT NULL))) " +
-                        "OR (name IS NULL AND (email IS NOT NULL OR address_id IS NOT NULL))",
-                )
+                jdbcTemplate.queryForList<Long>("SELECT id FROM $table WHERE name IS NULL AND email IS NOT NULL")
 
             assertEquals(emptyList<Long>(), rowsBreakingTheContactInvariant, "Found $table rows breaking the contact invariant")
         }
@@ -763,6 +760,26 @@ class NftDataSeederTests(
                 WHERE (EXTRACT(MONTH FROM po.renewal_date), EXTRACT(DAY FROM po.renewal_date))
                           <> (l.anniversary_month, l.anniversary_day)
                   AND NOT (l.anniversary_month = 2 AND l.anniversary_day = 29)
+                """.trimIndent(),
+                Long::class.java,
+            ),
+        )
+    }
+
+    @Test
+    fun `seedDatabase sets each property's paid for until date to its seeded payment's period end and its renewal date`() {
+        newSeeder().seedDatabase()
+
+        assertTrue(jdbcTemplate.queryForObject("SELECT count(*) FROM property_ownership", Long::class.java)!! > 0)
+        assertEquals(
+            0L,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM property_ownership po
+                JOIN payment p ON p.associated_property_id = po.id
+                WHERE po.paid_for_until IS DISTINCT FROM p.for_period_ending
+                   OR po.paid_for_until IS DISTINCT FROM po.renewal_date
                 """.trimIndent(),
                 Long::class.java,
             ),

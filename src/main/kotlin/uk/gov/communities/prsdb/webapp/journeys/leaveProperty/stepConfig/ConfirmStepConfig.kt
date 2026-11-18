@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -17,6 +19,7 @@ class ConfirmStepConfig(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val leavePropertyService: LeavePropertyService,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LeavePropertyJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -24,6 +27,8 @@ class ConfirmStepConfig(
         mapOf(
             "address" to propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId).address.singleLineAddress,
             "cancelLinkUrl" to PropertyDetailsController.getPropertyDetailsPath(state.propertyOwnershipId),
+            // TODO PDJB-2149: Remove when the ACTIVE_INACTIVE flag is removed
+            "isActiveInactiveEnabled" to featureFlagManager.checkFeature(ACTIVE_INACTIVE),
         )
 
     override fun chooseTemplate(state: LeavePropertyJourneyState) = "forms/confirmLeavePropertyForm"
