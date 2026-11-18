@@ -692,12 +692,14 @@ VALUES (54, current_timestamp, NULL, false, true, true, true),
 ON CONFLICT (property_ownership_id) DO NOTHING;
 
 INSERT INTO freeholder (name, email, property_ownership_id)
-VALUES ('Jordan Joint', 'joint.freeholder@example.com', 54),
-       ('Casey Joint', NULL, 54),
-       (NULL, NULL, 54),
-       ('Taylor Non-Joint', 'nonjoint.freeholder@example.com', 55),
-       ('Alex Non-Joint', NULL, 55),
-       (NULL, NULL, 55);
+SELECT v.name, v.email, v.property_ownership_id
+FROM (VALUES ('Jordan Joint', 'joint.freeholder@example.com', 54),
+             ('Casey Joint', NULL, 54),
+             (NULL, NULL, 54),
+             ('Taylor Non-Joint', 'nonjoint.freeholder@example.com', 55),
+             ('Alex Non-Joint', NULL, 55),
+             (NULL, NULL, 55)) AS v(name, email, property_ownership_id)
+WHERE NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = v.property_ownership_id);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
