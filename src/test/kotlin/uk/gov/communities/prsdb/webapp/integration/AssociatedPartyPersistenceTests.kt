@@ -82,6 +82,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
     fun `deleting a property ownership deletes its associated parties`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
+        val seededPropertyManagerCount = countRowsIn("property_manager")
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
             propertyOwnership.freeholders.add(freeholderRepository.save(Freeholder(propertyOwnership, name = "A Freeholder")))
@@ -90,7 +91,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
-        assertEquals(1, countRowsIn("property_manager"))
+        assertEquals(seededPropertyManagerCount + 1, countRowsIn("property_manager"))
         val superiorLandlord =
             jdbcTemplate.queryForMap(
                 "SELECT name, email FROM superior_landlord WHERE property_ownership_id = ?",
@@ -107,7 +108,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         // Assert
         assertEquals(0, countRowsFor("freeholder", propertyOwnershipId))
         assertEquals(0, countRowsFor("superior_landlord", propertyOwnershipId))
-        assertEquals(0, countRowsIn("property_manager"))
+        assertEquals(seededPropertyManagerCount, countRowsIn("property_manager"))
     }
 
     @Test
@@ -167,12 +168,13 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
     fun `replacing a property manager does not leave the previous one orphaned`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
+        val seededPropertyManagerCount = countRowsIn("property_manager")
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("First Manager", "first@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
-        assertEquals(1, countRowsIn("property_manager"))
+        assertEquals(seededPropertyManagerCount + 1, countRowsIn("property_manager"))
 
         // Act
         inTransaction {
@@ -182,27 +184,38 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         }
 
         // Assert
-        assertEquals(1, countRowsIn("property_manager"))
-        assertEquals("Second Manager", jdbcTemplate.queryForObject("SELECT name FROM property_manager", String::class.java))
+        assertEquals(seededPropertyManagerCount + 1, countRowsIn("property_manager"))
+        assertEquals(
+            "Second Manager",
+            jdbcTemplate.queryForObject(
+                "SELECT pm.name FROM property_manager pm JOIN property_ownership po ON po.property_manager_id = pm.id WHERE po.id = ?",
+                String::class.java,
+                propertyOwnershipId,
+            ),
+        )
     }
 
     @Test
     fun `removing a property manager from a property ownership deletes it from the database`() {
         // Arrange
         val propertyOwnershipId = anyPropertyOwnershipId()
+        val seededPropertyManagerCount = countRowsIn("property_manager")
         inTransaction {
             val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
             propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager("A Manager", "manager@example.com"))
             propertyOwnershipRepository.save(propertyOwnership)
         }
-        assertEquals(1, countRowsIn("property_manager"))
+        assertEquals(seededPropertyManagerCount + 1, countRowsIn("property_manager"))
 
         // Act
         inTransaction {
-            propertyOwnershipService.removePropertyManager(propertyOwnershipRepository.findById(propertyOwnershipId).get())
+            propertyOwnershipService.removePropertyManager(
+                propertyOwnershipId,
+                propertyOwnershipRepository.findById(propertyOwnershipId).get().getMostRecentlyUpdated(),
+            )
         }
 
         // Assert
-        assertEquals(0, countRowsIn("property_manager"))
+        assertEquals(seededPropertyManagerCount, countRowsIn("property_manager"))
     }
 }

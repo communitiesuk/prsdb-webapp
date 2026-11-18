@@ -27,11 +27,12 @@ class CompletePropertyManagerUpdateStepConfig(
         if (updatedPropertyManager == state.originalPropertyManager) return
 
         try {
-            propertyOwnershipService.updatePropertyManager(
-                state.propertyId,
-                updatedPropertyManager,
-                Instant.parse(state.lastModifiedDate).toJavaInstant(),
-            )
+            val lastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant()
+            if (updatedPropertyManager == null) {
+                propertyOwnershipService.removePropertyManager(state.propertyId, lastModifiedDate)
+            } else {
+                propertyOwnershipService.updatePropertyManager(state.propertyId, updatedPropertyManager, lastModifiedDate)
+            }
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()
             throw ex

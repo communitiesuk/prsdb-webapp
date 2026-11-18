@@ -1654,7 +1654,6 @@ class Navigator(
         )
     }
 
-    // TODO PDJB-1998: Use the property manager change link on the property record instead once it has been added
     fun navigateToUpdatePropertyManagerJourney(
         propertyOwnershipId: Long,
         stepRouteSegment: String = StartPropertyManagerUpdateStep.ROUTE_SEGMENT,

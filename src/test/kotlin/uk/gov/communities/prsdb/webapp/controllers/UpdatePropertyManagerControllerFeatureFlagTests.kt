@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
@@ -68,5 +69,22 @@ class UpdatePropertyManagerControllerFeatureFlagTests : FeatureFlagTestCallingEn
         mvc
             .get(updateStepRoute)
             .andExpect { status { is3xxRedirection() } }
+    }
+
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    @Test
+    fun `postUpdateStep is available if the associated parties feature flag is enabled`() {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+            .thenReturn(mapOf(PropertyManagerStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+        whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("redirect:/landlord/property-details/$propertyOwnershipId"))
+
+        mvc
+            .post(updateStepRoute) {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                content = "usingPropertyManager=true"
+                with(csrf())
+            }.andExpect { status { is3xxRedirection() } }
     }
 }

@@ -60,39 +60,30 @@ class UpdatePropertyManagerJourneyFactory(
                     }
                 }
             }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.peopleResponsible", shouldUseNumbering = false)
-                task(journey.propertyManagerTask) {
-                    parents { journey.routingStep.isComplete() }
+            task(journey.propertyManagerTask) {
+                parents { journey.routingStep.isComplete() }
+                backUrl { propertyDetailsRoute }
+                nextDestination {
+                    if (journey.propertyManagerTask.propertyManagerStep.outcome == YesOrNo.NO) {
+                        Destination(journey.checkYourAnswersStep)
+                    } else {
+                        Destination(journey.completePropertyManagerUpdateStep)
+                    }
+                }
+                configureStep(journey.propertyManagerTask.checkPropertyManagerStep) {
                     backUrl { propertyDetailsRoute }
-                    nextDestination {
-                        if (journey.propertyManagerTask.propertyManagerStep.outcome == YesOrNo.NO) {
-                            Destination(journey.checkYourAnswersStep)
-                        } else {
-                            Destination(journey.completePropertyManagerUpdateStep)
-                        }
+                    withAdditionalContentProperties {
+                        mapOf(
+                            "insetText" to "forms.update.propertyManager.check.insetText",
+                            "showWarning" to true,
+                            "submitButton" to "transactionSubmitButton",
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        )
                     }
-                    configureStep(journey.propertyManagerTask.checkPropertyManagerStep) {
-                        backUrl {
-                            if (journey.originalPropertyManager != null) {
-                                propertyDetailsRoute
-                            } else {
-                                Destination(journey.propertyManagerTask.propertyManagerDetailsStep).toUrlStringOrNull()
-                            }
-                        }
-                        withAdditionalContentProperties {
-                            mapOf(
-                                "insetText" to "forms.update.propertyManager.check.insetText",
-                                "showWarning" to true,
-                                "submitButton" to "transactionSubmitButton",
-                                "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            )
-                        }
-                    }
-                    configureStep(journey.propertyManagerTask.removePropertyManagerStep) {
-                        withAdditionalContentProperty {
-                            "insetText" to "forms.update.propertyManager.remove.insetText"
-                        }
+                }
+                configureStep(journey.propertyManagerTask.removePropertyManagerStep) {
+                    withAdditionalContentProperty {
+                        "insetText" to "forms.update.propertyManager.remove.insetText"
                     }
                 }
             }

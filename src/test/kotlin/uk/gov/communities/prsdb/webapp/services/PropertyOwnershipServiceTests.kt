@@ -1850,20 +1850,6 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `removePropertyManager clears the property manager and saves the property ownership`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-        propertyOwnership.propertyManager = PropertyManager("Agent Ltd", "agent@example.com")
-
-        // Act
-        propertyOwnershipService.removePropertyManager(propertyOwnership)
-
-        // Assert
-        assertNull(propertyOwnership.propertyManager)
-        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
-    }
-
-    @Test
     fun `updateOwnershipType does nothing to the freeholders when neither type requires any`() {
         // Arrange
         val propertyOwnership =
@@ -1917,7 +1903,7 @@ class PropertyOwnershipServiceTests {
     }
 
     @Nested
-    inner class UpdatePropertyManager {
+    inner class UpdateAndRemovePropertyManager {
         private lateinit var propertyOwnership: PropertyOwnership
 
         @BeforeEach
@@ -1945,11 +1931,10 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updatePropertyManager replaces an existing property manager with a new one`() {
+        fun `updatePropertyManager edits the existing property manager in place`() {
             // Arrange
-            propertyOwnership.propertyManager = PropertyManager("Old Agent", "old@example.com")
-            val newPropertyManager = PropertyManager("New Agent", "new@example.com")
-            whenever(mockPropertyManagerService.createPropertyManager("New Agent", "new@example.com")).thenReturn(newPropertyManager)
+            val existingPropertyManager = PropertyManager("Old Agent", "old@example.com")
+            propertyOwnership.propertyManager = existingPropertyManager
 
             // Act
             propertyOwnershipService.updatePropertyManager(
@@ -1959,22 +1944,39 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertSame(newPropertyManager, propertyOwnership.propertyManager)
+            verify(mockPropertyManagerService).updatePropertyManager(existingPropertyManager, "New Agent", "new@example.com")
+            verify(mockPropertyManagerService, never()).createPropertyManager(any(), any())
+            assertSame(existingPropertyManager, propertyOwnership.propertyManager)
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
 
         @Test
-        fun `updatePropertyManager removes the property manager when none is provided`() {
+        fun `removePropertyManager clears the property manager and saves the property ownership`() {
             // Arrange
             propertyOwnership.propertyManager = PropertyManager("Old Agent", "old@example.com")
 
             // Act
-            propertyOwnershipService.updatePropertyManager(propertyOwnership.id, null, propertyOwnership.getMostRecentlyUpdated())
+            propertyOwnershipService.removePropertyManager(propertyOwnership.id, propertyOwnership.getMostRecentlyUpdated())
 
             // Assert
             assertNull(propertyOwnership.propertyManager)
             verifyNoInteractions(mockPropertyManagerService)
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `removePropertyManager throws UpdateConflictException if modified dates conflict`() {
+            // Arrange
+            propertyOwnership.propertyManager = PropertyManager("Old Agent", "old@example.com")
+
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.removePropertyManager(
+                    propertyOwnership.id,
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+            verify(mockPropertyOwnershipRepository, never()).save(any())
         }
 
         @Test

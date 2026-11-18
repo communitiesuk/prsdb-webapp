@@ -393,22 +393,30 @@ class PropertyOwnershipService(
 
     // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
     @Transactional
-    fun removePropertyManager(propertyOwnership: PropertyOwnership) {
-        propertyOwnership.propertyManager = null
-        propertyOwnershipRepository.save(propertyOwnership)
-    }
-
-    // Replacing or clearing the reference deletes the previous property manager row through orphanRemoval.
-    @Transactional
-    fun updatePropertyManager(
+    fun removePropertyManager(
         id: Long,
-        propertyManager: PropertyManagerDataModel?,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.propertyManager =
-            propertyManager?.let { propertyManagerService.createPropertyManager(it.name, it.email) }
+        propertyOwnership.propertyManager = null
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updatePropertyManager(
+        id: Long,
+        propertyManager: PropertyManagerDataModel,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val existingPropertyManager = propertyOwnership.propertyManager
+        if (existingPropertyManager != null) {
+            propertyManagerService.updatePropertyManager(existingPropertyManager, propertyManager.name, propertyManager.email)
+        } else {
+            propertyOwnership.propertyManager = propertyManagerService.createPropertyManager(propertyManager.name, propertyManager.email)
+        }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

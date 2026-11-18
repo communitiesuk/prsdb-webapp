@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipTypeBeforePdjb95
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -1194,6 +1193,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class PropertyManagerUpdates {
+        private val propertyWithoutPropertyManagerId = 1L
+        private val propertyWithoutPropertyManagerUrlArguments =
+            mapOf("propertyOwnershipId" to propertyWithoutPropertyManagerId.toString())
+        private val propertyWithPropertyManagerId = 5L
+        private val propertyWithPropertyManagerUrlArguments =
+            mapOf("propertyOwnershipId" to propertyWithPropertyManagerId.toString())
+
         // TODO PDJB-2016: Remove this setup when the ASSOCIATED_PARTIES flag is removed
         @BeforeEach
         fun enableAssociatedParties() {
@@ -1202,115 +1208,136 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `a property manager can be added to a property without one`(page: Page) {
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments)
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            val propertyManagerPage =
+                assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
             propertyManagerPage.submitYes()
 
-            val detailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, urlArguments)
+            val detailsPage =
+                assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
             detailsPage.submitDetails("New Agent", "new.agent@example.com")
 
-            val checkPage = assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, urlArguments)
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
             assertThat(checkPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("new.agent@example.com")
             assertThat(checkPage.form.submitButton).hasText("Confirm and submit update")
             checkPage.confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.propertyManager
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
+            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithoutPropertyManagerId)!!.propertyManager
             assertEquals("New Agent", propertyManager?.name)
             assertEquals("new.agent@example.com", propertyManager?.email)
         }
 
         @Test
         fun `the back link on the first page returns to the property record when there is no property manager`(page: Page) {
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments)
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            val propertyManagerPage =
+                assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
 
             propertyManagerPage.backLink.clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
         }
 
         @Test
         fun `an existing property manager's details can be changed`(page: Page) {
-            addPropertyManagerToProperty("Existing Agent", "existing.agent@example.com")
+            val originalPropertyManager =
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager!!
 
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            val checkPage = assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(checkPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("existing.agent@example.com")
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+            assertThat(checkPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText(originalPropertyManager.email)
             checkPage.clickChangeAndWait()
 
-            val detailsPage = assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, urlArguments)
-            assertThat(detailsPage.form.nameInput.locator).hasValue("Existing Agent")
+            val detailsPage =
+                assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+            assertThat(detailsPage.form.nameInput.locator).hasValue(originalPropertyManager.name)
             detailsPage.submitDetails("Changed Agent", "changed.agent@example.com")
 
-            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, urlArguments).confirm()
+            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments).confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.propertyManager
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
+            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager
             assertEquals("Changed Agent", propertyManager?.name)
             assertEquals("changed.agent@example.com", propertyManager?.email)
-            assertEquals(1, propertyManagerRepository.count())
+            assertEquals(originalPropertyManager.id, propertyManager?.id)
         }
 
         @Test
-        fun `the back link on the check page returns to the property record when there is a property manager`(page: Page) {
-            addPropertyManagerToProperty("Existing Agent", "existing.agent@example.com")
-
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            val checkPage = assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, urlArguments)
+        fun `the back link on the check page returns to the property record when the property already has a property manager`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
 
             checkPage.backLink.clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+        }
+
+        @Test
+        fun `the back link on the check page returns to the property record after adding a property manager`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitYes()
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+                .submitDetails("New Agent", "new.agent@example.com")
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+
+            checkPage.backLink.clickAndWait()
+
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
         }
 
         @Test
         fun `an existing property manager can be removed`(page: Page) {
-            addPropertyManagerToProperty("Existing Agent", "existing.agent@example.com")
+            val propertyManagerCount = propertyManagerRepository.count()
 
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, urlArguments).clickRemoveAndWait()
-            assertPageIs(page, RemovePropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
-            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+                .clickRemoveAndWait()
+            assertPageIs(page, RemovePropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+                .submitYes()
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments).submitNo()
 
             val checkYourAnswersPage =
-                assertPageIs(page, UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class, urlArguments)
+                assertPageIs(
+                    page,
+                    UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class,
+                    propertyWithPropertyManagerUrlArguments,
+                )
             assertThat(checkYourAnswersPage.summaryList.usingPropertyManagerRow.value).containsText("No, I manage this property")
             assertThat(checkYourAnswersPage.form.submitButton).hasText("Confirm and submit update")
             checkYourAnswersPage.confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-            assertNull(propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.propertyManager)
-            assertEquals(0, propertyManagerRepository.count())
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
+            assertNull(propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager)
+            assertEquals(propertyManagerCount - 1, propertyManagerRepository.count())
         }
 
         @Test
         fun `the change link on the check your answers page returns to the property manager question`(page: Page) {
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId)
-            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitNo()
 
-            assertPageIs(page, UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class, urlArguments)
-                .clickChangeAndWait()
+            assertPageIs(
+                page,
+                UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class,
+                propertyWithoutPropertyManagerUrlArguments,
+            ).clickChangeAndWait()
 
-            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, urlArguments)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
         }
 
         @Test
         fun `entering the journey part-way through redirects to the property record`(page: Page) {
-            addPropertyManagerToProperty("Existing Agent", "existing.agent@example.com")
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId, PropertyManagerStep.ROUTE_SEGMENT)
 
-            navigator.navigateToUpdatePropertyManagerJourney(propertyOwnershipId, PropertyManagerStep.ROUTE_SEGMENT)
-
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-        }
-
-        private fun addPropertyManagerToProperty(
-            name: String,
-            email: String,
-        ) {
-            val propertyOwnership = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!
-            propertyOwnership.propertyManager = propertyManagerRepository.save(PropertyManager(name, email))
-            propertyOwnershipRepository.save(propertyOwnership)
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
         }
     }
 }
