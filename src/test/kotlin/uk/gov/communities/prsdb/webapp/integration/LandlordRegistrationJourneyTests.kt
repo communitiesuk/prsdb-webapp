@@ -157,7 +157,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             LandlordRegistrationConfirmationEmail(
                 createdLandlordRegNum.toString(),
                 absoluteLandlordUrl,
-                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+                scheduledDeactivationDate = getExpectedScheduledDeactivationDate(createdLandlord.createdDate),
             ),
         )
 
@@ -165,9 +165,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
-        val expectedDeactivationDate = formatExpectedDeactivationDate(createdLandlord.createdDate)
+        val expectedScheduledDeactivationDate = formatExpectedScheduledDeactivationDate(createdLandlord.createdDate)
         assertThat(confirmationPage.deactivationParagraph).containsText(
-            "If you do not submit a property registration by $expectedDeactivationDate your landlord account will be deactivated.",
+            "If you do not submit a property registration by $expectedScheduledDeactivationDate your landlord account will be deactivated.",
         )
         confirmationPage.goToDashboardLink.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
@@ -232,7 +232,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             LandlordRegistrationConfirmationEmail(
                 createdLandlordRegNum.toString(),
                 absoluteLandlordUrl,
-                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+                scheduledDeactivationDate = getExpectedScheduledDeactivationDate(createdLandlord.createdDate),
             ),
         )
 
@@ -288,7 +288,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             LandlordRegistrationConfirmationEmail(
                 createdLandlordRegNum.toString(),
                 absoluteLandlordUrl,
-                deactivationDate = getExpectedDeactivationDate(createdLandlord.createdDate),
+                scheduledDeactivationDate = getExpectedScheduledDeactivationDate(createdLandlord.createdDate),
             ),
         )
 
@@ -390,7 +390,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
                 prsdURL = absoluteLandlordUrl,
                 // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
                 isMultiUserOrganisationsEnabled = true,
-                deactivationDate = getExpectedDeactivationDate(createdOrgLandlord.createdDate),
+                scheduledDeactivationDate = getExpectedScheduledDeactivationDate(createdOrgLandlord.createdDate),
             ),
         )
 
@@ -399,9 +399,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(confirmationPage.surveyLink).isVisible()
         assertThat(confirmationPage.surveyLink).hasAttribute("href", ORG_LANDLORD_REGISTRATION_SURVEY_URL)
         assertThat(confirmationPage.whatYouCanDoNowHeading).isVisible()
-        val expectedDeactivationDate = formatExpectedDeactivationDate(createdOrgLandlord.createdDate)
+        val expectedScheduledDeactivationDate = formatExpectedScheduledDeactivationDate(createdOrgLandlord.createdDate)
         assertThat(confirmationPage.deactivationParagraph).containsText(
-            "If your organisation does not submit a property registration by $expectedDeactivationDate " +
+            "If your organisation does not submit a property registration by $expectedScheduledDeactivationDate " +
                 "your landlord account will be deactivated.",
         )
         confirmationPage.goToDashboardLink.clickAndWait()
@@ -1169,13 +1169,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualPostcode = manualPostcode,
     )
 
-    private fun getExpectedDeactivationDate(createdDate: Instant): LocalDate =
+    private fun getExpectedScheduledDeactivationDate(createdDate: Instant): LocalDate =
         createdDate
             .atZone(DateTimeHelper.UK_ZONE)
             .toLocalDate()
             .plusMonths(3)
 
-    private fun formatExpectedDeactivationDate(createdDate: Instant): String =
-        getExpectedDeactivationDate(createdDate)
+    private fun formatExpectedScheduledDeactivationDate(createdDate: Instant): String =
+        getExpectedScheduledDeactivationDate(createdDate)
             .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 }

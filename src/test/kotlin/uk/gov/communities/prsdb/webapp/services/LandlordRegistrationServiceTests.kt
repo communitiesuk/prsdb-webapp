@@ -290,7 +290,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerIndividualLandlord sends the confirmation email with a deactivation date 3 months after the landlord was created`() {
+        fun `registerIndividualLandlord sends the confirmation email with a scheduled deactivation date 3 months after creation`() {
             ReflectionTestUtils.setField(individualLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
             whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
 
@@ -312,7 +312,7 @@ class LandlordRegistrationServiceTests {
                     LandlordRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString(),
                         dashboardUri.toString(),
-                        deactivationDate = LocalDate.of(2027, 2, 17),
+                        scheduledDeactivationDate = LocalDate.of(2027, 2, 17),
                     ),
                 ),
             )
@@ -577,7 +577,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord sends the confirmation email with a deactivation date 3 months after the landlord was created`() {
+        fun `registerOrganisationLandlord sends the confirmation email with a scheduled deactivation date 3 months after creation`() {
             ReflectionTestUtils.setField(organisationalLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
             whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             whenever(mockFeatureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(false)
@@ -592,7 +592,7 @@ class LandlordRegistrationServiceTests {
                         organisationName = "Test Org",
                         lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
                         prsdURL = orgDashboardUri.toString(),
-                        deactivationDate = LocalDate.of(2027, 2, 17),
+                        scheduledDeactivationDate = LocalDate.of(2027, 2, 17),
                     ),
                 ),
             )

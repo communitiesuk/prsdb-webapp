@@ -8,11 +8,11 @@ data class LandlordRegistrationConfirmationEmail(
     val lrn: String,
     val prsdURL: String,
     // TODO PDJB-2149: Make non-nullable when the ACTIVE_INACTIVE flag is removed
-    val deactivationDate: LocalDate? = null,
+    val scheduledDeactivationDate: LocalDate? = null,
 ) : EmailTemplateModel {
     // TODO PDJB-2149: Always use LANDLORD_REGISTRATION_CONFIRMATION_EMAIL when the ACTIVE_INACTIVE flag is removed
     override val template =
-        if (deactivationDate != null) {
+        if (scheduledDeactivationDate != null) {
             EmailTemplate.LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
         } else {
             EmailTemplate.LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844
@@ -25,8 +25,8 @@ data class LandlordRegistrationConfirmationEmail(
                 "LRN" to lrn,
             )
 
-        // TODO PDJB-2149: Always add the deactivation date when the ACTIVE_INACTIVE flag is removed
-        deactivationDate?.let { hashMap["deactivation date"] = it.format(DATE_FORMATTER) }
+        // TODO PDJB-2149: Always add the scheduled deactivation date when the ACTIVE_INACTIVE flag is removed
+        scheduledDeactivationDate?.let { hashMap["deactivation date"] = it.format(DATE_FORMATTER) }
 
         return hashMap
     }
