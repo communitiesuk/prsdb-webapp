@@ -691,13 +691,13 @@ VALUES (54, current_timestamp, NULL, false, true, true, true),
        (56, current_timestamp, NULL, false, true, true, true)
 ON CONFLICT (property_ownership_id) DO NOTHING;
 
-INSERT INTO freeholder (name, email, address_id, property_ownership_id)
-VALUES ('Jordan Joint', 'joint.freeholder@example.com', NULL, 54),
-       ('Casey Joint', NULL, 63, 54),
-       (NULL, NULL, NULL, 54),
-       ('Taylor Non-Joint', 'nonjoint.freeholder@example.com', NULL, 55),
-       ('Alex Non-Joint', NULL, 64, 55),
-       (NULL, NULL, NULL, 55);
+INSERT INTO freeholder (name, email, property_ownership_id)
+VALUES ('Jordan Joint', 'joint.freeholder@example.com', 54),
+       ('Casey Joint', NULL, 54),
+       (NULL, NULL, 54),
+       ('Taylor Non-Joint', 'nonjoint.freeholder@example.com', 55),
+       ('Alex Non-Joint', NULL, 55),
+       (NULL, NULL, 55);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
