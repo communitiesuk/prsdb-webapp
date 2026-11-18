@@ -13,12 +13,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -45,21 +40,6 @@ class ReactivationCheckAnswersStepConfigTests {
 
     @Mock
     lateinit var mockGasSafetyTask: GasSafetyTask
-
-    @Mock
-    lateinit var mockTenancyDetailsTask: TenancyDetailsTask
-
-    @Mock
-    lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
-
-    @Mock
-    lateinit var mockFurnishedStatusStep: FurnishedStatusStep
-
-    @Mock
-    lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
-
-    @Mock
-    lateinit var mockRentFrequencyAndAmountTask: RentFrequencyAndAmountTask
 
     private val propertyOwnershipId = 123L
 
@@ -91,7 +71,8 @@ class ReactivationCheckAnswersStepConfigTests {
         whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
         whenever(mockComplianceDetailsHelper.getGasSafetyCyaContent(mockState, mockGasSafetyTask))
             .thenReturn(mapOf("gasSupplyRows" to gasSupplyRows))
-        val tenancyRows = mockTenancyRows()
+        val tenancyRows = listOf(mock<SummaryListRowViewModel>())
+        whenever(mockOccupancyDetailsHelper.getTenancyDetailsSummaryList(mockState, mockMessageSource)).thenReturn(tenancyRows)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -103,36 +84,6 @@ class ReactivationCheckAnswersStepConfigTests {
         assertEquals(tenancyRows, content["tenancyRows"])
         verify(mockComplianceDetailsHelper, never()).getElectricalSafetyCyaContent(any(), any())
         verify(mockComplianceDetailsHelper, never()).getEpcCyaContent(any(), any())
-    }
-
-    private fun mockTenancyRows(): List<SummaryListRowViewModel> {
-        whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
-        whenever(mockTenancyDetailsTask.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
-        whenever(mockTenancyDetailsTask.furnishedStatus).thenReturn(mockFurnishedStatusStep)
-        whenever(mockTenancyDetailsTask.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
-        whenever(mockTenancyDetailsTask.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
-        val householdsAndTenantsRows = listOf(mock<SummaryListRowViewModel>(), mock<SummaryListRowViewModel>())
-        val furnishedStatusRow = mock<SummaryListRowViewModel>()
-        val rentIncludesBillsRows = listOf(mock<SummaryListRowViewModel>())
-        val rentFrequencyAndAmountRows = listOf(mock<SummaryListRowViewModel>(), mock<SummaryListRowViewModel>())
-        whenever(mockOccupancyDetailsHelper.getCheckYourHouseHoldsAndTenantsAnswersSummaryList(mockState, mockHouseholdsAndTenantsTask))
-            .thenReturn(householdsAndTenantsRows)
-        whenever(mockOccupancyDetailsHelper.getFurnishedStatusRow(mockState, mockFurnishedStatusStep)).thenReturn(furnishedStatusRow)
-        whenever(
-            mockOccupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(
-                mockState,
-                mockRentIncludesBillsTask,
-                mockMessageSource,
-            ),
-        ).thenReturn(rentIncludesBillsRows)
-        whenever(
-            mockOccupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(
-                mockState,
-                mockRentFrequencyAndAmountTask,
-                mockMessageSource,
-            ),
-        ).thenReturn(rentFrequencyAndAmountRows)
-        return householdsAndTenantsRows + furnishedStatusRow + rentIncludesBillsRows + rentFrequencyAndAmountRows
     }
 
     private fun mockInactiveProperty() {

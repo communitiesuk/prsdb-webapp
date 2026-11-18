@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetails
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -36,7 +35,12 @@ class ReactivationCheckAnswersStepConfig(
                 emptyMap()
             }
         val epcContent = if (showEpc) complianceDetailsHelper.getEpcCyaContent(state, state.epcTask) else emptyMap()
-        val tenancyContent = if (showTenancyDetails) mapOf("tenancyRows" to getTenancyRows(state)) else emptyMap()
+        val tenancyContent =
+            if (showTenancyDetails) {
+                mapOf("tenancyRows" to occupancyDetailsHelper.getTenancyDetailsSummaryList(state, messageSource))
+            } else {
+                emptyMap()
+            }
 
         // TODO PDJB-2042: add licensing rows once the licensing task (PDJB-2037) is merged
         return mapOf(
@@ -46,26 +50,6 @@ class ReactivationCheckAnswersStepConfig(
             "showEpc" to showEpc,
             "showTenancyDetails" to showTenancyDetails,
         ) + gasSafetyContent + electricalSafetyContent + epcContent + tenancyContent
-    }
-
-    private fun getTenancyRows(state: PropertyReactivationJourneyState): List<SummaryListRowViewModel> {
-        val tenancyDetails = state.tenancyDetailsTask
-        val householdsAndTenantsRows =
-            occupancyDetailsHelper.getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, tenancyDetails.householdsAndTenantsTask)
-        val furnishedStatusRow = occupancyDetailsHelper.getFurnishedStatusRow(state, tenancyDetails.furnishedStatus)
-        val rentIncludesBillsRows =
-            occupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(
-                state,
-                tenancyDetails.rentIncludesBillsTask,
-                messageSource,
-            )
-        val rentFrequencyAndAmountRows =
-            occupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(
-                state,
-                tenancyDetails.rentFrequencyAndAmountTask,
-                messageSource,
-            )
-        return householdsAndTenantsRows + furnishedStatusRow + rentIncludesBillsRows + rentFrequencyAndAmountRows
     }
 }
 

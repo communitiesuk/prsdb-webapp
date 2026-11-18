@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -220,6 +221,12 @@ class PropertyReactivationJourney(
     override val allowProvideTenancyDetailsLaterRoute: Boolean = false
     override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
+    // Aliases for nested steps and tasks required by TenancyDetailsState
+    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
+    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
+    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
+    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
+
     override val cyaStep
         get() = checkAnswersStep
     override var cyaJourneys: Map<String, String> = mapOf()
@@ -246,6 +253,7 @@ interface PropertyReactivationJourneyState :
     ElectricalSafetyDependencies,
     EpcDependencies,
     HouseholdsAndTenantsDependencies,
+    TenancyDetailsState,
     CheckYourAnswersJourneyState {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
