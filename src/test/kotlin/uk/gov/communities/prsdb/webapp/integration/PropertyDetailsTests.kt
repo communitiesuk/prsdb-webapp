@@ -73,6 +73,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
+        fun `the people responsible tab shows the email address on a saved freeholder card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_JOINT_FREEHOLDERS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Jordan Joint" }
+            assertThat(freeholderCard).containsText("joint.freeholder@example.com")
+        }
+
+        @Test
         fun `the property details page loads with the property details tab selected by default`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
