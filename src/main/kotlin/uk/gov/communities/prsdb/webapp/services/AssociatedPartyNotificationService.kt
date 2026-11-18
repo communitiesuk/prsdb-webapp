@@ -64,24 +64,43 @@ class AssociatedPartyNotificationService(
 
     // TODO PDJB-1989, PDJB-1990: implement the superior landlord added-to-property email and letter when added via the property record, once templates are available
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlordDataModel): AssociatedPartyNotificationOutcome =
-        TODO("Implement superior landlord added-to-property notification when added via the property record and email and letter templates are available")
+        TODO(
+            "Implement superior landlord added-to-property notification when added via the property record " +
+                "and email and letter templates are available",
+        )
 
     // TODO PDJB-1991: implement the property manager added-to-property email when added via the property record, once the email template is available
     fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
-        TODO("Implement property manager added-to-property notification when added via the property record and the email template is available")
+        TODO(
+            "Implement property manager added-to-property notification when added via the property record " +
+                "and the email template is available",
+        )
 
     internal fun sendNotificationToFreeholder(
         freeholder: FreeholderDataModel,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
+    ): AssociatedPartyNotificationOutcome =
+        sendNotification(
+            name = freeholder.name,
+            emailAddress = freeholder.email,
+            postalAddress = freeholder.address,
+            email = email,
+            letter = letter,
+        )
 
     internal fun sendNotificationToSuperiorLandlord(
         superiorLandlord: SuperiorLandlordDataModel,
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome =
-        sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
+        sendNotification(
+            name = superiorLandlord.name,
+            emailAddress = superiorLandlord.email,
+            postalAddress = superiorLandlord.address,
+            email = email,
+            letter = letter,
+        )
 
     private fun sendNotification(
         name: String?,
