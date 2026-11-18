@@ -666,13 +666,13 @@ INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ow
                                 license_id, property_build_type, num_bedrooms, bills_included_list, custom_bills_included,
                                 furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type,
                                 marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later,
-                                tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date)
+                                tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, paid_for_until)
 VALUES (54, true, 2, 3, 0, 0, 90, 61, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 61, current_date + 365),
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 61, current_date + 365, current_date + 365),
        (55, true, 1, 1, 0, 0, 91, 62, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 62, current_date + 365),
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 62, current_date + 365, current_date + 365),
        (56, true, 0, 2, 0, 0, 92, 65, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 65, current_date + 365)
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 65, current_date + 365, current_date + 365)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
