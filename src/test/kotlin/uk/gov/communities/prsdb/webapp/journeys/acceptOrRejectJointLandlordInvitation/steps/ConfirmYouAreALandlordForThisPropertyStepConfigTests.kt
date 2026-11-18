@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
@@ -188,6 +189,23 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
             invitation.registeredOwnership.address.toMultiLineAddress(),
             invitation.registeredOwnership.id,
         )
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `afterStepDataIsAdded stores whether the landlord was reactivated in session`(landlordWasInactive: Boolean) {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val landlord = setupValidTokenWithLandlord()
+        if (landlordWasInactive) {
+            landlord.deactivate(LocalDate.now())
+        }
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockInvitationService).setLandlordReactivatedByLastAcceptance(landlordWasInactive)
     }
 
     @Test

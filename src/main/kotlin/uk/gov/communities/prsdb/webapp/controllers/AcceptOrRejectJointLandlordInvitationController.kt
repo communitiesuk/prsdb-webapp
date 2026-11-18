@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
@@ -37,6 +39,7 @@ class AcceptOrRejectJointLandlordInvitationController(
     private val invitationService: JointLandlordInvitationService,
     private val userRolesService: UserRolesService,
     private val userToLandlordService: UserToLandlordService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun startJourney(
@@ -87,13 +90,20 @@ class AcceptOrRejectJointLandlordInvitationController(
         model.addAttribute("addressParts", propertyAddress.split("\n"))
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
         val landlord = userToLandlordService.getCurrentLandlordForUser()
+        val isOrganisationLandlord = landlord.landlordType == LandlordType.ORGANISATION
         val surveyUrl =
-            if (landlord.landlordType == LandlordType.ORGANISATION) {
+            if (isOrganisationLandlord) {
                 ORG_LANDLORD_REGISTRATION_SURVEY_URL
             } else {
                 INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
             }
         model.addAttribute("landlordRegistrationSurveyUrl", surveyUrl)
+
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+        val showLandlordReactivated =
+            featureFlagManager.checkFeature(ACTIVE_INACTIVE) && invitationService.wasLandlordReactivatedByLastAcceptance()
+        model.addAttribute("landlordReactivated", showLandlordReactivated)
+        model.addAttribute("isOrganisationLandlord", isOrganisationLandlord)
 
         return ModelAndView("acceptJointLandlordInvitationConfirmation")
     }

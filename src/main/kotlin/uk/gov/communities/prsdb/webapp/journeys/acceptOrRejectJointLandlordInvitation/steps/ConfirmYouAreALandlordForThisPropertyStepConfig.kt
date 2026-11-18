@@ -68,6 +68,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             val invitation = invitationService.getInvitationForJourney(state.journeyId)
             val propertyOwnership = invitation.registeredOwnership
             val landlord = userToLandlordService.getCurrentLandlordForUser()
+            val landlordReactivated = !landlord.isActive
 
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, landlord)
 
@@ -75,6 +76,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 propertyOwnership.address.toMultiLineAddress(),
                 propertyOwnership.id,
             )
+            invitationService.setLandlordReactivatedByLastAcceptance(landlordReactivated)
 
             sendAcceptanceEmails(propertyOwnership, landlord)
         }

@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
@@ -48,6 +50,9 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     private val validToken = "test-token-123"
     private val journeyId = "test-journey-id"
@@ -271,6 +276,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                             "landlordRegistrationSurveyUrl",
                             INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL,
                         )
+                        attribute("isOrganisationLandlord", false)
                     }
                 }
         }
@@ -295,7 +301,72 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                             "landlordRegistrationSurveyUrl",
                             ORG_LANDLORD_REGISTRATION_SURVEY_URL,
                         )
+                        attribute("isOrganisationLandlord", true)
                     }
+                }
+        }
+
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        @Test
+        fun `getConfirmation shows landlord reactivated when the landlord was reactivated`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(invitationService.wasLandlordReactivatedByLastAcceptance()).thenReturn(true)
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("landlordReactivated", true) }
+                }
+        }
+
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        @Test
+        fun `getConfirmation does not show landlord reactivated when the landlord was not reactivated`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(invitationService.wasLandlordReactivatedByLastAcceptance()).thenReturn(false)
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("landlordReactivated", false) }
+                }
+        }
+
+        // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        @Test
+        fun `getConfirmation does not show landlord reactivated when the active inactive flag is disabled`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+            whenever(invitationService.wasLandlordReactivatedByLastAcceptance()).thenReturn(true)
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("landlordReactivated", false) }
                 }
         }
 

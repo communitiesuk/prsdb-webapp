@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -332,4 +333,11 @@ class JointLandlordInvitationService(
     @Suppress("UNCHECKED_CAST")
     fun getLastAcceptedPropertyFromSession(): Pair<String, Long>? =
         session.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS) as? Pair<String, Long>
+
+    fun setLandlordReactivatedByLastAcceptance(landlordReactivated: Boolean) {
+        session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE, landlordReactivated)
+    }
+
+    fun wasLandlordReactivatedByLastAcceptance(): Boolean =
+        session.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE) == true
 }
