@@ -129,6 +129,14 @@ jobs:
           NFT_SEED_PROPERTIES: ${{ vars.NFT_SEED_PROPERTIES }}
           NFT_SEED_INCOMPLETE_PROPERTIES: ${{ vars.NFT_SEED_INCOMPLETE_PROPERTIES }}
           NFT_LOAD_MINIMUM_FREE_ADDRESSES: ${{ vars.NFT_LOAD_MINIMUM_FREE_ADDRESSES }}
+      - name: Refresh credentials for private restore checkpoint
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-restore-state-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
       - name: Store restore state privately, including partial failure
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state

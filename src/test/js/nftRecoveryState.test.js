@@ -88,6 +88,22 @@ test('successful private checkpoint upload does not emit the state marker', asyn
   assert.ok(calls[0].includes('s3://prsdb-seed-data-nft/performance-recovery/123/2/restore-state/nft-restore-state.json'));
 });
 
+test('private checkpoint uploads restore orchestration credentials after database verification', async () => {
+  const workflow = await readFile(workflowPath, 'utf8');
+  for (const job of workflow.split(/(?=^  [\w-]+:\s*$)/m)) {
+    let role;
+    for (const step of job.split(/(?=^      - (?:name|uses):)/m)) {
+      if (step.includes('uses: ./.github/actions/verify-nft-database')) role = 'database';
+      if (/uses: aws-actions\/configure-aws-credentials@/.test(step)) {
+        role = step.includes(':role/nft-performance-test-orchestrator-access') ? 'orchestrator' : 'database';
+      }
+      if (/run: node scripts\/performance-tests\/nft-recovery-state\.mjs upload /.test(step)) {
+        assert.equal(role, 'orchestrator', step.match(/- name: (.+)/)?.[1]);
+      }
+    }
+  }
+});
+
 test('partial candidate worker ownership round-trips privately without publishing task metadata', async t => {
   const state = await setup(t);
   const workerState = {runId: '123-1', asyncRegistrationAttempted: true, candidateAsync: marker};
