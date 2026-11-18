@@ -124,7 +124,11 @@ class AssociatedPartyNotificationServiceTests {
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
-        val outcome = associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, propertyOwnership)
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                propertyOwnership,
+            )
 
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
@@ -142,7 +146,7 @@ class AssociatedPartyNotificationServiceTests {
 
         // Act
         val outcome =
-            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
                 createPropertyOwnership(),
             )
@@ -159,7 +163,7 @@ class AssociatedPartyNotificationServiceTests {
 
         // Act
         val outcome =
-            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
                 createPropertyOwnership(),
             )
@@ -187,7 +191,7 @@ class AssociatedPartyNotificationServiceTests {
 
         // Act
         val outcome =
-            service.sendFreeholderAddedToPropertyNotification(
+            service.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
                 createPropertyOwnership(),
             )
@@ -204,7 +208,10 @@ class AssociatedPartyNotificationServiceTests {
 
         // Act & Assert
         assertThrows(PrsdbWebException::class.java) {
-            associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, createPropertyOwnership())
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                createPropertyOwnership(),
+            )
         }
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
@@ -236,10 +243,26 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     private fun sendNotificationToFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =
-        associatedPartyNotificationService.sendNotificationToFreeholder(freeholder, email, letter)
+        checkNotNull(
+            associatedPartyNotificationService.sendNotificationToAssociatedParty(
+                name = freeholder.name,
+                emailAddress = freeholder.email,
+                postalAddress = freeholder.address,
+                emailTemplate = email,
+                buildLetter = { letter },
+            ),
+        )
 
     private fun sendNotificationToSuperiorLandlord(superiorLandlord: SuperiorLandlordDataModel): AssociatedPartyNotificationOutcome =
-        associatedPartyNotificationService.sendNotificationToSuperiorLandlord(superiorLandlord, email, letter)
+        checkNotNull(
+            associatedPartyNotificationService.sendNotificationToAssociatedParty(
+                name = superiorLandlord.name,
+                emailAddress = superiorLandlord.email,
+                postalAddress = superiorLandlord.address,
+                emailTemplate = email,
+                buildLetter = { letter },
+            ),
+        )
 
     @Test
     fun `sendNotification sends nothing to a fully redacted associated party`() {

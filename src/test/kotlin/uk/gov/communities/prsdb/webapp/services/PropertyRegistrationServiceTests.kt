@@ -1854,8 +1854,10 @@ class PropertyRegistrationServiceTests {
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
         verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
-        verify(mockAssociatedPartyNotificationService).sendFreeholderAddedToPropertyNotification(freeholderWithAddress, propertyOwnership)
-        verify(mockAssociatedPartyNotificationService).sendFreeholderAddedToPropertyNotification(freeholderWithEmail, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(freeholderWithAddress, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(freeholderWithEmail, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -1895,7 +1897,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockJointLandlordInvitationService.sendInvitationEmail(any()))
             .thenThrow(RuntimeException("Email failed to send"))
             .thenAnswer { }
-        whenever(mockAssociatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(any(), any()))
+        whenever(mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(any(), any()))
             .thenThrow(RuntimeException("Letter failed to send"))
 
         // Act
@@ -1941,7 +1943,10 @@ class PropertyRegistrationServiceTests {
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         stubConfirmationEmailDependencies()
         whenever(
-            mockAssociatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(firstFreeholder, propertyOwnership),
+            mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                firstFreeholder,
+                propertyOwnership,
+            ),
         ).thenThrow(RuntimeException("Letter failed to send"))
 
         // Act
@@ -1953,9 +1958,15 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockAssociatedPartyNotificationService)
-            .sendFreeholderAddedToPropertyNotification(firstFreeholder, propertyOwnership)
+            .sendNotificationToFreeholderAddedToProperty(
+                firstFreeholder,
+                propertyOwnership,
+            )
         verify(mockAssociatedPartyNotificationService)
-            .sendFreeholderAddedToPropertyNotification(secondFreeholder, propertyOwnership)
+            .sendNotificationToFreeholderAddedToProperty(
+                secondFreeholder,
+                propertyOwnership,
+            )
     }
 
     // TODO PDJB-1734: Remove "when payments is enabled" from this test name when the PAYMENTS flag is removed

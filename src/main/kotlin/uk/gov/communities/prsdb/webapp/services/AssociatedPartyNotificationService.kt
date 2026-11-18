@@ -21,11 +21,11 @@ class AssociatedPartyNotificationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     // TODO PDJB-1987: make the return type non-nullable once the freeholder added email is sent.
-    fun sendFreeholderAddedToPropertyNotification(
+    fun sendNotificationToFreeholderAddedToProperty(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
     ): AssociatedPartyNotificationOutcome? =
-        sendNotification(
+        sendNotificationToAssociatedParty(
             name = freeholder.name,
             emailAddress = freeholder.email,
             postalAddress = freeholder.address,
@@ -59,37 +59,7 @@ class AssociatedPartyNotificationService(
     fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
         TODO("Implement property manager creation notification when its email template is available")
 
-    internal fun sendNotificationToFreeholder(
-        freeholder: FreeholderDataModel,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome =
-        checkNotNull(
-            sendNotification(
-                name = freeholder.name,
-                emailAddress = freeholder.email,
-                postalAddress = freeholder.address,
-                emailTemplate = email,
-                buildLetter = { letter },
-            ),
-        )
-
-    internal fun sendNotificationToSuperiorLandlord(
-        superiorLandlord: SuperiorLandlordDataModel,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome =
-        checkNotNull(
-            sendNotification(
-                name = superiorLandlord.name,
-                emailAddress = superiorLandlord.email,
-                postalAddress = superiorLandlord.address,
-                emailTemplate = email,
-                buildLetter = { letter },
-            ),
-        )
-
-    private fun sendNotification(
+    internal fun sendNotificationToAssociatedParty(
         name: String?,
         emailAddress: String?,
         postalAddress: AddressDataModel?,

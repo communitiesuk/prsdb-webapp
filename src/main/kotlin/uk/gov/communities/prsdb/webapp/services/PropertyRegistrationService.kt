@@ -172,7 +172,10 @@ class PropertyRegistrationService(
             sendNotificationAndLogFailures(
                 "the freeholder ${index + 1} added-to-property notification for property ownership ${propertyOwnership.id}",
             ) {
-                associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, propertyOwnership)
+                associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                    freeholder,
+                    propertyOwnership,
+                )
             }
         }
 
