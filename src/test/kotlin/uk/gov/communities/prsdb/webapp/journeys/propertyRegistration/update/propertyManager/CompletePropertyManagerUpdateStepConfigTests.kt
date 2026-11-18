@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -61,31 +62,30 @@ class CompletePropertyManagerUpdateStepConfigTests {
     inner class AfterStepIsReached {
         @BeforeEach
         fun setUp() {
-            whenever(mockState.propertyId).thenReturn(propertyId)
             whenever(mockState.propertyManagerTask).thenReturn(mockPropertyManagerTask)
             whenever(mockPropertyManagerTask.propertyManagerStep).thenReturn(mockPropertyManagerStep)
         }
 
         @Test
-        fun `afterStepIsReached does not update the record when the property manager is unchanged`() {
+        fun `afterStepIsReached does not update the record or send emails when the property manager is unchanged`() {
             givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
             givenUsingPropertyManager("Agent Ltd", "agent@example.com")
 
             stepConfig.afterStepIsReached(mockState)
 
             verify(mockPropertyOwnershipService, never()).updatePropertyManager(any(), anyOrNull(), any())
-            verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
+            verifyNoInteractions(mockPropertyUpdateEmailService)
         }
 
         @Test
-        fun `afterStepIsReached does not update the record when there was and still is no property manager`() {
+        fun `afterStepIsReached does not update the record or send emails when there was and still is no property manager`() {
             givenOriginalPropertyManager(null)
             whenever(mockPropertyManagerStep.outcome).thenReturn(YesOrNo.NO)
 
             stepConfig.afterStepIsReached(mockState)
 
             verify(mockPropertyOwnershipService, never()).updatePropertyManager(any(), anyOrNull(), any())
-            verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
+            verifyNoInteractions(mockPropertyUpdateEmailService)
         }
 
         @Test
@@ -163,6 +163,7 @@ class CompletePropertyManagerUpdateStepConfigTests {
     }
 
     private fun givenTheRecordWillBeUpdated() {
+        whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
     }
 
