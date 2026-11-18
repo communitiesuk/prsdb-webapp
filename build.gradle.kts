@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     kotlin("jvm") version "2.3.21"
@@ -196,6 +197,12 @@ tasks.register<Copy>("copyBuiltAssets") {
 
 tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
+}
+
+// CVE-2026-114938 (Java4Shell): the default Liberica 25.0.5 JRE is vulnerable, so use Corretto (fixed in 25.0.5.1.2).
+// TODO PDJB-2236: Remove this override to return to the default Liberica JRE once Paketo ships a fixed Liberica 25.
+tasks.named<BootBuildImage>("bootBuildImage") {
+    buildpacks.set(listOf("docker://paketobuildpacks/amazon-corretto", "urn:cnb:builder:paketo-buildpacks/java"))
 }
 
 // CI runs the test suite as several parallel jobs, each taking a slice of the test classes. Nested
