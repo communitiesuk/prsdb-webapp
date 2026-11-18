@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlor
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -99,8 +100,14 @@ class PropertyDetailsController(
             )
         modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
         modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        // TODO PDJB-2149: Remove the deregisterPropertyLink and flag attribute when the ACTIVE_INACTIVE flag is removed
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
+        modelAndView.addObject("isActiveInactiveEnabled", featureFlagManager.checkFeature(ACTIVE_INACTIVE))
+        modelAndView.addObject(
+            "deactivatePropertyLink",
+            DeactivatePropertyController.getPropertyDeactivationPath(propertyOwnershipId),
+        )
         modelAndView.addObject("isLandlordView", true)
         val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
         modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)

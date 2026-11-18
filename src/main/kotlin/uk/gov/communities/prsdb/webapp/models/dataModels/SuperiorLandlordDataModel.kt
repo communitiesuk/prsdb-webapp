@@ -31,7 +31,6 @@ data class SuperiorLandlordDataModel(
                 detailsKnown = superiorLandlord.detailsKnown(),
                 name = superiorLandlord.name,
                 email = superiorLandlord.email,
-                address = superiorLandlord.address?.let { AddressDataModel.fromAddress(it) },
             )
     }
 }

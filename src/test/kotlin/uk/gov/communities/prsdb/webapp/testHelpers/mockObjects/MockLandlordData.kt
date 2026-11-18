@@ -238,6 +238,7 @@ class MockLandlordData {
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
             renewalDate: LocalDate = LocalDate.of(2027, 1, 1),
+            paidForUntil: LocalDate? = null,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -266,6 +267,7 @@ class MockLandlordData {
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
                     renewalDate = renewalDate,
+                    paidForUntil = paidForUntil ?: renewalDate,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
@@ -291,15 +293,13 @@ class MockLandlordData {
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-            address: Address? = null,
-        ) = Freeholder(propertyOwnership, name, email, address)
+        ) = Freeholder(propertyOwnership, name, email)
 
         fun createSuperiorLandlord(
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-            address: Address? = null,
-        ) = SuperiorLandlord(propertyOwnership, name, email, address)
+        ) = SuperiorLandlord(propertyOwnership, name, email)
 
         fun createPropertyManager(
             name: String = "Property Manager",

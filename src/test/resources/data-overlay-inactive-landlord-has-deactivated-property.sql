@@ -12,8 +12,8 @@ SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM addr
 INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, address_id, property_build_type, license_id, num_bedrooms, bills_included_list,
                                 custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied,
-                                correspondence_email, correspondence_address_id, renewal_date)
-VALUES (1, false, 1, 1, 0, 0, 2, 2, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365);
+                                correspondence_email, correspondence_address_id, renewal_date, paid_for_until)
+VALUES (1, false, 1, 1, 0, 0, 2, 2, 1, null, null, null, null, null, null, null, null, false, 'email@example.com', 1, current_date + 365, current_date + 365);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)

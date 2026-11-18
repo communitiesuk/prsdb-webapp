@@ -30,9 +30,15 @@ class ActiveInactiveService(
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
 
         propertyOwnership.landlords
-            .filterNot { propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(it.id, propertyOwnershipId) }
+            .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
             .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
+
+    fun landlordHasOtherActiveProperties(
+        landlordId: Long,
+        excludingPropertyOwnershipId: Long,
+    ): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlordId, excludingPropertyOwnershipId)
 
     @Transactional
     fun reactivateProperty(propertyOwnershipId: Long) {
@@ -52,6 +58,13 @@ class ActiveInactiveService(
             "Landlord ${landlord.id} cannot be deactivated while they have active properties"
         }
         markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
+    }
+
+    @Transactional
+    fun deactivateLandlordIfNoActiveProperties(landlord: Landlord) {
+        if (landlord.isActive && !propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
+            markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
+        }
     }
 
     @Transactional

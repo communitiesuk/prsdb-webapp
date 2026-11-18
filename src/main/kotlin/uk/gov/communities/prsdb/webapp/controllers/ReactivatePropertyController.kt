@@ -114,6 +114,7 @@ class ReactivatePropertyController(
     ): String {
         throwIfPropertyCannotBeReactivated(propertyOwnershipId)
 
+        // TODO PDJB-2044: Save the reactivation and show the confirmation page
         model.addAttribute("todoComment", "TODO (PDJB-2044): Save the reactivation and show the confirmation page")
         return "forms/todoConfirmation"
     }

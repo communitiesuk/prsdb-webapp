@@ -30,7 +30,6 @@ data class FreeholderDataModel(
                 detailsKnown = freeholder.detailsKnown(),
                 name = freeholder.name,
                 email = freeholder.email,
-                address = freeholder.address?.let { AddressDataModel.fromAddress(it) },
             )
     }
 }

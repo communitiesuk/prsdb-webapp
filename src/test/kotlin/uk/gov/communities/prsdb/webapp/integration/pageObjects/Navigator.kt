@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
 import uk.gov.communities.prsdb.webapp.controllers.ChangeOrgTeamMemberAccessLevelController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.DeactivatePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
@@ -165,6 +166,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisatio
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.AreYouSureFormPageOrganisationalLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
@@ -283,7 +285,6 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Ent
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -1709,7 +1710,7 @@ class Navigator(
         isPropertyAlreadyRegistered: Boolean = false,
     ) = navigateToPropertyReactivationStepAfterInfo(
         propertyOwnershipId,
-        ReactivationLicensingStep.ROUTE_SEGMENT,
+        LicensingTypeStep.ROUTE_SEGMENT,
         isPropertyAlreadyRegistered,
     )
 
@@ -1784,6 +1785,15 @@ class Navigator(
         return createValidPage(
             page,
             ConfirmPageLeaveProperty::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyDeactivationConfirmPage(propertyOwnershipId: Long): ConfirmPagePropertyDeactivation {
+        navigate(DeactivatePropertyController.getPropertyDeactivationPath(propertyOwnershipId))
+        return createValidPage(
+            page,
+            ConfirmPagePropertyDeactivation::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

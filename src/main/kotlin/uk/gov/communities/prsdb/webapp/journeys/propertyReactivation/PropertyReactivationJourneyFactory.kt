@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
@@ -35,6 +34,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
@@ -76,10 +77,8 @@ class PropertyReactivationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
-                // TODO PDJB-2037: replace this placeholder step with a task, registering it with task(...)
-                // and updating entryStepFor and completionStepFor
-                step(journey.licensingStep) {
-                    routeSegment(ReactivationLicensingStep.ROUTE_SEGMENT)
+                task(journey.licensingTask) {
+                    withDependencies { journey }
                     parents { journey.parentsFor(LICENSING) }
                     nextStep { journey.nextStepAfter(LICENSING) }
                 }
@@ -126,6 +125,7 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.completeReactivationParents() }
                 nextUrl { confirmationUrl(propertyOwnershipId) }
             }
+            useContinueButtons(journey.licensingTask)
             useContinueButtons(journey.gasSafetyTask)
             useContinueButtons(journey.electricalSafetyTask)
             useContinueButtons(journey.epcTask)
@@ -151,7 +151,7 @@ class PropertyReactivationJourneyFactory(
 
     private fun PropertyReactivationJourneyState.entryStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         when (taskType) {
-            LICENSING -> licensingStep
+            LICENSING -> licensingTask.firstStep
             GAS_SAFETY -> gasSafetyTask.firstStep
             ELECTRICAL_SAFETY -> electricalSafetyTask.firstStep
             EPC -> epcTask.firstStep
@@ -160,7 +160,7 @@ class PropertyReactivationJourneyFactory(
 
     private fun PropertyReactivationJourneyState.completionStepFor(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         when (taskType) {
-            LICENSING -> licensingStep
+            LICENSING -> licensingTask.exitStep
             GAS_SAFETY -> gasSafetyTask.exitStep
             ELECTRICAL_SAFETY -> electricalSafetyTask.exitStep
             EPC -> epcTask.exitStep
@@ -200,7 +200,7 @@ class PropertyReactivationJourneyFactory(
 class PropertyReactivationJourney(
     override val infoStep: ReactivationInfoStep,
     override val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep,
-    override val licensingStep: ReactivationLicensingStep,
+    override val licensingTask: LicensingTask,
     override val gasSafetyTask: GasSafetyTask,
     override val electricalSafetyTask: ElectricalSafetyTask,
     override val epcTask: EpcTask,
@@ -219,6 +219,7 @@ class PropertyReactivationJourney(
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
     override val allowProvideCertificateLaterRoute: Boolean = false
     override val allowProvideTenancyDetailsLaterRoute: Boolean = false
+    override val allowProvideLicensingLaterRoute: Boolean = false
     override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
     // Aliases for nested steps and tasks required by TenancyDetailsState
@@ -249,6 +250,7 @@ class PropertyReactivationJourney(
 
 interface PropertyReactivationJourneyState :
     PropertyOwnershipJourneyState,
+    LicensingDependencies,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
     EpcDependencies,
@@ -257,7 +259,7 @@ interface PropertyReactivationJourneyState :
     CheckYourAnswersJourneyState {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
-    val licensingStep: ReactivationLicensingStep
+    val licensingTask: LicensingTask
     val gasSafetyTask: GasSafetyTask
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
