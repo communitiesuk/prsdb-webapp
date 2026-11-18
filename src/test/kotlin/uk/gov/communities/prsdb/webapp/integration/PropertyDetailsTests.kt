@@ -39,7 +39,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     inner class PropertyDetailsLandlordView {
         @Test
         fun `the people responsible tab shows the saved freeholder as a read only card`() {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
@@ -50,7 +50,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `the people responsible tab shows a freeholder update link`() {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
             // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
@@ -62,7 +62,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `the people responsible tab shows the postal address note on a saved freeholder card`() {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_JOINT_FREEHOLDERS_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
             val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Casey Joint" }
@@ -291,7 +291,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the ownership answers are shown, omitting the rows for questions that were not asked`(page: Page) {
+            fun `the ownership answers are shown, omitting the rows for questions that were not asked`() {
                 // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, so freehold type is not asked
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToPeopleResponsible()
@@ -305,7 +305,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the ownership answers include the freehold type for a freehold property`(page: Page) {
+            fun `the ownership answers include the freehold type for a freehold property`() {
                 // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
                 detailsPage.tabs.goToPeopleResponsible()
@@ -389,7 +389,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         // TODO PDJB-1999: remove this test when freeholders are shown in the local council view
         @Test
         fun `the people responsible tab does not show saved freeholders`() {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).hasCount(0)
@@ -975,6 +975,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.expiredInvitationsDetails.locator("summary").click()
             assertThat(detailsPage.expiredInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
         }
+    }
+
+    companion object {
+        private const val PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID = 1L
+        private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
     }
 }
 
