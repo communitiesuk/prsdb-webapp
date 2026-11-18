@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -69,52 +70,8 @@ class PropertyDetailsController(
         }
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
+        val modelAndView = buildLandlordPropertyDetailsModelAndView(propertyOwnership, PropertyDetailsViewType.LANDLORD)
 
-        val propertyCompliance =
-            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
-                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
-        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
-
-        val propertyDetails =
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                viewType = PropertyDetailsViewType.LANDLORD,
-                messageSource = messageSource,
-                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
-            )
-
-        val propertyComplianceDetails =
-            propertyComplianceViewModelFactory.create(
-                propertyCompliance = propertyCompliance,
-                complianceStatus = complianceStatus,
-                viewType = PropertyDetailsViewType.LANDLORD,
-                propertyOwnershipId = propertyOwnershipId,
-            )
-
-        val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
-        modelAndView.addObject("propertyDetails", propertyDetails)
-        if (propertyDetails.showFreeholderSection) {
-            modelAndView.addObject(
-                "freeholderSummaryCards",
-                freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
-            )
-        }
-        modelAndView.addObject("complianceDetails", propertyComplianceDetails)
-        modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject(
-            "notificationBanner",
-            buildNotificationBanner(isLandlordView = true, propertyDetails, complianceStatus),
-        )
-
-        val landlord = userToLandlordService.getCurrentLandlordForUser()
-        val landlordSummaryCards =
-            PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
-                propertyOwnership.landlords,
-                landlord,
-                propertyOwnership.id,
-            )
-        modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
-        modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
         // TODO PDJB-2149: Remove the deregisterPropertyLink and flag attribute when the ACTIVE_INACTIVE flag is removed
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
@@ -123,7 +80,6 @@ class PropertyDetailsController(
             "deactivatePropertyLink",
             DeactivatePropertyController.getPropertyDeactivationPath(propertyOwnershipId),
         )
-        modelAndView.addObject("isLandlordView", true)
         val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
         modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
         modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
@@ -172,55 +128,78 @@ class PropertyDetailsController(
                 }
         modelAndView.addObject("pendingInvitations", pendingInvitations)
         modelAndView.addObject("expiredInvitations", expiredInvitations)
-        modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
 
         return modelAndView
     }
 
     private fun getDeactivatedPropertyDetails(propertyOwnershipId: Long): ModelAndView {
         val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
+        val modelAndView = buildLandlordPropertyDetailsModelAndView(propertyOwnership, PropertyDetailsViewType.DEACTIVATED_LANDLORD)
 
-        val propertyCompliance =
-            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
-                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
-        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
-
-        val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
-        modelAndView.addObject(
-            "propertyDetails",
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
-                messageSource = messageSource,
-                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
-            ),
-        )
-        modelAndView.addObject(
-            "complianceDetails",
-            propertyComplianceViewModelFactory.create(
-                propertyCompliance = propertyCompliance,
-                complianceStatus = complianceStatus,
-                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
-                propertyOwnershipId = propertyOwnershipId,
-            ),
-        )
-        modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject(
-            "landlordSummaryCards",
-            PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
-                propertyOwnership.landlords,
-                userToLandlordService.getCurrentLandlordForUser(),
-                propertyOwnership.id,
-                isReadOnly = true,
-            ),
-        )
-        modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
-        modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("isDeactivated", true)
         modelAndView.addObject(
             "reactivatePropertyUrl",
             ReactivatePropertyController.getPropertyReactivationPath(propertyOwnershipId),
         )
+
+        return modelAndView
+    }
+
+    private fun buildLandlordPropertyDetailsModelAndView(
+        propertyOwnership: PropertyOwnership,
+        viewType: PropertyDetailsViewType,
+    ): ModelAndView {
+        val isDeactivated = viewType == PropertyDetailsViewType.DEACTIVATED_LANDLORD
+
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
+                ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
+        val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+        val propertyDetails =
+            PropertyDetailsViewModel(
+                propertyOwnership = propertyOwnership,
+                viewType = viewType,
+                messageSource = messageSource,
+                associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
+            )
+
+        val propertyComplianceDetails =
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance = propertyCompliance,
+                complianceStatus = complianceStatus,
+                viewType = viewType,
+                propertyOwnershipId = propertyOwnership.id,
+            )
+
+        val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
+        modelAndView.addObject("propertyDetails", propertyDetails)
+        if (propertyDetails.showFreeholderSection) {
+            modelAndView.addObject(
+                "freeholderSummaryCards",
+                freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
+            )
+        }
+        modelAndView.addObject("complianceDetails", propertyComplianceDetails)
+        modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+        // The notification banner prompts for actions that a deactivated record can't take
+        if (!isDeactivated) {
+            modelAndView.addObject(
+                "notificationBanner",
+                buildNotificationBanner(isLandlordView = true, propertyDetails, complianceStatus),
+            )
+        }
+
+        val landlordSummaryCards =
+            PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                propertyOwnership.landlords,
+                userToLandlordService.getCurrentLandlordForUser(),
+                propertyOwnership.id,
+                isReadOnly = isDeactivated,
+            )
+        modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
+        modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
 
         return modelAndView

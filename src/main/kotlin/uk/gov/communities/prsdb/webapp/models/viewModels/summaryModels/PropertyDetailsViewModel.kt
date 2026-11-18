@@ -55,6 +55,8 @@ class PropertyDetailsViewModel(
 
     val freeholderSectionLinkTextKey: String = "registerProperty.freeholders.checkAnswers.changeLink.$freeholderHeadingType"
 
+    val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
     val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
 

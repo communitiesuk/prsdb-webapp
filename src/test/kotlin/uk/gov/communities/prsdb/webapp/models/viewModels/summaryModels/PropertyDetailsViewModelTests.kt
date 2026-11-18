@@ -238,11 +238,12 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(ownershipType = ownershipType),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                 )
 
             assertTrue(viewModel.showFreeholderSection)
+            assertTrue(viewModel.showFreeholderSectionUpdateLink)
             assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
             assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
             // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
@@ -256,7 +257,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
                 associatedPartiesEnabled = true,
             )
@@ -269,7 +270,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
                 associatedPartiesEnabled = true,
             )
@@ -332,7 +333,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                     associatedPartiesEnabled = false,
                 )
@@ -862,6 +863,19 @@ class PropertyDetailsViewModelTests {
 
         assertTrue(viewModel.peopleResponsibleOwnershipSection.isNotEmpty())
         assertTrue(allRows.none { it.hasActions })
+    }
+
+    @Test
+    fun `the deactivated landlord view shows the freeholder section without its update link`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showFreeholderSection)
+        assertFalse(viewModel.showFreeholderSectionUpdateLink)
     }
 
     @Test
