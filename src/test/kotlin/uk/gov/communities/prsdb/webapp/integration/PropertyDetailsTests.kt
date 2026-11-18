@@ -54,6 +54,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
+        fun `the people responsible tab shows the postal address note on a saved freeholder card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(54)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Casey Joint" }
+            assertThat(freeholderCard.bodyText).hasText(
+                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(freeholderCard.bodyText.locator("strong")).hasText("postal address")
+        }
+
+        @Test
         fun `the property details page loads with the property details tab selected by default`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
@@ -122,7 +134,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `individual property shows invite text link and not invite button on landlord tab`(page: Page) {
+        fun `individual property shows invite text link and not invite button on landlord tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
