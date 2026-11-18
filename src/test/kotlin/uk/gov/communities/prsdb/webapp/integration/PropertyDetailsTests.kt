@@ -384,7 +384,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
-            assertThat(detailsPage.freeholderSection).isHidden()
+            assertThat(detailsPage.freeholderSection).hasCount(0)
         }
 
         @Test
