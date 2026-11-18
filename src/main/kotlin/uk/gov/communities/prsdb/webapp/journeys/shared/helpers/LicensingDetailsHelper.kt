@@ -9,17 +9,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 @PrsdbWebService
 class LicensingDetailsHelper {
-    fun getCheckYourAnswersSummaryList(
+    fun getCheckYourAnswersSummaryListWithoutProvideLater(
         state: CheckYourAnswersJourneyState,
         licensingState: LicensingState,
     ): List<SummaryListRowViewModel> =
         licensingState.getLicensingType().let { licensingType ->
             listOfNotNull(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "licensing.checkAnswers.licensingType",
-                    licensingType,
-                    Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
-                ),
+                getLicensingTypeRow(state, licensingState, licensingType),
                 when (licensingType) {
                     LicensingType.HMO_MANDATORY_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoMandatoryLicenceStep)
                     LicensingType.HMO_ADDITIONAL_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoAdditionalLicenceStep)
@@ -34,4 +30,36 @@ class LicensingDetailsHelper {
                 },
             )
         }
+
+    fun getCheckYourAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+    ): List<SummaryListRowViewModel> {
+        val licensingType = licensingState.getLicensingType()
+
+        if (licensingType == LicensingType.NO_LICENSING) {
+            return listOf(getLicensingTypeRow(state, licensingState, "licensing.checkAnswers.noLicensingRequired"))
+        }
+
+        if (licensingState.isOccupied == false && licensingType == LicensingType.PROVIDE_LATER) {
+            return listOf(getLicensingTypeRow(state, licensingState, "licensing.checkAnswers.licensingProvideLaterUnoccupied"))
+        }
+
+        return getCheckYourAnswersSummaryListWithoutProvideLater(state, licensingState)
+    }
+
+    fun getLicensingCyaContent(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+    ): Map<String, Any?> = mapOf("licensingRows" to getCheckYourAnswersSummaryListWithoutProvideLater(state, licensingState))
+
+    private fun getLicensingTypeRow(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+        licensingTypeValue: Any,
+    ) = SummaryListRowViewModel.forCheckYourAnswersPage(
+        "licensing.checkAnswers.licensingType",
+        licensingTypeValue,
+        Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
+    )
 }

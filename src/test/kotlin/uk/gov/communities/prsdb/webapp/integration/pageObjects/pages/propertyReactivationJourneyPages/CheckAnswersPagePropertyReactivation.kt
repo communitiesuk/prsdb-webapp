@@ -20,12 +20,15 @@ class CheckAnswersPagePropertyReactivation(
             "/${ReactivationCheckAnswersStep.ROUTE_SEGMENT}",
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-xl"))
+    val licensingHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if the property needs a license")))
     val gasSafetyHeading = Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Gas safety certificate")))
     val electricalSafetyHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Electrical safety certificate")))
     val epcHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
     val tenancyHeading = Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+    val licensingSummaryList = LicensingSummaryList(page)
     val complianceSummaryList = ComplianceSummaryList(page)
     val tenancySummaryList = TenancySummaryList(page)
     val epcCard = SummaryCard(page, "Your EPC", headingLevel = "h3")
@@ -34,6 +37,13 @@ class CheckAnswersPagePropertyReactivation(
     val form = PostForm(page)
 
     fun submit() = form.submit()
+
+    class LicensingSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val licensingTypeRow = getRow("Licensing type")
+        val licensingNumberRow = getRow("Licensing number")
+    }
 
     class ComplianceSummaryList(
         page: Page,

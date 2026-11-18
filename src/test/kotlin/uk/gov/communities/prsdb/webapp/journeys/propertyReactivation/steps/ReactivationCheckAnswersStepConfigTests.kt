@@ -14,7 +14,9 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -27,6 +29,9 @@ class ReactivationCheckAnswersStepConfigTests {
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    lateinit var mockLicensingDetailsHelper: LicensingDetailsHelper
+
+    @Mock
     lateinit var mockComplianceDetailsHelper: ComplianceDetailsHelper
 
     @Mock
@@ -37,6 +42,9 @@ class ReactivationCheckAnswersStepConfigTests {
 
     @Mock
     lateinit var mockState: PropertyReactivationJourneyState
+
+    @Mock
+    lateinit var mockLicensingTask: LicensingTask
 
     @Mock
     lateinit var mockGasSafetyTask: GasSafetyTask
@@ -66,7 +74,11 @@ class ReactivationCheckAnswersStepConfigTests {
         val stepConfig = setupStepConfig()
         mockInactiveProperty()
         whenever(mockState.requiredTaskTypes)
-            .thenReturn(listOf(ReactivationTaskType.GAS_SAFETY, ReactivationTaskType.TENANCY_DETAILS))
+            .thenReturn(listOf(ReactivationTaskType.LICENSING, ReactivationTaskType.GAS_SAFETY, ReactivationTaskType.TENANCY_DETAILS))
+        val licensingRows = listOf(mock<SummaryListRowViewModel>())
+        whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
+        whenever(mockLicensingDetailsHelper.getLicensingCyaContent(mockState, mockLicensingTask))
+            .thenReturn(mapOf("licensingRows" to licensingRows))
         val gasSupplyRows = listOf(mock<SummaryListRowViewModel>())
         whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
         whenever(mockComplianceDetailsHelper.getGasSafetyCyaContent(mockState, mockGasSafetyTask))
@@ -77,10 +89,12 @@ class ReactivationCheckAnswersStepConfigTests {
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
+        assertEquals(true, content["showLicensing"])
         assertEquals(true, content["showGasSafety"])
         assertEquals(false, content["showElectricalSafety"])
         assertEquals(false, content["showEpc"])
         assertEquals(true, content["showTenancyDetails"])
+        assertEquals(licensingRows, content["licensingRows"])
         assertEquals(gasSupplyRows, content["gasSupplyRows"])
         assertEquals(tenancyRows, content["tenancyRows"])
         verify(mockComplianceDetailsHelper, never()).getElectricalSafetyCyaContent(any(), any())
@@ -103,6 +117,7 @@ class ReactivationCheckAnswersStepConfigTests {
         val stepConfig =
             ReactivationCheckAnswersStepConfig(
                 mockPropertyOwnershipService,
+                mockLicensingDetailsHelper,
                 mockComplianceDetailsHelper,
                 mockOccupancyDetailsHelper,
                 mockMessageSource,

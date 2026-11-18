@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 class PropertyReactivationStateSessionBuilder :
@@ -11,6 +11,7 @@ class PropertyReactivationStateSessionBuilder :
     GasSafetyStateBuilder<PropertyReactivationStateSessionBuilder>,
     ElectricalSafetyStateBuilder<PropertyReactivationStateSessionBuilder>,
     EpcStateBuilder<PropertyReactivationStateSessionBuilder>,
+    LicensingStateBuilder<PropertyReactivationStateSessionBuilder>,
     OccupancyStateBuilder<PropertyReactivationStateSessionBuilder> {
     fun withInfoCompleted(): PropertyReactivationStateSessionBuilder {
         withSubmittedValue(ReactivationInfoStep.ROUTE_SEGMENT, NoInputFormModel())
@@ -22,18 +23,12 @@ class PropertyReactivationStateSessionBuilder :
         return self()
     }
 
-    // TODO PDJB-2042: use the licensing state builder once the licensing task (PDJB-2037) is merged
-    fun withLicensingCompleted(): PropertyReactivationStateSessionBuilder {
-        withSubmittedValue(ReactivationLicensingStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
     companion object {
         fun beforeCheckAnswers() =
             PropertyReactivationStateSessionBuilder()
                 .withInfoCompleted()
                 .withIsPropertyAlreadyRegistered(false)
-                .withLicensingCompleted()
+                .withLicensing(LicensingType.SELECTIVE_LICENCE, "SL-12345")
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()

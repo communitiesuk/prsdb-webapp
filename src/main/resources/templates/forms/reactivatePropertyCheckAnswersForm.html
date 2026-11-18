@@ -3,10 +3,12 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showLicensing" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="showGasSafety" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="showElectricalSafety" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="showEpc" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="showTenancyDetails" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="licensingRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasCertRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasInsetTextKey" type="java.lang.String"*/-->
@@ -31,7 +33,10 @@
         <div class="govuk-inset-text" th:text="#{reactivateProperty.checkAnswers.insetText}">
             reactivateProperty.checkAnswers.insetText
         </div>
-        <!--/* TODO PDJB-2042: add the licensing section once the licensing task (PDJB-2037) is merged */-->
+        <th:block th:if="${showLicensing}">
+            <h2 class="govuk-heading-m" th:text="#{licensing.checkAnswers.heading}">licensing.checkAnswers.heading</h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${licensingRows})}"></dl>
+        </th:block>
         <th:block th:if="${showGasSafety}">
             <h2 class="govuk-heading-m" th:text="#{checkGasSafety.heading}">checkGasSafety.heading</h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>

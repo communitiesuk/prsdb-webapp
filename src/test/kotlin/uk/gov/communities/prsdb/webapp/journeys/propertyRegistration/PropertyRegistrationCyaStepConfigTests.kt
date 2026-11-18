@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -35,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Freeh
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
@@ -208,9 +206,6 @@ class PropertyRegistrationCyaStepConfigTests {
     private lateinit var mockLicensingTask: LicensingTask
 
     @Mock
-    private lateinit var mockLicensingTypeStep: LicensingTypeStep
-
-    @Mock
     private lateinit var mockGasSafetyTask: GasSafetyTask
 
     @Mock
@@ -322,8 +317,6 @@ class PropertyRegistrationCyaStepConfigTests {
             .thenReturn(emptyList())
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         lenient().`when`(mockState.licensingTask).thenReturn(mockLicensingTask)
-        lenient().`when`(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
-        lenient().`when`(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
         lenient().`when`(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
         lenient().`when`(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
         lenient().`when`(mockState.epcTask).thenReturn(mockEpcTask)
@@ -563,30 +556,14 @@ class PropertyRegistrationCyaStepConfigTests {
     @Nested
     inner class LicensingContent {
         @Test
-        fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
+        fun `getStepSpecificContent puts rentedOutLicensingRows from getCheckYourAnswersSummaryList`() {
+            val expectedLicensingDetails = listOf(mock<SummaryListRowViewModel>())
+            whenever(mockLicensingDetailsHelper.getCheckYourAnswersSummaryList(mockState, mockLicensingTask))
+                .thenReturn(expectedLicensingDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "licensing.checkAnswers.noLicensingRequired",
-                licensingRows.first().fieldValue,
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses unoccupied provide-later wording when unoccupied`() {
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            val licensingRows = content["rentedOutLicensingRows"] as List<SummaryListRowViewModel>
-            assertEquals(
-                "licensing.checkAnswers.licensingProvideLaterUnoccupied",
-                licensingRows.first().fieldValue,
-            )
+            assertEquals(expectedLicensingDetails, content["rentedOutLicensingRows"])
         }
     }
 

@@ -130,6 +130,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
         assertThat(checkAnswersPage.heading).containsText("Check your answers for: Inactive House, PRSDB Road, IN1 1AA")
+        assertThat(checkAnswersPage.licensingSummaryList.licensingTypeRow.value).containsText("None")
         assertThat(checkAnswersPage.complianceSummaryList.gasSupplyRow.value).containsText("No")
         assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("1")
         assertThat(checkAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("400")

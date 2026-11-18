@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import kotlin.test.assertEquals
 
 class LicensingDetailsHelperTests {
@@ -21,12 +22,12 @@ class LicensingDetailsHelperTests {
     private val childJourneyId = "childJourneyId"
 
     @Test
-    fun `When there is no licensing, getCheckYourAnswersSummaryList returns only a licence type row`() {
+    fun `When there is no licensing, getCheckYourAnswersSummaryListWithoutProvideLater returns only a licence type row`() {
         // Arrange
         val state = createMockLicensingState(LicensingType.NO_LICENSING, null)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(state, state)
 
         // Assert
         summaryList.single().let { row ->
@@ -40,13 +41,13 @@ class LicensingDetailsHelperTests {
     }
 
     @Test
-    fun `When there is a licence provided, getCheckYourAnswersSummaryList returns both licence type and licence number rows`() {
+    fun `When there is a licence provided, getCheckYourAnswersSummaryListWithoutProvideLater returns licence type and number rows`() {
         // Arrange
         val licenceNumber = "LIC123456"
         val state = createMockLicensingState(LicensingType.HMO_MANDATORY_LICENCE, licenceNumber)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(state, state)
 
         // Assert
         assertEquals(2, summaryList.size)
@@ -71,12 +72,12 @@ class LicensingDetailsHelperTests {
     }
 
     @Test
-    fun `When licensing is to be provided later, getCheckYourAnswersSummaryList returns a single provide-this-later row`() {
+    fun `When licensing is provided later, getCheckYourAnswersSummaryListWithoutProvideLater returns a single provide-this-later row`() {
         // Arrange
         val state = createMockLicensingStateWithSkip()
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(state, state)
 
         // Assert
         summaryList.single().let { row ->
@@ -87,6 +88,66 @@ class LicensingDetailsHelperTests {
                 row.actions,
             )
         }
+    }
+
+    @Test
+    fun `When there is no licensing, getCheckYourAnswersSummaryList uses the no licence required wording`() {
+        // Arrange
+        val state = createMockLicensingState(LicensingType.NO_LICENSING, null)
+
+        // Act
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+
+        // Assert
+        summaryList.single().let { row ->
+            assertEquals("licensing.checkAnswers.licensingType", row.fieldHeading)
+            assertEquals("licensing.checkAnswers.noLicensingRequired", row.fieldValue)
+            assertEquals(
+                listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
+                row.actions,
+            )
+        }
+    }
+
+    @Test
+    fun `When an unoccupied property will provide licensing later, getCheckYourAnswersSummaryList uses the unoccupied wording`() {
+        // Arrange
+        val state = createMockLicensingStateWithSkip()
+        whenever(state.isOccupied).thenReturn(false)
+
+        // Act
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+
+        // Assert
+        assertEquals("licensing.checkAnswers.licensingProvideLaterUnoccupied", summaryList.single().fieldValue)
+    }
+
+    @Test
+    fun `When an occupied property will provide licensing later, getCheckYourAnswersSummaryList uses the provide later type`() {
+        // Arrange
+        val state = createMockLicensingStateWithSkip()
+        whenever(state.isOccupied).thenReturn(true)
+
+        // Act
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+
+        // Assert
+        assertEquals(LicensingType.PROVIDE_LATER, summaryList.single().fieldValue)
+    }
+
+    @Test
+    fun `getLicensingCyaContent returns the licensing rows without provide later as licensingRows`() {
+        // Arrange
+        val state = createMockLicensingState(LicensingType.NO_LICENSING, null)
+
+        // Act
+        val content = licensingDetailsHelper.getLicensingCyaContent(state, state)
+
+        // Assert
+        assertEquals(setOf("licensingRows"), content.keys)
+        @Suppress("UNCHECKED_CAST")
+        val rows = content["licensingRows"] as List<SummaryListRowViewModel>
+        assertEquals(LicensingType.NO_LICENSING, rows.single().fieldValue)
     }
 
     interface TestableLicensingState :

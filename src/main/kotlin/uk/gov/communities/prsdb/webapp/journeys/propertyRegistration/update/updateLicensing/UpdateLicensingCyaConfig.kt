@@ -26,7 +26,7 @@ class UpdateLicensingCyaConfig(
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
             "summaryListData" to
-                licensingDetailsHelper.getCheckYourAnswersSummaryList(
+                licensingDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(
                     state,
                     state.licensingTask,
                 ),

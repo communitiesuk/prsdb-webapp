@@ -44,10 +44,13 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
 
             assertThatComponent(checkAnswersPage.heading)
                 .containsText("Check your answers for: Inactive House, PRSDB Road, IN1 1AA")
+            assertThatComponent(checkAnswersPage.licensingHeading).isVisible()
             assertThatComponent(checkAnswersPage.gasSafetyHeading).isVisible()
             assertThatComponent(checkAnswersPage.electricalSafetyHeading).isVisible()
             assertThatComponent(checkAnswersPage.epcHeading).isVisible()
             assertThatComponent(checkAnswersPage.tenancyHeading).isVisible()
+            assertThat(checkAnswersPage.licensingSummaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(checkAnswersPage.licensingSummaryList.licensingNumberRow.value).containsText("SL-12345")
             assertThat(checkAnswersPage.complianceSummaryList.gasSupplyRow.value).containsText("No")
             assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("2")
             assertThat(checkAnswersPage.tenancySummaryList.numberOfTenantsRow.value).containsText("4")
