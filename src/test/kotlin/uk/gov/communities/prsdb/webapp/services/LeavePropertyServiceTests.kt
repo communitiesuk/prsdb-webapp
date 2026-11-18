@@ -212,10 +212,8 @@ class LeavePropertyServiceTests {
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
 
-        // Act and assert
+        // Act & Assert
         assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
-
-        // Assert
         verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
@@ -231,7 +229,7 @@ class LeavePropertyServiceTests {
             .whenever(mockSwapToIndividualNudgeEmailService)
             .sendNudgeEmailIfApplicable(propertyOwnership)
 
-        // Act and assert
+        // Act & Assert
         assertDoesNotThrow { leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership) }
     }
 
