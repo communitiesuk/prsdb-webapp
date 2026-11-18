@@ -319,20 +319,6 @@ class PropertyDetailsViewModelTests {
         }
     }
 
-    // TODO PDJB-2016: remove this test when the ASSOCIATED_PARTIES feature flag is removed
-    @Test
-    fun `the freeholder section is hidden when associated parties are disabled`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = false,
-            )
-
-        assertFalse(viewModel.showFreeholderSection)
-    }
-
     // TODO PDJB-1999: update or remove this test when freeholders are shown in the local council view
     @Test
     fun `the freeholder section is hidden in the local council view`() {
@@ -410,6 +396,19 @@ class PropertyDetailsViewModelTests {
     //  local council view onto the people responsible tab first).
     @Nested
     inner class OwnershipBeforePdjb955 {
+        @Test
+        fun `the freeholder section is hidden when associated parties are disabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertFalse(viewModel.showFreeholderSection)
+        }
+
         @Test
         fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
             val viewModel =
