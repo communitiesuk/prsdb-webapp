@@ -427,8 +427,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        val typePage = navigateToLicensingPage(page)
         assertThat(typePage.form.submitButton).hasCount(1)
         assertThat(typePage.form.submitButton).hasText("Continue")
         assertThat(typePage.provideThisLaterButton).isHidden()
@@ -458,8 +457,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `licensing type retains its validation`(page: Page) {
-        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
-        val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+        val typePage = navigateToLicensingPage(page)
         typePage.form.submitPrimaryButton()
         assertThat(typePage.form.getErrorMessage())
             .containsText("Select this property’s licence, or select ‘This property does not need a licence")
@@ -523,6 +521,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
     }
 
+    private fun navigateToLicensingPage(page: Page): LicensingTypeFormPagePropertyReactivation {
+        navigator.navigateToPropertyReactivationLicensingPageAfterInfo(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
+        return assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
     private fun navigateToHasGasSupplyPage(page: Page): HasGasSupplyFormPagePropertyReactivation {
         navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER).submit()
         assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments).submitLicensingType(LicensingType.NO_LICENSING)
@@ -567,10 +570,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         when (type) {
             LicensingType.SELECTIVE_LICENCE ->
                 assertPageIs(page, SelectiveLicenceFormPagePropertyReactivation::class, urlArguments)
+
             LicensingType.HMO_MANDATORY_LICENCE ->
                 assertPageIs(page, HmoMandatoryLicenceFormPagePropertyReactivation::class, urlArguments)
+
             LicensingType.HMO_ADDITIONAL_LICENCE ->
                 assertPageIs(page, HmoAdditionalLicenceFormPagePropertyReactivation::class, urlArguments)
+
             else -> error("Unexpected licensing type $type")
         }
 
@@ -613,9 +619,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             CertificateType.Eic ->
                 assertPageIs(page, EicExpiredFormPagePropertyReactivation::class, urlArguments)
                     .let { it.form to it.changeIssueDateLink }
+
             CertificateType.Eicr ->
                 assertPageIs(page, EicrExpiredFormPagePropertyReactivation::class, urlArguments)
                     .let { it.form to it.changeExpiryDateLink }
+
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
 
