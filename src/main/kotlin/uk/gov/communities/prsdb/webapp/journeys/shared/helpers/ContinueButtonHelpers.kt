@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 
 private fun JourneyBuilder<*>.useSubmitButtonText(
     vararg steps: JourneyStep<*, *, *>,
@@ -30,6 +31,15 @@ private fun JourneyBuilder<*>.useContinueWithoutCertButtons(
     continueWithoutCertMessageKey: String,
 ) = useSubmitButtonText(*steps) {
     if (isOccupied()) continueWithoutCertMessageKey else "forms.buttons.continue"
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: LicensingTask) {
+    useContinueButtons(
+        task.licensingTypeStep,
+        task.selectiveLicenceStep,
+        task.hmoMandatoryLicenceStep,
+        task.hmoAdditionalLicenceStep,
+    )
 }
 
 fun JourneyBuilder<*>.useContinueButtons(task: GasSafetyDetailsTask) {
