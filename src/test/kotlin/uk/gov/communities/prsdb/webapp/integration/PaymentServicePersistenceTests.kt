@@ -260,7 +260,9 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
         verify(mockGovUkPayClient).capturePayment(CREATED_PAYMENT_ID)
         val registeredProperty = paymentRepository.findById(CREATED_PAYMENT_ID).get().associatedProperty!!
         assertPaymentSucceededForProperty(registeredProperty.id)
-        assertEquals(originalPeriodEnd, propertyOwnershipRepository.findById(registeredProperty.id).get().renewalDate)
+        val persistedProperty = propertyOwnershipRepository.findById(registeredProperty.id).get()
+        assertEquals(originalPeriodEnd, persistedProperty.renewalDate)
+        assertEquals(originalPeriodEnd, persistedProperty.paidForUntil)
     }
 
     @Test
