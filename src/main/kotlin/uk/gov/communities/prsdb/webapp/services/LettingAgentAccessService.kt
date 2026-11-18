@@ -65,6 +65,9 @@ class LettingAgentAccessService(
         session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS) as MutableSet<String>?
             ?: mutableSetOf()
 
+    fun getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId: Long): LettingAgentAccess? =
+        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
+
     @Transactional
     fun deleteDelegationByPropertyOwnershipId(propertyOwnershipId: Long) {
         lettingAgentAccessRepository.deleteByPropertyOwnershipId(propertyOwnershipId)

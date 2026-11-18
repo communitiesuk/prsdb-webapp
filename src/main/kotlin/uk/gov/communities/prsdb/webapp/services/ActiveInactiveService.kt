@@ -4,11 +4,15 @@ import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -16,6 +20,9 @@ class ActiveInactiveService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
+    // TODO PDJB-2149: Remove the feature flag manager when the ACTIVE_INACTIVE flag is removed
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
@@ -26,8 +33,12 @@ class ActiveInactiveService(
         val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
         propertyOwnershipRepository.save(propertyOwnership)
-        // TODO PDJB-2106: Email the letting agent when their delegation is removed
+        val delegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
+        if (delegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            sendLettingAgentDeactivatedEmail(delegation.invitedEmail, propertyOwnership)
+        }
 
         propertyOwnership.landlords
             .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
@@ -94,4 +105,21 @@ class ActiveInactiveService(
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
+
+    private fun sendLettingAgentDeactivatedEmail(
+        lettingAgentEmail: String,
+        propertyOwnership: PropertyOwnership,
+    ) {
+        EmailHelper.sendEmailAndLogFailures(
+            "the letting agent property deactivated email for property ownership ${propertyOwnership.id}",
+        ) {
+            lettingAgentDeactivatedEmailSender.sendEmail(
+                lettingAgentEmail,
+                LettingAgentPropertyDeactivatedNotificationEmail(
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    singleLineAddress = propertyOwnership.address.singleLineAddress,
+                ),
+            )
+        }
+    }
 }
