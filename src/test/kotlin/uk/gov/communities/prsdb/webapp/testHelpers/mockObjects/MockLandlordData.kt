@@ -293,15 +293,13 @@ class MockLandlordData {
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-            address: Address? = null,
-        ) = Freeholder(propertyOwnership, name, email, address)
+        ) = Freeholder(propertyOwnership, name, email)
 
         fun createSuperiorLandlord(
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-            address: Address? = null,
-        ) = SuperiorLandlord(propertyOwnership, name, email, address)
+        ) = SuperiorLandlord(propertyOwnership, name, email)
 
         fun createPropertyManager(
             name: String = "Property Manager",
