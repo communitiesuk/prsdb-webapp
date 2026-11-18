@@ -137,14 +137,17 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `freeholder added to property notification is not sent without a name`() {
+        // Arrange
         val freeholder = createFreeholderModel(address = postalAddress)
 
+        // Act
         val outcome =
             associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(
                 freeholder,
                 createPropertyOwnership(),
             )
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
@@ -167,7 +170,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property notification prefers email when both contact methods are present`() {
+    fun `freeholder added to property notification is not sent yet when both contact methods are present`() {
         // Arrange
         val freeholder =
             createFreeholderModel(
@@ -199,7 +202,7 @@ class AssociatedPartyNotificationServiceTests {
         // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson")
 
-        // Act, Assert
+        // Act & Assert
         assertThrows(PrsdbWebException::class.java) {
             associatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(freeholder, createPropertyOwnership())
         }
@@ -208,8 +211,10 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `creation notification for a superior landlord fails explicitly until implemented`() {
+        // Arrange
         val superiorLandlord = createSuperiorLandlordModel()
 
+        // Act & Assert
         assertThrows(NotImplementedError::class.java) {
             associatedPartyNotificationService.sendCreationNotificationForSuperiorLandlord(superiorLandlord)
         }
@@ -219,8 +224,10 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `creation notification for a property manager fails explicitly until implemented`() {
+        // Arrange
         val propertyManager = PropertyManagerDataModel(name = "Alex Jones", email = "alex.jones@example.com")
 
+        // Act & Assert
         assertThrows(NotImplementedError::class.java) {
             associatedPartyNotificationService.sendCreationNotificationForPropertyManager(propertyManager)
         }
@@ -236,30 +243,39 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification sends nothing to a fully redacted associated party`() {
+        // Arrange
         val freeholder = createFreeholderModel()
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotificationToSuperiorLandlord sends nothing when contact details are redacted`() {
+        // Arrange
         val superiorLandlord = createSuperiorLandlordModel()
 
+        // Act
         val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotification emails a non-redacted associated party when their email address is known`() {
+        // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah.thompson@example.com")
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
         verify(emailNotificationService).sendEmail("sarah.thompson@example.com", email)
         verifyNoInteractions(letterNotificationService)
@@ -267,26 +283,33 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification does not email a freeholder with an email address but no name`() {
+        // Arrange
         val freeholder = createFreeholderModel(email = "sarah.thompson@example.com")
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotification does not email a superior landlord with an email address but a blank name`() {
+        // Arrange
         val superiorLandlord = createSuperiorLandlordModel(name = " ", email = "daniel.roberts@example.com")
 
+        // Act
         val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotificationToSuperiorLandlord prefers email over letter when both contact methods are available`() {
+        // Arrange
         val superiorLandlord =
             createSuperiorLandlordModel(
                 name = "Daniel Roberts",
@@ -294,8 +317,10 @@ class AssociatedPartyNotificationServiceTests {
                 address = postalAddress,
             )
 
+        // Act
         val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
         verify(emailNotificationService).sendEmail("daniel.roberts@example.com", email)
         verifyNoInteractions(letterNotificationService)
@@ -303,10 +328,13 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification posts a letter addressed by name to an associated party without an email address`() {
+        // Arrange
         val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", address = postalAddress)
 
+        // Act
         val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
@@ -317,10 +345,13 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification posts a letter to an associated party with a blank email address`() {
+        // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson", email = " ", address = postalAddress)
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
@@ -331,34 +362,43 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification does not try to notify by post when the associated party's name is missing`() {
+        // Arrange
         val freeholder = createFreeholderModel(address = postalAddress)
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotification does not try to notify by post when the associated party's name is blank`() {
+        // Arrange
         val freeholder = createFreeholderModel(name = " ", address = postalAddress)
 
+        // Act
         val outcome = sendNotificationToFreeholder(freeholder)
 
+        // Assert
         assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotification throws when a named associated party has no contact method`() {
+        // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson")
 
+        // Act & Assert
         assertThrows(PrsdbWebException::class.java) { sendNotificationToFreeholder(freeholder) }
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
     fun `sendNotification condenses a long address while keeping the postcode last`() {
+        // Arrange
         val fullAddress =
             AddressDataModel(
                 singleLineAddress =
@@ -374,8 +414,10 @@ class AssociatedPartyNotificationServiceTests {
             )
         val freeholder = createFreeholderModel(name = "Daniel Roberts", address = fullAddress)
 
+        // Act
         sendNotificationToFreeholder(freeholder)
 
+        // Assert
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(
                 listOf(
@@ -394,6 +436,7 @@ class AssociatedPartyNotificationServiceTests {
 
     @Test
     fun `sendNotification condenses a long manually entered address while keeping the postcode last`() {
+        // Arrange
         val manualAddress =
             AddressDataModel(
                 singleLineAddress =
@@ -401,8 +444,10 @@ class AssociatedPartyNotificationServiceTests {
             )
         val freeholder = createFreeholderModel(name = "Daniel Roberts", address = manualAddress)
 
+        // Act
         sendNotificationToFreeholder(freeholder)
 
+        // Assert
         verify(letterNotificationService).sendLetter(
             LetterAddressDataModel(
                 listOf(
