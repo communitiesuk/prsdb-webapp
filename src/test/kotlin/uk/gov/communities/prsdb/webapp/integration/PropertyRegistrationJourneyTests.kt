@@ -2526,9 +2526,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(
-        page: Page,
-    ) {
+    fun `completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(page: Page) {
         val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
         provideTenancyDetailsLaterPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
