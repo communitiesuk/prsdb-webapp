@@ -17,6 +17,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -39,6 +41,10 @@ class ActiveInactiveServiceTests {
 
     @Mock
     private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
+
+    // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE flag is removed
+    @Mock
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @InjectMocks
     private lateinit var activeInactiveService: ActiveInactiveService
@@ -181,6 +187,8 @@ class ActiveInactiveServiceTests {
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
             .thenReturn(true)
         whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
 
         activeInactiveService.deactivateProperty(PROPERTY_ID)
 
@@ -207,6 +215,24 @@ class ActiveInactiveServiceTests {
         verifyNoInteractions(lettingAgentDeactivatedEmailSender)
     }
 
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `deactivateProperty does not email the letting agent when ACTIVE_INACTIVE is disabled`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val delegation =
+            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        activeInactiveService.deactivateProperty(PROPERTY_ID)
+
+        verifyNoInteractions(lettingAgentDeactivatedEmailSender)
+    }
+
     @Test
     fun `deactivateProperty still deactivates the property when the letting agent email fails to send`() {
         val landlord = MockLandlordData.createIndividualLandlord()
@@ -217,6 +243,8 @@ class ActiveInactiveServiceTests {
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
             .thenReturn(true)
         whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(lettingAgentDeactivatedEmailSender.sendEmail(any(), any())).thenThrow(RuntimeException("Notify is down"))
 
         activeInactiveService.deactivateProperty(PROPERTY_ID)
