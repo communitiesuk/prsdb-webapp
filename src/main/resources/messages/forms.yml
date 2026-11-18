@@ -202,13 +202,12 @@ countryOfResidence:
 selectLocalCouncil:
   error:
     missing: Select a local council to continue
-  fieldSetHeading: What local council area is your property in?
-  fieldSetHint: Select the local council that your property falls under.
+  fieldSetHeading: What local council area is this property in?
+  subHeading: Find this property’s local council
   paragraph:
-    one:
-      beforeLink: You can
-      linkText: find your local council by searching using the property postcode (opens in new tab)
-      afterLink: .
+    beforeLink: You can
+    linkText: find your local council by searching using the property postcode (opens in new tab)
+    afterLink: .
   select:
     label: Select a local council
 date:
