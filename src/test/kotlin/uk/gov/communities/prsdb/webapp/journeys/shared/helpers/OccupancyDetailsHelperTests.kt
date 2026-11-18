@@ -14,8 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -28,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tenancyDetails.UpdateTenancyDetailsJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -81,15 +78,6 @@ class OccupancyDetailsHelperTests {
 
     @Mock
     private lateinit var mockRentAmountStep: RentAmountStep
-
-    @Mock
-    private lateinit var mockCyaState: CheckYourAnswersJourneyState
-
-    @Mock
-    private lateinit var mockTenancyDetailsState: TenancyDetailsState
-
-    @Mock
-    private lateinit var mockBillsIncludedStep: BillsIncludedStep
 
     @BeforeEach
     fun setUp() {
@@ -221,72 +209,5 @@ class OccupancyDetailsHelperTests {
         assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
         assertEquals("tenancyDetails.checkAnswers.provideLater", rows[0].fieldValue)
         assertEquals(true, rows[0].actions[0].url.contains("journeyId=journey-123"))
-    }
-
-    @Test
-    fun `getTenancyDetailsSummaryList returns household, people, furnishing and rent rows in order`() {
-        stubTenancyDetailsState()
-
-        val rows = helper.getTenancyDetailsSummaryList(mockCyaState, mockTenancyDetailsState, mockMessageSource)
-
-        assertEquals(6, rows.size)
-        assertEquals("tenancyDetails.checkAnswers.households", rows[0].fieldHeading)
-        assertEquals("tenancyDetails.checkAnswers.people", rows[1].fieldHeading)
-        assertEquals("tenancyDetails.checkAnswers.furnishedStatus", rows[2].fieldHeading)
-        assertEquals("tenancyDetails.checkAnswers.rentIncludesBills", rows[3].fieldHeading)
-        assertEquals("tenancyDetails.checkAnswers.rentFrequency", rows[4].fieldHeading)
-        assertEquals("tenancyDetails.checkAnswers.rentAmount", rows[5].fieldHeading)
-    }
-
-    @Test
-    fun `getTenancyDetailsSummaryList includes the bills included row when rent includes bills`() {
-        stubTenancyDetailsState()
-        whenever(mockRentIncludesBillsTask.doesRentIncludeBills()).thenReturn(true)
-        // Lenient because Mockito's strict stubs treat getBillsIncluded(MessageSource) and the billsIncluded getter as one method
-        lenient().`when`(mockRentIncludesBillsTask.getBillsIncluded(mockMessageSource)).thenReturn("Gas")
-        whenever(mockRentIncludesBillsTask.billsIncluded).thenReturn(mockBillsIncludedStep)
-        whenever(mockCyaState.getCyaJourneyId(mockBillsIncludedStep)).thenReturn("bills-included-cya")
-
-        val rows = helper.getTenancyDetailsSummaryList(mockCyaState, mockTenancyDetailsState, mockMessageSource)
-
-        assertEquals(7, rows.size)
-        assertEquals("tenancyDetails.checkAnswers.billsIncluded", rows[4].fieldHeading)
-    }
-
-    @Test
-    fun `getTenancyDetailsSummaryList only returns the provide later row when tenancy details are deferred`() {
-        whenever(mockTenancyDetailsState.provideTenancyDetailsLater).thenReturn(true)
-        whenever(mockTenancyDetailsState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
-        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.PROVIDE_THIS_LATER)
-        whenever(mockCyaState.getCyaJourneyId(mockHouseholdStep)).thenReturn("households-cya")
-
-        val rows = helper.getTenancyDetailsSummaryList(mockCyaState, mockTenancyDetailsState, mockMessageSource)
-
-        assertEquals(1, rows.size)
-        assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
-    }
-
-    private fun stubTenancyDetailsState() {
-        whenever(mockTenancyDetailsState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
-        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.COMPLETE)
-        whenever(mockHouseholdStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
-        whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "5" })
-        whenever(mockCyaState.getCyaJourneyId(mockHouseholdStep)).thenReturn("households-cya")
-        whenever(mockCyaState.getCyaJourneyId(mockTenantsStep)).thenReturn("tenants-cya")
-        whenever(mockTenancyDetailsState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
-        whenever(mockFurnishedStatusStep.formModel).thenReturn(
-            FurnishedStatusFormModel().apply { furnishedStatus = FurnishedStatus.FURNISHED },
-        )
-        whenever(mockCyaState.getCyaJourneyId(mockFurnishedStatusStep)).thenReturn("furnished-cya")
-        whenever(mockTenancyDetailsState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
-        whenever(mockRentIncludesBillsTask.rentIncludesBills).thenReturn(mockRentIncludesBillsStep)
-        whenever(mockCyaState.getCyaJourneyId(mockRentIncludesBillsStep)).thenReturn("rent-bills-cya")
-        whenever(mockTenancyDetailsState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
-        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
-        whenever(mockRentFrequencyStep.formModel).thenReturn(RentFrequencyFormModel().apply { rentFrequency = RentFrequency.MONTHLY })
-        whenever(mockCyaState.getCyaJourneyId(mockRentFrequencyStep)).thenReturn("frequency-cya")
-        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
-        lenient().`when`(mockRentAmountStep.formModel).thenReturn(RentAmountFormModel().apply { rentAmount = "500" })
-        whenever(mockCyaState.getCyaJourneyId(mockRentAmountStep)).thenReturn("amount-cya")
     }
 }
