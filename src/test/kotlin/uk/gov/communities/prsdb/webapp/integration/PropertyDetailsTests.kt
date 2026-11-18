@@ -45,12 +45,19 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
             val freeholderCard = detailsPage.freeholderCards.single()
             assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertEquals(0, freeholderCard.actionLinks.count())
+        }
+
+        @Test
+        fun `the people responsible tab shows a freeholder update link`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToPeopleResponsible()
+
             // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
                 "#",
             )
-            assertEquals(0, freeholderCard.actionLinks.count())
         }
 
         @Test
