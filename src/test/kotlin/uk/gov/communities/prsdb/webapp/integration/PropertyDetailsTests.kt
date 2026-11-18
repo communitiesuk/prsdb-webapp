@@ -379,6 +379,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
     @Nested
     inner class PropertyDetailsLocalCouncilView {
+        // TODO PDJB-1999: remove this test when freeholders are shown in the local council view
         @Test
         fun `the people responsible tab does not show saved freeholders`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
