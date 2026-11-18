@@ -46,7 +46,6 @@ class UpdateFurnishedStatusJourneyFactory(
                 initialStep()
                 withAdditionalContentProperties {
                     mapOf(
-                        "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",
                         "showWarning" to true,

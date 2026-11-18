@@ -763,7 +763,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of households
                 val newNumberOfHouseholds = 1
-                assertThat(updateNumberOfHouseholdsPage.header).containsText("Households in your property")
+                assertThat(updateNumberOfHouseholdsPage.header).containsText("Number of households")
                 updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
                 val updateNumberOfPeoplePage =
                     assertPageIs(
@@ -774,7 +774,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of people
                 val newNumberOfPeople = 3
-                assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
+                assertThat(updateNumberOfPeoplePage.header).containsText("How many people live here in total?")
                 updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
                 val checkOccupancyAnswersPage =
                     assertPageIs(
@@ -907,7 +907,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update rent includes bills to yes
-                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
+                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Does the rent include any bills?")
                 updateRentIncludesBillsPage.submitIsIncluded()
                 val billsIncludedPage =
                     assertPageIs(
@@ -918,7 +918,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update bills included
                 val expectedBillsIncluded = "Gas, Electricity, Water"
-                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Update which of these you include in the rent")
+                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Which bills are included?")
                 billsIncludedPage.selectGasElectricityWater()
                 billsIncludedPage.form.submit()
                 val checkYourAnswersPage =
@@ -1079,7 +1079,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Update furnished status
                 val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
                 assertThat(updateFurnishedStatusPage.form.fieldsetHeading)
-                    .containsText("Update is the property furnished")
+                    .containsText("How is the property furnished?")
                 updateFurnishedStatusPage.submitFurnishedStatus(newFurnishedStatus)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
