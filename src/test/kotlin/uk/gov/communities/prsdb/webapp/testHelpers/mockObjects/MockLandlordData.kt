@@ -238,6 +238,7 @@ class MockLandlordData {
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
             renewalDate: LocalDate = LocalDate.of(2027, 1, 1),
+            paidForUntil: LocalDate? = null,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -266,6 +267,7 @@ class MockLandlordData {
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
                     renewalDate = renewalDate,
+                    paidForUntil = paidForUntil ?: renewalDate,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
