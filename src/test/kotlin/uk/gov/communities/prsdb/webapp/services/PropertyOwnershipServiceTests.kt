@@ -2023,6 +2023,76 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
+        fun `updateIsOccupied doesn't throw when property without compliance information transitions to unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", null)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            assertDoesNotThrow {
+                propertyOwnershipService.updateIsOccupied(
+                    propertyOwnership.id,
+                    isOccupied = false,
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+                )
+            }
+
+            // Assert
+            assertFalse(propertyOwnership.isOccupied)
+            assertNull(propertyOwnership.propertyCompliance)
+            assertNull(propertyOwnership.tenancyProvideLater)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updateIsOccupied clears stale tenancy and compliance data when property is already unoccupied`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true).apply {
+                    isOccupied = false
+                }
+            val propertyCompliance =
+                PropertyCompliance(
+                    propertyOwnership = propertyOwnership,
+                    tenancyStartedBeforeEpcExpiry = true,
+                    gasSafetyCertProvideLater = true,
+                    electricalSafetyCertProvideLater = true,
+                    epcProvideLater = true,
+                )
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = false,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertFalse(propertyOwnership.isOccupied)
+            assertEquals(0, propertyOwnership.currentNumHouseholds)
+            assertEquals(0, propertyOwnership.currentNumTenants)
+            assertNull(propertyOwnership.billsIncludedList)
+            assertNull(propertyOwnership.customBillsIncluded)
+            assertNull(propertyOwnership.furnishedStatus)
+            assertNull(propertyOwnership.rentFrequency)
+            assertNull(propertyOwnership.customRentFrequency)
+            assertNull(propertyOwnership.rentAmount)
+            assertNull(propertyOwnership.tenancyProvideLater)
+            assertNull(propertyCompliance.tenancyStartedBeforeEpcExpiry)
+            assertNull(propertyCompliance.gasSafetyCertProvideLater)
+            assertNull(propertyCompliance.electricalSafetyCertProvideLater)
+            assertNull(propertyCompliance.epcProvideLater)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
         fun `updateIsOccupied throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
