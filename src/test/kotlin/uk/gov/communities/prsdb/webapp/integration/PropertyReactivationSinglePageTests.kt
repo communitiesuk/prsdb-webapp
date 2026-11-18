@@ -35,4 +35,26 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
                 .hasAttribute("href", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         }
     }
+
+    @Nested
+    inner class CheckAnswersStep {
+        @Test
+        fun `the check answers page shows the answers for each required task`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            assertThatComponent(checkAnswersPage.heading)
+                .containsText("Check your answers for: Inactive House, PRSDB Road, IN1 1AA")
+            assertThatComponent(checkAnswersPage.gasSafetyHeading).isVisible()
+            assertThatComponent(checkAnswersPage.electricalSafetyHeading).isVisible()
+            assertThatComponent(checkAnswersPage.epcHeading).isVisible()
+            assertThatComponent(checkAnswersPage.tenancyHeading).isVisible()
+            assertThat(checkAnswersPage.complianceSummaryList.gasSupplyRow.value).containsText("No")
+            assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("2")
+            assertThat(checkAnswersPage.tenancySummaryList.numberOfTenantsRow.value).containsText("4")
+            assertThat(checkAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("400")
+            assertThatComponent(checkAnswersPage.epcCard).isVisible()
+            assertThatComponent(checkAnswersPage.warning).containsText("false or misleading")
+            assertThatComponent(checkAnswersPage.form.submitButton).containsText("Confirm details")
+        }
+    }
 }

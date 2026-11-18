@@ -52,7 +52,8 @@ The summary list contains 19 rows, in display order:
 ## Transaction counts
 
 Completed transactions — registrations, deregistrations, updates, switch-to-individual, accepting a
-joint landlord invitation, and leaving a property as a joint landlord — are counted from a dedicated
+joint landlord invitation, leaving a property as a joint landlord, and reactivating a property — are
+counted from a dedicated
 Plausible `Transaction` custom event. The event
 is fired by a button press on each journey's final commit step: the commit button is rendered from a
 fragment tagged `data-plausible-event="Transaction"` (`transactionSubmitButton` / `transactionWarningButton`).
@@ -121,6 +122,17 @@ occupied *and* delegated to a letting agent — shows an "are you sure" interrup
 making the property unoccupied removes the letting agent from the registration. The check-your-answers
 page is the commit step on every variant of that journey, and is the only step that carries the tag
 (because it uses `forms/checkAnswersForm`).
+
+#### Property reactivation with no details to provide
+
+When an inactive property needs no further details, the reactivation journey goes straight from the
+`info` page to the confirmation page and skips the check-your-answers page that carries the `Transaction`
+tag. The `info` page's Continue button can't be tagged: whether the property's address has since been
+registered by someone else (which leads to the `already-registered` page instead) is only known after the
+button is pressed, so tagging it would also count reactivations that can't go ahead.
+
+**Decision:** reactivations with no details to provide are intentionally **not counted**. Reactivations
+that go through the check-your-answers page are counted as normal.
 
 ## Cost and cost per transaction
 

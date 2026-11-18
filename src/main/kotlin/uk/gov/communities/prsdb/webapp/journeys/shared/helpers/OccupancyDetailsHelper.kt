@@ -139,6 +139,18 @@ class OccupancyDetailsHelper {
             getRentAmountRow(state, rentFrequencyAndAmountState, messageSource),
         )
 
+    fun getTenancyDetailsSummaryList(
+        cyaState: CheckYourAnswersJourneyState,
+        tenancyDetailsState: TenancyDetailsState,
+        messageSource: MessageSource,
+    ): List<SummaryListRowViewModel> =
+        if (tenancyDetailsState.provideTenancyDetailsLater) {
+            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(cyaState, tenancyDetailsState.householdsAndTenantsTask)
+        } else {
+            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(cyaState, tenancyDetailsState.householdsAndTenantsTask) +
+                getPropertyRegistrationRentBillsAndFurnishingsSummaryList(cyaState, tenancyDetailsState, messageSource)
+        }
+
     private fun getRentFrequencyRow(
         state: CheckYourAnswersJourneyState,
         rentFrequencyAndAmountState: RentFrequencyAndAmountState,
@@ -186,26 +198,27 @@ class OccupancyDetailsHelper {
             getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask, provideLaterDestination)
         } else {
             getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-                getPropertyRegistrationRentBillsAndFurnishingsSummaryList(state, messageSource)
+                getPropertyRegistrationRentBillsAndFurnishingsSummaryList(state, state, messageSource)
         }
 
-    private fun <T> getPropertyRegistrationRentBillsAndFurnishingsSummaryList(
-        state: T,
+    private fun getPropertyRegistrationRentBillsAndFurnishingsSummaryList(
+        cyaState: CheckYourAnswersJourneyState,
+        tenancyDetailsState: TenancyDetailsState,
         messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val furnishedStatusStep = state.furnishedStatus
+                val furnishedStatusStep = tenancyDetailsState.furnishedStatus
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "tenancyDetails.checkAnswers.furnishedStatus",
                         furnishedStatusStep.formModel.furnishedStatus,
-                        Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
+                        Destination.VisitableStep(furnishedStatusStep, cyaState.getCyaJourneyId(furnishedStatusStep)),
                     ),
                 )
-                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
-                add(getRentFrequencyRow(state, state.rentFrequencyAndAmountTask))
-                add(getRentAmountRow(state, state.rentFrequencyAndAmountTask, messageSource))
+                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(cyaState, tenancyDetailsState.rentIncludesBillsTask, messageSource))
+                add(getRentFrequencyRow(cyaState, tenancyDetailsState.rentFrequencyAndAmountTask))
+                add(getRentAmountRow(cyaState, tenancyDetailsState.rentFrequencyAndAmountTask, messageSource))
             }
 
     private fun <T> getUpdateTenancyDetailsRentBillsAndFurnishingsSummaryList(

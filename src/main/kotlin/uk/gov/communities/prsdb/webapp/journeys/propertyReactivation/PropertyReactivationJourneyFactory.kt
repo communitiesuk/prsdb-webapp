@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -7,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
@@ -24,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationLicensingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -35,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -44,6 +48,7 @@ class PropertyReactivationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyReactivationJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
+    // TODO PDJB-2042: build a check your answers child journey map when state.checkingAnswersFor is set
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
@@ -54,10 +59,10 @@ class PropertyReactivationJourneyFactory(
                 initialStep()
                 // TODO PDJB-2034: go back to the deactivated property record
                 backUrl { LANDLORD_DASHBOARD_URL }
-                nextStep { mode ->
+                nextDestination { mode ->
                     when (mode) {
-                        ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.stepAfterInfo()
-                        ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED -> journey.alreadyRegisteredStep
+                        ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.destinationAfterInfo()
+                        ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED -> Destination(journey.alreadyRegisteredStep)
                     }
                 }
             }
@@ -114,9 +119,7 @@ class PropertyReactivationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.checkAnswersParents() }
-                nextUrl {
-                    "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
-                }
+                nextUrl { confirmationUrl(propertyOwnershipId) }
             }
             useContinueButtons(journey.gasSafetyTask)
             useContinueButtons(journey.electricalSafetyTask)
@@ -162,8 +165,13 @@ class PropertyReactivationJourneyFactory(
     private fun PropertyReactivationJourneyState.nextStepAfter(taskType: ReactivationTaskType): JourneyStep<*, *, *> =
         requiredTaskTypes.filter { it > taskType }.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
 
-    private fun PropertyReactivationJourneyState.stepAfterInfo(): JourneyStep<*, *, *> =
-        requiredTaskTypes.minOrNull()?.let { entryStepFor(it) } ?: checkAnswersStep
+    // TODO PDJB-2044: also reactivate the property when no tasks are required and we go straight to confirmation
+    private fun PropertyReactivationJourneyState.destinationAfterInfo(): Destination =
+        requiredTaskTypes.minOrNull()?.let { Destination(entryStepFor(it)) }
+            ?: Destination.ExternalUrl(confirmationUrl(propertyOwnershipId))
+
+    private fun confirmationUrl(propertyOwnershipId: Long) =
+        "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
 
     private fun PropertyReactivationJourneyState.parentsFor(taskType: ReactivationTaskType): Parentage {
         val previousStep = requiredTaskTypes.filter { it < taskType }.maxOrNull()?.let { completionStepFor(it) }
@@ -177,7 +185,7 @@ class PropertyReactivationJourneyFactory(
     private fun PropertyReactivationJourneyState.checkAnswersParents(): Parentage {
         val previousStep =
             requiredTaskTypes.maxOrNull()?.let { completionStepFor(it) }
-                ?: return infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_AVAILABLE)
+                ?: return SingleParent(infoStep) { false }
         return SingleParent(previousStep) { previousStep.outcome != null }
     }
 }
@@ -192,7 +200,9 @@ class PropertyReactivationJourney(
     override val epcTask: EpcTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val checkAnswersStep: ReactivationCheckAnswersStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
+    override val stateFactory: ObjectFactory<PropertyReactivationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyReactivationJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
@@ -204,10 +214,17 @@ class PropertyReactivationJourney(
     override val allowProvideTenancyDetailsLaterRoute: Boolean = false
     override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
+    override val cyaStep
+        get() = checkAnswersStep
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
         return super<AbstractJourneyState>.generateJourneyId(
-            propertyOwnershipId?.let { generateSeedForPropertyOwnership(it) },
+            propertyOwnershipId?.let { generateSeedForPropertyOwnership(it) } ?: seed,
         )
     }
 
@@ -222,7 +239,8 @@ interface PropertyReactivationJourneyState :
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
     EpcDependencies,
-    HouseholdsAndTenantsDependencies {
+    HouseholdsAndTenantsDependencies,
+    CheckYourAnswersJourneyState {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
     val licensingStep: ReactivationLicensingStep
