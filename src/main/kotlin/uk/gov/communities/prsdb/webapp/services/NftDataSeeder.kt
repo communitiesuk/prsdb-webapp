@@ -840,6 +840,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.setInt(24, NftDataFaker.generateOwnershipTypeBeforePdjb955().ordinal)
         propertyOwnershipStmt.setLongOrNull(25, propertyManagerIdIfManaged)
+        propertyOwnershipStmt.setDate(26, renewalDate)
         propertyOwnershipStmt.addBatch()
 
         if (ownershipType.requiresFreeholderRecords()) {

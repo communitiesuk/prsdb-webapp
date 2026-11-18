@@ -222,6 +222,7 @@ class LandlordDashboardUrlTests(
                 correspondenceEmail = anyOrNull(),
                 correspondenceAddressModel = anyOrNull(),
                 renewalDate = any(),
+                paidForUntil = any(),
                 freeholders = anyOrNull(),
                 superiorLandlords = any(),
                 propertyManager = anyOrNull(),
