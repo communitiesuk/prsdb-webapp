@@ -311,11 +311,11 @@ class PropertyDetailsViewModelTests {
                 messageSource = mockMessageSource,
             )
 
-        buildList {
-            viewModel.peopleResponsibleOwnershipSection.mapTo(this) { it.fieldHeading }
-            add(viewModel.peopleResponsibleOwnershipHeadingKey)
-            add(viewModel.peopleResponsibleTabHeadingKey)
-        }.forEach { messageKey ->
+        (
+            viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading } +
+                viewModel.peopleResponsibleOwnershipHeadingKey +
+                viewModel.peopleResponsibleTabHeadingKey
+        ).forEach { messageKey ->
             val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
             assertNotEquals(messageKey, resolvedMessage) {
                 "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
