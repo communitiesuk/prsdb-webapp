@@ -43,6 +43,12 @@ const propertyFixtures = Array.from({length: 109}, (_, i) => ({
   files: [],
 }));
 
+const sharedCertificate = {objectKey: 'seeding/certificate_template.png', extension: 'png', versionId: 'fixture-version-1'};
+const sharedCertificateFixtures = propertyFixtures.map((row, i) => ({
+  ...row,
+  files: i < 2 ? [{...sharedCertificate}] : [],
+}));
+
 const organisationFixtures = Array.from({length: 92}, (_, i) => ({
   subject: `admin-${i}`, organisationId: i + 100, registrationNumber: i + 200, name: `Fixture organisation ${i}`,
 }));
@@ -132,6 +138,56 @@ test('exports completed-property fixtures read-only through guarded NFT tunnel',
   assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
   assert.match(commands[0][1].at(-1), /LIMIT 121/);
   assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+});
+
+test('completed-property export accepts repeated references to one versioned shared certificate', async () => {
+  const deps = dependencies();
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async () => ({stdout: JSON.stringify(sharedCertificateFixtures)}),
+    save: async (...args) => { written = args; },
+  });
+  const exported = JSON.parse(written[1]);
+  assert.deepEqual(exported[0].files, [sharedCertificate]);
+  assert.deepEqual(exported[1].files, [sharedCertificate]);
+});
+
+for (const [description, mutate] of [
+  ['missing version', rows => { delete rows[0].files[0].versionId; }],
+  ['blank version', rows => { rows[0].files[0].versionId = '  '; }],
+  ['mixed versions', rows => { rows[1].files[0].versionId = 'another-version'; }],
+  ['unsupported extension', rows => { rows[0].files[0].extension = 'pdf'; }],
+  ['arbitrary shared key', rows => { rows[0].files[0].objectKey = 'seeding/other.png'; }],
+]) {
+  test(`completed-property export rejects shared certificate with ${description} before writing`, async () => {
+    const fixtures = structuredClone(sharedCertificateFixtures);
+    mutate(fixtures);
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportCompletedPropertyFixtures('properties.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /certificate|file/i);
+    assert.equal(written, false);
+  });
+}
+
+test('completed-property export preserves unique generated per-property certificate keys', async () => {
+  const fixtures = structuredClone(propertyFixtures);
+  fixtures[0].files.push({
+    objectKey: 'certificateUpload.seed-100.gas-safety-certificate-file-upload.member-120',
+    extension: 'png',
+  });
+  const deps = dependencies();
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1])[0].files, fixtures[0].files);
 });
 
 for (const [description, fixtures] of [
@@ -360,6 +416,26 @@ test('restores with four workers after clearing the schema and preserves fail-fa
   assert.equal(calls[1][1].includes(environment.PGPASSWORD), false);
 });
 
+test('public restore progress excludes object metadata while retaining the private pinned result', async () => {
+  const logs = [];
+  const version = 'private-version-canary';
+  const etag = '"private-etag-canary"';
+  const deps = dependencies({
+    aws: async service => service === 'sts'
+      ? {Account: config.account}
+      : {ContentLength: 1024, ETag: etag, VersionId: version},
+    log: message => logs.push(message),
+  });
+
+  const result = await loadSeededDataset(config, deps);
+
+  assert.equal(result.object.versionId, version);
+  assert.equal(result.object.etag, etag);
+  for (const value of [version, etag, config.bucket, config.key, deps.env.FLYWAY_PASSWORD]) {
+    assert.ok(logs.every(message => !message.includes(value)), 'Public restore progress exposed private metadata');
+  }
+});
+
 test('reports timed phases and a heartbeat without exposing restore error details', async t => {
   t.mock.timers.enable({apis: ['Date', 'setInterval'], now: 0});
   const logs = [];
@@ -391,6 +467,8 @@ test('reports timed phases and a heartbeat without exposing restore error detail
   assert.ok(logs.some(message => /Z Restore database \(4 workers\): still running \(60\.0s elapsed\)$/.test(message)));
   assert.ok(logs.some(message => /Z Restore database \(4 workers\): failed after 60\.0s$/.test(message)));
   assert.equal(logs.some(message => message.includes('sensitive restore details')), false);
+  assert.ok(logs.every(message => !message.includes('baseline-version') && !message.includes('dump-etag')),
+    'Failed restore progress exposed private object metadata');
   const logCount = logs.length;
   t.mock.timers.tick(60000);
   assert.equal(logs.length, logCount);
@@ -594,7 +672,7 @@ test('does not report success when migration fails', async () => {
 });
 
 const uuidFor = i => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`;
-const journeyFixtures = (family, count = family.startsWith('organisation-team') ? 17 : 28) => Array.from({length: count}, (_, i) => {
+const journeyFixtures = (family, count = family === 'paid-registration' ? 456 : family === 'council-read' || family.startsWith('organisation-team') ? 17 : 28) => Array.from({length: count}, (_, i) => {
   const row = {ownerSubject: `owner-${i}`, propertyOwnershipId: i + 1, address: `${i} Fixture Road`, files: []};
   if (family === 'joint' || family === 'joint-accept') Object.assign(row, {inviteeSubject: `invitee-${i}`, invitedEmail: `joint-${i}@example.test`});
   if (family === 'joint-accept') Object.assign(row, {token: uuidFor(i), invitationId: i + 1});
@@ -603,9 +681,17 @@ const journeyFixtures = (family, count = family.startsWith('organisation-team') 
   if (family === 'organisation-team-ramp-preparation' || family === 'organisation-team-preparation') return {subject: `admin-${i}`, name: `Organisation ${i}`, organisationId: i + 1, registrationNumber: i + 100};
   if (family.startsWith('organisation-team')) return {subject: `admin-${i}`, name: `Organisation ${i}`, organisationId: i + 1, registrationNumber: i + 100, invitationToken: uuidFor(i), invitedEmail: `team-${i}@example.test`};
   if (family === 'operator') return {subject: `operator-${i}`, councilName: 'Council', councilId: 1, targetId: i + 1, targetName: `Target ${i}`, targetEmail: `target-${i}@example.test`, targetSubject: `target-${i}`, targetManager: false};
+  if (family === 'paid-registration') return {subject: `paid-${i}`, address: `${i + 1} Registration Road, FA1 1AA`, postcode: 'FA1 1AA', building: String(i + 1), localCouncilId: 1, uprn: 9200000001 + i};
+  if (family === 'council-read') return {
+    subject: `council-${i}`, actorName: `Council user ${i}`, councilId: i + 1, councilName: `Council ${i}`,
+    targetId: i + 100, targetName: `Target ${i}`, targetEmail: `target-${i}@example.test`, targetSubject: `target-${i}`, targetManager: true,
+    propertyId: i + 100027, address: `${i} Council Road, FA1 1AA`, uprn: String(i + 2000),
+    propertyRegistrationNumber: i + 3000, landlordId: i + 4000, landlordName: `Landlord ${i}`, landlordRegistrationNumber: i + 5000,
+    licenseType: null,
+  };
   return row;
 });
-for (const family of ['organisation-team', 'organisation-team-preparation', 'organisation-team-ramp-preparation', 'organisation-team-ramp', 'joint', 'joint-accept', 'agent', 'agent-access', 'operator', 'offboarding']) {
+for (const family of ['paid-registration', 'council-read', 'organisation-team', 'organisation-team-preparation', 'organisation-team-ramp-preparation', 'organisation-team-ramp', 'joint', 'joint-accept', 'agent', 'agent-access', 'operator', 'offboarding']) {
   test(`journey export ${family} reads guarded fixtures and writes privately`, async () => {
     const fixtures = journeyFixtures(family);
     const deps = dependencies();
@@ -614,7 +700,7 @@ for (const family of ['organisation-team', 'organisation-team-preparation', 'org
       aws: deps.aws, env: deps.env, log: deps.log,
       executeCommand: async (_command, args, options) => {
         assert.equal(options.env.PGOPTIONS, '-c default_transaction_read_only=on');
-        assert.doesNotMatch(args.at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+        assert.doesNotMatch(args.at(-1).replace(/^--.*$/gm, ''), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
         return {stdout: JSON.stringify(fixtures)};
       },
       save: async (...args) => { written = args; },
@@ -624,6 +710,14 @@ for (const family of ['organisation-team', 'organisation-team-preparation', 'org
   });
 }
 for (const [family, mutate] of [
+  ['paid-registration', rows => { rows.splice(0, 2); }],
+  ['paid-registration', rows => { rows[0].uprn = rows[1].uprn; }],
+  ['paid-registration', rows => { rows[0].localCouncilId = 0; }],
+  ['paid-registration', rows => { rows[0].address = ` ${rows[1].address.toUpperCase()} `; }],
+  ['council-read', rows => { rows.pop(); }],
+  ['council-read', rows => { rows[0].subject = rows[1].subject; }],
+  ['council-read', rows => { rows[0].propertyId = rows[1].propertyId; }],
+  ['council-read', rows => { rows[0].licenseType = -1; }],
   ['agent', rows => { rows.splice(0, 1); }],
   ['agent-access', rows => { rows[0].hasPassword = true; }],
   ['agent-access', rows => { rows[0].token = 'invalid'; }],
@@ -655,6 +749,67 @@ test('concurrent team fixture allocation is disjoint from profile and sequential
   assert.match(sequential, /OFFSET 118 LIMIT 17/);
   assert.match(sql, /LEFT JOIN organisational_landlord_invitation/);
   assert.match(sql, /json_strip_nulls/);
+});
+
+test('certificate fixture SQL exports exact object versions and recognizes only the shared seed key', async () => {
+  const fileFixtureSql = [
+    'data-nft-agent-fixtures.sql',
+    'data-nft-agent-access-fixtures.sql',
+    'data-nft-completed-property-fixtures.sql',
+    'data-nft-joint-invite-fixtures.sql',
+    'data-nft-joint-accept-fixtures.sql',
+    'data-nft-joint-offboarding-deregister-property-fixtures.sql',
+  ];
+  for (const file of fileFixtureSql) {
+    const sql = await readFile(new URL(`../../main/resources/${file}`, import.meta.url), 'utf8');
+    assert.equal((sql.match(/\b(?:upload|f)\.version_id AS "versionId"/g) ?? []).length, 2, file);
+    if (file === 'data-nft-completed-property-fixtures.sql') {
+      assert.match(sql, /SELECT "objectKey", extension, "versionId" FROM fixture_files/, file);
+    } else {
+      assert.match(sql, /'versionId', "versionId"/, file);
+    }
+  }
+  for (const file of [
+    'data-nft-agent-fixtures.sql',
+    'data-nft-joint-invite-fixtures.sql',
+    'data-nft-joint-offboarding-deregister-property-fixtures.sql',
+  ]) {
+    const sql = await readFile(new URL(`../../main/resources/${file}`, import.meta.url), 'utf8');
+    assert.equal((sql.match(/upload\.object_key <> 'seeding\/certificate_template\.png'/g) ?? []).length, 2, file);
+  }
+});
+
+test('combined workload requires paid and council exports and preserves full-run-only success markers', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const ramp = workflow.split('id: rampedJourneys\n')[1].split('\n      - name:')[0];
+  const summary = workflow.split('- name: Summarise journey outcomes\n')[1].split('\n      - name:')[0];
+  const action = await readFile(new URL('../../../.github/actions/verify-nft-database/action.yml', import.meta.url), 'utf8');
+  for (const [mode, id, variable] of [
+    ['paid-registration', 'exportPaidRegistrationFixtures', 'EXPORT_PAID_REGISTRATION'],
+    ['council-read', 'exportCouncilReadFixtures', 'EXPORT_COUNCIL_READ'],
+  ]) {
+    assert.ok(action.includes(`${mode}-fixtures`));
+    assert.ok(workflow.includes(`mode: ${mode}-fixtures`));
+    assert.ok(workflow.indexOf(`id: ${id}\n`) < workflow.indexOf('id: rampedJourneys\n'));
+    assert.ok(ramp.includes(`steps.${id}.outcome == 'success'`));
+    assert.ok(summary.includes(`${variable}: \${{ steps.${id}.outcome }}`));
+  }
+  const environment = Object.fromEntries([...summary.matchAll(/^\s+([A-Z_0-9]+): \$\{\{ steps\.[^.]+\.outcome }}/gm)]
+    .map(([, name]) => [name, 'success']));
+  environment.GITHUB_STEP_SUMMARY = '/dev/null';
+  const shell = summary.split('        run: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
+  assert.equal(spawnSync('bash', ['-euo', 'pipefail', '-c', shell], {env: environment, encoding: 'utf8'}).status, 0);
+  for (const variable of ['EXPORT_PAID_REGISTRATION', 'EXPORT_COUNCIL_READ', 'RAMPED_JOURNEYS']) {
+    for (const outcome of ['failure', 'skipped', '']) {
+      assert.notEqual(spawnSync('bash', ['-euo', 'pipefail', '-c', shell], {
+        env: {...environment, [variable]: outcome}, encoding: 'utf8',
+      }).status, 0, `${variable} ${outcome || 'missing'} must fail`);
+    }
+  }
+  const markerCondition = workflow.split('\n  marker:\n')[1].split('    runs-on:')[0];
+  assert.ok(markerCondition.includes("github.ref == 'refs/heads/nft'"));
+  assert.ok(markerCondition.includes("needs.changes.outputs.run == 'true'"));
+  assert.ok(!markerCondition.includes("== 'skipped'"));
 });
 
 test('concurrent preparation precedes ramp and correctness journeys use fresh exports', async () => {

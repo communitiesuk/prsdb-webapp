@@ -7,13 +7,16 @@ import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
 import {cleanupNftEnvironment, restoreAsyncWorker, restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 import {restoreEnvironment} from '../../../scripts/performance-tests/nft-restore.mjs';
+import * as lifecycle from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 
 const prefix = 'arn:aws:ecs:eu-west-2:448120078528:';
 const appArn = `${prefix}task-definition/prsdb-webapp-nft:95`;
 const workerArn = `${prefix}task-definition/prsdb-nft-vpc-restore-20261105:3`;
 const asyncArn = `${prefix}task-definition/prsdb-async-worker-nft:4`;
 const taskArn = `${prefix}task/nft-app/worker`;
-const config = {taskDefinition: workerArn, runId: '123-1'};
+const imageDigest = `sha256:${'c'.repeat(64)}`;
+const config = {taskDefinition: workerArn, runId: '123-1', resetSha: 'b'.repeat(40),
+  resetCompatibleTaskDefinition: asyncArn, resetCompatibleSha: 'b'.repeat(40)};
 const app = () => ({
   serviceName: 'nft-app', status: 'ACTIVE', taskDefinition: appArn,
   desiredCount: 1, runningCount: 1, pendingCount: 0,
@@ -55,11 +58,17 @@ function dependencies(overrides = {}) {
         return {taskArns: input.cluster === 'nft-scheduled-tasks' ? [] : ['app-task']};
       }
       if (operation === 'describe-task-definition') {
+        if (input.taskDefinition === asyncArn) return {taskDefinition: {taskDefinitionArn: asyncArn, status: 'ACTIVE'}};
         return {taskDefinition: {
           taskDefinitionArn: workerArn, family: 'prsdb-nft-vpc-restore-20261105', status: 'ACTIVE',
           containerDefinitions: [{name: 'nft-vpc-restore', essential: true}],
         }};
       }
+      if (operation === 'get-queue-attributes') return {Attributes: {
+        QueueArn: `${prefix.replace(':ecs:', ':sqs:')}nft-prsdb-scan-result-queue`,
+        ApproximateNumberOfMessages: '0', ApproximateNumberOfMessagesNotVisible: '0', ApproximateNumberOfMessagesDelayed: '0',
+      }};
+      if (operation === 'list-task-definitions') return {taskDefinitionArns: []};
       if (operation === 'run-task') return {tasks: [{taskArn}]};
       if (operation === 'describe-tasks') {
         if (input.tasks.includes('async-task')) return {tasks: [{taskArn: 'async-task', lastStatus: 'STOPPED'}]};
@@ -100,7 +109,7 @@ test('restores exactly the owned async service and rejects missing or changed st
   const changed = dependencies();
   Object.assign(changed.state, {runId: config.runId, taskDefinition: workerArn,
     originalAsync: {taskDefinition: `${asyncArn}-other`, desiredCount: 1}, asyncStopAttempted: true});
-  await assert.rejects(restoreAsyncWorker(config, changed), /changed/);
+  await assert.rejects(restoreAsyncWorker(config, changed), /changed|not runnable/);
   assert.equal(changed.calls.some(([op]) => op === 'update-service'), false);
 });
 
@@ -162,6 +171,214 @@ test('workflow attempts async recovery independently after a successful reset', 
   assert.doesNotMatch(job, /needs\.restore-app-after-database-reset\.result == 'success'/);
   assert.match(job, /nft-vpc-restore\.mjs restore-async/);
 });
+
+test('workflow gates every upload phase on candidate worker readiness and checkpoints its partial changes', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const job = workflow.split('  performance-tests:')[1].split('\n  stop-writers-for-reset:')[0];
+  const worker = job.indexOf('nft-vpc-restore.mjs start-async');
+  assert.ok(worker > job.indexOf('nft-vpc-restore.mjs start'));
+  assert.ok(worker < job.indexOf('nft-prepare.mjs'));
+  assert.match(job, /if: always\(\)\s+run: node scripts\/performance-tests\/nft-recovery-state\.mjs upload worker-state/);
+  assert.match(workflow, /NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: \$\{\{ secrets\.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION \}\}/);
+});
+
+test('candidate scan worker cannot start from an unverified restore or silently resume the old image', async () => {
+  const deps = dependencies();
+  await stopNftWriters(config, deps);
+  await assert.rejects(() => lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps),
+    /Successful database restore/);
+  assert.equal(deps.calls.some(([op]) => op === 'register-task-definition'), false);
+});
+
+async function candidateDependencies({baselineCount = 1, loseSwitch = false, loseRegistration = false, lifecycleConfig = config} = {}) {
+  const deps = dependencies();
+  const baselineAws = deps.aws;
+  deps.aws = async (service, operation, input = {}) => {
+    if (baselineCount === 0 && operation === 'describe-services' && input.services.includes('nft-async-worker')) {
+      return {services: [{...asyncWorker(), desiredCount: 0, runningCount: 0}]};
+    }
+    if (operation === 'describe-task-definition' && input.taskDefinition === appArn) {
+      return {taskDefinition: {containerDefinitions: [{
+        name: 'prsdb-webapp', image: `448120078528.dkr.ecr.eu-west-2.amazonaws.com/prsdb-webapp:candidate-${'a'.repeat(40)}`,
+      }]}};
+    }
+    return baselineAws(service, operation, input);
+  };
+  await stopNftWriters(lifecycleConfig, deps);
+  deps.state.restorePassed = true;
+  const original = deps.aws;
+  const candidateArn = `${prefix}task-definition/prsdb-async-worker-nft-performance-123-1:1`;
+  let revision = asyncArn;
+  let desired = 0;
+  let appDesired = 1;
+  let registered;
+  const env = [
+    {name: 'RDS_URL', value: 'jdbc:postgresql://nft-db/database'}, {name: 'RDS_USERNAME', value: 'nft-user'},
+    {name: 'AWS_QUARANTINE_BUCKET', value: 'prsdb-quarantine-nft'}, {name: 'S3_SAFE_BUCKET_KEY', value: 'prsdb-uploaded-files-nft'},
+  ];
+  const definition = worker => ({
+    taskDefinitionArn: worker ? asyncArn : appArn, family: worker ? 'prsdb-async-worker-nft' : 'prsdb-webapp-nft',
+    status: 'ACTIVE', taskRoleArn: 'arn:aws:iam::448120078528:role/nft-async-worker-ecs-task',
+    executionRoleArn: 'arn:aws:iam::448120078528:role/nft-ecs-task-execution',
+    containerDefinitions: [{
+      name: worker ? 'prsdb-async-worker' : 'prsdb-webapp', essential: true,
+      image: worker ? 'old-worker' : `448120078528.dkr.ecr.eu-west-2.amazonaws.com/prsdb-webapp:candidate-${'a'.repeat(40)}`,
+      environment: [...env, {name: 'SPRING_PROFILES_ACTIVE', value: worker ? 'web-server-deactivated,email-worker,nft' : 'default,nft'}],
+      secrets: [{name: 'RDS_PASSWORD', valueFrom: 'nft-password'}],
+    }],
+  });
+  deps.aws = async (service, operation, input = {}) => {
+    deps.calls.push([operation, structuredClone(input)]);
+    if (operation === 'describe-services') {
+      if (input.services.includes('nft-async-worker')) return {services: [{
+        ...asyncWorker(), taskDefinition: revision, desiredCount: desired, runningCount: desired,
+        deployments: [{taskDefinition: revision, rolloutState: 'COMPLETED'}],
+      }]};
+      return {services: [{...app(), desiredCount: appDesired, runningCount: appDesired}, simulator]};
+    }
+    if (operation === 'describe-task-definition') {
+      if (input.taskDefinition === candidateArn) return {taskDefinition: {...registered, taskDefinitionArn: candidateArn, status: 'ACTIVE'}};
+      return {taskDefinition: definition(input.taskDefinition === asyncArn)};
+    }
+    if (operation === 'register-task-definition') {
+      registered = structuredClone(input);
+      if (loseRegistration) throw new Error('Controlled lost registration response');
+      return {taskDefinition: {taskDefinitionArn: candidateArn}};
+    }
+    if (operation === 'list-task-definitions') return {taskDefinitionArns: input.familyPrefix.includes('async-worker') ? [candidateArn] : [appArn]};
+    if (operation === 'update-service') {
+      if (input.service === 'nft-async-worker') {
+        revision = input.taskDefinition ?? revision;
+        desired = input.desiredCount;
+        if (loseSwitch && desired === 1 && revision === candidateArn) throw new Error('Controlled lost switch response');
+      } else appDesired = input.desiredCount;
+      return {};
+    }
+    if (operation === 'describe-tasks' && input.tasks.includes('async-task')) return {tasks: [{
+      taskArn: 'async-task', taskDefinitionArn: revision, lastStatus: desired ? 'RUNNING' : 'STOPPED',
+      containers: [{name: 'prsdb-async-worker', lastStatus: desired ? 'RUNNING' : 'STOPPED', imageDigest}],
+    }]};
+    if (operation === 'describe-tasks' && input.tasks.includes('app-task')) return {tasks: [{
+      taskArn: 'app-task', taskDefinitionArn: appArn, lastStatus: appDesired ? 'RUNNING' : 'STOPPED',
+      containers: [{name: 'prsdb-webapp', image: definition(false).containerDefinitions[0].image, imageDigest}],
+    }]};
+    if (operation === 'get-parameter') return {Parameter: {Value: 'nft-prsdb-scan-result-queue'}};
+    if (operation === 'list-services') return {serviceArns: ['nft-app', 'nft-one-login-simulator', 'nft-async-worker']
+      .map(name => `${prefix}service/nft-app/${name}`)};
+    if (operation === 'deregister-task-definition') return {};
+    return original(service, operation, input);
+  };
+  return {...deps, candidateArn};
+}
+
+test('candidate worker is ready throughout uploads, quiesces before recovery, and preserves an originally stopped baseline', async () => {
+  const unpinnedConfig = {...config, expectedSha: 'a'.repeat(40)};
+  delete unpinnedConfig.resetCompatibleTaskDefinition;
+  delete unpinnedConfig.resetCompatibleSha;
+  const deps = await candidateDependencies({baselineCount: 0, lifecycleConfig: unpinnedConfig});
+  assert.equal(deps.state.originalAsync.desiredCount, 0);
+  await lifecycle.startAsyncWorker(unpinnedConfig, deps);
+  assert.equal(deps.state.asyncReady, true);
+  assert.equal(deps.state.writersStopped, false);
+  assert.equal(deps.calls.find(([op]) => op === 'register-task-definition')[1].containerDefinitions[0].image,
+    `448120078528.dkr.ecr.eu-west-2.amazonaws.com/prsdb-webapp@${imageDigest}`);
+  let quiescentBeforeReadiness = false;
+  await cleanupNftEnvironment(unpinnedConfig, async () => {
+    quiescentBeforeReadiness = deps.state.asyncQuiescent;
+    return null;
+  }, deps);
+  assert.equal(quiescentBeforeReadiness, true);
+  assert.equal(deps.state.asyncRetired, true);
+  await assert.rejects(restoreAsyncWorker(unpinnedConfig, deps), /Verified database reset/);
+  await restoreAsyncWorker({...unpinnedConfig, resetVerified: true}, deps);
+  const updates = deps.calls.filter(([op, input]) => op === 'update-service' && input.service === 'nft-async-worker');
+  assert.deepEqual(updates.at(-1)[1], {cluster: 'nft-app', service: 'nft-async-worker', desiredCount: 0});
+  assert.deepEqual(deps.calls.filter(([op]) => op === 'deregister-task-definition'),
+    [['deregister-task-definition', {taskDefinition: deps.candidateArn}]]);
+});
+
+test('lost candidate registration or service-switch responses retain sufficient private ownership for recovery', async t => {
+  for (const failure of ['loseRegistration', 'loseSwitch']) await t.test(failure, async () => {
+    const deps = await candidateDependencies({[failure]: true});
+    await assert.rejects(lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps), /Controlled lost/);
+    await cleanupNftEnvironment(config, async () => null, deps);
+    await restoreAsyncWorker({...config, resetVerified: true}, deps);
+    assert.equal(deps.state.asyncRetired, true);
+    assert.equal(deps.state.asyncRestored, true);
+    const updates = deps.calls.filter(([op, input]) => op === 'update-service' && input.service === 'nft-async-worker');
+    assert.equal(updates.at(-1)[1].desiredCount, 1);
+    assert.equal(deps.calls.some(([op, input]) => op === 'deregister-task-definition' && input.taskDefinition === asyncArn), false);
+  });
+});
+
+  test('candidate worker fails closed before registration for a wrong queue or unverified app digest', async t => {
+    for (const failure of ['queue', 'digest']) await t.test(failure, async () => {
+      const deps = await candidateDependencies();
+      const original = deps.aws;
+      deps.aws = async (service, operation, input) => {
+        if (failure === 'queue' && operation === 'get-parameter') return {Parameter: {Value: 'production-queue'}};
+        if (failure === 'digest' && operation === 'describe-tasks' && input.tasks.includes('app-task')) {
+          return {tasks: [{taskDefinitionArn: appArn, lastStatus: 'RUNNING', containers: [{name: 'prsdb-webapp'}]}]};
+        }
+        return original(service, operation, input);
+      };
+      await assert.rejects(lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps), /queue is not ready|digest is unverified/);
+      assert.equal(deps.calls.some(([op]) => op === 'register-task-definition'), false);
+    });
+  });
+
+  test('cleanup waits for queued work with candidate still running and never purges messages', async () => {
+    const deps = await candidateDependencies();
+    await lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps);
+    const original = deps.aws;
+    let samples = 0;
+    const start = deps.calls.length;
+    deps.aws = async (service, operation, input) => {
+      const result = await original(service, operation, input);
+      if (operation === 'get-queue-attributes' && ++samples < 3) {
+        assert.equal(deps.calls.slice(start).some(([op, value]) => op === 'update-service' && value.service === 'nft-async-worker'), false);
+        result.Attributes.ApproximateNumberOfMessagesNotVisible = '1';
+      }
+      return result;
+    };
+    await cleanupNftEnvironment(config, async () => null, deps);
+    assert.ok(samples >= 3);
+    assert.equal(deps.calls.some(([op]) => /purge|delete-message|receive-message/.test(op)), false);
+  });
+
+  test('cleanup blocks destructive recovery for a draining task or an unrecognized service reference', async t => {
+    for (const failure of ['draining', 'reference']) await t.test(failure, async () => {
+      const deps = await candidateDependencies();
+      let clock = 0;
+      Object.assign(deps, {now: () => clock, timeoutMs: 1, pollMs: 1, sleep: async () => { clock++; }});
+      await lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps);
+      const original = deps.aws;
+      deps.aws = async (service, operation, input) => {
+        if (failure === 'draining' && operation === 'describe-tasks' && input.tasks.includes('async-task')) {
+          return {tasks: [{lastStatus: 'DEACTIVATING'}]};
+        }
+        if (failure === 'reference' && operation === 'list-services') return {serviceArns: ['unexpected-service']};
+        return original(service, operation, input);
+      };
+      let readinessTouched = false;
+      await assert.rejects(cleanupNftEnvironment(config, async () => { readinessTouched = true; return null; }, deps),
+        /shutdown timeout|references cannot be established/);
+      assert.equal(readinessTouched, false);
+      assert.equal(deps.calls.some(([op]) => op === 'deregister-task-definition'), false);
+    });
+  });
+
+  test('abandonment recovers candidate identity even if the last worker checkpoint was lost', async () => {
+    const deps = await candidateDependencies();
+    await lifecycle.startAsyncWorker({...config, expectedSha: 'a'.repeat(40)}, deps);
+    for (const key of ['asyncRegistrationAttempted', 'candidateAsync', 'asyncImage', 'asyncSwitchAttempted', 'asyncReady']) delete deps.state[key];
+    await cleanupNftEnvironment(config, async () => null, deps);
+    assert.equal(deps.state.asyncRetired, true);
+    await assert.rejects(restoreAsyncWorker({...config, resetVerified: true, resetCompatibleSha: 'd'.repeat(40)}, deps),
+      /compatibility approval/);
+    await restoreAsyncWorker({...config, resetVerified: true}, deps);
+    assert.equal(deps.state.asyncRestored, true);
+  });
 
 test('waits for actual app tasks STOPPED even after ECS reports zero running', async () => {
   const deps = dependencies();
@@ -429,13 +646,16 @@ test('workflow separates reusable classes from versioned recovery checkpoints an
     const body = workflow.split(`  ${job}:`)[1].split(/\n  [a-z][a-z-]+:/)[0];
     assert.match(body, /nft-recovery-state\.mjs require-fresh-attempt/);
   }
-  assert.match(workflow, /nft-load-checkpoint-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
-  for (const job of ['stop-writers-for-reset', 'restore-app-after-database-reset', 'restore-async-after-database-reset']) {
+  assert.match(workflow, /nft-recovery-state\.mjs upload load-checkpoint/);
+  for (const job of ['performance-tests', 'stop-writers-for-reset', 'restore-app-after-database-reset', 'restore-async-after-database-reset']) {
     const body = workflow.split(`  ${job}:`)[1].split(/\n  [a-z][a-z-]+:/)[0];
-    assert.match(body, /nft-recovery-state\.mjs select/);
+    const credentials = body.indexOf('configure-aws-credentials');
+    const download = body.indexOf('nft-recovery-state.mjs download');
+    const select = body.indexOf('nft-recovery-state.mjs select');
+    assert.ok(credentials >= 0 && credentials < download && download < select);
     assert.doesNotMatch(body, /merge-multiple: true/);
   }
-  assert.match(workflow, /nft-cleanup-state-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/);
+  assert.match(workflow, /nft-recovery-state\.mjs upload cleanup-state/);
 });
 
 test('new restore attempts fail before state lookup or AWS while recovery remains retryable', () => {

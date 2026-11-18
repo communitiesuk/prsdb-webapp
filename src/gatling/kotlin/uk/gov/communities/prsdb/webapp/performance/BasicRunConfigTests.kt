@@ -15,6 +15,13 @@ class BasicRunConfigTests {
             "gatling.basic.landlordSubject" to "synthetic-landlord",
             "gatling.basic.mode" to "baseline",
         )
+    private val nftProperties =
+        localProperties +
+            mapOf(
+                "gatling.target" to "nft",
+                "gatling.baseUrl" to "https://nft.register-home-to-rent.test.communities.gov.uk",
+                "gatling.simulatorUrl" to "https://nft.lb.register-home-to-rent.test.communities.gov.uk",
+            )
 
     @Test
     fun `gated mode rejects missing response time limits`() {
@@ -44,12 +51,7 @@ class BasicRunConfigTests {
     @Test
     fun `NFT certificate origin must be a separate HTTPS S3 bucket origin`() {
         val origin = "https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com"
-        val properties =
-            localProperties +
-                mapOf(
-                    "gatling.target" to "nft",
-                    "gatling.baseUrl" to "https://app.example.test",
-                )
+        val properties = nftProperties
         assertEquals(
             origin,
             BasicRunConfig.from(properties + ("gatling.certificate.downloadOrigin" to origin)).certificateDownloadOrigin,
@@ -59,7 +61,7 @@ class BasicRunConfigTests {
             "$origin:443",
             "$origin/certificate.pdf",
             "$origin?signature=secret",
-            "https://app.example.test",
+            properties.getValue("gatling.baseUrl"),
             "https://other.example.test",
         )) {
             assertFailsWith<IllegalArgumentException> {
@@ -86,9 +88,8 @@ class BasicRunConfigTests {
     @Test
     fun `NFT never inherits local response time limits`() {
         val properties =
-            localProperties +
+            nftProperties +
                 mapOf(
-                    "gatling.target" to "nft",
                     "gatling.basic.mode" to "gated",
                     "gatling.nft.basic.meanResponseTimeMs" to "1000",
                     "gatling.local.basic.maxResponseTimeMs" to "2000",
@@ -100,14 +101,11 @@ class BasicRunConfigTests {
     }
 
     @Test
-    fun `NFT uses its own limits and independently supplied URLs`() {
+    fun `NFT uses its own limits and approved origins`() {
         val config =
             BasicRunConfig.from(
-                localProperties +
+                nftProperties +
                     mapOf(
-                        "gatling.target" to "nft",
-                        "gatling.baseUrl" to "https://app.example.test",
-                        "gatling.simulatorUrl" to "https://simulator.example.test",
                         "gatling.basic.mode" to "gated",
                         "gatling.nft.basic.meanResponseTimeMs" to "2000",
                         "gatling.nft.basic.maxResponseTimeMs" to "4000",
@@ -115,7 +113,7 @@ class BasicRunConfigTests {
             )
 
         assertEquals(PerformanceTarget.NFT, config.target)
-        assertEquals("https://app.example.test", config.baseUrl)
+        assertEquals(nftProperties.getValue("gatling.baseUrl"), config.baseUrl)
         assertEquals(ResponseTimeLimits(meanMs = 2000, maxMs = 4000), config.limits)
     }
 
@@ -179,6 +177,59 @@ class BasicRunConfigTests {
 
         assertEquals("http://127.0.0.1:8091", config.baseUrl)
         assertEquals("http://127.0.0.1:3011", config.simulatorUrl)
+    }
+
+    @Test
+    fun `local workloads reject non-loopback application and simulator origins`() {
+        for (key in listOf("gatling.baseUrl", "gatling.simulatorUrl")) {
+            for (origin in listOf(
+                "https://unapproved.example.test",
+                "http://localhost.example.test:8080",
+                nftProperties.getValue(key),
+            )) {
+                val exception =
+                    assertFailsWith<IllegalArgumentException> {
+                        BasicRunConfig.from(localProperties + (key to origin))
+                    }
+                assertTrue(exception.message.orEmpty().contains(key))
+                assertTrue(!exception.message.orEmpty().contains(origin), "Errors must not echo destination URLs")
+            }
+        }
+    }
+
+    @Test
+    fun `NFT workloads reject other environments local hosts and swapped application simulator origins`() {
+        for (key in listOf("gatling.baseUrl", "gatling.simulatorUrl")) {
+            val otherKey = if (key == "gatling.baseUrl") "gatling.simulatorUrl" else "gatling.baseUrl"
+            for (origin in listOf(
+                "https://unapproved.example.test",
+                localProperties.getValue(key),
+                nftProperties.getValue(otherKey),
+                nftProperties.getValue(key).replace("https:", "http:"),
+            )) {
+                val exception =
+                    assertFailsWith<IllegalArgumentException> {
+                        BasicRunConfig.from(nftProperties + (key to origin))
+                    }
+                assertTrue(exception.message.orEmpty().contains(key))
+                assertTrue(!exception.message.orEmpty().contains(origin), "Errors must not echo destination URLs")
+            }
+        }
+    }
+
+    @Test
+    fun `local IPv6 loopback supports separate worktree ports`() {
+        val config =
+            BasicRunConfig.from(
+                localProperties +
+                    mapOf(
+                        "gatling.baseUrl" to "http://[::1]:8091",
+                        "gatling.simulatorUrl" to "http://[::1]:3011",
+                    ),
+            )
+
+        assertEquals("http://[::1]:8091", config.baseUrl)
+        assertEquals("http://[::1]:3011", config.simulatorUrl)
     }
 
     @Test

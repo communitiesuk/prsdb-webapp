@@ -30,13 +30,15 @@ WITH fixtures AS (
     ORDER BY l.individual_subject_identifier, p.id
     LIMIT 121
 ), fixture_files AS MATERIALIZED (
-    SELECT pc.property_ownership_id, f.object_key AS "objectKey", f.extension
+    SELECT pc.property_ownership_id, f.object_key AS "objectKey", f.extension,
+           f.version_id AS "versionId"
     FROM fixtures
     JOIN property_compliance pc ON pc.property_ownership_id = fixtures."propertyOwnershipId"
     JOIN gas_safety_uploads g ON g.property_compliance_id = pc.id
     JOIN file_upload f ON f.id = g.gas_safety_file_uploads_id
     UNION
-    SELECT pc.property_ownership_id, f.object_key AS "objectKey", f.extension
+    SELECT pc.property_ownership_id, f.object_key AS "objectKey", f.extension,
+           f.version_id AS "versionId"
     FROM fixtures
     JOIN property_compliance pc ON pc.property_ownership_id = fixtures."propertyOwnershipId"
     JOIN electrical_safety_uploads e ON e.property_compliance_id = pc.id
@@ -46,7 +48,7 @@ WITH fixtures AS (
            (
                SELECT COALESCE(json_agg(objects ORDER BY "objectKey"), '[]'::json)
                FROM (
-                   SELECT "objectKey", extension FROM fixture_files
+                   SELECT "objectKey", extension, "versionId" FROM fixture_files
                    WHERE property_ownership_id = fixtures."propertyOwnershipId"
                ) objects
            ) AS files

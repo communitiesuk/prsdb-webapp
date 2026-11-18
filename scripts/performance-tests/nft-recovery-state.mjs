@@ -1,7 +1,19 @@
+import {execFileSync} from 'node:child_process';
 import {mkdir, readFile, readdir, rename, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {requireCondition} from './nft-shared.mjs';
+
+const recoveryPrefix = 'performance-recovery';
+const defaultBucket = 'prsdb-seed-data-nft';
+const phaseFiles = {
+  'restore-checkpoint': ['nft-restore-state.json'],
+  'restore-state': ['nft-restore-state.json'],
+  'load-checkpoint': ['nft-restore-state.json'],
+  'worker-state': ['nft-restore-state.json'],
+  'readiness-state': ['nft-state.json'],
+  'cleanup-state': ['nft-restore-state.json', 'nft-state.json'],
+};
 
 function context({runId, attempt}) {
   requireCondition(/^[1-9][0-9]*$/.test(runId ?? ''), 'Expected a GitHub recovery run ID');
@@ -12,6 +24,34 @@ function context({runId, attempt}) {
 
 function environment(env) {
   return context({runId: env.GITHUB_RUN_ID, attempt: env.GITHUB_RUN_ATTEMPT});
+}
+
+function storageContext(options) {
+  const current = context(options);
+  const bucket = options.bucket ?? defaultBucket;
+  requireCondition(bucket === defaultBucket,
+    'Private recovery storage is not configured');
+  return {...current, bucket};
+}
+
+function runAws(args, runner) {
+  try {
+    return runner('aws', args, {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
+  } catch {
+    throw new Error('Private recovery checkpoint operation failed');
+  }
+}
+
+function s3Prefix(runId) {
+  return `${recoveryPrefix}/${runId}/`;
+}
+
+function s3Key(runId, attempt, phase, file) {
+  return `${s3Prefix(runId)}${attempt}/${phase}/${file}`;
+}
+
+function artifactDirectory(phase, runId, attempt) {
+  return `nft-${phase}-${runId}-${attempt}`;
 }
 
 export function recoveryOwner(state, options) {
@@ -49,12 +89,56 @@ export async function markReadinessAttempted(path, env = process.env) {
   await save(path, state);
 }
 
+export async function uploadRecoveryCheckpoints(directory, options, runner = execFileSync) {
+  const {runId, attempt, bucket} = storageContext(options);
+  const {phase} = options;
+  const files = Object.hasOwn(phaseFiles, phase) ? phaseFiles[phase] : undefined;
+  requireCondition(files, 'Unknown recovery checkpoint phase');
+  for (const file of files) {
+    runAws([
+      's3', 'cp', join(directory, file), `s3://${bucket}/${s3Key(runId, attempt, phase, file)}`,
+      '--only-show-errors', '--region', 'eu-west-2',
+    ], runner);
+  }
+}
+
+export async function downloadRecoveryCheckpoints(directory, options, runner = execFileSync) {
+  const {runId, attempt, bucket} = storageContext(options);
+  const prefix = s3Prefix(runId);
+  const output = runAws([
+    's3api', 'list-objects-v2', '--bucket', bucket, '--prefix', prefix,
+    '--query', 'Contents[].Key', '--output', 'json', '--region', 'eu-west-2',
+  ], runner);
+  let keys;
+  try {
+    keys = JSON.parse(output || '[]');
+  } catch {
+    throw new Error('Private recovery checkpoint listing was invalid');
+  }
+  if (keys === null) keys = [];
+  requireCondition(Array.isArray(keys), 'Private recovery checkpoint listing was invalid');
+  for (const key of keys) {
+    if (typeof key !== 'string') throw new Error('Private recovery checkpoint listing was invalid');
+    const [root, ownerRunId, rawAttempt, phase, file, ...extra] = key.split('/');
+    const parsedAttempt = Number(rawAttempt);
+    if (root !== recoveryPrefix || ownerRunId !== runId || extra.length ||
+      !/^[1-9][0-9]*$/.test(rawAttempt) || !Number.isSafeInteger(parsedAttempt) ||
+      parsedAttempt > attempt || !Object.hasOwn(phaseFiles, phase) || !phaseFiles[phase].includes(file)) continue;
+    const targetDirectory = join(directory, artifactDirectory(phase, runId, parsedAttempt));
+    await mkdir(targetDirectory, {recursive: true, mode: 0o700});
+    runAws([
+      's3', 'cp', `s3://${bucket}/${key}`, join(targetDirectory, file),
+      '--only-show-errors', '--region', 'eu-west-2',
+    ], runner);
+  }
+}
+
 export async function selectRecoveryState(directory, {runId, attempt, outputDirectory}) {
   const current = context({runId, attempt});
-  const phases = {'restore-checkpoint': 1, 'restore-state': 2, 'load-checkpoint': 3, 'cleanup-state': 4, 'readiness-state': 0};
+  const phases = {'restore-checkpoint': 1, 'restore-state': 2, 'worker-state': 2.5, 'load-checkpoint': 3, 'cleanup-state': 4, 'readiness-state': 0};
   const candidates = [];
   for (const entry of await readdir(directory, {withFileTypes: true})) {
-    const match = /^nft-(restore-checkpoint|restore-state|load-checkpoint|cleanup-state|readiness-state)-([1-9][0-9]*)-([1-9][0-9]*)$/.exec(entry.name);
+    const match = /^nft-(restore-checkpoint|restore-state|worker-state|load-checkpoint|cleanup-state|readiness-state)-([1-9][0-9]*)-([1-9][0-9]*)$/.exec(entry.name);
     if (!entry.isDirectory() || !match) continue;
     requireCondition(match[2] === current.runId && Number.isSafeInteger(Number(match[3])) &&
       Number(match[3]) <= current.attempt, 'Recovery checkpoint belongs to another run or a future attempt');
@@ -97,16 +181,20 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     else {
       const directory = process.env.RUNNER_TEMP;
       requireCondition(directory, 'RUNNER_TEMP is required for recovery checkpoints');
+      const current = {...environment(process.env), bucket: process.env.NFT_RECOVERY_BUCKET ?? defaultBucket};
       if (command === 'mark-readiness') {
         await markReadinessAttempted(join(directory, 'nft-restore-state.json'));
+      } else if (command === 'upload') {
+        await uploadRecoveryCheckpoints(directory, {...current, phase: process.argv[3]});
+      } else if (command === 'download') {
+        await downloadRecoveryCheckpoints(join(directory, 'nft-recovery-artifacts'), current);
       } else if (command === 'select') {
         await selectRecoveryState(join(directory, 'nft-recovery-artifacts'), {
-          ...environment(process.env), outputDirectory: directory,
+          ...current, outputDirectory: directory,
         });
-      } else throw new Error('Expected require-fresh-attempt, mark-readiness or select');
+      } else throw new Error('Unknown recovery operation');
     }
-  } catch (error) {
-    console.log(`NFT recovery checkpoint details: ${error.message}`);
+  } catch {
     console.error('NFT recovery checkpoint validation failed; operator recovery may be required.');
     process.exitCode = 1;
   }

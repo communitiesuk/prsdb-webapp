@@ -2,8 +2,10 @@ import {readFile, rename, writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {join} from 'node:path';
+import {isDeepStrictEqual} from 'node:util';
 import {
-  account, appName, awsCommand, cluster, region, requireCondition, servicesFactory, stable, taskPrefix, waitFactory,
+  account, appName, awsCommand, cloneForScanWorker, cluster, region, requireCondition, scanQueueArn,
+  scanQueueName, scanQueueUrl, servicesFactory, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
 import {recoveryOwner, requireFreshAttempt} from './nft-recovery-state.mjs';
@@ -52,12 +54,67 @@ async function asyncService(aws) {
   return service;
 }
 
+async function scanQueueEmpty(aws) {
+  const {Attributes: attributes} = await aws('sqs', 'get-queue-attributes', {
+    QueueUrl: scanQueueUrl,
+    AttributeNames: ['QueueArn', 'ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible', 'ApproximateNumberOfMessagesDelayed'],
+  });
+  requireCondition(attributes?.QueueArn === scanQueueArn, 'NFT scan queue identity is unverified');
+  return ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible', 'ApproximateNumberOfMessagesDelayed']
+    .every(name => attributes[name] === '0');
+}
+
+async function runningCandidateImage(aws, app, definition) {
+  const image = definition.containerDefinitions.find(value => value.name === 'prsdb-webapp').image;
+  const listed = await aws('ecs', 'list-tasks', {cluster, serviceName: appName});
+  requireCondition(!listed.nextToken && listed.taskArns?.length === 1, 'Candidate app task identity is unverified');
+  const [task] = await describeTasks(aws, listed.taskArns);
+  const container = task.containers?.find(value => value.name === 'prsdb-webapp');
+  requireCondition(task.taskDefinitionArn === app.taskDefinition && task.lastStatus === 'RUNNING' &&
+    container?.image === image && /^sha256:[a-f0-9]{64}$/.test(container.imageDigest ?? ''),
+  'Candidate app image digest is unverified');
+  return `${image.replace(/:[^/]+$/, '')}@${container.imageDigest}`;
+}
+
+async function recoverAsyncRegistration(deps, discover = false) {
+  const {aws, state, persist} = deps;
+  if ((!state.asyncRegistrationAttempted && !discover) || state.candidateAsync || state.asyncRetired) return;
+  const family = `prsdb-async-worker-nft-performance-${state.runId}`;
+  const listed = await aws('ecs', 'list-task-definitions', {familyPrefix: family, status: 'ACTIVE'});
+  const matches = listed.taskDefinitionArns?.filter(arn => arn.startsWith(`${taskPrefix}${family}:`));
+  if (discover && !state.asyncRegistrationAttempted && !listed.nextToken && matches?.length === 0) return;
+  requireCondition(!listed.nextToken && matches?.length === 1,
+    'Candidate worker registration is unresolved; operator recovery required');
+  const {taskDefinition: candidate} = await aws('ecs', 'describe-task-definition', {taskDefinition: matches[0]});
+  const {taskDefinition: baseline} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalAsync.taskDefinition});
+  const {taskDefinition: app} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalApp.taskDefinition});
+  const expected = cloneForScanWorker(baseline, app, {runId: state.runId, expectedSha: state.expectedSha});
+  expected.containerDefinitions[0].image = state.asyncImage ??
+    await runningCandidateImage(aws, (await servicesFactory(aws)()).app, app);
+  requireCondition(candidate?.status === 'ACTIVE' && candidate.taskDefinitionArn === matches[0] &&
+    Object.entries(expected).every(([key, value]) => isDeepStrictEqual(candidate[key], value)),
+  'Candidate worker registration identity is unverified');
+  state.candidateAsync = matches[0];
+  state.asyncRegistrationAttempted = true;
+  state.asyncImage = expected.containerDefinitions[0].image;
+  // A lost checkpoint may also have lost the service-switch response.
+  state.asyncSwitchAttempted = true;
+  await persist();
+}
+
 async function stopAsyncWorker(deps) {
   const {aws, state, persist} = deps;
+  await recoverAsyncRegistration(deps);
   const service = await asyncService(aws);
-  requireCondition(state.originalAsync && service.taskDefinition === state.originalAsync.taskDefinition,
+  requireCondition(state.originalAsync &&
+    [state.originalAsync.taskDefinition, state.candidateAsync].includes(service.taskDefinition),
     'NFT async service revision changed');
-  requireCondition([0, state.originalAsync.desiredCount].includes(service.desiredCount), 'NFT async service count changed');
+  requireCondition([0, state.originalAsync.desiredCount, ...(state.asyncSwitchAttempted ? [1] : [])]
+    .includes(service.desiredCount), 'NFT async service count changed');
+  if (state.asyncSwitchAttempted) {
+    await waitFactory(deps)('NFT scan queue quiescence', () => scanQueueEmpty(aws), true);
+  } else requireCondition(await scanQueueEmpty(aws), 'NFT scan queue is not empty; refusing database replacement');
+  const revision = service.taskDefinition;
   const arns = new Set();
   for (const desiredStatus of ['RUNNING', 'STOPPED']) {
     const listed = await aws('ecs', 'list-tasks', {cluster, serviceName: asyncName, desiredStatus});
@@ -68,14 +125,26 @@ async function stopAsyncWorker(deps) {
     'Cannot identify NFT async tasks');
   state.asyncTasks = [...arns];
   state.asyncStopAttempted = true;
+  state.asyncReady = false;
   await persist();
   await aws('ecs', 'update-service', {cluster, service: asyncName, desiredCount: 0});
   await waitFactory(deps)('Actual async task shutdown', async () => {
     const current = await asyncService(aws);
-    requireCondition(current.taskDefinition === state.originalAsync.taskDefinition, 'NFT async service revision changed');
+    requireCondition(current.taskDefinition === revision, 'NFT async service revision changed');
+    for (const desiredStatus of ['RUNNING', 'STOPPED']) {
+      const listed = await aws('ecs', 'list-tasks', {cluster, serviceName: asyncName, desiredStatus});
+      requireCondition(!listed.nextToken && Array.isArray(listed.taskArns), 'Cannot identify NFT async tasks');
+      listed.taskArns.forEach(arn => arns.add(arn));
+    }
+    requireCondition(arns.size <= 100, 'Cannot identify NFT async tasks');
+    state.asyncTasks = [...arns];
+    await persist();
     return current.desiredCount === 0 && current.runningCount === 0 && current.pendingCount === 0 &&
       (await describeTasks(aws, state.asyncTasks)).every(task => task.lastStatus === 'STOPPED');
   });
+  requireCondition(await scanQueueEmpty(aws), 'NFT scan queue changed during shutdown; refusing database replacement');
+  state.asyncQuiescent = true;
+  await persist();
 }
 
 export async function stopNftWriters(config, overrides = {}) {
@@ -102,14 +171,25 @@ export async function stopNftWriters(config, overrides = {}) {
     requireCondition(worker?.taskDefinitionArn === config.taskDefinition && worker.status === 'ACTIVE',
       'Restore task revision is unavailable; refusing to stop the app');
     requireCondition(Number.isSafeInteger(asyncWorker.desiredCount) && asyncWorker.desiredCount >= 0 &&
-      asyncWorker.taskDefinition?.startsWith(taskPrefix) &&
+      new RegExp(`^${taskPrefix}prsdb-async-worker-nft:\\d+$`).test(asyncWorker.taskDefinition ?? '') &&
       stable(asyncWorker, asyncWorker.taskDefinition, asyncWorker.desiredCount),
     'NFT async service baseline is not stable');
+    const {taskDefinition: originalAsync} = await aws('ecs', 'describe-task-definition', {taskDefinition: asyncWorker.taskDefinition});
+    requireCondition(originalAsync?.taskDefinitionArn === asyncWorker.taskDefinition && originalAsync.status === 'ACTIVE',
+      'Original async task is not runnable; refusing database replacement');
+    if (config.expectedSha !== undefined && asyncWorker.desiredCount > 0) {
+      requireCondition(/^[a-f0-9]{40}$/.test(config.resetSha ?? '') &&
+        config.resetCompatibleTaskDefinition === asyncWorker.taskDefinition &&
+        config.resetCompatibleSha === config.resetSha,
+      'Exact baseline worker and reset schema compatibility approval is required');
+    }
     state.originalApp = {taskDefinition: app.taskDefinition, desiredCount: 1};
     state.originalAsync = {taskDefinition: asyncWorker.taskDefinition, desiredCount: asyncWorker.desiredCount};
     state.network = app.networkConfiguration.awsvpcConfiguration;
     state.taskDefinition = config.taskDefinition;
     state.runId = config.runId;
+    state.expectedSha = config.expectedSha;
+    state.resetSha = config.resetSha;
   }
   requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition,
     'Restore state belongs to another run or task definition');
@@ -183,6 +263,12 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
   } catch (error) {
     errors.push(error);
   }
+  if (state.originalAsync) await recoverAsyncRegistration(deps, true);
+  if (state.asyncRegistrationAttempted) {
+    // Stop the candidate before changing app/schema configuration, including failed starts.
+    await stopAsyncWorker(deps);
+    await returnAsyncRevision(deps);
+  }
   if (state.environmentRestored !== true) {
     try {
       await restoreEnvironment(await loadReadiness(), {
@@ -233,6 +319,7 @@ export async function restoreInVpc(config, overrides = {}) {
   const deps = runtime(overrides);
   const {aws, state, persist, log, signal} = deps;
   await identity(aws);
+  requireCondition(await scanQueueEmpty(aws), 'NFT scan queue is not empty; refusing database replacement');
   requireCondition(state.writersStopped && state.taskDefinition === config.taskDefinition &&
     state.runId === config.runId, 'App shutdown must complete before VPC restore');
   const {app, simulator} = await servicesFactory(aws)();
@@ -306,6 +393,16 @@ export async function restoreAsyncWorker(config, overrides = {}) {
     state.originalAsync && Number.isSafeInteger(state.originalAsync.desiredCount) &&
     state.originalAsync.desiredCount >= 0 && state.asyncStopAttempted,
   'NFT async recovery state is missing or belongs to another run');
+  const databaseChanged = state.launchAttempted || state.restorePassed || state.asyncSwitchAttempted || config.resetVerified;
+  requireCondition(!databaseChanged || config.resetVerified === true,
+    'Verified database reset is required before baseline worker recovery');
+  if (databaseChanged && state.originalAsync.desiredCount > 0) {
+    requireCondition(/^[a-f0-9]{40}$/.test(state.resetSha ?? '') &&
+      config.resetCompatibleTaskDefinition === state.originalAsync.taskDefinition &&
+      config.resetCompatibleSha === state.resetSha,
+    'Exact baseline worker and reset schema compatibility approval is required');
+  }
+  await returnAsyncRevision(deps);
   const service = await asyncService(aws);
   requireCondition(service.taskDefinition === state.originalAsync.taskDefinition &&
     [0, state.originalAsync.desiredCount].includes(service.desiredCount), 'NFT async service changed');
@@ -317,6 +414,104 @@ export async function restoreAsyncWorker(config, overrides = {}) {
   }, true);
   state.asyncRestored = true;
   await persist();
+}
+
+async function returnAsyncRevision(deps) {
+  const {aws, state, persist} = deps;
+  await recoverAsyncRegistration(deps);
+  const {taskDefinition: original} = await aws('ecs', 'describe-task-definition', {
+    taskDefinition: state.originalAsync.taskDefinition,
+  });
+  requireCondition(original?.status === 'ACTIVE' && original.taskDefinitionArn === state.originalAsync.taskDefinition,
+    'Original async task is not runnable; operator recovery required');
+  let service = await asyncService(aws);
+  requireCondition([state.originalAsync.taskDefinition, state.candidateAsync].includes(service.taskDefinition),
+    'NFT async service changed');
+  if (service.taskDefinition === state.candidateAsync) {
+    requireCondition(state.asyncQuiescent && service.desiredCount === 0 &&
+      service.runningCount === 0 && service.pendingCount === 0, 'Candidate async worker is not quiescent');
+    await aws('ecs', 'update-service', {
+      cluster, service: asyncName, taskDefinition: state.originalAsync.taskDefinition, desiredCount: 0,
+    });
+    await waitFactory(deps)('Async revision recovery', async () => {
+      service = await asyncService(aws);
+      requireCondition(service.taskDefinition === state.originalAsync.taskDefinition, 'NFT async service changed');
+      return stable(service, state.originalAsync.taskDefinition, 0);
+    }, true);
+  }
+  if (state.candidateAsync && !state.asyncRetired) {
+    const {app, simulator} = await servicesFactory(aws)();
+    service = await asyncService(aws);
+    const listed = await aws('ecs', 'list-services', {cluster});
+    const knownServices = [appName, 'nft-one-login-simulator', asyncName]
+      .map(name => `arn:aws:ecs:${region}:${account}:service/${cluster}/${name}`);
+    requireCondition(!listed.nextToken && Array.isArray(listed.serviceArns) &&
+      listed.serviceArns.every(arn => knownServices.includes(arn)),
+    'NFT service references cannot be established');
+    requireCondition([app, simulator, service].every(value => value.taskDefinition !== state.candidateAsync &&
+      !(value.deployments ?? []).some(deployment => deployment.taskDefinition === state.candidateAsync)),
+    'Candidate worker task is still referenced');
+    await aws('ecs', 'deregister-task-definition', {taskDefinition: state.candidateAsync});
+    state.asyncRetired = true;
+    await persist();
+  }
+}
+
+export async function startAsyncWorker(config, overrides = {}) {
+  validate(config);
+  const deps = runtime(overrides);
+  const {aws, state, persist, signal, log} = deps;
+  await identity(aws);
+  requireCondition(state.restorePassed === true && state.runId === config.runId &&
+    state.taskDefinition === config.taskDefinition && state.originalAsync && state.asyncStopAttempted,
+  'Successful database restore and owned worker state are required');
+  const {app} = await servicesFactory(aws)();
+  requireCondition(stable(app, state.originalApp.taskDefinition, 1), 'Candidate app is not stable');
+  const service = await asyncService(aws);
+  requireCondition(stable(service, state.originalAsync.taskDefinition, 0), 'NFT async service changed before candidate start');
+  const {taskDefinition: baseline} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalAsync.taskDefinition});
+  const {taskDefinition: candidate} = await aws('ecs', 'describe-task-definition', {taskDefinition: state.originalApp.taskDefinition});
+  requireCondition(baseline?.taskDefinitionArn === state.originalAsync.taskDefinition &&
+    candidate?.taskDefinitionArn === state.originalApp.taskDefinition, 'Candidate worker task identity mismatch');
+  const cloned = cloneForScanWorker(baseline, candidate, config);
+  cloned.containerDefinitions[0].image = await runningCandidateImage(aws, app, candidate);
+  const {Parameter: queue} = await aws('ssm', 'get-parameter', {Name: 'nft-prsdb-scan-result-queue-name'});
+  requireCondition(queue?.Value === scanQueueName && await scanQueueEmpty(aws), 'NFT scan queue is not ready');
+  requireCondition(!state.asyncRegistrationAttempted, 'Candidate worker was already attempted; recover before retrying');
+  signal?.throwIfAborted();
+  state.asyncRegistrationAttempted = true;
+  state.expectedSha = config.expectedSha;
+  state.asyncImage = cloned.containerDefinitions[0].image;
+  await persist();
+  const {taskDefinition: registered} = await aws('ecs', 'register-task-definition', cloned);
+  requireCondition(new RegExp(`^${taskPrefix}${cloned.family}:\\d+$`).test(registered?.taskDefinitionArn ?? ''),
+    'Unexpected candidate worker task revision');
+  state.candidateAsync = registered.taskDefinitionArn;
+  await persist();
+  requireCondition(stable(await asyncService(aws), state.originalAsync.taskDefinition, 0),
+    'NFT async service changed before candidate switch');
+  signal?.throwIfAborted();
+  state.asyncSwitchAttempted = true;
+  state.asyncQuiescent = false;
+  state.writersStopped = false;
+  await persist();
+  await aws('ecs', 'update-service', {cluster, service: asyncName, taskDefinition: state.candidateAsync, desiredCount: 1});
+  await waitFactory(deps)('Candidate scan worker readiness', async () => {
+    const current = await asyncService(aws);
+    requireCondition(current.taskDefinition === state.candidateAsync, 'Candidate scan worker changed');
+    if (!stable(current, state.candidateAsync, 1)) return false;
+    const listed = await aws('ecs', 'list-tasks', {cluster, serviceName: asyncName});
+    if (listed.nextToken || listed.taskArns?.length !== 1) return false;
+    const [task] = await describeTasks(aws, listed.taskArns);
+    return task.taskDefinitionArn === state.candidateAsync && task.lastStatus === 'RUNNING' &&
+      task.containers?.length === 1 && task.containers[0].name === 'prsdb-async-worker' &&
+      task.containers[0].lastStatus === 'RUNNING' &&
+      task.containers[0].imageDigest === state.asyncImage.split('@')[1] &&
+      task.healthStatus !== 'UNHEALTHY';
+  }, false, signal);
+  state.asyncReady = true;
+  await persist();
+  log('Candidate scan worker ready: 1 running task.');
 }
 
 async function healthyAppTarget(aws, app) {
@@ -352,7 +547,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   process.on('SIGINT', abort);
   try {
     const command = process.argv[2];
-    if (['stop', 'run', 'start'].includes(command)) requireFreshAttempt();
+    if (['stop', 'run', 'start', 'start-async'].includes(command)) requireFreshAttempt();
     const path = process.env.NFT_RESTORE_STATE_PATH ||
       (process.env.RUNNER_TEMP && join(process.env.RUNNER_TEMP, 'nft-restore-state.json'));
     requireCondition(path, 'NFT_RESTORE_STATE_PATH is required');
@@ -360,11 +555,16 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       taskDefinition: process.env.NFT_RESTORE_TASK_DEFINITION,
       runId: `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
       expectedSha: process.env.EXPECTED_NFT_SHA,
+      resetVerified: process.env.NFT_DATABASE_RESET_PASSED === 'true',
+      resetSha: process.env.GITHUB_SHA,
+      resetCompatibleTaskDefinition: process.env.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION,
+      resetCompatibleSha: process.env.NFT_RESET_COMPATIBLE_APP_SHA,
     };
     const state = await readFile(path, 'utf8').then(JSON.parse).catch(error => {
       if (command === 'stop' && error.code === 'ENOENT') return {};
       throw new Error('NFT restore state is missing or unreadable; manual recovery required');
     });
+    if (command === 'start-async') config.taskDefinition = state.taskDefinition;
     if (['cleanup', 'start-after-reset', 'restore-async'].includes(command)) {
       config.runId = recoveryOwner(state, {
         runId: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT,
@@ -374,7 +574,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       state, signal: controller.signal,
       persist: async () => {
         const temporary = `${path}.tmp`;
-        await writeFile(temporary, JSON.stringify(state));
+        await writeFile(temporary, JSON.stringify(state), {mode: 0o600});
         await rename(temporary, path);
       },
     });
@@ -384,6 +584,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     }
     else if (command === 'run') await restoreInVpc(config, deps);
     else if (command === 'start') await startNftApp(deps);
+    else if (command === 'start-async') await startAsyncWorker(config, deps);
     else if (command === 'start-after-reset') await startNftApp(deps, {afterReset: true});
     else if (command === 'restore-async') await restoreAsyncWorker(config, deps);
     else if (command === 'cleanup') {
@@ -396,7 +597,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
           throw new Error('Readiness state cannot be read safely');
         });
       }, deps);
-    } else throw new Error('Expected stop, run, start, start-after-reset, restore-async or cleanup');
+    } else throw new Error('Unknown NFT VPC lifecycle operation');
   } catch (error) {
     console.log(`NFT VPC restore details: ${error.message}`);
     console.error('NFT VPC operation failed; keep the app stopped until recovery succeeds.');

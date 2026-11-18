@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.performance
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class RampScheduleTests {
@@ -10,20 +11,51 @@ class RampScheduleTests {
         val counts = BaselineLoadProfile.schedules(emptyMap()).mapValues { it.value.arrivalTimesMillis().size }
         assertEquals(
             mapOf(
-                BaselineFamily.LANDLORD to 455,
-                BaselineFamily.SAVED to 70,
-                BaselineFamily.PROPERTY to 70,
-                BaselineFamily.ORGANISATION_PROFILE to 70,
-                BaselineFamily.COMPLIANCE to 17,
-                BaselineFamily.ORGANISATION_TEAM to 17,
-                BaselineFamily.JOINT to 17,
-                BaselineFamily.AGENT to 17,
-                BaselineFamily.OPERATOR to 17,
-                BaselineFamily.OFFBOARDING to 17,
+                "LANDLORD" to 455,
+                "SAVED" to 70,
+                "PROPERTY" to 70,
+                "ORGANISATION_PROFILE" to 70,
+                "COMPLIANCE" to 17,
+                "ORGANISATION_TEAM" to 17,
+                "JOINT" to 17,
+                "AGENT" to 17,
+                "OPERATOR" to 17,
+                "OFFBOARDING" to 17,
+                "PAID_REGISTRATION" to 455,
+                "COUNCIL_READ" to 17,
             ),
-            counts,
+            counts.mapKeys { it.key.name },
         )
-        assertEquals(767, counts.values.sum())
+        assertEquals(1_239, counts.values.sum())
+    }
+
+    @Test
+    fun `new family rates do not replace the original workload`() {
+        val original = BaselineLoadProfile.schedules(emptyMap())
+        val changed =
+            BaselineLoadProfile.schedules(
+                mapOf(
+                    "gatling.ramp.paidRegistrationsPerMinute" to "2",
+                    "gatling.ramp.councilReadsPerMinute" to "2",
+                ),
+            )
+        val counts = changed.mapKeys { it.key.name }.mapValues { it.value.arrivalTimesMillis().size }
+        assertEquals(35, counts["PAID_REGISTRATION"])
+        assertEquals(35, counts["COUNCIL_READ"])
+        original.filterKeys { it.name !in setOf("PAID_REGISTRATION", "COUNCIL_READ") }.forEach { (family, schedule) ->
+            assertEquals(schedule, changed[family], "$family must retain its existing arrival schedule")
+        }
+    }
+
+    @Test
+    fun `new families reject zero negative nonfinite and malformed rates`() {
+        for (key in listOf("gatling.ramp.paidRegistrationsPerMinute", "gatling.ramp.councilReadsPerMinute")) {
+            for (value in listOf("0", "-1", "NaN", "Infinity", "invalid")) {
+                assertFailsWith<IllegalArgumentException>("$key=$value must fail before starting workload") {
+                    BaselineLoadProfile.schedules(mapOf(key to value))
+                }
+            }
+        }
     }
 
     @Test

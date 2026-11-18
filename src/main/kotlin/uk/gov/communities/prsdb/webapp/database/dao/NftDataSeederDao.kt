@@ -233,8 +233,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO file_upload 
-            (id, created_date, last_modified_date, object_key, e_tag, status, extension, file_name) 
-            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png', ?)
+            (id, created_date, last_modified_date, object_key, e_tag, status, extension, file_name, version_id) 
+            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png', ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -302,21 +302,25 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
-    fun snapshotIncompleteAddressAllocations() {
+    fun snapshotUnavailablePropertyAddresses() {
         connection.createStatement().use { statement ->
-            statement.execute("CREATE TEMP TABLE nft_seed_incomplete_addresses (id BIGINT PRIMARY KEY) ON COMMIT DROP")
+            statement.execute("CREATE TEMP TABLE nft_seed_unavailable_property_addresses (id BIGINT PRIMARY KEY) ON COMMIT DROP")
             statement.execute(
                 """
-                INSERT INTO nft_seed_incomplete_addresses
+                INSERT INTO nft_seed_unavailable_property_addresses
                 WITH labels AS MATERIALIZED (
-                    SELECT DISTINCT s.serialized_state::jsonb #>> '{journeyData,select-address,address}' AS address
+                    SELECT s.serialized_state::jsonb #>> '{journeyData,select-address,address}' AS address
                     FROM saved_journey_state s
                     JOIN landlord_incomplete_properties i ON i.saved_journey_state_id = s.id
+                    UNION
+                    SELECT single_line_address FROM address
+                    WHERE is_active
+                    GROUP BY single_line_address HAVING count(*) > 1
                 )
                 SELECT a.id FROM address a JOIN labels l ON l.address = a.single_line_address
                 """.trimIndent(),
             )
-            statement.execute("ANALYZE nft_seed_incomplete_addresses")
+            statement.execute("ANALYZE nft_seed_unavailable_property_addresses")
         }
     }
 
@@ -331,7 +335,7 @@ class NftDataSeederDao(
               AND a.local_council_id IS NOT NULL AND a.is_active AND a.uprn IS NOT NULL
               AND a.id NOT BETWEEN 9100000001 AND 9100000005
               AND NOT EXISTS (SELECT 1 FROM property_ownership p WHERE p.is_active AND p.address_id = a.id)
-              AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id)
+              AND NOT EXISTS (SELECT 1 FROM nft_seed_unavailable_property_addresses i WHERE i.id = a.id)
             ORDER BY a.id
             LIMIT :limit
             """.trimIndent(),
@@ -360,7 +364,7 @@ class NftDataSeederDao(
 
     /**
      * Initialises in-memory counts while the seeder is the only writer. Property allocations also exclude the
-     * snapshot of pre-existing saved registrations; new allocations use a shared forward-only cursor.
+     * snapshot of pre-existing saved registrations and ambiguous active labels; new allocations use a shared cursor.
      */
     fun countAvailableAddresses(restrictToAvailable: Boolean): Int {
         val query =
@@ -370,7 +374,7 @@ class NftDataSeederDao(
             AND (
                 NOT ?
                 OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN 9100000001 AND 9100000005
-                    AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id))
+                    AND NOT EXISTS (SELECT 1 FROM nft_seed_unavailable_property_addresses i WHERE i.id = a.id))
             )
             AND (
                 NOT EXISTS (
