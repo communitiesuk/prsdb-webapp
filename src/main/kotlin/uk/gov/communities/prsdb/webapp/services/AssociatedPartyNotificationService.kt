@@ -20,7 +20,7 @@ class AssociatedPartyNotificationService(
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987: make the return type non-nullable once the freeholder added-to-property email is sent when they are added via the property record.
+    // TODO PDJB-1987: make the return type non-nullable once the freeholder added email is sent.
     fun sendFreeholderAddedToPropertyNotification(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
@@ -31,7 +31,7 @@ class AssociatedPartyNotificationService(
         }
 
         if (!freeholder.email.isNullOrBlank()) {
-            // TODO PDJB-1987: build and send the freeholder added-to-property email when they are added via the property record.
+            // TODO PDJB-1987: build and send the freeholder added email.
             return null
         }
 
@@ -62,19 +62,13 @@ class AssociatedPartyNotificationService(
         )
     }
 
-    // TODO PDJB-1989, PDJB-1990: implement the superior landlord added-to-property email and letter when added via the property record, once templates are available
+    // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
     fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlordDataModel): AssociatedPartyNotificationOutcome =
-        TODO(
-            "Implement superior landlord added-to-property notification when added via the property record " +
-                "and email and letter templates are available",
-        )
+        TODO("Implement superior landlord creation notification when its email and letter templates are available")
 
-    // TODO PDJB-1991: implement the property manager added-to-property email when added via the property record, once the email template is available
+    // TODO PDJB-1991: implement once the property manager creation email template is available
     fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
-        TODO(
-            "Implement property manager added-to-property notification when added via the property record " +
-                "and the email template is available",
-        )
+        TODO("Implement property manager creation notification when its email template is available")
 
     internal fun sendNotificationToFreeholder(
         freeholder: FreeholderDataModel,
