@@ -5,11 +5,13 @@ data class JointLandlordInvitationAcceptedEmail(
     val propertyAddress: String,
     val propertyRecordUrl: String,
     val propertyRegistrationNumber: String,
+    val landlordReactivated: Boolean = false,
 ) : EmailTemplateModel {
     private val recipientNameKey = "recipient name"
     private val propertyAddressKey = "property address"
     private val propertyRecordUrlKey = "property record url"
     private val propertyRegistrationNumberKey = "property registration number"
+    private val landlordReactivatedKey = "landlordReactivated"
 
     override val template = EmailTemplate.JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL
 
@@ -19,5 +21,6 @@ data class JointLandlordInvitationAcceptedEmail(
             propertyAddressKey to propertyAddress,
             propertyRecordUrlKey to propertyRecordUrl,
             propertyRegistrationNumberKey to propertyRegistrationNumber,
+            landlordReactivatedKey to if (landlordReactivated) "yes" else "no",
         )
 }
