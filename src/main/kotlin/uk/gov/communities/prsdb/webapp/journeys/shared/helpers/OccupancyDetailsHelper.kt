@@ -52,22 +52,20 @@ class OccupancyDetailsHelper {
                 }
             }
 
+    fun <T> getCheckYourAnswersSummaryListWithoutProvideLater(
+        state: T,
+        messageSource: MessageSource,
+    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
+        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
+            getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource) +
+            getFurnishedStatusRow(state, state.furnishedStatus) +
+            getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource)
+
     fun <T> getTenancyDetailsCyaContent(
         state: T,
         messageSource: MessageSource,
     ): Map<String, Any?> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        mapOf("tenancyRows" to getTenancyDetailsSummaryList(state, messageSource))
-
-    fun <T> getCheckYourTenancyDetailsAnswersSummaryList(
-        state: T,
-        messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        if (state.provideTenancyDetailsLater) {
-            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask)
-        } else {
-            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-                getUpdateTenancyDetailsRentBillsAndFurnishingsSummaryList(state, messageSource)
-        }
+        mapOf("tenancyRows" to getCheckYourAnswersSummaryListWithoutProvideLater(state, messageSource))
 
     fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
         state: CheckYourAnswersJourneyState,
@@ -207,15 +205,4 @@ class OccupancyDetailsHelper {
                 getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource) +
                 getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource)
         }
-
-    private fun <T> getUpdateTenancyDetailsRentBillsAndFurnishingsSummaryList(
-        state: T,
-        messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
-                add(getFurnishedStatusRow(state, state.furnishedStatus))
-                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource))
-            }
 }
