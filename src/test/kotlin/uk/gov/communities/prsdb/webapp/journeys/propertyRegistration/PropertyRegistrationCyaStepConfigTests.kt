@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetails
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OwnershipStructureDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
@@ -276,8 +277,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockComplianceDetailsHelper,
                 mockMessageSource,
                 mockFeatureFlagManager,
-                SuperiorLandlordSummaryCardHelper(),
-                FreeholderSummaryCardHelper(),
+                OwnershipStructureDetailsHelper(FreeholderSummaryCardHelper(), SuperiorLandlordSummaryCardHelper()),
                 PropertyManagerSummaryCardHelper(),
             )
         lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
