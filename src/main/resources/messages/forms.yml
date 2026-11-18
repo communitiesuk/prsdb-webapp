@@ -321,19 +321,13 @@ occupancy:
 numberOfBedrooms:
   input:
     error: 'Enter the number of bedrooms, like 3 or 8'
-  heading: How many bedrooms in your property?
+  heading: Number of bedrooms
   paragraph:
-    one: A bedroom is any room built or converted for sleeping, even if it is currently being used for another purpose (such as an office).
-    two: In an HMO, a bedroom is any room built or converted for sleeping. To be counted, a room must meet the minimum floor area and natural light requirements set by your local council and be for the tenant’s exclusive use.
-    three: 'Do not include:'
+    one: 'Include:'
   bullet:
-    one: kitchens or bathrooms
-    two: landings and hallways
-    three: any room smaller than 4.64 square metres
-  details:
-    summary: Where to find this information
-    text: If your property is an HMO with an active licence, you may find it helpful to consult your licence documentation. This will confirm the maximum number of bedrooms and occupants permitted for the property.
-  label: Enter the number of bedrooms
+    one: rooms built as bedrooms that are being used for another purpose, such as a home office
+    two: living rooms or other rooms that have been converted into a bedroom
+  label: How many bedrooms does this property have?
 hmoShared:
   detail:
     paragraph:
@@ -420,8 +414,6 @@ update:
         one: You’ve changed this property to being unoccupied.
         two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
         three: You can go back to undo this change.
-  numberOfBedrooms:
-    heading: Update how many bedrooms are in your property
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers

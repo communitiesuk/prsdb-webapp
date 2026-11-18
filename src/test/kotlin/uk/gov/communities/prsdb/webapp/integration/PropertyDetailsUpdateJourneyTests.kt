@@ -857,7 +857,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
@@ -879,7 +879,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
