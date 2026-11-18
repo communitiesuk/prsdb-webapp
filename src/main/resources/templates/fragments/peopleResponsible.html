@@ -111,7 +111,7 @@
                         <th:block th:if="${propertyDetails.showFreeholdersSection}">
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholdersHeadingKey}}">propertyDetails.peopleResponsible.freeholders.heading</h3>
                             <th:block th:each="card : ${propertyDetails.freeholderSummaryCards}">
-                                <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+                                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h4', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
                             </th:block>
                             <p class="govuk-body">
                                 <a class="govuk-link" th:href="${propertyDetails.freeholdersUpdateLink}" th:text="#{${propertyDetails.freeholdersUpdateLinkTextKey}}">
