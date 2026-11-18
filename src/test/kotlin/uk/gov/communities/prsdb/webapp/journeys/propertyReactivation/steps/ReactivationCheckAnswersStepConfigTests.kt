@@ -72,7 +72,8 @@ class ReactivationCheckAnswersStepConfigTests {
         whenever(mockComplianceDetailsHelper.getGasSafetyCyaContent(mockState, mockGasSafetyTask))
             .thenReturn(mapOf("gasSupplyRows" to gasSupplyRows))
         val tenancyRows = listOf(mock<SummaryListRowViewModel>())
-        whenever(mockOccupancyDetailsHelper.getTenancyDetailsSummaryList(mockState, mockMessageSource)).thenReturn(tenancyRows)
+        whenever(mockOccupancyDetailsHelper.getTenancyDetailsCyaContent(mockState, mockMessageSource))
+            .thenReturn(mapOf("tenancyRows" to tenancyRows))
 
         val content = stepConfig.getStepSpecificContent(mockState)
 

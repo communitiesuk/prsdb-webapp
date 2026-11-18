@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 @ExtendWith(MockitoExtension::class)
 class OccupancyDetailsHelperTests {
@@ -190,6 +191,21 @@ class OccupancyDetailsHelperTests {
 
         val rows = helper.getCheckYourTenancyDetailsAnswersSummaryList(mockTenancyState, mockMessageSource)
 
+        assertEquals(1, rows.size)
+        assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
+    }
+
+    @Test
+    fun `getTenancyDetailsCyaContent returns the tenancy details rows as tenancyRows`() {
+        whenever(mockTenancyState.provideTenancyDetailsLater).thenReturn(true)
+        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.PROVIDE_THIS_LATER)
+        whenever(mockTenancyState.getCyaJourneyId(mockHouseholdStep)).thenReturn("households-cya")
+
+        val content = helper.getTenancyDetailsCyaContent(mockTenancyState, mockMessageSource)
+
+        assertEquals(setOf("tenancyRows"), content.keys)
+        @Suppress("UNCHECKED_CAST")
+        val rows = content["tenancyRows"] as List<SummaryListRowViewModel>
         assertEquals(1, rows.size)
         assertEquals("tenancyDetails.checkAnswers.tenancyDetailsRow", rows[0].fieldHeading)
     }

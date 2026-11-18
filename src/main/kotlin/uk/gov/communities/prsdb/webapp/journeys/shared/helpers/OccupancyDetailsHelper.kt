@@ -52,19 +52,11 @@ class OccupancyDetailsHelper {
                 }
             }
 
-    fun <T> getTenancyDetailsSummaryList(
+    fun <T> getTenancyDetailsCyaContent(
         state: T,
         messageSource: MessageSource,
-        provideLaterDestination: Destination? = null,
-    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        if (state.provideTenancyDetailsLater) {
-            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask, provideLaterDestination)
-        } else {
-            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-                getFurnishedStatusRow(state, state.furnishedStatus) +
-                getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource) +
-                getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource)
-        }
+    ): Map<String, Any?> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
+        mapOf("tenancyRows" to getTenancyDetailsSummaryList(state, messageSource))
 
     fun <T> getCheckYourTenancyDetailsAnswersSummaryList(
         state: T,
@@ -201,6 +193,20 @@ class OccupancyDetailsHelper {
             isOccupied,
             Destination.VisitableStep(occupiedStep, childJourneyId),
         )
+
+    private fun <T> getTenancyDetailsSummaryList(
+        state: T,
+        messageSource: MessageSource,
+        provideLaterDestination: Destination? = null,
+    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
+        if (state.provideTenancyDetailsLater) {
+            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask, provideLaterDestination)
+        } else {
+            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
+                getFurnishedStatusRow(state, state.furnishedStatus) +
+                getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource) +
+                getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource)
+        }
 
     private fun <T> getUpdateTenancyDetailsRentBillsAndFurnishingsSummaryList(
         state: T,
