@@ -371,10 +371,8 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1992: when ASSOCIATED_PARTIES is on, this should take the landlord's freeholder and
-    //  superior landlord answers (including the yes/no superior landlord question) so that changing the
-    //  ownership type leaves the property in a valid state. The flag-off journey never asks, so it keeps
-    //  falling back on a placeholder freeholder until PDJB-2016 removes the flag.
+    // TODO PDJB-2016: delete this with the flag-off journey, which never asks who the freeholders are and so falls
+    //  back on a placeholder freeholder.
     @Transactional
     fun updateOwnershipType(
         id: Long,
@@ -395,6 +393,45 @@ class PropertyOwnershipService(
         } else if (propertyOwnership.freeholders.isNotEmpty()) {
             freeholderService.clearFreeholders(propertyOwnership)
         }
+    }
+
+    @Transactional
+    fun updateOwnershipStructure(
+        id: Long,
+        ownershipType: OwnershipType,
+        freeholders: List<FreeholderDataModel>,
+        superiorLandlords: List<SuperiorLandlordDataModel>,
+        initialLastModifiedDate: Instant,
+    ): Pair<List<FreeholderDataModel>, List<SuperiorLandlordDataModel>> {
+        val propertyOwnership = getPropertyOwnership(id)
+        if (propertyOwnership.getOwnershipStructureMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+        propertyOwnership.ownershipType = ownershipType
+        // TODO PDJB-2019: delete this line with the legacy column.
+        propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
+        propertyOwnershipRepository.save(propertyOwnership)
+
+        val addedFreeholders =
+            if (ownershipType.requiresFreeholderRecords()) {
+                require(freeholders.isNotEmpty()) { "Ownership type $ownershipType requires at least one freeholder" }
+                freeholderService.updateFreeholders(propertyOwnership, freeholders)
+            } else {
+                freeholderService.clearFreeholders(propertyOwnership)
+                emptyList()
+            }
+
+        val addedSuperiorLandlords =
+            if (ownershipType.requiresSuperiorLandlordInfo() && superiorLandlords.isNotEmpty()) {
+                superiorLandlordService.updateSuperiorLandlords(propertyOwnership, superiorLandlords)
+            } else {
+                superiorLandlordService.clearSuperiorLandlords(propertyOwnership)
+                emptyList()
+            }
+
+        return Pair(addedFreeholders, addedSuperiorLandlords)
     }
 
     // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
