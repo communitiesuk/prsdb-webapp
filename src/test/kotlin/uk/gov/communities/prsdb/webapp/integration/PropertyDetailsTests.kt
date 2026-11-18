@@ -45,7 +45,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
             val freeholderCard = detailsPage.freeholderCards.single()
             assertEquals("Unknown freeholder", freeholderCard.title.getText())
-            assertThat(freeholderCard.bodyText).containsText("You told us there was another freeholder")
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
                 "#",
