@@ -10,15 +10,12 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 class PropertyRegistrationConfirmationService(
     private val session: HttpSession,
 ) {
-    fun setLastPrnRegisteredThisSession(
-        prn: Long,
-        landlordReactivated: Boolean,
-    ) {
-        session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
-        session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION, landlordReactivated)
-    }
+    fun setLastPrnRegisteredThisSession(prn: Long) = session.setAttribute(PROPERTY_REGISTRATION_NUMBER, prn)
 
     fun getLastPrnRegisteredThisSession() = session.getAttribute(PROPERTY_REGISTRATION_NUMBER)?.toString()?.toLong()
+
+    fun setLandlordReactivatedByLastRegistration(landlordReactivated: Boolean) =
+        session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION, landlordReactivated)
 
     fun wasLandlordReactivatedByLastRegistration(): Boolean =
         session.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION) == true

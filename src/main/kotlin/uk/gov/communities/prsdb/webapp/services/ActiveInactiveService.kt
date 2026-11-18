@@ -63,10 +63,8 @@ class ActiveInactiveService(
     }
 
     @Transactional
-    fun reactivateLandlordIfInactive(landlord: Landlord): Boolean {
-        if (landlord.isActive) return false
-        reactivateLandlord(landlord)
-        return true
+    fun reactivateLandlordIfInactive(landlord: Landlord) {
+        if (!landlord.isActive) reactivateLandlord(landlord)
     }
 
     private fun markLandlordAsInactive(

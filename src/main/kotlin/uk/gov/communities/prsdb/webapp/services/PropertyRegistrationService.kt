@@ -59,7 +59,8 @@ class PropertyRegistrationService(
                     renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
                 )
 
-            val landlordReactivated = activeInactiveService.reactivateLandlordIfInactive(landlord)
+            val landlordReactivated = !landlord.isActive
+            activeInactiveService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
 
@@ -96,10 +97,8 @@ class PropertyRegistrationService(
             )
 
             runAfterTransactionCommits {
-                confirmationService.setLastPrnRegisteredThisSession(
-                    propertyOwnership.registrationNumber.number,
-                    landlordReactivated,
-                )
+                confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+                confirmationService.setLandlordReactivatedByLastRegistration(landlordReactivated)
                 sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
             }
 

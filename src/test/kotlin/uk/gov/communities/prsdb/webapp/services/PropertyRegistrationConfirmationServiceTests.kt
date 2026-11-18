@@ -15,7 +15,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationConfirmationServiceTests {
@@ -70,12 +69,11 @@ class PropertyRegistrationConfirmationServiceTests {
     }
 
     @Test
-    fun `setLastPrnRegisteredThisSession stores the registration number and whether the landlord was reactivated`() {
+    fun `setLandlordReactivatedByLastRegistration stores whether the landlord was reactivated`() {
         // Act
-        propertyRegistrationConfirmationService.setLastPrnRegisteredThisSession(123L, true)
+        propertyRegistrationConfirmationService.setLandlordReactivatedByLastRegistration(true)
 
         // Assert
-        verify(mockSession).setAttribute(PROPERTY_REGISTRATION_NUMBER, 123L)
         verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION, true)
     }
 
