@@ -55,7 +55,7 @@ class FreeholderSummaryCardHelper {
         }
 
         val name = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name")
-        if (!allowEmptyContactRows && freeholder.email == null && freeholder.address == null) {
+        if (!allowEmptyContactRows && !replacePostalAddressWithNote && freeholder.email == null && freeholder.address == null) {
             throw PrsdbWebException("Freeholder $freeholderId has known details but no email or postal address")
         }
         if (freeholder.email != null && freeholder.address != null) {
@@ -63,7 +63,7 @@ class FreeholderSummaryCardHelper {
         }
 
         val showNote =
-            replacePostalAddressWithNote && freeholder.address != null ||
+            replacePostalAddressWithNote && (freeholder.address != null || freeholder.email == null) ||
                 allowEmptyContactRows && freeholder.email == null && freeholder.address == null
         return SummaryCardViewModel(
             title = name,
