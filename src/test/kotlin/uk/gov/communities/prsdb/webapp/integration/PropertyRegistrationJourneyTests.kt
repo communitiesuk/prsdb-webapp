@@ -397,18 +397,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     inner class EnableFeatureFlags {
         @ParameterizedTest
         @CsvSource(
-            "false, , , false, NONE",
-            "true, LEASEHOLD_ONLY, , false, LEASEHOLD_ONLY",
-            "true, FREEHOLD_ONLY, JOINT_TENANTS, true, JOINT_TENANTS",
-            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, true, TENANTS_IN_COMMON",
-            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, true, SHARE_OF_JOINT_TENANTS",
-            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, true, SHARE_OF_TENANTS_IN_COMMON",
+            "false, , , NONE",
+            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+            "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS",
+            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON",
+            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON",
         )
         fun `registered freeholders appear on the property record`(
             ownsProperty: Boolean,
             ownershipKind: OwnershipKind?,
             freeholdType: FreeholdType?,
-            joint: Boolean,
             expectedOwnershipType: OwnershipType,
             page: Page,
         ) {
@@ -455,9 +454,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection.locator("h3"))
-                .hasText(if (joint) "Joint freeholders" else "Freeholders")
+                .hasText(if (expectedOwnershipType.isJointFreeholder()) "Joint freeholders" else "Freeholders")
             assertThat(detailsPage.freeholderUpdateLink.locator)
-                .hasText(if (joint) "Add, change or remove joint freeholders" else "Add, change or remove freeholders")
+                .hasText(
+                    if (expectedOwnershipType.isJointFreeholder()) {
+                        "Add, change or remove joint freeholders"
+                    } else {
+                        "Add, change or remove freeholders"
+                    },
+                )
             assertThat(detailsPage.freeholderUpdateLink.locator)
                 .hasAttribute("href", "#")
             assertEquals(3, detailsPage.freeholderCards.size)
