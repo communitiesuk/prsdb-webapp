@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
@@ -320,6 +321,94 @@ class PropertyDetailsViewModelTests {
                 )
 
             assertEquals("propertyDetails.peopleResponsible.heading", viewModel.peopleResponsibleTabHeadingKey)
+        }
+    }
+
+    @Test
+    fun `the people responsible tab shows a not-used property manager row when there is no property manager`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showPropertyManagerSection)
+        assertFalse(viewModel.hasPropertyManager)
+        val row = viewModel.propertyManagerNotUsedRows.single()
+        assertEquals("registerProperty.propertyManager.usingPropertyManager.fieldSetHeading", row.fieldHeading)
+        assertEquals("propertyDetails.peopleResponsible.propertyManager.notUsing", row.fieldValue)
+        // TODO PDJB-1995: assert the real update route once the property manager update journey exists
+        assertEquals("#", row.actions.single().url)
+    }
+
+    @Test
+    fun `there is no not-used property manager row and a placeholder update link when there is a property manager`() {
+        val propertyOwnership = createOccupiedPropertyOwnership().apply { propertyManager = createPropertyManager() }
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showPropertyManagerSection)
+        assertTrue(viewModel.hasPropertyManager)
+        assertTrue(viewModel.showPropertyManagerUpdateLink)
+        assertTrue(viewModel.propertyManagerNotUsedRows.isEmpty())
+        // TODO PDJB-1995: assert the real update route once the property manager update journey exists
+        assertEquals("#", viewModel.propertyManagerUpdateUrl)
+    }
+
+    @Test
+    fun `the property manager message keys resolve to messages`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        viewModel.propertyManagerNotUsedRows
+            .flatMap { listOf(it.fieldHeading, it.fieldValue as String) }
+            .forEach { messageKey ->
+                val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+                assertNotEquals(messageKey, resolvedMessage) {
+                    "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
+                }
+            }
+    }
+
+    // TODO PDJB-1999: update or remove this test when the property manager is shown in the local council view
+    @Test
+    fun `the property manager section is not shown in the local council view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
+                messageSource = mockMessageSource,
+            )
+
+        assertFalse(viewModel.showPropertyManagerSection)
+        assertTrue(viewModel.propertyManagerNotUsedRows.isEmpty())
+    }
+
+    // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
+    @Nested
+    inner class BeforeAssociatedParties {
+        @Test
+        fun `the property manager section is hidden`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(),
+                    viewType = PropertyDetailsViewType.LANDLORD,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertFalse(viewModel.showPropertyManagerSection)
+            assertTrue(viewModel.propertyManagerNotUsedRows.isEmpty())
         }
     }
 
@@ -876,6 +965,33 @@ class PropertyDetailsViewModelTests {
 
         assertTrue(viewModel.showFreeholderSection)
         assertFalse(viewModel.showFreeholderSectionUpdateLink)
+    }
+
+    @Test
+    fun `the deactivated landlord view shows the property manager section without its update link`() {
+        val propertyOwnership = createOccupiedPropertyOwnership().apply { propertyManager = createPropertyManager() }
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showPropertyManagerSection)
+        assertFalse(viewModel.showPropertyManagerUpdateLink)
+    }
+
+    @Test
+    fun `the deactivated landlord view shows the not-used property manager row without a change link`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertFalse(viewModel.propertyManagerNotUsedRows.single().hasActions)
     }
 
     @Test
