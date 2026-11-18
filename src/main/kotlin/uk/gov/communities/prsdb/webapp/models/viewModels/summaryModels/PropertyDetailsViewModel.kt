@@ -48,19 +48,11 @@ class PropertyDetailsViewModel(
     val showFreeholderSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
-    val freeholderSectionHeadingKey: String =
-        if (propertyOwnership.ownershipType.isJointFreeholder()) {
-            "registerProperty.freeholders.checkAnswers.heading.joint"
-        } else {
-            "registerProperty.freeholders.checkAnswers.heading.nonJoint"
-        }
+    private val freeholderHeadingType = if (propertyOwnership.ownershipType.isJointFreeholder()) "joint" else "nonJoint"
 
-    val freeholderSectionLinkTextKey: String =
-        if (propertyOwnership.ownershipType.isJointFreeholder()) {
-            "registerProperty.freeholders.checkAnswers.changeLink.joint"
-        } else {
-            "registerProperty.freeholders.checkAnswers.changeLink.nonJoint"
-        }
+    val freeholderSectionHeadingKey: String = "registerProperty.freeholders.checkAnswers.heading.$freeholderHeadingType"
+
+    val freeholderSectionLinkTextKey: String = "registerProperty.freeholders.checkAnswers.changeLink.$freeholderHeadingType"
 
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
     val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
