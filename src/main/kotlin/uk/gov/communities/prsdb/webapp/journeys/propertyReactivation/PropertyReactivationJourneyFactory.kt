@@ -8,11 +8,13 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
@@ -25,7 +27,31 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -40,6 +66,9 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersS
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -49,11 +78,19 @@ class PropertyReactivationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyReactivationJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    // TODO PDJB-2042: build a check your answers child journey map when state.checkingAnswersFor is set
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun mainJourneyMap(state: PropertyReactivationJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.infoStep }
             step(journey.infoStep) {
                 routeSegment(ReactivationInfoStep.ROUTE_SEGMENT)
@@ -119,21 +156,178 @@ class PropertyReactivationJourneyFactory(
                 parents { journey.checkAnswersParents() }
                 // TODO PDJB-2045: route through the remaining reactivation steps to completeReactivationStep, and stop
                 //  the check answers step deleting the journey
-                nextUrl { confirmationUrl(propertyOwnershipId) }
+                nextUrl { confirmationUrl(journey.propertyOwnershipId) }
             }
             step(journey.completeReactivationStep) {
                 parents { journey.completeReactivationParents() }
-                nextUrl { confirmationUrl(propertyOwnershipId) }
+                nextUrl { confirmationUrl(journey.propertyOwnershipId) }
             }
-            useContinueButtons(journey.licensingTask)
-            useContinueButtons(journey.gasSafetyTask)
-            useContinueButtons(journey.electricalSafetyTask)
-            useContinueButtons(journey.epcTask)
-            useContinueButtons(journey.tenancyDetailsTask)
+            useContinueButtonsForTasks()
             hideCheckAnswersSectionHeader(journey.gasSafetyTask)
             hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
             hideCheckAnswersSectionHeader(journey.epcTask)
         }
+
+    private fun checkYourAnswersJourneyMap(
+        state: PropertyReactivationJourney,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                // TODO PDJB-2042: add the licensing branches once the licensing task (PDJB-2037) is merged
+                HasGasSupplyStep.ROUTE_SEGMENT,
+                HasGasCertStep.ROUTE_SEGMENT,
+                CheckGasCertUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                GasCertIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyTask.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep,
+                    )
+                }
+
+                HasElectricalCertStep.ROUTE_SEGMENT,
+                CheckEicUploadsStep.ROUTE_SEGMENT,
+                CheckEicrUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+                EicExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EicrExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                StartEpcStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                }
+
+                HasEpcStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasEpcStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                IsEpcRequiredStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.isEpcRequiredStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EpcExemptionStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.epcExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                HasMeesExemptionStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasMeesExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                MeesExemptionStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.epcTask.epcDetailsTask, journey) {
+                        checkAnswerStep(task.meesExemptionStep, MeesExemptionStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HouseholdStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
+                }
+
+                TenantsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
+                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                RentIncludesBillsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentIncludesBillsTask)
+                }
+
+                BillsIncludedStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                FurnishedStatusStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                }
+
+                RentFrequencyStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+            useContinueButtonsForTasks()
+        }
+
+    private fun JourneyBuilder<PropertyReactivationJourney>.useContinueButtonsForTasks() {
+        useContinueButtons(journey.licensingTask)
+        useContinueButtons(journey.gasSafetyTask)
+        useContinueButtons(journey.electricalSafetyTask)
+        useContinueButtons(journey.epcTask)
+        useContinueButtons(journey.tenancyDetailsTask)
     }
 
     private fun getInitializedState(propertyOwnershipId: Long): PropertyReactivationJourney {

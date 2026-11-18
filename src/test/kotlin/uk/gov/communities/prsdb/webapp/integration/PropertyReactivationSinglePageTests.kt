@@ -4,11 +4,28 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasElectricalCertFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfHouseholdsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfPeopleFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentAmountFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
 class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     private val inactivePropertyOwnershipId = 52L
+    private val urlArguments = mapOf("propertyOwnershipId" to inactivePropertyOwnershipId.toString())
+
+    @MockitoBean
+    private lateinit var epcRegisterClient: EpcRegisterClient
 
     @Nested
     inner class InfoStep {
@@ -58,6 +75,66 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThatComponent(checkAnswersPage.epcCard).isVisible()
             assertThatComponent(checkAnswersPage.warning).containsText("false or misleading")
             assertThatComponent(checkAnswersPage.form.submitButton).containsText("Confirm details")
+        }
+
+        @Test
+        fun `the gas supply change link navigates to the gas supply page, which links back to check answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            val gasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments)
+            gasSupplyPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the electrical certificate change link navigates to the certificate page, which links back to check answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments)
+            hasElectricalCertPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `changing the number of households returns to check answers with the new answer`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, NumberOfHouseholdsFormPagePropertyReactivation::class, urlArguments).submitNumberOfHouseholds(3)
+            assertPageIs(page, NumberOfPeopleFormPagePropertyReactivation::class, urlArguments).submitNumOfPeople(5)
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("3")
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.numberOfTenantsRow.value).containsText("5")
+        }
+
+        @Test
+        fun `changing the rent amount returns to check answers with the new answer`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.tenancySummaryList.rentAmountRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, RentAmountFormPagePropertyReactivation::class, urlArguments).submitRentAmount("500")
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("500")
+        }
+
+        @Test
+        fun `the EPC change link returns to check answers after confirming the EPC found by UPRN`(page: Page) {
+            whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments).submitYes()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
         }
     }
 }
