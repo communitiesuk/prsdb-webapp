@@ -17,8 +17,12 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -28,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -41,6 +46,9 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockitoBean
+    private lateinit var freeholderSummaryCardHelper: FreeholderSummaryCardHelper
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -63,6 +71,8 @@ class PropertyDetailsControllerTests(
 
     @BeforeEach
     fun setUp() {
+        // TODO PDJB-2016: remove this stubbing when the ASSOCIATED_PARTIES feature flag is removed
+        whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(true)
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
@@ -77,7 +87,15 @@ class PropertyDetailsControllerTests(
                 any(),
                 any(),
             ),
-        ).thenReturn(PropertyDetailsNotificationBannerViewModel.fromState(true, false, false, false, emptyList()))
+        ).thenReturn(
+            PropertyDetailsNotificationBannerViewModel.fromState(
+                isLandlordView = true,
+                isOccupied = false,
+                isLicensingProvideLater = false,
+                isTenancyProvideLater = false,
+                complianceMessages = emptyList(),
+            ),
+        )
     }
 
     @Nested
@@ -174,6 +192,30 @@ class PropertyDetailsControllerTests(
                     status { isOk() }
                     view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
                 }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails adds cards built from the property's persisted freeholders`() {
+            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
+            propertyOwnership.freeholders.add(
+                createFreeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
+            )
+            val expectedCards = listOf(SummaryCardViewModel(title = "Freeholder One", summaryList = emptyList()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("freeholderSummaryCards", expectedCards) }
+                }
+
+            verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
         }
 
         @Test
