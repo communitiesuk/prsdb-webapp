@@ -219,6 +219,65 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `the freeholder section uses ownership specific labels and update url`() {
+        val ownershipTypes =
+            listOf(
+                Triple(
+                    OwnershipType.SHARE_OF_JOINT_TENANTS,
+                    "registerProperty.freeholders.checkAnswers.heading.joint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.joint",
+                ),
+                Triple(
+                    OwnershipType.LEASEHOLD_ONLY,
+                    "registerProperty.freeholders.checkAnswers.heading.nonJoint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.nonJoint",
+                ),
+            )
+
+        ownershipTypes.forEach { (ownershipType, headingKey, linkTextKey) ->
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = ownershipType),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                )
+
+            assertTrue(viewModel.showFreeholderSection)
+            assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
+            assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
+            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
+            assertEquals("#", viewModel.freeholderSectionUpdateUrl)
+        }
+    }
+
+    // TODO PDJB-1999: update or remove this test when freeholders are shown in the local council view
+    @Test
+    fun `the freeholder section is hidden in the local council view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = true,
+            )
+
+        assertFalse(viewModel.showFreeholderSection)
+    }
+
+    @Test
+    fun `the freeholder section is hidden when the ownership type does not require freeholder records`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = true,
+            )
+
+        assertFalse(viewModel.showFreeholderSection)
+    }
+
+    @Test
     fun `every ownership type has an expected set of ownership answer rows`() {
         assertEquals(
             OwnershipType.entries.toSet(),
@@ -268,6 +327,19 @@ class PropertyDetailsViewModelTests {
     //  local council view onto the people responsible tab first).
     @Nested
     inner class OwnershipBeforePdjb955 {
+        @Test
+        fun `the freeholder section is hidden when associated parties are disabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                    isLandlordView = true,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertFalse(viewModel.showFreeholderSection)
+        }
+
         @Test
         fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
             val viewModel =
