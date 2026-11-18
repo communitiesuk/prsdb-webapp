@@ -1921,6 +1921,43 @@ class PropertyRegistrationServiceTests {
         )
     }
 
+    @Test
+    fun `registerProperty attempts the next freeholder notification when the previous one fails`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val firstFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val secondFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Daniel Roberts",
+                address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendFreeholderAddedToPropertyNotification(firstFreeholder, propertyOwnership),
+        ).thenThrow(RuntimeException("Letter failed to send"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                freeholders = listOf(firstFreeholder, secondFreeholder),
+            ),
+        )
+
+        // Assert
+        verify(mockAssociatedPartyNotificationService)
+            .sendFreeholderAddedToPropertyNotification(firstFreeholder, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendFreeholderAddedToPropertyNotification(secondFreeholder, propertyOwnership)
+    }
+
     // TODO PDJB-1734: Remove "when payments is enabled" from this test name when the PAYMENTS flag is removed
     @Test
     fun `registerProperty sends the confirmation email with the latest succeeded payment's details when payments is enabled`() {
