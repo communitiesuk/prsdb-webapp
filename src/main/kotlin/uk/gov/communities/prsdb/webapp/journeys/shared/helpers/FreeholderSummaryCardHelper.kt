@@ -21,7 +21,6 @@ class FreeholderSummaryCardHelper {
                     freeholderId.toString(),
                     freeholder,
                     getActions(freeholderId),
-                    allowEmptyContactRows = true,
                 )
             }
 
@@ -43,7 +42,6 @@ class FreeholderSummaryCardHelper {
         freeholder: FreeholderDataModel,
         actions: List<SummaryCardActionViewModel>,
         replacePostalAddressWithNote: Boolean = false,
-        allowEmptyContactRows: Boolean = false,
     ): SummaryCardViewModel {
         if (!freeholder.detailsKnown) {
             return SummaryCardViewModel(
@@ -55,16 +53,12 @@ class FreeholderSummaryCardHelper {
         }
 
         val name = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name")
-        if (!allowEmptyContactRows && !replacePostalAddressWithNote && freeholder.email == null && freeholder.address == null) {
-            throw PrsdbWebException("Freeholder $freeholderId has known details but no email or postal address")
-        }
         if (freeholder.email != null && freeholder.address != null) {
             throw PrsdbWebException("Freeholder $freeholderId has both an email and postal address")
         }
 
         val showNote =
-            replacePostalAddressWithNote && (freeholder.address != null || freeholder.email == null) ||
-                allowEmptyContactRows && freeholder.email == null && freeholder.address == null
+            freeholder.email == null && (replacePostalAddressWithNote || freeholder.address == null)
         return SummaryCardViewModel(
             title = name,
             summaryList = getContactRows(freeholder, replacePostalAddressWithNote),
