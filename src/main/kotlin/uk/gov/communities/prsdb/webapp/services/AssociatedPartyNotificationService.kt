@@ -24,25 +24,14 @@ class AssociatedPartyNotificationService(
     fun sendFreeholderAddedToPropertyNotification(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
-    ): AssociatedPartyNotificationOutcome? {
-        val name = freeholder.name
-        if (name.isNullOrBlank()) {
-            return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
-        }
-
-        if (!freeholder.email.isNullOrBlank()) {
-            // TODO PDJB-1987: build and send the freeholder added email.
-            return null
-        }
-
-        if (freeholder.address != null) {
-            val letter = buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership)
-            letterNotificationService.sendLetter(letterAddress(name, freeholder.address), letter)
-            return AssociatedPartyNotificationOutcome.LETTER_SENT
-        }
-
-        throw PrsdbWebException("Associated party has a name but no email address or postal address")
-    }
+    ): AssociatedPartyNotificationOutcome? =
+        sendNotification(
+            name = freeholder.name,
+            emailAddress = freeholder.email,
+            postalAddress = freeholder.address,
+            emailTemplate = null,
+            buildLetter = { buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership) },
+        )
 
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
@@ -75,12 +64,14 @@ class AssociatedPartyNotificationService(
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome =
-        sendNotification(
-            name = freeholder.name,
-            emailAddress = freeholder.email,
-            postalAddress = freeholder.address,
-            email = email,
-            letter = letter,
+        checkNotNull(
+            sendNotification(
+                name = freeholder.name,
+                emailAddress = freeholder.email,
+                postalAddress = freeholder.address,
+                emailTemplate = email,
+                buildLetter = { letter },
+            ),
         )
 
     internal fun sendNotificationToSuperiorLandlord(
@@ -88,32 +79,38 @@ class AssociatedPartyNotificationService(
         email: EmailTemplateModel,
         letter: LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome =
-        sendNotification(
-            name = superiorLandlord.name,
-            emailAddress = superiorLandlord.email,
-            postalAddress = superiorLandlord.address,
-            email = email,
-            letter = letter,
+        checkNotNull(
+            sendNotification(
+                name = superiorLandlord.name,
+                emailAddress = superiorLandlord.email,
+                postalAddress = superiorLandlord.address,
+                emailTemplate = email,
+                buildLetter = { letter },
+            ),
         )
 
     private fun sendNotification(
         name: String?,
         emailAddress: String?,
         postalAddress: AddressDataModel?,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome {
+        emailTemplate: EmailTemplateModel?,
+        buildLetter: () -> LetterTemplateModel,
+    ): AssociatedPartyNotificationOutcome? {
         if (name.isNullOrBlank()) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
 
         if (!emailAddress.isNullOrBlank()) {
-            emailNotificationService.sendEmail(emailAddress, email)
+            if (emailTemplate == null) {
+                // TODO PDJB-1987: build and send the freeholder added email.
+                return null
+            }
+            emailNotificationService.sendEmail(emailAddress, emailTemplate)
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
         if (postalAddress != null) {
-            letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
+            letterNotificationService.sendLetter(letterAddress(name, postalAddress), buildLetter())
             return AssociatedPartyNotificationOutcome.LETTER_SENT
         }
 
