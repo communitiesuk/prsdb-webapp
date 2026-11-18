@@ -8,15 +8,19 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasElectricalCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HmoMandatoryLicenceFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingTypeFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfHouseholdsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfPeopleFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentAmountFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.SelectiveLicenceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
@@ -75,6 +79,32 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThatComponent(checkAnswersPage.epcCard).isVisible()
             assertThatComponent(checkAnswersPage.warning).containsText("false or misleading")
             assertThatComponent(checkAnswersPage.form.submitButton).containsText("Confirm details")
+        }
+
+        @Test
+        fun `changing the licensing type re-asks for the licence number and returns to check answers with the new answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.licensingSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+                .submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
+            assertPageIs(page, HmoMandatoryLicenceFormPagePropertyReactivation::class, urlArguments).submitLicenseNumber("HMO-67890")
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.licensingSummaryList.licensingTypeRow.value).containsText("HMO mandatory licence")
+            assertThat(updatedCheckAnswersPage.licensingSummaryList.licensingNumberRow.value).containsText("HMO-67890")
+        }
+
+        @Test
+        fun `changing the licence number returns to check answers with the new answer`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.licensingSummaryList.licensingNumberRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, SelectiveLicenceFormPagePropertyReactivation::class, urlArguments).submitLicenseNumber("SL-67890")
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.licensingSummaryList.licensingTypeRow.value).containsText("Selective licence")
+            assertThat(updatedCheckAnswersPage.licensingSummaryList.licensingNumberRow.value).containsText("SL-67890")
         }
 
         @Test

@@ -44,12 +44,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEp
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
@@ -176,7 +180,28 @@ class PropertyReactivationJourneyFactory(
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                // TODO PDJB-2042: add the licensing branches once the licensing task (PDJB-2037) is merged
+                LicensingTypeStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.licensingTask, { journey })
+                }
+
+                SelectiveLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.selectiveLicenceStep, SelectiveLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoMandatoryLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoMandatoryLicenceStep, HmoMandatoryLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoAdditionalLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoAdditionalLicenceStep, HmoAdditionalLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
                 HasGasSupplyStep.ROUTE_SEGMENT,
                 HasGasCertStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
