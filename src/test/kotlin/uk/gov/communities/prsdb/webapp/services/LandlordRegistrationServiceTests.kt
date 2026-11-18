@@ -290,7 +290,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerIndividualLandlord sends the confirmation email with the deactivation date when ACTIVE_INACTIVE is enabled`() {
+        fun `registerIndividualLandlord sends the confirmation email with a deactivation date 3 months after the landlord was created`() {
             ReflectionTestUtils.setField(individualLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
             whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
 
@@ -577,7 +577,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord sends the confirmation email with the deactivation date when ACTIVE_INACTIVE is enabled`() {
+        fun `registerOrganisationLandlord sends the confirmation email with a deactivation date 3 months after the landlord was created`() {
             ReflectionTestUtils.setField(organisationalLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
             whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             whenever(mockFeatureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(false)
