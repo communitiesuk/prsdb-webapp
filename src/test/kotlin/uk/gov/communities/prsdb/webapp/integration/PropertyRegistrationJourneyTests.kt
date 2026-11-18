@@ -395,130 +395,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Nested
     inner class EnableFeatureFlags {
-        @ParameterizedTest
-        @CsvSource(
-            "false, , , NONE",
-            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
-            "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS",
-            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON",
-            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
-            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON",
-        )
-        fun `registered freeholders appear on the property record`(
-            ownsProperty: Boolean,
-            ownershipKind: OwnershipKind?,
-            freeholdType: FreeholdType?,
-            expectedOwnershipType: OwnershipType,
-            page: Page,
-        ) {
-            val freeholders =
-                mapOf(
-                    1 to FreeholderDataModel(detailsKnown = true, name = "First Freeholder", email = "FirstFreeholder@example.com"),
-                    2 to
-                        FreeholderDataModel(
-                            detailsKnown = true,
-                            name = "Second Freeholder",
-                            address =
-                                AddressDataModel.fromManualAddressData(
-                                    addressLineOne = "1 Example Street",
-                                    addressLineTwo = "Example Court",
-                                    townOrCity = "Example City",
-                                    county = "Exampleshire",
-                                    postcode = "EX1 1AB",
-                                ),
-                        ),
-                    3 to FreeholderDataModel(detailsKnown = false),
-                )
-            val builder =
-                PropertyStateSessionBuilder
-                    .beforePropertyRegistrationCheckAnswers()
-                    .withBedrooms()
-                    .withOwnsProperty(ownsProperty)
-                    .withFreeholders(freeholders)
-                    .withFreeholdersInfoComplete()
-                    .withFreeholdersListComplete()
-            if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
-            if (freeholdType != null) builder.withFreeholdType(freeholdType)
-            if (ownershipKind != OwnershipKind.FREEHOLD_ONLY) builder.withAnyoneInOwnershipChain(false)
-
-            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
-            completePropertyRegistrationPaymentSuccessfully(page)
-
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
-            val propertyId = propertyOwnershipCaptor.value.id
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyId)
-            detailsPage.tabs.goToPeopleResponsible()
-
-            assertThat(detailsPage.freeholderSection.locator("h3"))
-                .hasText(if (expectedOwnershipType.isJointFreeholder()) "Joint freeholders" else "Freeholders")
-            assertThat(detailsPage.freeholderUpdateLink.locator)
-                .hasText(
-                    if (expectedOwnershipType.isJointFreeholder()) {
-                        "Add, change or remove joint freeholders"
-                    } else {
-                        "Add, change or remove freeholders"
-                    },
-                )
-            assertThat(detailsPage.freeholderUpdateLink.locator)
-                .hasAttribute("href", "#")
-            assertEquals(3, detailsPage.freeholderCards.size)
-            val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
-            assertEquals(setOf("First Freeholder", "Second Freeholder", "Unknown freeholder"), cards.keys)
-            assertThat(cards.getValue("First Freeholder").summaryList).containsText("Email address")
-            assertThat(cards.getValue("First Freeholder").summaryList).containsText("FirstFreeholder@example.com")
-            assertEquals(0, cards.getValue("First Freeholder").bodyText.count())
-            assertThat(cards.getValue("Second Freeholder").summaryList).hasCount(0)
-            assertThat(cards.getValue("Second Freeholder").bodyText).hasText(
-                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
-            )
-            assertThat(cards.getValue("Second Freeholder").bodyText.locator("strong")).hasText("postal address")
-            assertThat(cards.getValue("Unknown freeholder").bodyText).hasText(
-                "You told us there was another freeholder, but you cannot currently provide their details. " +
-                    "Return and add these details when you can.",
-            )
-            assertEquals(0, cards.getValue("Unknown freeholder").bodyText.locator("strong").count())
-            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
-        }
-
-        @ParameterizedTest
-        @CsvSource(
-            "FREEHOLD_ONLY, SOLE_OWNERSHIP, SOLE_FREEHOLD",
-            "FREEHOLD_ONLY, COMMONHOLD, COMMONHOLD",
-            "FREEHOLD_AND_LEASEHOLD, SOLE_OWNERSHIP, SHARE_OF_SOLE_FREEHOLD",
-            "FREEHOLD_AND_LEASEHOLD, COMMONHOLD, SHARE_OF_COMMONHOLD",
-        )
-        fun `registered sole and commonhold owners do not see freeholders on the property record`(
-            ownershipKind: OwnershipKind,
-            freeholdType: FreeholdType,
-            expectedOwnershipType: OwnershipType,
-            page: Page,
-        ) {
-            val builder =
-                PropertyStateSessionBuilder
-                    .beforePropertyRegistrationCheckAnswers()
-                    .withBedrooms()
-                    .withOwnsProperty()
-                    .withOwnershipKind(ownershipKind)
-                    .withFreeholdType(freeholdType)
-            if (ownershipKind == OwnershipKind.FREEHOLD_AND_LEASEHOLD) builder.withAnyoneInOwnershipChain(false)
-
-            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
-            completePropertyRegistrationPaymentSuccessfully(page)
-
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
-            detailsPage.tabs.goToPeopleResponsible()
-            assertThat(detailsPage.freeholderSection).hasCount(0)
-        }
-
         @Test
         fun `completing the payment journey successfully reaches the confirmation page`(page: Page) {
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
@@ -3384,5 +3260,216 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
+    }
+}
+
+class RegisterAndCheckDetailsTests : IntegrationTestWithMutableData("data-local.sql") {
+    private val absoluteLandlordUrl = "www.example.com/landlord"
+
+    @MockitoSpyBean
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @MockitoBean
+    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    private lateinit var govUkPayClient: GovUkPayClient
+
+    @Autowired
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
+
+    @Autowired
+    private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
+
+    @Autowired
+    private lateinit var prsdbUserRepository: PrsdbUserRepository
+
+    private val loggedInUserId = "urn:fdc:gov.uk:2022:UVWXY"
+
+    @Volatile
+    private var govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+
+    @BeforeEach
+    fun setupPayment() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        whenever(
+            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
+        ).thenReturn(URI("http://localhost/invite/test-token"))
+        whenever(
+            absoluteUrlProvider.buildPropertyDetailsUri(any()),
+        ).thenReturn(URI("http://localhost/property-details/1"))
+        whenever(
+            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
+        ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
+        whenever(absoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(any(), any())).thenAnswer { invocation ->
+            URI(
+                "http://localhost:$port${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentReturnStep.ROUTE_SEGMENT}" +
+                    "?${JourneyIdProvider.PARAMETER_NAME}=${invocation.getArgument<String>(0)}" +
+                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${invocation.getArgument<String>(1)}",
+            )
+        }
+        whenever(govUkPayClient.createPayment(any())).thenAnswer { invocation ->
+            val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
+            MockGovUkPayData.createGovUkPayCreatedPayment(
+                paymentId = "test-payment-${UUID.randomUUID()}",
+                amount = request.amount,
+                reference = request.reference,
+                nextUrl = request.returnUrl,
+            )
+        }
+        govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
+        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+            MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "false, , , NONE",
+        "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+        "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS",
+        "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON",
+        "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+        "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON",
+    )
+    fun `registered freeholders appear on the property record`(
+        ownsProperty: Boolean,
+        ownershipKind: OwnershipKind?,
+        freeholdType: FreeholdType?,
+        expectedOwnershipType: OwnershipType,
+        page: Page,
+    ) {
+        val freeholders =
+            mapOf(
+                1 to FreeholderDataModel(detailsKnown = true, name = "First Freeholder", email = "FirstFreeholder@example.com"),
+                2 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Second Freeholder",
+                        address =
+                            AddressDataModel.fromManualAddressData(
+                                addressLineOne = "1 Example Street",
+                                addressLineTwo = "Example Court",
+                                townOrCity = "Example City",
+                                county = "Exampleshire",
+                                postcode = "EX1 1AB",
+                            ),
+                    ),
+                3 to FreeholderDataModel(detailsKnown = false),
+            )
+        val builder =
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswers()
+                .withBedrooms()
+                .withOwnsProperty(ownsProperty)
+                .withFreeholders(freeholders)
+                .withFreeholdersInfoComplete()
+                .withFreeholdersListComplete()
+        if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
+        if (freeholdType != null) builder.withFreeholdType(freeholdType)
+        if (ownershipKind != OwnershipKind.FREEHOLD_ONLY) builder.withAnyoneInOwnershipChain(false)
+
+        val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+        completePropertyRegistrationPaymentSuccessfully(page)
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+        detailsPage.tabs.goToPeopleResponsible()
+
+        assertThat(detailsPage.freeholderSection.locator("h3"))
+            .hasText(if (expectedOwnershipType.isJointFreeholder()) "Joint freeholders" else "Freeholders")
+        assertThat(detailsPage.freeholderUpdateLink.locator)
+            .hasText(
+                if (expectedOwnershipType.isJointFreeholder()) {
+                    "Add, change or remove joint freeholders"
+                } else {
+                    "Add, change or remove freeholders"
+                },
+            )
+        assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute("href", "#")
+        assertEquals(3, detailsPage.freeholderCards.size)
+        val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
+        assertEquals(setOf("First Freeholder", "Second Freeholder", "Unknown freeholder"), cards.keys)
+        assertThat(cards.getValue("First Freeholder").summaryList).containsText("Email address")
+        assertThat(cards.getValue("First Freeholder").summaryList).containsText("FirstFreeholder@example.com")
+        assertEquals(0, cards.getValue("First Freeholder").bodyText.count())
+        assertThat(cards.getValue("Second Freeholder").summaryList).hasCount(0)
+        assertThat(cards.getValue("Second Freeholder").bodyText).hasText(
+            "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+        )
+        assertThat(cards.getValue("Second Freeholder").bodyText.locator("strong")).hasText("postal address")
+        assertThat(cards.getValue("Unknown freeholder").bodyText).hasText(
+            "You told us there was another freeholder, but you cannot currently provide their details. " +
+                "Return and add these details when you can.",
+        )
+        assertEquals(0, cards.getValue("Unknown freeholder").bodyText.locator("strong").count())
+        cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "FREEHOLD_ONLY, SOLE_OWNERSHIP, SOLE_FREEHOLD",
+        "FREEHOLD_ONLY, COMMONHOLD, COMMONHOLD",
+        "FREEHOLD_AND_LEASEHOLD, SOLE_OWNERSHIP, SHARE_OF_SOLE_FREEHOLD",
+        "FREEHOLD_AND_LEASEHOLD, COMMONHOLD, SHARE_OF_COMMONHOLD",
+    )
+    fun `registered sole and commonhold owners do not see freeholders on the property record`(
+        ownershipKind: OwnershipKind,
+        freeholdType: FreeholdType,
+        expectedOwnershipType: OwnershipType,
+        page: Page,
+    ) {
+        val builder =
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswers()
+                .withBedrooms()
+                .withOwnsProperty()
+                .withOwnershipKind(ownershipKind)
+                .withFreeholdType(freeholdType)
+        if (ownershipKind == OwnershipKind.FREEHOLD_AND_LEASEHOLD) builder.withAnyoneInOwnershipChain(false)
+
+        val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+        completePropertyRegistrationPaymentSuccessfully(page)
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+        detailsPage.tabs.goToPeopleResponsible()
+        assertThat(detailsPage.freeholderSection).hasCount(0)
+    }
+
+    private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        ensureIncompletePropertyExistsForCurrentJourney(page)
+        paymentSummaryPage.form.submit()
+        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") }
+        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    private fun ensureIncompletePropertyExistsForCurrentJourney(page: Page) {
+        val journeyId =
+            UriComponentsBuilder
+                .fromUriString(page.url())
+                .build()
+                .queryParams
+                .getFirst(JourneyIdProvider.PARAMETER_NAME)
+                ?: error("No journey ID in ${page.url()}")
+        if (landlordIncompletePropertiesRepository.findBySavedJourneyState_JourneyIdAndUser_Id(journeyId, loggedInUserId) == null) {
+            val user = prsdbUserRepository.findById(loggedInUserId).orElseThrow()
+            val savedJourneyState =
+                savedJourneyStateRepository.findByJourneyIdAndUser_Id(journeyId, loggedInUserId)
+                    ?: savedJourneyStateRepository.save(SavedJourneyState(user, journeyId))
+            landlordIncompletePropertiesRepository.save(LandlordIncompleteProperty(user, savedJourneyState))
+        }
     }
 }
