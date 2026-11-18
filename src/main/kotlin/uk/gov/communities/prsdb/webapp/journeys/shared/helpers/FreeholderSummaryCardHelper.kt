@@ -24,8 +24,7 @@ class FreeholderSummaryCardHelper {
                         title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
                         summaryList = contactRows,
                         actions = actions,
-                        // A named freeholder with no contact rows was contacted by post, but their address was not stored
-                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
+                        bodyTextKey = if (freeholder.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
