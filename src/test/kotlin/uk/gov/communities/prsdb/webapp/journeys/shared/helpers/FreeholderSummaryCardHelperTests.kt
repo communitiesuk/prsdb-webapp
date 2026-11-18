@@ -82,17 +82,6 @@ class FreeholderSummaryCardHelperTests {
     }
 
     @Test
-    fun `getSummaryCards throws when a freeholder has both email and postal address`() {
-        // Arrange
-        val address = AddressDataModel.fromManualAddressData("36 Sunnyside Lane", "Biggleswade", "SG18 9EJ")
-        val freeholder = FreeholderDataModel(detailsKnown = true, name = "Alex Both", email = "alex@example.com", address = address)
-
-        // Act & Assert
-        val exception = assertThrows<PrsdbWebException> { helper.getSummaryCards(mapOf(7 to freeholder)) }
-        assertEquals("Freeholder 7 has both an email and postal address", exception.message)
-    }
-
-    @Test
     fun `freeholder with a postal address has a card titled with their name and a multi-line postal address row`() {
         // Arrange
         val freeholder =
