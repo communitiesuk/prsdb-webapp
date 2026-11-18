@@ -52,7 +52,7 @@
             </div>
         </th:block>
         <span class="govuk-caption-l"
-              th:text="${isDeactivated == true} ? #{propertyDetails.deactivated.caption} : #{propertyDetails.heading}">propertyDetails.heading</span>
+              th:text="${isDeactivated} ? #{propertyDetails.deactivated.caption} : #{propertyDetails.heading}">propertyDetails.heading</span>
         <h1 class="govuk-heading-l">
             <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
         </h1>
@@ -64,7 +64,7 @@
                 propertyDetails.deactivatePropertyLink.text
             </a>
         </p>
-        <div th:if="${isDeactivated == true}" id="reactivate-property-panel" class="govuk-!-width-two-thirds">
+        <div th:if="${isDeactivated}" id="reactivate-property-panel" class="govuk-!-width-two-thirds">
             <article id="reactivate-property-ticket-panel"
                      th:replace="~{fragments/ticketPanel ::
                      ticketPanel('propertyDetails.deactivated.panel.heading',

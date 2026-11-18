@@ -429,9 +429,10 @@ abstract class PropertyDetailsViewModelBase(
         val (actionLink, withActionLink) =
             when (viewType) {
                 PropertyDetailsViewType.LANDLORD -> landlordActionLink to true
-                PropertyDetailsViewType.LOCAL_COUNCIL -> null to false
+                PropertyDetailsViewType.LOCAL_COUNCIL,
+                PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                -> null to false
                 PropertyDetailsViewType.LETTING_AGENT -> lettingAgentActionLink to (lettingAgentActionLink != null)
-                PropertyDetailsViewType.DEACTIVATED_LANDLORD -> null to false
             }
         return row(
             key = key,
@@ -475,9 +476,11 @@ abstract class PropertyDetailsViewModelBase(
     }
 }
 
-enum class PropertyDetailsViewType {
-    LANDLORD,
-    LOCAL_COUNCIL,
-    LETTING_AGENT,
-    DEACTIVATED_LANDLORD,
+enum class PropertyDetailsViewType(
+    val isLandlordView: Boolean,
+) {
+    LANDLORD(isLandlordView = true),
+    LOCAL_COUNCIL(isLandlordView = false),
+    LETTING_AGENT(isLandlordView = false),
+    DEACTIVATED_LANDLORD(isLandlordView = true),
 }

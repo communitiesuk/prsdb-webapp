@@ -30,7 +30,7 @@ class PropertyDetailsViewModel(
     //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
     //  Once PDJB-1999 is done both views always use the flag-on version.
     val showPeopleResponsibleOwnership: Boolean =
-        viewType != PropertyDetailsViewType.LOCAL_COUNCIL && associatedPartiesEnabled
+        viewType.isLandlordView && associatedPartiesEnabled
 
     val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
