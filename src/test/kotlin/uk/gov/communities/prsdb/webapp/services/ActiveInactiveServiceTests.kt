@@ -20,7 +20,9 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.time.LocalDate
 import java.util.Optional
 
@@ -34,6 +36,9 @@ class ActiveInactiveServiceTests {
 
     @Mock
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
+
+    @Mock
+    private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
 
     @InjectMocks
     private lateinit var activeInactiveService: ActiveInactiveService
@@ -162,6 +167,61 @@ class ActiveInactiveServiceTests {
 
         assertFalse(property.isActive)
         assertEquals(today(), property.lastDeactivatedDate)
+        verify(propertyOwnershipRepository).save(property)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+    }
+
+    @Test
+    fun `deactivateProperty emails the letting agent when the property had a delegation`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val delegation =
+            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+
+        activeInactiveService.deactivateProperty(PROPERTY_ID)
+
+        verify(lettingAgentDeactivatedEmailSender).sendEmail(
+            LETTING_AGENT_EMAIL,
+            LettingAgentPropertyDeactivatedNotificationEmail(
+                propertyAddress = property.address.toMultiLineAddress(),
+                singleLineAddress = property.address.singleLineAddress,
+            ),
+        )
+    }
+
+    @Test
+    fun `deactivateProperty does not email a letting agent when the property had no delegation`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(null)
+
+        activeInactiveService.deactivateProperty(PROPERTY_ID)
+
+        verifyNoInteractions(lettingAgentDeactivatedEmailSender)
+    }
+
+    @Test
+    fun `deactivateProperty still deactivates the property when the letting agent email fails to send`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val delegation =
+            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        whenever(lettingAgentDeactivatedEmailSender.sendEmail(any(), any())).thenThrow(RuntimeException("Notify is down"))
+
+        activeInactiveService.deactivateProperty(PROPERTY_ID)
+
+        assertFalse(property.isActive)
         verify(propertyOwnershipRepository).save(property)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
     }
@@ -338,6 +398,7 @@ class ActiveInactiveServiceTests {
 
     companion object {
         private const val PROPERTY_ID = 1L
+        private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)

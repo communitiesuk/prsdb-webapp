@@ -345,6 +345,13 @@
     "bodyLocation": "/emails/CancelDelegationLettingAgentNotification.md"
   },
   {
+    "test_id": "00000000-0000-0000-0000-000000000000",
+    "prod_id": "00000000-0000-0000-0000-000000000000",
+    "enumName": "LETTING_AGENT_PROPERTY_DEACTIVATED_NOTIFICATION_EMAIL",
+    "subject": "You can no longer update ((single line address))",
+    "bodyLocation": "/emails/LettingAgentPropertyDeactivatedNotification.md"
+  },
+  {
     "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
     "prod_id": "b3f8620c-67b8-4988-98c7-1d8bf7738aea",
     "enumName": "DELEGATE_TO_LETTING_AGENT_CONFIRMATION_EMAIL",

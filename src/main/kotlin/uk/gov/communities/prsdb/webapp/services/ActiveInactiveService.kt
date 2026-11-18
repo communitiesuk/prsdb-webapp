@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -16,6 +18,7 @@ class ActiveInactiveService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
 ) {
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
@@ -26,8 +29,9 @@ class ActiveInactiveService(
         val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
         propertyOwnershipRepository.save(propertyOwnership)
-        // TODO PDJB-2106: Email the letting agent when their delegation is removed
+        val delegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
+        delegation?.let { sendLettingAgentDeactivatedEmail(it.invitedEmail, propertyOwnership) }
 
         propertyOwnership.landlords
             .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
@@ -94,4 +98,21 @@ class ActiveInactiveService(
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
+
+    private fun sendLettingAgentDeactivatedEmail(
+        lettingAgentEmail: String,
+        propertyOwnership: PropertyOwnership,
+    ) {
+        EmailHelper.sendEmailAndLogFailures(
+            "the letting agent property deactivated email for property ownership ${propertyOwnership.id}",
+        ) {
+            lettingAgentDeactivatedEmailSender.sendEmail(
+                lettingAgentEmail,
+                LettingAgentPropertyDeactivatedNotificationEmail(
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    singleLineAddress = propertyOwnership.address.singleLineAddress,
+                ),
+            )
+        }
+    }
 }
