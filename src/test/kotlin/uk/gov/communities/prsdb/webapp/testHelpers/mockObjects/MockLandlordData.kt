@@ -293,9 +293,8 @@ class MockLandlordData {
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-            address: Address? = null,
             id: Long? = null,
-        ) = Freeholder(propertyOwnership, name, email, address).also { freeholder ->
+        ) = Freeholder(propertyOwnership, name, email).also { freeholder ->
             if (id != null) ReflectionTestUtils.setField(freeholder, "id", id)
         }
 

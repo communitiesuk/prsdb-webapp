@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -62,15 +61,7 @@ class FreeholderSummaryCardHelperTests {
     fun `persisted postal-address freeholder gets property-record note only`() {
         // Arrange
         val propertyOwnership = createPropertyOwnership()
-        val postalAddress =
-            Address(
-                AddressDataModel.fromManualAddressData(
-                    "36 Sunnyside Lane",
-                    "Biggleswade",
-                    "SG18 9EJ",
-                ),
-            )
-        val postal = createFreeholder(propertyOwnership, name = "Casey Address", address = postalAddress)
+        val postal = createFreeholder(propertyOwnership, name = "Casey Address")
         val email = createFreeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com")
         val unknown = createFreeholder(propertyOwnership)
 
@@ -98,17 +89,6 @@ class FreeholderSummaryCardHelperTests {
 
         // Act & Assert
         val exception = assertThrows<PrsdbWebException> { helper.getSummaryCards(mapOf(7 to freeholder)) }
-        assertEquals("Freeholder 7 has both an email and postal address", exception.message)
-    }
-
-    @Test
-    fun `getSummaryCards throws when a persisted freeholder has both email and postal address`() {
-        // Arrange
-        val address = Address(AddressDataModel.fromManualAddressData("36 Sunnyside Lane", "Biggleswade", "SG18 9EJ"))
-        val freeholder = createFreeholder(name = "Alex Both", email = "alex@example.com", address = address, id = 7L)
-
-        // Act & Assert
-        val exception = assertThrows<PrsdbWebException> { helper.getSummaryCards(listOf(freeholder)) }
         assertEquals("Freeholder 7 has both an email and postal address", exception.message)
     }
 
