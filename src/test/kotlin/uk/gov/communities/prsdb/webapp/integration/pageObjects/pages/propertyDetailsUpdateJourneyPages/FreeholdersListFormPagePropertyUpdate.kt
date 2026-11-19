@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
@@ -18,6 +19,7 @@ class FreeholdersListFormPagePropertyUpdate(
         page,
         UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(urlArguments["propertyOwnershipId"]!!.toLong()),
     ) {
+    val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
     val backLink = BackLink.default(page)
     val warning = Warning.default(page)

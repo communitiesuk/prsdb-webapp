@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FreeholderContactType
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -42,7 +43,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Test
-    fun `landlord can add a named freeholder with an email address`(page: Page) {
+    fun `landlord can add email, postal-address, and unknown freeholders in the non-joint update journey`(page: Page) {
         featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
@@ -51,21 +52,120 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).addAnotherButton.click()
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("You’ve added 1 freeholder")
+        freeholdersListPage.addAnotherButton.click()
         assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("New Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
         FreeholderEmailFormPagePropertyRegistration(page).submitEmail("new.freeholder@example.com")
-        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Postal Address Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("You’ve added 4 freeholders")
+        freeholdersListPage.submit()
 
         val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, updatedPropertyDetailsPage.tabs.activeTabPanelId)
+        assertThat(updatedPropertyDetailsPage.freeholderSection.locator("h3")).hasText("Freeholders")
+        assertThat(updatedPropertyDetailsPage.freeholderUpdateLink.locator)
+            .hasText("Add, change or remove freeholders")
+        val freeholderCards = updatedPropertyDetailsPage.freeholderCards
+        assertEquals(4, freeholderCards.size)
+        assertThat(freeholderCards.single { it.title.getText() == "New Freeholder" })
+            .containsText("new.freeholder@example.com")
+        assertThat(freeholderCards.single { it.title.getText() == "Postal Address Freeholder" }.bodyText)
+            .hasText(
+                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+            )
+        assertThat(freeholderCards.first { it.title.getText() == "Unknown freeholder" }.bodyText)
+            .hasText(
+                "You told us there was another freeholder, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
         val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
-        assertEquals(2, savedFreeholders.size)
+        assertEquals(4, savedFreeholders.size)
         assertEquals(1, savedFreeholders.count { it.id == originalFreeholder.id })
-        val newFreeholder = savedFreeholders.single { it.id != originalFreeholder.id }
-        assertEquals("New Freeholder", newFreeholder.name)
-        assertEquals("new.freeholder@example.com", newFreeholder.email)
+        val addedFreeholders = savedFreeholders.filter { it.id != originalFreeholder.id }
+        assertEquals("new.freeholder@example.com", addedFreeholders.single { it.name == "New Freeholder" }.email)
+        assertNull(addedFreeholders.single { it.name == "Postal Address Freeholder" }.email)
+        assertEquals(1, addedFreeholders.count { !it.detailsKnown() })
+    }
+
+    @Test
+    fun `landlord can add email, postal-address, and unknown freeholders in the joint update journey`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow()
+        propertyOwnership.ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS
+        propertyOwnershipRepository.save(propertyOwnership)
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove joint freeholders"))
+            .click()
+
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("You’ve added 1 joint freeholder")
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("New Joint Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
+        FreeholderEmailFormPagePropertyRegistration(page).submitEmail("new.joint.freeholder@example.com")
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Joint Postal Address Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("You’ve added 4 joint freeholders")
+        freeholdersListPage.submit()
+
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, updatedPropertyDetailsPage.tabs.activeTabPanelId)
+        assertThat(updatedPropertyDetailsPage.freeholderSection.locator("h3")).hasText("Joint freeholders")
+        assertThat(updatedPropertyDetailsPage.freeholderUpdateLink.locator)
+            .hasText("Add, change or remove joint freeholders")
+        val freeholderCards = updatedPropertyDetailsPage.freeholderCards
+        assertEquals(4, freeholderCards.size)
+        assertThat(freeholderCards.single { it.title.getText() == "New Joint Freeholder" })
+            .containsText("new.joint.freeholder@example.com")
+        assertThat(freeholderCards.single { it.title.getText() == "Joint Postal Address Freeholder" }.bodyText)
+            .hasText(
+                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+            )
+        assertThat(freeholderCards.first { it.title.getText() == "Unknown freeholder" }.bodyText)
+            .hasText(
+                "You told us there was another freeholder, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
+        val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
+        assertEquals(4, savedFreeholders.size)
+        assertEquals(1, savedFreeholders.count { it.id == originalFreeholder.id })
+        val addedFreeholders = savedFreeholders.filter { it.id != originalFreeholder.id }
+        assertEquals(
+            "new.joint.freeholder@example.com",
+            addedFreeholders.single { it.name == "New Joint Freeholder" }.email,
+        )
+        assertNull(addedFreeholders.single { it.name == "Joint Postal Address Freeholder" }.email)
+        assertEquals(1, addedFreeholders.count { !it.detailsKnown() })
     }
 
     @Test
