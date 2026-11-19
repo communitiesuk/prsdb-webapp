@@ -99,7 +99,7 @@ class PropertyReactivationJourneyFactory(
             step(journey.infoStep) {
                 routeSegment(ReactivationInfoStep.ROUTE_SEGMENT)
                 initialStep()
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(journey.propertyOwnershipId) }
                 nextStep { mode ->
                     when (mode) {
                         ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.stepAfterInfo()
@@ -301,37 +301,39 @@ class PropertyReactivationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { journey })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
-                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                    checkAnswerTask(journey.tenancyDetailsTask.householdsAndTenantsTask, { journey })
+                    configureStep(journey.tenancyDetailsTask.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.rentIncludesBillsTask) {
+                    fromTask(journey.tenancyDetailsTask.rentIncludesBillsTask) {
                         checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                    fromTask(journey.tenancyDetailsTask, journey) {
+                        checkAnswerStep(task.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
                 }
 
                 RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                    checkAnswerTask(journey.tenancyDetailsTask.rentFrequencyAndAmountTask)
+                    configureStep(journey.tenancyDetailsTask.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }

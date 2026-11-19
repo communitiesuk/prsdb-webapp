@@ -49,6 +49,7 @@ class CheckAnswersPagePropertyReactivation(
         page: Page,
     ) : SummaryList(page) {
         val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
+        val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
     }
 
     class TenancySummaryList(
