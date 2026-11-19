@@ -28,7 +28,7 @@ class ConfirmRemoveSuperiorLandlordStepConfig(
             "optionalFieldSetHeadingParam" to superiorLandlordName,
             "fieldSetHint" to "registerProperty.superiorLandlords.remove.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
     }
 

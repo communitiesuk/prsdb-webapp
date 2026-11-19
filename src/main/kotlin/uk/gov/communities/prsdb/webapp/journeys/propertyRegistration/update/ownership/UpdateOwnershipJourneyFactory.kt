@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
@@ -81,6 +82,7 @@ class UpdateOwnershipJourneyFactory(
                 parents { journey.checkYourAnswersStep.isComplete() }
                 nextUrl { peopleResponsibleRoute }
             }
+            useContinueButtons(journey.ownershipStructureTask)
         }
     }
 
@@ -137,6 +139,7 @@ class UpdateOwnershipJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
+            useContinueButtons(journey.ownershipStructureTask)
         }
 
     fun initializeJourneyState(
