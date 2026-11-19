@@ -6,19 +6,34 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
+import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 
-// TODO PDJB-2045: reactivate the property in afterStepIsReached
 @JourneyFrameworkComponent
-class CompleteReactivationStepConfig : AbstractInternalStepConfig<Complete, PropertyReactivationJourneyState>() {
+class CompleteReactivationStepConfig(
+    private val addressAvailabilityService: AddressAvailabilityService,
+    private val propertyReactivationService: PropertyReactivationService,
+) : AbstractInternalStepConfig<Complete, PropertyReactivationJourneyState>() {
     override fun mode(state: PropertyReactivationJourneyState): Complete = Complete.COMPLETE
+
+    override fun afterStepIsReached(state: PropertyReactivationJourneyState) {
+        if (state.uprn?.let { addressAvailabilityService.isAddressOwned(it) } == true) {
+            state.isPropertyAlreadyRegistered = true
+            return
+        }
+        propertyReactivationService.reactivateProperty(state.propertyOwnershipId)
+    }
 
     override fun resolveNextDestination(
         state: PropertyReactivationJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination =
+        if (state.isPropertyAlreadyRegistered == true) {
+            Destination(state.alreadyRegisteredStep)
+        } else {
+            state.deleteJourney()
+            defaultDestination
+        }
 }
 
 @JourneyFrameworkComponent
