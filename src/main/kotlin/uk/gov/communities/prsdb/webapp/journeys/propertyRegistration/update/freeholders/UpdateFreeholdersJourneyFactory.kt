@@ -84,7 +84,7 @@ class UpdateFreeholdersJourneyFactory(
                     mapOf(
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",
-                        "insetText" to "propertyDetails.peopleResponsible.freeholders.notificationInset",
+                        "insetText" to "forms.update.freeholders.notificationInset",
                         "showWarning" to true,
                     )
                 }
