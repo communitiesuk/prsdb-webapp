@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalCertUploadsFormBasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
@@ -299,6 +300,14 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         infoPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+    }
+
+    @Test
+    fun `the back link on the info page returns to the deactivated property record`(page: Page) {
+        val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
+        infoPage.backLink.clickAndWait()
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
     }
 
     @Test

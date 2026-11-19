@@ -11,16 +11,20 @@
     <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.one}">
         tenancyDetails.numberOfHouseholds.paragraph.one
     </p>
+    <details id="details" th:replace="~{fragments/details :: details(#{tenancyDetails.numberOfHouseholds.details.summary}, ~{::#details/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.details.paragraph}">
+                tenancyDetails.numberOfHouseholds.details.paragraph
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{tenancyDetails.numberOfHouseholds.details.bullet.one}">tenancyDetails.numberOfHouseholds.details.bullet.one</li>
+                <li th:text="#{tenancyDetails.numberOfHouseholds.details.bullet.two}">tenancyDetails.numberOfHouseholds.details.bullet.two</li>
+                <li th:text="#{tenancyDetails.numberOfHouseholds.details.bullet.three}">tenancyDetails.numberOfHouseholds.details.bullet.three</li>
+            </ul>
+        </div>
+    </details>
     <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.two}">
         tenancyDetails.numberOfHouseholds.paragraph.two
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.one}">tenancyDetails.numberOfHouseholds.bullet.point.one</li>
-        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.two}">tenancyDetails.numberOfHouseholds.bullet.point.two</li>
-        <li th:text="#{tenancyDetails.numberOfHouseholds.bullet.point.three}">tenancyDetails.numberOfHouseholds.bullet.point.three</li>
-    </ul>
-    <p class="govuk-body" th:text="#{tenancyDetails.numberOfHouseholds.paragraph.three}">
-        tenancyDetails.numberOfHouseholds.paragraph.three
     </p>
     <h2 class="govuk-heading-m" th:text="#{tenancyDetails.numberOfHouseholds.questionHeading}">
         tenancyDetails.numberOfHouseholds.questionHeading

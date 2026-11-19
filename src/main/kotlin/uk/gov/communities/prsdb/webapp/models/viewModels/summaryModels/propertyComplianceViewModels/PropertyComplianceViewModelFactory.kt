@@ -123,7 +123,9 @@ class PropertyComplianceViewModelFactory(
     ): List<SummaryCardActionViewModel>? =
         when (viewType) {
             PropertyDetailsViewType.LANDLORD -> SummaryCardActionViewModel.changeAction(landlordRoute)
-            PropertyDetailsViewType.LOCAL_COUNCIL -> null
+            PropertyDetailsViewType.LOCAL_COUNCIL,
+            PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+            -> null
             PropertyDetailsViewType.LETTING_AGENT -> lettingAgentRoute?.let { SummaryCardActionViewModel.changeAction(it) }
         }
 }

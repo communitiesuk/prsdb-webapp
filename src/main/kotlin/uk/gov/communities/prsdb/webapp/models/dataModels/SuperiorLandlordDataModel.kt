@@ -22,6 +22,11 @@ data class SuperiorLandlordDataModel(
     val manualCounty: String? = null,
     val manualPostcode: String? = null,
 ) {
+    // We must post to a superior landlord with no email, but we are not allowed to store their address. So a named
+    // superior landlord loaded from the database will have neither, while one added in the current journey will
+    // still have the address they entered.
+    fun hasUnstoredPostalAddress() = detailsKnown && email == null && address == null
+
     companion object {
         // TODO PDJB-1994: use this to pre-populate the superior landlords list from the database when
         //  the update journey starts.

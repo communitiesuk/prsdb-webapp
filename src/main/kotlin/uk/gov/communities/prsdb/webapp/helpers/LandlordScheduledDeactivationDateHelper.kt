@@ -4,9 +4,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinInstant
 import java.time.Instant
 
-class LandlordDeactivationDateHelper {
+class LandlordScheduledDeactivationDateHelper {
     companion object {
-        fun getDeactivationDateFromCreatedDate(createdDate: Instant): LocalDate =
+        fun getScheduledDeactivationDateFromCreatedDate(createdDate: Instant): LocalDate =
             DateTimeHelper.get3MonthsFromDate(DateTimeHelper.getDateInUK(createdDate.toKotlinInstant()))
     }
 }

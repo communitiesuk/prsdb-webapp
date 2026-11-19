@@ -5,7 +5,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -58,8 +58,7 @@ class PropertyReactivationJourneyFactory(
             step(journey.infoStep) {
                 routeSegment(ReactivationInfoStep.ROUTE_SEGMENT)
                 initialStep()
-                // TODO PDJB-2034: go back to the deactivated property record
-                backUrl { LANDLORD_DASHBOARD_URL }
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextStep { mode ->
                     when (mode) {
                         ReactivationInfoMode.PROPERTY_AVAILABLE -> journey.stepAfterInfo()

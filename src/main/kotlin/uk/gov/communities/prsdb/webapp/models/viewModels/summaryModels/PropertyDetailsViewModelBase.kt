@@ -343,7 +343,10 @@ abstract class PropertyDetailsViewModelBase(
     // views show a provide-later row (with a change link only where rowWithViewTypeSpecificChangeLink supplies a route for the view type).
     protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
         when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
+            PropertyDetailsViewType.LANDLORD,
+            PropertyDetailsViewType.LETTING_AGENT,
+            PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+            -> {
                 if (isLicensingProvideLater) {
                     listOf(licensingProvideLaterRow())
                 } else {
@@ -363,7 +366,10 @@ abstract class PropertyDetailsViewModelBase(
     protected fun buildTenancySection(): List<SummaryListRowViewModel> {
         if (!isOccupied) return emptyList()
         return when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
+            PropertyDetailsViewType.LANDLORD,
+            PropertyDetailsViewType.LETTING_AGENT,
+            PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+            -> {
                 if (isTenancyProvideLater) {
                     listOf(tenancyProvideLaterRow())
                 } else {
@@ -409,6 +415,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
+    //  - Deactivated landlord: never linked - the record is read-only until the property is reactivated.
     // PDJB-1576 will wire up lettingAgentActionLink for its remaining row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
@@ -422,7 +429,9 @@ abstract class PropertyDetailsViewModelBase(
         val (actionLink, withActionLink) =
             when (viewType) {
                 PropertyDetailsViewType.LANDLORD -> landlordActionLink to true
-                PropertyDetailsViewType.LOCAL_COUNCIL -> null to false
+                PropertyDetailsViewType.LOCAL_COUNCIL,
+                PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                -> null to false
                 PropertyDetailsViewType.LETTING_AGENT -> lettingAgentActionLink to (lettingAgentActionLink != null)
             }
         return row(
@@ -459,15 +468,19 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
-        // TODO PDJB-1992: remove once the ownership answer rows link to their real update routes.
-        private const val PLACEHOLDER_ACTION_LINK = "#"
+        // TODO PDJB-1992, PDJB-1993: remove once the ownership answer rows and freeholder section link to
+        //  their real update routes.
+        protected const val PLACEHOLDER_ACTION_LINK = "#"
 
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }
 
-enum class PropertyDetailsViewType {
-    LANDLORD,
-    LOCAL_COUNCIL,
-    LETTING_AGENT,
+enum class PropertyDetailsViewType(
+    val isLandlordView: Boolean,
+) {
+    LANDLORD(isLandlordView = true),
+    LOCAL_COUNCIL(isLandlordView = false),
+    LETTING_AGENT(isLandlordView = false),
+    DEACTIVATED_LANDLORD(isLandlordView = true),
 }

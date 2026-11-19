@@ -25,6 +25,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -119,6 +120,8 @@ class PropertyRegistrationServiceTests {
     fun setUp() {
         // TODO PDJB-1734: Remove the checkFeature(PAYMENTS) stub when the flag is removed, but keep the payment repository stub
         lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
+        // TODO PDJB-2149: Remove the checkFeature(ACTIVE_INACTIVE) stub when the flag is removed
+        lenient().`when`(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
         lenient()
             .`when`(
                 mockPaymentRepository.findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
@@ -1830,6 +1833,7 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+        verify(mockPropertyRegistrationConfirmationService).setLandlordReactivatedByLastRegistration(false)
         verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
@@ -1980,6 +1984,84 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockActiveInactiveService).reactivateLandlordIfInactive(landlord)
+    }
+
+    @Test
+    fun `registerProperty records in the session that an inactive landlord was reactivated once the transaction commits`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        landlord.deactivate(LocalDate.of(2026, 1, 1))
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        TransactionSynchronizationManager.initSynchronization()
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+        TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+
+        // Assert
+        verify(mockPropertyRegistrationConfirmationService).setLandlordReactivatedByLastRegistration(true)
+    }
+
+    @Test
+    fun `registerProperty confirmation email says the landlord account was reactivated if it was inactive`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        landlord.deactivate(LocalDate.of(2026, 1, 1))
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+
+        // Assert
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq(CURRENT_USER_EMAIL),
+            argThat<PropertyRegistrationConfirmationEmail> { landlordReactivated },
+        )
+    }
+
+    @Test
+    fun `registerProperty confirmation email does not say the landlord account was reactivated if it was already active`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+
+        // Assert
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq(CURRENT_USER_EMAIL),
+            argThat<PropertyRegistrationConfirmationEmail> { !landlordReactivated },
+        )
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `registerProperty confirmation email does not say the landlord account was reactivated when active inactive is disabled`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        landlord.deactivate(LocalDate.of(2026, 1, 1))
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        // Act
+        propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
+
+        // Assert
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq(CURRENT_USER_EMAIL),
+            argThat<PropertyRegistrationConfirmationEmail> { !landlordReactivated },
+        )
     }
 
     private fun stubPropertyOwnershipCreation(
