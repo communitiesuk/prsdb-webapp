@@ -53,6 +53,10 @@ confirmation:
     epc: energy performance certificate (EPC)
     tenancyDetails: tenancy details
   goToDashboard: Go to dashboard
+  landlordAccount:
+    heading: Your landlord account
+    individual: Your landlord account is now active.
+    organisation: Your organisation’s landlord account is now active.
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
 taskList:
