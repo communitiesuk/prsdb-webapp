@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 
+// TODO PDJB-2016: Remove ASSOCIATED_PARTIES feature flag setup once the flag is removed.
 class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     private lateinit var freeholderRepository: FreeholderRepository
