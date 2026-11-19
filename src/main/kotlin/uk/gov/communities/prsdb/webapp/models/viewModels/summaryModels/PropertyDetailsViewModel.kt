@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
 class PropertyDetailsViewModel(
@@ -69,6 +70,16 @@ class PropertyDetailsViewModel(
 
     // TODO PDJB-1994: Replace this placeholder URL with the superior landlord update journey route.
     val superiorLandlordSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
+    val superiorLandlordNotUsedRows: List<SummaryListRowViewModel> =
+        listOf(
+            rowWithViewTypeSpecificChangeLink(
+                key = "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
+                // Resolves as 'No'
+                value = MessageKeyConverter.convert(false),
+                landlordActionLink = superiorLandlordSectionUpdateUrl,
+            ),
+        )
 
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())

@@ -309,6 +309,22 @@ class PropertyDetailsViewModelTests {
         assertEquals("#", viewModel.superiorLandlordSectionUpdateUrl)
     }
 
+    @Test
+    fun `the superior landlord not used rows show a no answer with a change link in the landlord view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        val row = viewModel.superiorLandlordNotUsedRows.single()
+        assertEquals("registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain", row.fieldHeading)
+        assertEquals("commonText.no", row.fieldValue)
+        // TODO PDJB-1994: update this URL when the superior landlord update journey route is added
+        assertEquals(listOf(SummaryListRowActionsViewModel("forms.links.change", "#")), row.actions)
+    }
+
     // TODO PDJB-1999: update or remove this test when superior landlords are shown in the local council view
     @Test
     fun `the superior landlord section is hidden in the local council view`() {
@@ -947,6 +963,7 @@ class PropertyDetailsViewModelTests {
 
         assertTrue(viewModel.showSuperiorLandlordSection)
         assertFalse(viewModel.showSuperiorLandlordSectionUpdateLink)
+        assertTrue(viewModel.superiorLandlordNotUsedRows.none { it.hasActions })
     }
 
     @Test

@@ -135,7 +135,7 @@
                                     </div>
                                 </th:block>
                                 <th:block th:unless="${propertyDetails.hasSuperiorLandlords}">
-                                    <dl th:replace="~{fragments/summaryList :: summaryList(${noSuperiorLandlordsSummaryList})}"></dl>
+                                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.superiorLandlordNotUsedRows})}"></dl>
                                 </th:block>
                             </div>
                         </th:block>
