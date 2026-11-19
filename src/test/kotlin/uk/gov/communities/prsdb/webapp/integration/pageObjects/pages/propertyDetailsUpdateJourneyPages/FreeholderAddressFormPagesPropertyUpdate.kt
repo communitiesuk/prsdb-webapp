@@ -10,15 +10,24 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
+private fun freeholderAddressUrlPath(
+    propertyOwnershipId: Long,
+    stepRouteSegment: String,
+): String {
+    val route =
+        UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE.replace(
+            "{propertyOwnershipId}",
+            propertyOwnershipId.toString(),
+        )
+    return "$route/${FreeholderAddressTask.ROUTE_SEGMENT}/$stepRouteSegment"
+}
+
 class FreeholderLookupAddressFormPagePropertyUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : LookupAddressFormPage(
         page,
-        "${UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE.replace(
-            "{propertyOwnershipId}",
-            urlArguments["propertyOwnershipId"]!!,
-        )}/${FreeholderAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+        freeholderAddressUrlPath(urlArguments["propertyOwnershipId"]!!.toLong(), LookupAddressStep.ROUTE_SEGMENT),
     )
 
 class FreeholderSelectAddressFormPagePropertyUpdate(
@@ -26,10 +35,7 @@ class FreeholderSelectAddressFormPagePropertyUpdate(
     urlArguments: Map<String, String>,
 ) : SelectAddressFormPage(
         page,
-        "${UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE.replace(
-            "{propertyOwnershipId}",
-            urlArguments["propertyOwnershipId"]!!,
-        )}/${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        freeholderAddressUrlPath(urlArguments["propertyOwnershipId"]!!.toLong(), SelectAddressStep.ROUTE_SEGMENT),
     )
 
 class FreeholderManualAddressFormPagePropertyUpdate(
@@ -37,8 +43,5 @@ class FreeholderManualAddressFormPagePropertyUpdate(
     urlArguments: Map<String, String>,
 ) : ManualAddressFormPage(
         page,
-        "${UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE.replace(
-            "{propertyOwnershipId}",
-            urlArguments["propertyOwnershipId"]!!,
-        )}/${FreeholderAddressTask.ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}",
+        freeholderAddressUrlPath(urlArguments["propertyOwnershipId"]!!.toLong(), ManualAddressStep.ROUTE_SEGMENT),
     )
