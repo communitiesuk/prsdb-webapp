@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveL
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
+import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
@@ -49,6 +50,7 @@ class LandlordDetailsController(
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
     private val usersIncompletePropertyService: UsersIncompletePropertyService,
+    private val activeInactiveService: ActiveInactiveService,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -74,7 +76,7 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val isInactiveVariant = shouldShowInactiveLandlordVariant(landlord)
+        val isInactiveVariant = activeInactiveService.isLandlordInactive(landlord)
         val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = !isInactiveVariant)
 
         model.addAttribute("landlord", landlordViewModel)
@@ -92,7 +94,7 @@ class LandlordDetailsController(
         model: Model,
     ): String {
         val canPerformOrgAdminActions = organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()
-        val isInactiveVariant = shouldShowInactiveLandlordVariant(orgLandlord)
+        val isInactiveVariant = activeInactiveService.isLandlordInactive(orgLandlord)
         val canChangeRecord = canPerformOrgAdminActions && !isInactiveVariant
 
         model.addAttribute(
@@ -182,10 +184,6 @@ class LandlordDetailsController(
         model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
-
-    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
-    private fun shouldShowInactiveLandlordVariant(landlord: Landlord): Boolean =
-        featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
     @GetMapping(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
