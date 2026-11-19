@@ -79,7 +79,6 @@ provideLicensingLater:
       two: details about the license (if your property needs one)
 checkAnswers:
   heading: Tell us if the property needs a license
-  licensingType: Licensing type
   noLicensing: None
   noLicensingRequired: This property does not need a licence
   licensingProvideLater: Provide this later

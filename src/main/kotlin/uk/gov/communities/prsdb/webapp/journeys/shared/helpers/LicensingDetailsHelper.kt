@@ -9,57 +9,56 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 @PrsdbWebService
 class LicensingDetailsHelper {
-    fun getCheckYourAnswersSummaryListWithoutProvideLater(
-        state: CheckYourAnswersJourneyState,
-        licensingState: LicensingState,
-    ): List<SummaryListRowViewModel> =
-        licensingState.getLicensingType().let { licensingType ->
-            listOfNotNull(
-                getLicensingTypeRow(state, licensingState, licensingType),
-                when (licensingType) {
-                    LicensingType.HMO_MANDATORY_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoMandatoryLicenceStep)
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoAdditionalLicenceStep)
-                    LicensingType.SELECTIVE_LICENCE -> (licensingState.getLicenceNumber() to licensingState.selectiveLicenceStep)
-                    else -> null
-                }?.let { (licenceNumber, step) ->
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                        licenceNumber,
-                        Destination.VisitableStep(step, state.getCyaJourneyId(step)),
-                    )
-                },
-            )
-        }
-
     fun getCheckYourAnswersSummaryList(
         state: CheckYourAnswersJourneyState,
         licensingState: LicensingState,
     ): List<SummaryListRowViewModel> {
         val licensingType = licensingState.getLicensingType()
+        val licensingTypeValue: Any =
+            when {
+                licensingType == LicensingType.NO_LICENSING -> "licensing.checkAnswers.noLicensingRequired"
+                licensingType == LicensingType.PROVIDE_LATER && licensingState.isOccupied == false ->
+                    "licensing.checkAnswers.licensingProvideLaterUnoccupied"
 
-        if (licensingType == LicensingType.NO_LICENSING) {
-            return listOf(getLicensingTypeRow(state, licensingState, "licensing.checkAnswers.noLicensingRequired"))
-        }
+                else -> licensingType
+            }
 
-        if (licensingState.isOccupied == false && licensingType == LicensingType.PROVIDE_LATER) {
-            return listOf(getLicensingTypeRow(state, licensingState, "licensing.checkAnswers.licensingProvideLaterUnoccupied"))
-        }
-
-        return getCheckYourAnswersSummaryListWithoutProvideLater(state, licensingState)
+        return listOfNotNull(
+            getLicensingTypeRow(state, licensingState, licensingTypeValue),
+            getLicenceNumberRow(state, licensingState, licensingType),
+        )
     }
 
     fun getLicensingCyaContent(
         state: CheckYourAnswersJourneyState,
         licensingState: LicensingState,
-    ): Map<String, Any?> = mapOf("licensingRows" to getCheckYourAnswersSummaryListWithoutProvideLater(state, licensingState))
+    ): Map<String, Any?> = mapOf("licensingRows" to getCheckYourAnswersSummaryList(state, licensingState))
 
     private fun getLicensingTypeRow(
         state: CheckYourAnswersJourneyState,
         licensingState: LicensingState,
         licensingTypeValue: Any,
     ) = SummaryListRowViewModel.forCheckYourAnswersPage(
-        "licensing.checkAnswers.licensingType",
+        "propertyDetails.propertyRecord.licensingInformation.licensingType",
         licensingTypeValue,
         Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
     )
+
+    private fun getLicenceNumberRow(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+        licensingType: LicensingType,
+    ): SummaryListRowViewModel? =
+        when (licensingType) {
+            LicensingType.HMO_MANDATORY_LICENCE -> licensingState.hmoMandatoryLicenceStep
+            LicensingType.HMO_ADDITIONAL_LICENCE -> licensingState.hmoAdditionalLicenceStep
+            LicensingType.SELECTIVE_LICENCE -> licensingState.selectiveLicenceStep
+            else -> null
+        }?.let { step ->
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+                licensingState.getLicenceNumber(),
+                Destination.VisitableStep(step, state.getCyaJourneyId(step)),
+            )
+        }
 }
