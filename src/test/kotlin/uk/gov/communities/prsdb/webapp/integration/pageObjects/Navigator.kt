@@ -1749,8 +1749,11 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyReactivationCheckAnswersPage(propertyOwnershipId: Long): CheckAnswersPagePropertyReactivation {
-        setJourneyStateInSession(PropertyReactivationStateSessionBuilder.beforeCheckAnswers().build())
+    fun skipToPropertyReactivationCheckAnswersPage(
+        propertyOwnershipId: Long,
+        stateBuilder: PropertyReactivationStateSessionBuilder = PropertyReactivationStateSessionBuilder.beforeCheckAnswers(),
+    ): CheckAnswersPagePropertyReactivation {
+        setJourneyStateInSession(stateBuilder.build())
         navigate(
             ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
                 "/${ReactivationCheckAnswersStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",

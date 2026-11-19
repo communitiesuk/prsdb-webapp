@@ -4,25 +4,46 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.BillsIncludedFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicUploadsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicrUploadsFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasCertUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicIssueDateFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicrExpiryDateFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EpcExemptionFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.FurnishedStatusFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.GasCertIssueDateFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasElectricalCertFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasEpcFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasMeesExemptionFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HmoMandatoryLicenceFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.IsEpcRequiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.LicensingTypeFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.MeesExemptionFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfHouseholdsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.NumberOfPeopleFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentAmountFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentFrequencyFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.RentIncludesBillsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.SelectiveLicenceFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyReactivationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
@@ -180,6 +201,247 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation::class, urlArguments).submitYes()
 
             assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the valid gas certificate change link navigates to the gas certificate page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersGasCertUploaded(),
+                )
+
+            checkAnswersPage.complianceSummaryList.validGasCertRow.clickFirstActionLinkAndWait()
+            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyReactivation::class, urlArguments)
+            hasGasCertPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the gas certificate issue date change link navigates to the issue date page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersGasCertUploaded(),
+                )
+
+            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.clickFirstActionLinkAndWait()
+            val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
+            gasCertIssueDatePage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the gas certificate uploads change link navigates to the uploads page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersGasCertUploaded(),
+                )
+
+            checkAnswersPage.complianceSummaryList.gasCertUploadRow.clickFirstActionLinkAndWait()
+            val gasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyReactivation::class, urlArguments)
+            gasCertUploadsPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the EIC issue date change link navigates to the issue date page, which links back to check answers`(page: Page) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
+
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
+            val issueDatePage = assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
+            issueDatePage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the EICR expiry date change link navigates to the expiry date page, which links back to check answers`(page: Page) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eicr)
+
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eicr).clickFirstActionLinkAndWait()
+            val expiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyReactivation::class, urlArguments)
+            expiryDatePage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @ParameterizedTest(name = "{0}")
+        @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
+        fun `the electrical certificate uploads change link navigates to the uploads page, which links back to check answers`(
+            certificateType: CertificateType,
+            page: Page,
+        ) {
+            val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(certificateType)
+
+            checkAnswersPage.complianceSummaryList.electricalCertUploadRow.clickFirstActionLinkAndWait()
+            val electricalCertUploadsPage =
+                when (certificateType) {
+                    CertificateType.Eic -> assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments)
+                    CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyReactivation::class, urlArguments)
+                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+                }
+            electricalCertUploadsPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        private fun skipToCheckAnswersPageWithElectricalCertUploaded(certificateType: CertificateType) =
+            navigator.skipToPropertyReactivationCheckAnswersPage(
+                inactivePropertyOwnershipId,
+                when (certificateType) {
+                    CertificateType.Eic -> PropertyReactivationStateSessionBuilder.beforeCheckAnswersEicUploaded()
+                    CertificateType.Eicr -> PropertyReactivationStateSessionBuilder.beforeCheckAnswersEicrUploaded()
+                    else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
+                },
+            )
+
+        @Test
+        fun `the EPC change link goes to the has EPC page when found by certificate number, which links back to check answers`(
+            page: Page,
+        ) {
+            whenever(epcRegisterClient.getByUprn(any())).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersEpcFoundByCertificateNumber(),
+                )
+
+            checkAnswersPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
+            hasEpcPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the EPC tenancy check change link navigates to the tenancy check page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersEpcExpiredInDateAtTenancyStart(),
+                )
+
+            checkAnswersPage.complianceSummaryList.epcTenancyCheckRow.clickFirstActionLinkAndWait()
+            val tenancyCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyReactivation::class, urlArguments)
+            tenancyCheckPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the is EPC required and EPC exemption change links navigate to their pages, which link back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersNoEpcExempt(),
+                )
+
+            checkAnswersPage.complianceSummaryList.isEpcRequiredRow.clickFirstActionLinkAndWait()
+            val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyReactivation::class, urlArguments)
+            isEpcRequiredPage.backLink.clickAndWait()
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+
+            checkAnswersPage.complianceSummaryList.epcExemptionRow.clickFirstActionLinkAndWait()
+            val epcExemptionPage = assertPageIs(page, EpcExemptionFormPagePropertyReactivation::class, urlArguments)
+            epcExemptionPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the registered energy efficiency exemption change link navigates to its page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersEpcLowRatingWithExemption(),
+                )
+
+            checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.clickFirstActionLinkAndWait()
+            val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyReactivation::class, urlArguments)
+            hasMeesExemptionPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the registered exemption reason change link navigates to the reason page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersEpcLowRatingWithExemption(),
+                )
+
+            checkAnswersPage.complianceSummaryList.meesExemptionRow.clickFirstActionLinkAndWait()
+            val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyReactivation::class, urlArguments)
+            meesExemptionPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `the number of tenants change link navigates to the number of tenants page, which links back to check answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+
+            checkAnswersPage.tenancySummaryList.numberOfTenantsRow.clickFirstActionLinkAndWait()
+            val numberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyReactivation::class, urlArguments)
+            numberOfPeoplePage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `changing rent includes bills asks which bills are included and returns to check answers with the new answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+            assertThat(checkAnswersPage.tenancySummaryList.rentIncludesBillsRow.value).containsText("No")
+
+            checkAnswersPage.tenancySummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, RentIncludesBillsFormPagePropertyReactivation::class, urlArguments).submitIsIncluded()
+            val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyReactivation::class, urlArguments)
+            billsIncludedPage.selectGasElectricityWater()
+            billsIncludedPage.form.submit()
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.rentIncludesBillsRow.value).containsText("Yes")
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.billsIncludedRow.value).containsText("Gas, Electricity, Water")
+        }
+
+        @Test
+        fun `the bills included change link navigates to the bills included page, which links back to check answers`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersRentIncludesBills(),
+                )
+
+            checkAnswersPage.tenancySummaryList.billsIncludedRow.clickFirstActionLinkAndWait()
+            val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyReactivation::class, urlArguments)
+            billsIncludedPage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `changing the rent frequency re-asks for the rent amount and returns to check answers with the new answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+            assertThat(checkAnswersPage.tenancySummaryList.rentFrequencyRow.value).containsText("Monthly")
+
+            checkAnswersPage.tenancySummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyReactivation::class, urlArguments)
+            rentFrequencyPage.selectRentFrequency(RentFrequency.WEEKLY)
+            rentFrequencyPage.form.submit()
+            assertPageIs(page, RentAmountFormPagePropertyReactivation::class, urlArguments).submitRentAmount("100")
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.rentFrequencyRow.value).containsText("Weekly")
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("100")
         }
     }
 }
