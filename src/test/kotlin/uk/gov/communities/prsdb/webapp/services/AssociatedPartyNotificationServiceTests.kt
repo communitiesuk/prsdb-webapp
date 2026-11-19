@@ -173,8 +173,9 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
+    // TODO PDJB-1987: Update this test to expect an email once the freeholder-added email is implemented.
     @Test
-    fun `freeholder added to property notification is not sent yet when both contact methods are present`() {
+    fun `freeholder with both contact methods receives no notification while email implementation is pending`() {
         // Arrange
         val freeholder =
             createFreeholderModel(
