@@ -108,7 +108,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property notification posts a letter built from journey details when the address is known`() {
+    fun `freeholder added to property notification is sent as a letter built from journey details when the address is known`() {
         // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson", address = postalAddress)
         val propertyOwnership =
