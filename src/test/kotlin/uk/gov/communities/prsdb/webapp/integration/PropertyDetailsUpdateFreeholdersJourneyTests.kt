@@ -88,7 +88,13 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertThat(freeholdersListPage.getSummaryCard("Unknown freeholder").title).hasText("Unknown freeholder")
         freeholdersListPage.submit()
 
-        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val unknownFreeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
+        assertEquals("Unknown freeholder", unknownFreeholderCard.title.getText())
+        assertThat(unknownFreeholderCard.bodyText).hasText(
+            "You told us there was another freeholder, but you cannot currently provide their details. " +
+                "Return and add these details when you can.",
+        )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
         assertNull(savedFreeholder.name)
@@ -152,7 +158,12 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
         assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
 
-        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
+        assertEquals("Existing Freeholder", freeholderCard.title.getText())
+        assertThat(freeholderCard.bodyText).hasText(
+            "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+        )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
         assertNull(savedFreeholder.email)
@@ -194,7 +205,12 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
 
-        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
+        assertEquals("Existing Freeholder", freeholderCard.title.getText())
+        assertThat(freeholderCard.bodyText).hasText(
+            "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+        )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
         assertNull(savedFreeholder.email)
@@ -305,6 +321,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         emailPage.submitEmail("updated@example.com")
         assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).submit()
 
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
+        assertEquals("Updated Freeholder", freeholderCard.title.getText())
+        assertThat(freeholderCard).containsText("updated@example.com")
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
         assertEquals("Updated Freeholder", savedFreeholder.name)
