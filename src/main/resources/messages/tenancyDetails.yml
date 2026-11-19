@@ -89,7 +89,7 @@ rentFrequency:
         label: Monthly
         hint: You collect rent on the same date each month
       fourWeekly:
-        label: 4 weekly
+        label: Every 4 weeks
         hint: You collect rent every 28 days
       weekly:
         label: Weekly
@@ -103,31 +103,30 @@ rentFrequency:
       missing: Select how often you charge rent
 rentAmount:
   heading:
-    weekly: What is the weekly rent?
-    fourWeekly: What is the 4-weekly rent?
-    monthly: What is the monthly rent?
+    weekly: Rent charged each week
+    fourWeekly: Rent charged every 4 weeks
+    monthly: Rent charged each month
     other: Equivalent monthly rent
   subheading:
-    weekly: Weekly rent
-    fourWeekly: 4-weekly rent
-    monthly: Monthly rent
+    weekly: How much is the weekly rent, in pounds?
+    fourWeekly: How much is the rent every 4 weeks, in pounds?
+    monthly: How much is the monthly rent, in pounds?
     other:
       one: What to include
       two: What is the rent, as a monthly figure in pounds?
   paragraph:
     one:
-      weekly: The amount you enter must be the total weekly rent agreed with the tenant.
-      fourWeekly: The amount you enter must be the total 4-weekly rent agreed with the tenant.
-      monthly: The amount you enter must be the total monthly rent agreed with the tenant.
-      other: The amount you enter must be the total monthly rent agreed with the tenant.
+      weekly: Enter the total weekly rent agreed with the tenant.
+      fourWeekly: Enter the total 4-weekly rent agreed with the tenant.
+      monthly: Enter the total monthly rent agreed with the tenant.
+      other: Enter the total monthly rent agreed with the tenant.
     two: 'You must include:'
     three: 'Do not include:'
-    four: Enter the amount in pounds. For example, 705 or 705.50
     five: Tell us how much rent you charge, converted into a monthly figure.
   bullet:
     one: the agreed rent
     two: the rent for the whole property (if the property is an HMO, do not enter the price per room)
-    three: any bills or services included in the rent, such as gas, electricity or cleaning
+    three: any bills included in the rent
     four: rent arrears
     five: rent in advance payments
   details:
@@ -138,9 +137,7 @@ rentAmount:
     paragraph:
       one: Multiply the rent by 26, then divide it by 12.
       two: Calculate how much the rent is per year, then divide it by 12.
-  fieldSetHint:
-    default: Do not use the £ sign or commas.
-    other: For example, 650.50
+  fieldSetHint: For example, 650.50
   error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
 provideTenancyDetailsLater:
   heading: Provide tenancy details later

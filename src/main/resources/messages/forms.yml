@@ -423,17 +423,6 @@ update:
         three: You can go back to undo this change.
   numberOfBedrooms:
     heading: Update how many bedrooms are in your property
-  rentFrequency:
-    heading: Update when you charge rent
-  rentAmount:
-    weekly:
-      fieldSetHeading: Update your weekly rent
-    fourWeekly:
-      fieldSetHeading: Update your 4-weekly rent
-    monthly:
-      fieldSetHeading: Update your monthly rent
-    other:
-      fieldSetHeading: Update your monthly rent
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers

@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -16,7 +18,15 @@ class ActiveInactiveService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val userToLandlordService: UserToLandlordService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
+    fun isCurrentLandlordInactive(): Boolean =
+        userToLandlordService.getCurrentLandlordForUserOrNull()?.let { isLandlordInactive(it) } ?: false
+
+    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+    fun isLandlordInactive(landlord: Landlord): Boolean = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
+
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
     fun deactivateProperty(propertyOwnershipId: Long) {
