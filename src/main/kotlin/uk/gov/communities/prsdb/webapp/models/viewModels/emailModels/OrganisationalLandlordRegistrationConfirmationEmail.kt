@@ -12,18 +12,18 @@ data class OrganisationalLandlordRegistrationConfirmationEmail(
     // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
     val isMultiUserOrganisationsEnabled: Boolean = false,
     // TODO PDJB-2149: Make non-nullable when the ACTIVE_INACTIVE flag is removed
-    val deactivationDate: LocalDate? = null,
+    val scheduledDeactivationDate: LocalDate? = null,
 ) : EmailTemplateModel {
     private val registrantNameKey = "registrant name"
     private val organisationNameKey = "organisation name"
     private val lrnKey = "LRN"
     private val prsdURLKey = "PRSD URL"
     private val isMultiUserOrganisationsEnabledKey = "isMultiUserOrganisationsEnabled"
-    private val deactivationDateKey = "deactivation date"
+    private val scheduledDeactivationDateKey = "deactivation date"
 
     // TODO PDJB-2149: Always use ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL when the ACTIVE_INACTIVE flag is removed
     override val template =
-        if (deactivationDate != null) {
+        if (scheduledDeactivationDate != null) {
             EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
         } else {
             EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844
@@ -39,8 +39,8 @@ data class OrganisationalLandlordRegistrationConfirmationEmail(
                 isMultiUserOrganisationsEnabledKey to isMultiUserOrganisationsEnabled.toNotifyYesNo(),
             )
 
-        // TODO PDJB-2149: Always add the deactivation date when the ACTIVE_INACTIVE flag is removed
-        deactivationDate?.let { hashMap[deactivationDateKey] = it.format(DATE_FORMATTER) }
+        // TODO PDJB-2149: Always add the scheduled deactivation date when the ACTIVE_INACTIVE flag is removed
+        scheduledDeactivationDate?.let { hashMap[scheduledDeactivationDateKey] = it.format(DATE_FORMATTER) }
 
         return hashMap
     }
