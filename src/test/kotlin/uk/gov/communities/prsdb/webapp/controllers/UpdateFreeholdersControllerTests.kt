@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
@@ -14,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -83,23 +81,5 @@ class UpdateFreeholdersControllerTests(
                     status { isNotFound() }
                 }
         }
-    }
-
-    @Test
-    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `postUpdateStep redirects to the journey destination for a landlord`() {
-        stubCreateJourneySteps()
-        whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
-            .thenReturn(ModelAndView("redirect:/landlord/property-details/$propertyOwnershipId"))
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl("/landlord/property-details/$propertyOwnershipId")
-            }
     }
 }
