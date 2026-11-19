@@ -20,7 +20,7 @@ class AssociatedPartyNotificationService(
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987: make the return type non-nullable once the freeholder added email is sent.
+    // TODO PDJB-1987: make the email template and return type non-nullable once the freeholder added email is sent.
     fun sendNotificationToFreeholderAddedToProperty(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
