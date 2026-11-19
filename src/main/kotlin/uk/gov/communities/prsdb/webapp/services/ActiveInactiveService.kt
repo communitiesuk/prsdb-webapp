@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -19,6 +22,7 @@ class ActiveInactiveService(
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val userToLandlordService: UserToLandlordService,
+    private val transactionTemplate: TransactionTemplate,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     fun isCurrentLandlordInactive(): Boolean =
@@ -42,6 +46,28 @@ class ActiveInactiveService(
         propertyOwnership.landlords
             .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
             .forEach { markLandlordAsInactive(it, deactivationDate) }
+    }
+
+    fun deactivatePropertiesWithOverdueTasksReturningFailureCount(): Int {
+        val cutoff =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
+        val propertyOwnershipIds = propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff)
+        var failureCount = 0
+
+        propertyOwnershipIds.forEach { propertyOwnershipId ->
+            try {
+                transactionTemplate.executeWithoutResult { deactivateProperty(propertyOwnershipId) }
+            } catch (exception: Exception) {
+                logger.error("Failed to deactivate property ownership $propertyOwnershipId", exception)
+                failureCount++
+            }
+        }
+
+        return failureCount
     }
 
     fun landlordHasOtherActiveProperties(
@@ -104,4 +130,8 @@ class ActiveInactiveService(
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(ActiveInactiveService::class.java)
+    }
 }
