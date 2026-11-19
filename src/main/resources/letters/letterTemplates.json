@@ -5,5 +5,12 @@
     "enumName": "FREEHOLDER_ADDED_TO_PROPERTY_LETTER",
     "subject": "Check these details are correct",
     "bodyLocation": "/letters/FreeholderAddedToPropertyLetter.md"
+  },
+  {
+    "test_id": "17654692-4f36-4bc5-a36c-20fc6577dabb",
+    "prod_id": "f3e2f94c-3433-4501-ba4a-f950fef25712",
+    "enumName": "SUPERIOR_LANDLORD_ADDED_TO_PROPERTY_LETTER",
+    "subject": "Check these details are correct",
+    "bodyLocation": "/letters/SuperiorLandlordAddedToPropertyLetter.md"
   }
 ]
