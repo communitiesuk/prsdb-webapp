@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import kotlinx.serialization.Serializable
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 
 @Serializable
@@ -16,6 +17,8 @@ data class AddressDataModel(
     val locality: String? = null,
     val townName: String? = null,
     val postcode: String? = null,
+    val country: String = ENGLAND,
+    val gss: String? = null,
 ) {
     fun toMultiLineAddress(): String {
         val multiLineFromComponents = buildMultiLineAddressFromComponents()
@@ -80,6 +83,10 @@ data class AddressDataModel(
                 townName = townOrCity,
                 postcode = postcode,
                 localCouncilId = localCouncilId,
+                // TODO PDJB-2115: Pass in the country rather than hardcoding England
+                country = ENGLAND,
+                // TODO PDJB-2258: Match up a GSS code for manual addresses
+                gss = null,
             )
 
         fun manualAddressDataToSingleLineAddress(
@@ -105,6 +112,8 @@ data class AddressDataModel(
                 locality = address.locality,
                 townName = address.townName,
                 postcode = address.postcode,
+                country = address.country,
+                gss = address.gss,
             )
     }
 }
