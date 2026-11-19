@@ -113,7 +113,7 @@ class PropertyDetailsViewModelTests {
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         // Assert
-        assertTrue(viewModel.showFreeholdersSection)
+        assertTrue(viewModel.showFreeholderSection)
         assertEquals(
             "/landlord/property-details/123/update-freeholders/freeholders-list",
             viewModel.freeholdersUpdateLink,
@@ -137,7 +137,7 @@ class PropertyDetailsViewModelTests {
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         // Assert
-        assertTrue(viewModel.showFreeholdersSection)
+        assertTrue(viewModel.showFreeholderSection)
         assertEquals(
             "propertyDetails.peopleResponsible.freeholders.jointUpdateLink",
             viewModel.freeholdersUpdateLinkTextKey,
@@ -168,9 +168,9 @@ class PropertyDetailsViewModelTests {
             )
 
         // Assert
-        assertFalse(ineligibleViewModel.showFreeholdersSection)
+        assertFalse(ineligibleViewModel.showFreeholderSection)
         assertNull(ineligibleViewModel.freeholdersUpdateLink)
-        assertFalse(disabledFeatureViewModel.showFreeholdersSection)
+        assertFalse(disabledFeatureViewModel.showFreeholderSection)
         assertNull(disabledFeatureViewModel.freeholdersUpdateLink)
     }
 
@@ -321,7 +321,7 @@ class PropertyDetailsViewModelTests {
                     messageSource = mockMessageSource,
                 )
 
-            assertTrue(viewModel.showFreeholdersSection)
+            assertTrue(viewModel.showFreeholderSection)
             assertEquals(headingKey, viewModel.freeholdersHeadingKey)
             assertEquals(linkTextKey, viewModel.freeholdersUpdateLinkTextKey)
             assertTrue(viewModel.freeholdersUpdateLink != null)
@@ -339,7 +339,7 @@ class PropertyDetailsViewModelTests {
                 associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showFreeholdersSection)
+        assertFalse(viewModel.showFreeholderSection)
     }
 
     @Test
@@ -352,7 +352,7 @@ class PropertyDetailsViewModelTests {
                 associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showFreeholdersSection)
+        assertFalse(viewModel.showFreeholderSection)
     }
 
     @ParameterizedTest
@@ -562,7 +562,7 @@ class PropertyDetailsViewModelTests {
                     associatedPartiesEnabled = false,
                 )
 
-            assertFalse(viewModel.showFreeholdersSection)
+            assertFalse(viewModel.showFreeholderSection)
         }
 
         @Test
@@ -1111,7 +1111,7 @@ class PropertyDetailsViewModelTests {
                 messageSource = mockMessageSource,
             )
 
-        assertTrue(viewModel.showFreeholdersSection)
+        assertTrue(viewModel.showFreeholderSection)
         assertNull(viewModel.freeholdersUpdateLink)
     }
 

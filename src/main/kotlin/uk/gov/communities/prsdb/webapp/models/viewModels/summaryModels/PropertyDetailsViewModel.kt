@@ -48,7 +48,7 @@ class PropertyDetailsViewModel(
     val peopleResponsibleOwnershipSection: List<SummaryListRowViewModel> =
         if (showPeopleResponsibleOwnership) ownershipAnswerRows() else emptyList()
 
-    val showFreeholdersSection: Boolean =
+    val showFreeholderSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
     val freeholdersHeadingKey: String =
@@ -66,7 +66,7 @@ class PropertyDetailsViewModel(
         }
 
     val freeholdersUpdateLink: String? =
-        if (showFreeholdersSection && viewType == PropertyDetailsViewType.LANDLORD) {
+        if (showFreeholderSection && viewType == PropertyDetailsViewType.LANDLORD) {
             UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
         } else {
             null
