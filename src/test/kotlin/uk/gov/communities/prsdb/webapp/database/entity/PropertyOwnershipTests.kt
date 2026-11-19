@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.time.Instant
 import java.time.LocalDate
 
 class PropertyOwnershipTests {
@@ -62,6 +64,24 @@ class PropertyOwnershipTests {
         val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord))
 
         assertFalse(property.isSolelyOwnedBy(landlord))
+    }
+
+    @Test
+    fun `getOwnershipStructureMostRecentlyUpdated returns the latest of the ownership, freeholder and superior landlord dates`() {
+        val property = MockLandlordData.createPropertyOwnership(createdDate = Instant.parse("2025-01-01T00:00:00Z"))
+        property.freeholders.add(MockLandlordData.createFreeholder(property).withCreatedDate("2025-03-01T00:00:00Z"))
+        property.superiorLandlords.add(
+            MockLandlordData.createSuperiorLandlord(property).withCreatedDate("2025-02-01T00:00:00Z"),
+        )
+
+        assertEquals(Instant.parse("2025-03-01T00:00:00Z"), property.getOwnershipStructureMostRecentlyUpdated())
+    }
+
+    @Test
+    fun `getOwnershipStructureMostRecentlyUpdated returns the ownership date when there are no freeholders or superior landlords`() {
+        val property = MockLandlordData.createPropertyOwnership(createdDate = Instant.parse("2025-01-01T00:00:00Z"))
+
+        assertEquals(Instant.parse("2025-01-01T00:00:00Z"), property.getOwnershipStructureMostRecentlyUpdated())
     }
 
     @Test
@@ -160,4 +180,7 @@ class PropertyOwnershipTests {
         assertTrue(property.isActive)
         assertNull(property.lastDeactivatedDate)
     }
+
+    private fun <T : ModifiableAuditableEntity> T.withCreatedDate(createdDate: String): T =
+        apply { ReflectionTestUtils.setField(this, "createdDate", Instant.parse(createdDate)) }
 }

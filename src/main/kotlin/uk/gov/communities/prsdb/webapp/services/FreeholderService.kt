@@ -14,7 +14,6 @@ class FreeholderService(
     // Updates the saved freeholders to match the list the user submitted, creating, updating and
     // deleting them one at a time.
     // Returns the newly added freeholders so they can be tracked by the journey and notified.
-    // TODO PDJB-1993: use this to update freeholders.
     // TODO PDJB-2171: also return updated and removed freeholders so they can be tracked by the
     //  journey and notified.
     @Transactional
@@ -100,8 +99,6 @@ class FreeholderService(
 
     // TODO PDJB-2016: remove this with the flag-off code paths, which never ask who the freeholder is.
     //  It keeps the invariant that an ownership type requiring freeholder records has at least one row.
-    //  PDJB-1992 will remove the remaining flag-on caller in updateOwnershipType. The flag-off callers
-    //  remain until the flag goes.
     @Transactional
     fun createPlaceholderFreeholder(propertyOwnership: PropertyOwnership) {
         freeholderRepository.save(Freeholder(propertyOwnership = propertyOwnership))
