@@ -261,6 +261,17 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(checkAnswersPage.summaryList.freeholdTypeRow.value).containsText("Joint tenants")
     }
 
+    @Test
+    fun `the postal address note is rendered as HTML on the check answers and freeholders list pages`(page: Page) {
+        val urlArguments = urlArgumentsFor(propertyWithPartiesId)
+        val checkAnswersPage = completeJourneyToCheckAnswersAsShareOfJointTenantsWithNoOwnershipChain(page, urlArguments)
+        assertThat(postalAddressNoteEmphasis(page, "Alex Non-Joint")).hasText("postal address")
+
+        checkAnswersPage.changeJointFreeholdersLink.clickAndWait()
+        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertThat(postalAddressNoteEmphasis(page, "Alex Non-Joint")).hasText("postal address")
+    }
+
     // TODO PDJB-2016: delete this test along with the ASSOCIATED_PARTIES flag
     @Test
     fun `the ownership update journey is not available when the associated parties flag is disabled`() {
@@ -276,6 +287,13 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
     }
 
     private fun urlArgumentsFor(propertyOwnershipId: Long) = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+
+    private fun postalAddressNoteEmphasis(
+        page: Page,
+        cardTitle: String,
+    ) = page
+        .locator(".govuk-summary-card", Page.LocatorOptions().setHasText(cardTitle))
+        .locator(".govuk-summary-card__content p strong")
 
     private fun startJourney(propertyOwnershipId: Long) {
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
