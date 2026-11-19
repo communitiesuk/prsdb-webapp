@@ -43,7 +43,7 @@ class UpdateFreeholdersJourneyFactory(
             val freeholders = freeholderService.getFreeholdersForProperty(propertyOwnership)
 
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isJointFreeholder = propertyOwnership.ownershipType.isJointFreeholder()
             state.freeholdersMap =
                 freeholders
