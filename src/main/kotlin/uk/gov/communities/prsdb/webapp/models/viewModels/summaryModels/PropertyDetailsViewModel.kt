@@ -54,13 +54,18 @@ class PropertyDetailsViewModel(
     val showFreeholdersSection: Boolean =
         isLandlordView && associatedPartiesEnabled && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
-    val freeholdersHeadingKey: String = "propertyDetails.peopleResponsible.freeholders.heading"
+    val freeholdersHeadingKey: String =
+        if (propertyOwnership.ownershipType.isJointFreeholder()) {
+            "propertyDetails.peopleResponsible.freeholders.jointHeading"
+        } else {
+            "propertyDetails.peopleResponsible.freeholders.nonJointHeading"
+        }
 
     val freeholdersUpdateLinkTextKey: String =
         if (propertyOwnership.ownershipType.isJointFreeholder()) {
             "propertyDetails.peopleResponsible.freeholders.updateJointLink"
         } else {
-            "propertyDetails.peopleResponsible.freeholders.updateLink"
+            "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink"
         }
 
     val freeholdersUpdateLink: String? =

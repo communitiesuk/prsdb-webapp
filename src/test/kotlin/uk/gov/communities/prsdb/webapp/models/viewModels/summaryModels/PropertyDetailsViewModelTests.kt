@@ -115,7 +115,7 @@ class PropertyDetailsViewModelTests {
             viewModel.freeholdersUpdateLink,
         )
         assertEquals(
-            "propertyDetails.peopleResponsible.freeholders.updateLink",
+            "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink",
             viewModel.freeholdersUpdateLinkTextKey,
         )
         assertEquals("Freeholder", viewModel.freeholderSummaryCards.single().title)
@@ -293,13 +293,13 @@ class PropertyDetailsViewModelTests {
             listOf(
                 Triple(
                     OwnershipType.SHARE_OF_JOINT_TENANTS,
-                    "propertyDetails.peopleResponsible.freeholders.heading",
+                    "propertyDetails.peopleResponsible.freeholders.jointHeading",
                     "propertyDetails.peopleResponsible.freeholders.updateJointLink",
                 ),
                 Triple(
                     OwnershipType.LEASEHOLD_ONLY,
-                    "propertyDetails.peopleResponsible.freeholders.heading",
-                    "propertyDetails.peopleResponsible.freeholders.updateLink",
+                    "propertyDetails.peopleResponsible.freeholders.nonJointHeading",
+                    "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink",
                 ),
             )
 

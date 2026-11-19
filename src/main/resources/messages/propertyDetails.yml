@@ -33,8 +33,9 @@ peopleResponsible:
     ownershipType: Ownership type
     freeholdType: Freehold type
   freeholders:
-    heading: Freeholders
-    updateLink: Add, change or remove freeholders
+    nonJointHeading: Freeholders
+    jointHeading: Joint freeholders
+    nonJointUpdateLink: Add, change or remove freeholders
     updateJointLink: Add, change or remove joint freeholders
     notificationInset: We’ll notify anyone you add or remove.
   freeholder:
