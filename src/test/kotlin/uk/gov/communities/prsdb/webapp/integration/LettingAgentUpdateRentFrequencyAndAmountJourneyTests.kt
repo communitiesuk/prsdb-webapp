@@ -30,13 +30,13 @@ class LettingAgentUpdateRentFrequencyAndAmountJourneyTests : IntegrationTestWith
         val rentFrequencyPage =
             assertPageIs(page, RentFrequencyFormPageLettingAgentUpdate::class, urlArguments)
 
-        assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
+        assertThat(rentFrequencyPage.header).containsText("How often do you charge rent?")
         rentFrequencyPage.selectRentFrequency(newRentFrequency)
         rentFrequencyPage.form.submit()
         val rentAmountPage =
             assertPageIs(page, RentAmountFormPageLettingAgentUpdate::class, urlArguments)
 
-        assertThat(rentAmountPage.header).containsText("Update your weekly rent")
+        assertThat(rentAmountPage.header).containsText("Rent charged each week")
         rentAmountPage.submitRentAmount(newRentAmount)
         val checkYourAnswersPage =
             assertPageIs(page, CheckRentFrequencyAndAmountAnswersPageLettingAgentUpdate::class, urlArguments)
