@@ -74,9 +74,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-                }
-                withAdditionalContentProperty {
                     "submitButtonText" to "forms.buttons.continue"
                 }
             }
@@ -95,9 +92,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                     configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                         withAdditionalContentProperty {
-                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-                        }
-                        withAdditionalContentProperty {
                             "submitButtonText" to "forms.buttons.continue"
                         }
                     }
@@ -111,9 +105,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                         }
                     }
                     configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-                        withAdditionalContentProperty {
-                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-                        }
                         withAdditionalContentProperty {
                             "submitButtonText" to "forms.buttons.continue"
                         }

@@ -33,13 +33,5 @@ class RentDataHelper {
         }
 
         fun hasCustomRentFrequency(rentFrequency: RentFrequency): Boolean = rentFrequency == RentFrequency.OTHER
-
-        fun getUpdateRentAmountHeading(rentFrequency: RentFrequency): String =
-            when (rentFrequency) {
-                RentFrequency.WEEKLY -> "tenancyDetails.rentAmount.heading.weekly"
-                RentFrequency.FOUR_WEEKLY -> "tenancyDetails.rentAmount.heading.fourWeekly"
-                RentFrequency.OTHER -> "tenancyDetails.rentAmount.heading.other"
-                else -> "tenancyDetails.rentAmount.heading.monthly"
-            }
     }
 }
