@@ -108,7 +108,7 @@ class PropertyDetailsController(
                     "noSuperiorLandlordsSummaryList",
                     listOf(
                         SummaryListRowViewModel(
-                            fieldHeading = "registerProperty.superiorLandlords.checkAnwers.anyoneInOwnershipChain",
+                            fieldHeading = "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
                             // Resolves as 'No'
                             fieldValue = MessageKeyConverter.convert(false),
                             actions =
