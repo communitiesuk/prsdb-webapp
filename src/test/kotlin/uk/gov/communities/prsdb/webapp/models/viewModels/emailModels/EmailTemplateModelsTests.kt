@@ -664,6 +664,29 @@ class EmailTemplateModelsTests {
 
     @ParameterizedTest
     @CsvSource("true,yes", "false,no")
+    fun `property registration email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        // Arrange
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = true,
+                landlordReactivated = landlordReactivated,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedPersonalisation, hashMap["landlordReactivated"])
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
     fun `organisation registration email includes the feature flag as yes or no personalisation`(
         isMultiUserOrganisationsEnabled: Boolean,
         expectedPersonalisation: String,

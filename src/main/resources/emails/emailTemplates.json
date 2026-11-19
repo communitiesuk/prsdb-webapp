@@ -28,15 +28,15 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "3f121222-95c4-41c4-bd40-d923058c6f21",
-    "prod_id": "a20ab90c-451c-4f2e-be56-1a4d69ec5339",
+    "test_id": "d5a11670-e816-4a0f-a46f-8207b89d94b8",
+    "prod_id": "91d89d3b-c213-4dd7-893b-f9e8ceb8d843",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "b7baefef-634e-4bce-9d74-4ac4862a7f00",
-    "prod_id": "e8f2b6b5-53d5-430f-a8fa-8d1b63db4e36",
+    "test_id": "71714210-1f5a-42fe-bf01-cc5fb8007a02",
+    "prod_id": "98737797-3323-4254-9165-98255e0039c2",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION_WITH_PAYMENT",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmationWithPayment.md"

@@ -138,6 +138,7 @@ class RegisteredPropertyViewModelsTests {
                         RegistrationNumberDataModel
                             .fromRegistrationNumber(propertyOwnership.registrationNumber)
                             .toString(),
+                    recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id),
                 )
 
             val result = DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(propertyOwnership)

@@ -109,7 +109,7 @@
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
                             <div th:if="${propertyDetails.showFreeholderSection}" id="freeholder-section">
                                 <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholderSectionHeadingKey}}">registerProperty.freeholders.checkAnswers.heading</h3>
-                                <p class="govuk-body">
+                                <p th:if="${propertyDetails.showFreeholderSectionUpdateLink}" class="govuk-body">
                                     <a id="freeholder-update-link" class="govuk-link"
                                        th:href="@{${propertyDetails.freeholderSectionUpdateUrl}}"
                                        th:text="#{${propertyDetails.freeholderSectionLinkTextKey}}">registerProperty.freeholders.checkAnswers.changeLink</a>
@@ -123,7 +123,7 @@
                             <div th:if="${propertyDetails.showSuperiorLandlordSection}" id="superior-landlord-section">
                                 <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h3>
                                 <th:block th:if="${propertyDetails.hasSuperiorLandlords}">
-                                    <p class="govuk-body">
+                                    <p th:if="${propertyDetails.showSuperiorLandlordSectionUpdateLink}" class="govuk-body">
                                         <a id="superior-landlord-update-link" class="govuk-link"
                                            th:href="@{${propertyDetails.superiorLandlordSectionUpdateUrl}}"
                                            th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>

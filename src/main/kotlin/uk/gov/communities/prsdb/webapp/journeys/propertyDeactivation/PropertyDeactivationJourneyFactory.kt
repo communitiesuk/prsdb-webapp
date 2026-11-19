@@ -46,7 +46,6 @@ class PropertyDeactivationJourneyFactory(
                 routeSegment(ConfirmDeactivationStep.ROUTE_SEGMENT)
                 parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.SINGLE_LANDLORD) }
                 nextDestination {
-                    // TODO PDJB-2035: The property record 404s for inactive properties until it supports them
                     Destination
                         .ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
                         .withFlashAttribute("deactivationSuccessBanner", "propertyDetails.deactivationSuccessBanner.propertyDeactivated")
