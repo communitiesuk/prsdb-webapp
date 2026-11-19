@@ -123,5 +123,5 @@ interface UpdateFreeholdersJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val isJointFreeholder: Boolean
-    var freeholderSnapshot: Map<Long, String>
+    val freeholderSnapshot: Map<Long, String>
 }
