@@ -170,6 +170,49 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
+    fun `invalid email returns the registration format error in the update journey`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Email Validation Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
+        val emailPage = FreeholderEmailFormPagePropertyRegistration(page)
+        emailPage.submitEmail("not-an-email")
+
+        assertThat(emailPage.form.getErrorMessage())
+            .containsText("Enter an email address in the correct format, like name@example.com")
+        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
+    }
+
+    @Test
+    fun `blank postcode returns the required error on freeholder address lookup during an update`(page: Page) {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Postcode Validation Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("", "1")
+
+        assertThat(lookupAddressPage.form.getErrorMessage()).containsText("Enter a postcode")
+        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
+    }
+
+    @Test
     fun `changing a known freeholder to details unknown clears their details without replacing the record`(page: Page) {
         featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
