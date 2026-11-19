@@ -175,6 +175,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
@@ -3311,7 +3312,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "You told us there was another freeholder, but you cannot currently provide their details. " +
                     "Return and add these details when you can.",
             )
-            assertEquals(0, cards.getValue("Unknown freeholder").bodyText.locator("strong").count())
+            assertEquals(
+                0,
+                cards
+                    .getValue("Unknown freeholder")
+                    .bodyText
+                    .locator("strong")
+                    .count(),
+            )
             cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
 
@@ -3348,6 +3356,88 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
             detailsPage.tabs.goToPeopleResponsible()
             assertThat(detailsPage.freeholderSection).hasCount(0)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordsOnPropertyRecord {
+        @ParameterizedTest
+        @CsvSource(
+            "false, , , NONE",
+            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+            "true, FREEHOLD_AND_LEASEHOLD, SOLE_OWNERSHIP, SHARE_OF_SOLE_FREEHOLD",
+            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+            "true, FREEHOLD_AND_LEASEHOLD, COMMONHOLD, SHARE_OF_COMMONHOLD",
+        )
+        fun `registered superior landlords appear on the property record`(
+            ownsProperty: Boolean,
+            ownershipKind: OwnershipKind?,
+            freeholdType: FreeholdType?,
+            expectedOwnershipType: OwnershipType,
+            page: Page,
+        ) {
+            val superiorLandlords =
+                mapOf(
+                    1 to SuperiorLandlordDataModel(detailsKnown = true, name = "First Superior", email = "FirstSuperior@example.com"),
+                    2 to
+                        SuperiorLandlordDataModel(
+                            detailsKnown = true,
+                            name = "Second Superior",
+                            address =
+                                AddressDataModel.fromManualAddressData(
+                                    addressLineOne = "1 Example Street",
+                                    addressLineTwo = "Example Court",
+                                    townOrCity = "Example City",
+                                    county = "Exampleshire",
+                                    postcode = "EX1 1AB",
+                                ),
+                        ),
+                    3 to SuperiorLandlordDataModel(detailsKnown = false),
+                )
+            val builder =
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswers()
+                    .withBedrooms()
+                    .withOwnsProperty(ownsProperty)
+                    .withAnyoneInOwnershipChain(true)
+                    .withSuperiorLandlords(superiorLandlords)
+                    .withSuperiorLandlordsListComplete()
+            if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
+            if (freeholdType != null) builder.withFreeholdType(freeholdType)
+            if (expectedOwnershipType.requiresFreeholderRecords()) {
+                builder
+                    .withFreeholders(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
+                    .withFreeholdersInfoComplete()
+                    .withFreeholdersListComplete()
+            }
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection.locator("h3")).hasText("Other people in the property’s ownership chain")
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("First Superior", "Second Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("First Superior").summaryList).containsText("FirstSuperior@example.com")
+            assertEquals(0, cards.getValue("First Superior").bodyText.count())
+            assertThat(cards.getValue("Second Superior").summaryList).hasCount(0)
+            assertThat(cards.getValue("Second Superior").bodyText).hasText(
+                "A postal address was provided for this person in the ownership chain. " +
+                    "We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
     }
 

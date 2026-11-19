@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceA
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 
@@ -81,6 +82,26 @@ class PropertyDetailsViewModel(
         } else {
             emptyList()
         }
+
+    val showSuperiorLandlordSection: Boolean =
+        showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()
+
+    val hasSuperiorLandlords: Boolean = propertyOwnership.superiorLandlords.isNotEmpty()
+
+    val showSuperiorLandlordSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    // TODO PDJB-1994: Replace this placeholder URL with the superior landlord update journey route.
+    val superiorLandlordSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
+    val superiorLandlordNotUsedRows: List<SummaryListRowViewModel> =
+        listOf(
+            rowWithViewTypeSpecificChangeLink(
+                key = "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
+                // Resolves as 'No'
+                value = MessageKeyConverter.convert(false),
+                landlordActionLink = superiorLandlordSectionUpdateUrl,
+            ),
+        )
 
     // TODO PDJB-1999: show the property manager on the local council view's people responsible tab.
     // TODO PDJB-2016: Remove showPropertyManagerSection, its guard in PropertyDetailsController and the th:if it

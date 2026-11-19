@@ -84,6 +84,70 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
+        fun `the people responsible tab shows saved superior landlords as read only cards`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).containsText("Other people in the property’s ownership chain")
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow).isHidden()
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+        }
+
+        @Test
+        fun `the people responsible tab shows a superior landlord update link`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasAttribute("href", "#")
+        }
+
+        @Test
+        fun `the people responsible tab shows the postal address note on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Robin Superior" }
+            assertThat(superiorLandlordCard.bodyText).hasText(
+                "A postal address was provided for this person in the ownership chain. " +
+                    "We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(superiorLandlordCard.bodyText.locator("strong")).hasText("postal address")
+        }
+
+        @Test
+        fun `the people responsible tab shows the email address on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Sam Superior" }
+            assertThat(superiorLandlordCard).containsText("superior.landlord@example.com")
+        }
+
+        @Test
+        fun `the people responsible tab shows a no row when there are no superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow.value).hasText("No")
+            assertEquals(0, detailsPage.superiorLandlordCards.size)
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasCount(0)
+        }
+
+        @Test
+        fun `the people responsible tab shows a change link on the no superior landlords row`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val row = detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(row.actions.firstActionLink.locator).hasAttribute("href", "#")
+        }
+
+        @Test
         fun `the property details page loads with the property details tab selected by default`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
@@ -492,6 +556,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).hasCount(0)
+        }
+
+        // TODO PDJB-1999: remove this test when superior landlords are shown in the local council view
+        @Test
+        fun `the people responsible tab does not show saved superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).hasCount(0)
         }
 
         @Test
@@ -1103,6 +1176,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     companion object {
         private const val PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID = 1L
         private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
+        private const val PROPERTY_WITH_SUPERIOR_LANDLORDS_ID = 57L
+        private const val PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID = 1L
     }
 }
 
