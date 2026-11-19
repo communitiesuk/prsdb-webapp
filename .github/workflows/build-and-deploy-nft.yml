@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - nft
-      - feat/PDJB-553-complete-performance-coverage
 
 permissions:
   id-token: write
