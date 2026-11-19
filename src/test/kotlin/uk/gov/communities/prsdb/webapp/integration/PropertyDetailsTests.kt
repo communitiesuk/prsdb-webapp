@@ -2,9 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -326,6 +328,36 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
+            fun `the people responsible tab shows the saved property manager as a read only card`() {
+                // Property 37 is seeded with a property manager
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
+                assertEquals("Pat Manager", detailsPage.propertyManagerCard.title.getText())
+                assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
+                assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
+                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasAttribute("href", "#")
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
+            }
+
+            @Test
+            fun `the people responsible tab shows that no property manager is used when there is none`() {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
+                    .containsText("No, I manage this property (or another joint landlord does)")
+                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
+                    .hasAttribute("href", "#")
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).not().isVisible()
+            }
+
+            @Test
             fun `multiple landlord cards are displayed with logged in user first then alphabetically`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
                 detailsPage.tabs.goToPeopleResponsible()
@@ -536,6 +568,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals("Tobias Evans", detailsPage.landlordSummaryCards[2].title.getText())
             }
 
+            // TODO PDJB-1999: replace with a positive assertion when the local council view shows the property manager
+            @Test
+            fun `the property manager section is not shown`() {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+                assertThat(detailsPage.propertyManagerSection).hasCount(0)
+            }
+
             @Test
             fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
@@ -698,6 +738,22 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.lettingAgentPanel).not().isVisible()
+        }
+    }
+
+    // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
+    @Nested
+    inner class BeforeAssociatedParties {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
+        @Test
+        fun `the landlord view does not show the property manager section`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.propertyManagerSection).hasCount(0)
         }
     }
 

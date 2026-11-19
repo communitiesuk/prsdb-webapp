@@ -35,6 +35,9 @@ class PropertyDetailsPageLocalCouncilView(
             return (0 until locator.count()).map { LandlordSummaryCard(locator.nth(it)) }
         }
 
+    val propertyManagerSection: Locator
+        get() = page.locator("#property-manager-section")
+
     class LandlordSummaryCard(
         locator: Locator,
     ) : SummaryCard(locator) {
