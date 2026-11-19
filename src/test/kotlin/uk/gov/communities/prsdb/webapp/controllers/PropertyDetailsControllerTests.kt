@@ -24,6 +24,8 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -39,7 +41,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createSuperiorLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
@@ -53,6 +57,12 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var freeholderSummaryCardHelper: FreeholderSummaryCardHelper
+
+    @MockitoBean
+    private lateinit var superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper
+
+    @MockitoBean
+    private lateinit var propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -220,6 +230,30 @@ class PropertyDetailsControllerTests(
                 }
 
             verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails adds cards built from the property's persisted superior landlords`() {
+            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_SOLE_FREEHOLD)
+            propertyOwnership.superiorLandlords.add(
+                createSuperiorLandlord(propertyOwnership, name = "Superior One", email = "superior@example.com"),
+            )
+            val expectedCards = listOf(SummaryCardViewModel(title = "Superior One", summaryList = emptyList()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords)).thenReturn(expectedCards)
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("superiorLandlordSummaryCards", expectedCards) }
+                }
+
+            verify(superiorLandlordSummaryCardHelper).getSummaryCards(propertyOwnership.superiorLandlords)
         }
 
         @Test
@@ -457,6 +491,69 @@ class PropertyDetailsControllerTests(
                     model { attributeExists("landlordSummaryCards") }
                     model { attributeExists("landlordCount") }
                 }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails adds the property manager card when the property has a property manager`() {
+            val propertyManager = createPropertyManager()
+            val propertyOwnership = createPropertyOwnership().apply { this.propertyManager = propertyManager }
+            val expectedCard = SummaryCardViewModel(title = propertyManager.name, summaryList = emptyList())
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(propertyManagerSummaryCardHelper.getSummaryCard(propertyManager)).thenReturn(expectedCard)
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("propertyManagerSummaryCard", expectedCard) }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails does not add a property manager card when the property has no property manager`() {
+            val propertyOwnership = createPropertyOwnership()
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attributeDoesNotExist("propertyManagerSummaryCard") }
+                }
+        }
+
+        // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
+        @Nested
+        inner class BeforeAssociatedParties {
+            @BeforeEach
+            fun disableAssociatedParties() {
+                whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+            }
+
+            @Test
+            @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+            fun `getPropertyDetails does not add a property manager card`() {
+                val propertyOwnership = createPropertyOwnership().apply { propertyManager = createPropertyManager() }
+                whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                    .thenReturn(propertyOwnership)
+                whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                    .thenReturn(Pair(emptyList(), emptyList()))
+
+                mvc
+                    .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                    .andExpect {
+                        status { isOk() }
+                        model { attributeDoesNotExist("propertyManagerSummaryCard") }
+                    }
+            }
         }
 
         @Test

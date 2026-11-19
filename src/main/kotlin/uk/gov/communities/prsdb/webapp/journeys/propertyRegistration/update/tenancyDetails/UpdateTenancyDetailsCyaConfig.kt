@@ -29,7 +29,7 @@ class UpdateTenancyDetailsCyaConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourTenancyDetailsAnswersSummaryList(state, messageSource),
+            "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(state, messageSource),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 

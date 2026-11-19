@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
 class PropertyDetailsViewModel(
@@ -59,6 +60,51 @@ class PropertyDetailsViewModel(
 
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
     val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
+    val showSuperiorLandlordSection: Boolean =
+        showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()
+
+    val hasSuperiorLandlords: Boolean = propertyOwnership.superiorLandlords.isNotEmpty()
+
+    val showSuperiorLandlordSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    // TODO PDJB-1994: Replace this placeholder URL with the superior landlord update journey route.
+    val superiorLandlordSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
+    val superiorLandlordNotUsedRows: List<SummaryListRowViewModel> =
+        listOf(
+            rowWithViewTypeSpecificChangeLink(
+                key = "registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain",
+                // Resolves as 'No'
+                value = MessageKeyConverter.convert(false),
+                landlordActionLink = superiorLandlordSectionUpdateUrl,
+            ),
+        )
+
+    // TODO PDJB-1999: show the property manager on the local council view's people responsible tab.
+    // TODO PDJB-2016: Remove showPropertyManagerSection, its guard in PropertyDetailsController and the th:if it
+    //  drives in fragments/peopleResponsible.html when the ASSOCIATED_PARTIES flag is removed.
+    val showPropertyManagerSection: Boolean = showPeopleResponsibleOwnership
+
+    val hasPropertyManager: Boolean = propertyOwnership.propertyManager != null
+
+    // TODO PDJB-1995: Replace this placeholder URL with the property manager update journey route.
+    val propertyManagerUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+
+    val showPropertyManagerUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    val propertyManagerNotUsedRows: List<SummaryListRowViewModel> =
+        if (showPropertyManagerSection && !hasPropertyManager) {
+            listOf(
+                rowWithViewTypeSpecificChangeLink(
+                    key = "registerProperty.propertyManager.usingPropertyManager.fieldSetHeading",
+                    value = "registerProperty.propertyManager.usingPropertyManager.radios.no",
+                    landlordActionLink = propertyManagerUpdateUrl,
+                ),
+            )
+        } else {
+            emptyList()
+        }
 
     val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())

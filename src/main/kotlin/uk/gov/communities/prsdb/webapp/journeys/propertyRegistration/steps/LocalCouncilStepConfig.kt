@@ -27,7 +27,6 @@ class LocalCouncilStepConfig(
 
         return mapOf(
             "fieldSetHeading" to "forms.selectLocalCouncil.fieldSetHeading",
-            "fieldSetHint" to "forms.selectLocalCouncil.fieldSetHint",
             "selectLabel" to "forms.selectLocalCouncil.select.label",
             "findLocalCouncilUrl" to FIND_LOCAL_COUNCIL_URL,
             "selectOptions" to localCouncilsSelectOptions,

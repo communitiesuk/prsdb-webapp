@@ -23,6 +23,9 @@ class PropertyDetailsPageLocalCouncilView(
     val freeholderSection: Locator
         get() = page.locator("#freeholder-section")
 
+    val superiorLandlordSection: Locator
+        get() = page.locator("#superior-landlord-section")
+
     val pendingInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
 
@@ -34,6 +37,9 @@ class PropertyDetailsPageLocalCouncilView(
             val locator = page.locator("#landlord-summary-cards .govuk-summary-card")
             return (0 until locator.count()).map { LandlordSummaryCard(locator.nth(it)) }
         }
+
+    val propertyManagerSection: Locator
+        get() = page.locator("#property-manager-section")
 
     class LandlordSummaryCard(
         locator: Locator,

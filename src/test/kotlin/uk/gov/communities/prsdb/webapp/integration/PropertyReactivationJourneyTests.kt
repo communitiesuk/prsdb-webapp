@@ -130,7 +130,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         completeTenancyDetailsTask(page)
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
-        assertThat(checkAnswersPage.heading).containsText("PDJB-2042")
+        assertThat(checkAnswersPage.heading).containsText("Check your answers for: Inactive House, PRSDB Road, IN1 1AA")
+        assertThat(checkAnswersPage.licensingSummaryList.licensingTypeRow.value).containsText("This property does not need a licence")
+        assertThat(checkAnswersPage.complianceSummaryList.gasSupplyRow.value).containsText("No")
+        assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("1")
+        assertThat(checkAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("400")
         checkAnswersPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
@@ -289,16 +293,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord goes straight to check answers when there are no details to provide`(page: Page) {
+    fun `a landlord goes straight to the confirmation page when there are no details to provide`(page: Page) {
         val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, noDetailsUrlArguments)
-        checkAnswersPage.backLink.clickAndWait()
-
-        assertPageIs(page, InfoFormPagePropertyReactivation::class, noDetailsUrlArguments)
+        assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
     }
 
     @Test
