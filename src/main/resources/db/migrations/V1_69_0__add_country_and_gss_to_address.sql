@@ -1,5 +1,3 @@
--- Backfill all previous addresses with 'England'
 ALTER TABLE address ADD COLUMN country VARCHAR(255) NOT NULL DEFAULT 'England';
-ALTER TABLE address ALTER COLUMN country DROP DEFAULT;
 
 ALTER TABLE address ADD COLUMN gss VARCHAR(255);

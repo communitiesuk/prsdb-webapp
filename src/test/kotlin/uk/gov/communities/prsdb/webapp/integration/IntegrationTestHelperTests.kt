@@ -61,7 +61,8 @@ class IntegrationTestHelperTests : IntegrationTestWithMutableData("data-local.sq
 
         val id =
             jdbcTemplate.queryForObject(
-                "INSERT INTO address (single_line_address, postcode) VALUES ('1 Test Street, EG1 2AB', 'EG1 2AB') RETURNING id",
+                "INSERT INTO address (single_line_address, postcode, country) " +
+                    "VALUES ('1 Test Street, EG1 2AB', 'EG1 2AB', 'England') RETURNING id",
                 Long::class.java,
             )
 
