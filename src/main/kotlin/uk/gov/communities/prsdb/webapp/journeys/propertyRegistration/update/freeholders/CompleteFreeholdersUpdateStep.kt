@@ -25,7 +25,9 @@ class CompleteFreeholdersUpdateStepConfig(
                     state.freeholdersMap
                         ?.values
                         ?.toList()
-                        ?: throw PrsdbWebException("Freeholder update journey has no freeholder list."),
+                        ?: throw PrsdbWebException(
+                            "Freeholder update journey for property ${state.propertyId} has no freeholder list.",
+                        ),
                 expectedSnapshot = state.freeholderSnapshot,
             )
         } catch (ex: UpdateConflictException) {
