@@ -1,4 +1,10 @@
 heading: Property record
+deactivated:
+  caption: Deactivated property
+  panel:
+    heading: Your property has been deactivated
+    body: Deactivated properties remain visible to the local council for 5 years. You can reactivate the property by confirming the details and adding any missing information.
+    button: Reactivate this property
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied

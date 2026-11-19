@@ -86,6 +86,17 @@
             </p>
         </th:block>
 
+        <th:block th:if="${landlordReactivated}">
+            <h2 class="govuk-heading-m"
+                th:text="#{registerProperty.confirmation.landlordAccount.heading}">
+                registerProperty.confirmation.landlordAccount.heading
+            </h2>
+            <p class="govuk-body"
+               th:text="${isOrganisationLandlord} ? #{registerProperty.confirmation.landlordAccount.organisation} : #{registerProperty.confirmation.landlordAccount.individual}">
+                registerProperty.confirmation.landlordAccount.individual
+            </p>
+        </th:block>
+
         <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
             #{common.confirmationPage.feedback.heading},
             #{registerProperty.confirmation.feedback.body},

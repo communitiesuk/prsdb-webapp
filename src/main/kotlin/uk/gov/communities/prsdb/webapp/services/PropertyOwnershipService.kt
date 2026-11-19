@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
@@ -262,10 +262,18 @@ class PropertyOwnershipService(
             )
         }
 
-    fun getDeactivatedPropertiesForLandlordUser(landlord: Landlord): List<DeactivatedPropertyLandlordViewModel> =
+    fun getDeactivatedPropertiesForLandlordUser(
+        landlord: Landlord,
+        currentUrlFragment: String? = null,
+    ): List<DeactivatedPropertyLandlordViewModel> =
         propertyOwnershipRepository
             .findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
-            .map { DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(it) }
+            .map { propertyOwnership ->
+                DeactivatedPropertyLandlordViewModel.fromPropertyOwnership(
+                    propertyOwnership,
+                    currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
+                )
+            }
 
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,
@@ -609,7 +617,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
 
         runAfterTransactionCommits {
-            sendEmailAndLogFailures("the other landlord left notification emails for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the other landlord left notification emails for property ownership ${propertyOwnership.id}") {
                 jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
             }
         }

@@ -173,7 +173,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -193,7 +193,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -249,7 +249,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -277,7 +277,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = ownershipType),
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -307,7 +307,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(ownershipType = ownershipType),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                 )
 
@@ -324,7 +324,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
                 associatedPartiesEnabled = true,
             )
@@ -337,7 +337,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.SOLE_FREEHOLD),
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
                 associatedPartiesEnabled = true,
             )
@@ -360,7 +360,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS),
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -378,11 +378,11 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `the tab heading is renamed for both views`() {
-        listOf(true, false).forEach { isLandlordView ->
+        listOf(PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LOCAL_COUNCIL).forEach { viewType ->
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
-                    isLandlordView = isLandlordView,
+                    viewType = viewType,
                     messageSource = mockMessageSource,
                 )
 
@@ -400,7 +400,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                     associatedPartiesEnabled = false,
                 )
@@ -413,7 +413,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                     associatedPartiesEnabled = true,
                 )
@@ -427,7 +427,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
-                    isLandlordView = false,
+                    viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                     messageSource = mockMessageSource,
                     associatedPartiesEnabled = true,
                 )
@@ -445,7 +445,7 @@ class PropertyDetailsViewModelTests {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
-                    isLandlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                     associatedPartiesEnabled = false,
                 )
@@ -473,7 +473,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -497,7 +497,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -521,7 +521,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -545,7 +545,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -560,7 +560,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -577,7 +577,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -644,7 +644,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -669,7 +669,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -692,7 +692,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -715,7 +715,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -739,7 +739,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -757,7 +757,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -771,7 +771,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
@@ -868,7 +868,7 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                isLandlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
 
@@ -900,11 +900,75 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 createPropertyOwnership(),
-                isLandlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
             )
 
         assertTrue(viewModel.correspondenceSection.none { it.hasActions })
+    }
+
+    @Test
+    fun `the deactivated landlord view has no change links in any section`() {
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        val allRows =
+            viewModel.registrationDetails +
+                viewModel.propertyDetailsSection +
+                viewModel.ownershipSectionBeforePdjb955 +
+                viewModel.peopleResponsibleOwnershipSection +
+                viewModel.correspondenceSection +
+                viewModel.occupiedSection +
+                viewModel.licensingSection +
+                viewModel.tenancySection
+
+        assertTrue(viewModel.peopleResponsibleOwnershipSection.isNotEmpty())
+        assertTrue(allRows.none { it.hasActions })
+    }
+
+    @Test
+    fun `the deactivated landlord view shows the freeholder section without its update link`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.showFreeholdersSection)
+        assertNull(viewModel.freeholdersUpdateLink)
+    }
+
+    @Test
+    fun `the deactivated landlord view shows provide later rows without links and no council paragraphs`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = null,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                createdDate = occupiedAtRegistrationInstant,
+                licenseProvideLater = true,
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(1, viewModel.licensingSection.size)
+        assertEquals(1, viewModel.tenancySection.size)
+        assertTrue(viewModel.licensingSection.none { it.hasActions })
+        assertTrue(viewModel.tenancySection.none { it.hasActions })
+        assertNull(viewModel.licensingProvideLaterParagraph)
+        assertNull(viewModel.tenancyProvideLaterParagraph)
     }
 
     companion object {

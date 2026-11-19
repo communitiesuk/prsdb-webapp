@@ -18,12 +18,7 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
         return mapOf(
             "heading" to getHeading(rentFrequency),
             "subheading" to getSubheadingForRentFrequency(rentFrequency),
-            "fieldSetHint" to
-                if (isOtherRentFrequency) {
-                    "tenancyDetails.rentAmount.fieldSetHint.other"
-                } else {
-                    "tenancyDetails.rentAmount.fieldSetHint.default"
-                },
+            "fieldSetHint" to "tenancyDetails.rentAmount.fieldSetHint",
             "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),
             "showRentCalculationSection" to isOtherRentFrequency,
         )

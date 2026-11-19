@@ -5,21 +5,16 @@ import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
-        private fun landlordEmail(landlord: Landlord): String =
-            when (landlord) {
-                is IndividualLandlord -> landlord.email
-                is OrganisationalLandlord -> landlord.wholeOrgEmail
-                else -> throw IllegalArgumentException("Unknown landlord type")
-            }
-
         fun buildSummaryCards(
             landlords: Set<Landlord>,
             currentLandlord: Landlord,
             propertyOwnershipId: Long,
+            isReadOnly: Boolean = false,
         ): List<SummaryCardViewModel> =
             landlords
                 .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.name })
@@ -43,7 +38,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                             title = titleKey,
                             cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
-                            actions = if (landlords.size > 1) listOf(removeMeAction) else null,
+                            actions = if (landlords.size > 1 && !isReadOnly) listOf(removeMeAction) else null,
                         )
                     } else {
                         SummaryCardViewModel(
@@ -61,7 +56,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlordEmail(landlord),
+                    fieldValue = landlord.getContactEmail(),
                 ),
             )
 

@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
-    isLandlordView: Boolean = true,
+    viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
     messageSource: MessageSource,
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
@@ -19,7 +19,7 @@ class PropertyDetailsViewModel(
     freeholderSummaryCardHelper: FreeholderSummaryCardHelper = FreeholderSummaryCardHelper(),
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
-        if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
+        viewType,
         messageSource,
     ) {
     val showTenancySection: Boolean = isOccupied
@@ -33,7 +33,8 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this property, showOwnershipSectionOnPropertyDetailsTab and the
     //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
     //  Once PDJB-1999 is done both views always use the flag-on version.
-    val showPeopleResponsibleOwnership: Boolean = isLandlordView && associatedPartiesEnabled
+    val showPeopleResponsibleOwnership: Boolean =
+        viewType.isLandlordView && associatedPartiesEnabled
 
     val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
@@ -52,7 +53,7 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: Remove only the associatedPartiesEnabled check when the ASSOCIATED_PARTIES flag is removed;
     //  retain the landlord-view and ownership-type conditions.
     val showFreeholdersSection: Boolean =
-        isLandlordView && associatedPartiesEnabled && propertyOwnership.ownershipType.requiresFreeholderRecords()
+        viewType.isLandlordView && associatedPartiesEnabled && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
     val freeholdersHeadingKey: String =
         if (propertyOwnership.ownershipType.isJointFreeholder()) {
@@ -69,7 +70,7 @@ class PropertyDetailsViewModel(
         }
 
     val freeholdersUpdateLink: String? =
-        if (showFreeholdersSection) {
+        if (showFreeholdersSection && viewType == PropertyDetailsViewType.LANDLORD) {
             UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
         } else {
             null
@@ -120,7 +121,7 @@ class PropertyDetailsViewModel(
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
     val licensingProvideLaterParagraph: String? =
-        if (isLicensingProvideLater && !isLandlordView) {
+        if (isLicensingProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
             if (hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
@@ -134,7 +135,7 @@ class PropertyDetailsViewModel(
 
     val tenancyProvideLaterParagraph: String? =
         when {
-            !showTenancySection || isLandlordView -> {
+            !showTenancySection || viewType != PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 null
             }
 

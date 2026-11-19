@@ -4,6 +4,7 @@ import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -22,6 +23,8 @@ import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveLandlordNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -30,8 +33,12 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.time.LocalDate
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @WebMvcTest(LandlordDetailsController::class)
 @Import(MessageSourceConfig::class)
@@ -49,6 +56,9 @@ class LandlordDetailsControllerTests(
 
     @MockitoBean
     private lateinit var organisationPermissionsProvider: OrganisationPermissionsProvider
+
+    @MockitoBean
+    private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
 
     // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE feature flag is removed
     @MockitoBean
@@ -97,7 +107,8 @@ class LandlordDetailsControllerTests(
             // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord()
-            val deactivatedProperties = listOf(DeactivatedPropertyLandlordViewModel("6 Mythical Place", "P-XXXX-XXXX"))
+            val deactivatedProperties =
+                listOf(DeactivatedPropertyLandlordViewModel("6 Mythical Place", "P-XXXX-XXXX", "/landlord/property/6"))
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
@@ -105,8 +116,12 @@ class LandlordDetailsControllerTests(
                     currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 ),
             ).thenReturn(emptyList())
-            whenever(propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord))
-                .thenReturn(deactivatedProperties)
+            whenever(
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(deactivatedProperties)
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
@@ -143,7 +158,7 @@ class LandlordDetailsControllerTests(
                     attributeDoesNotExist("deactivatedPropertiesList", "activePropertiesTabId", "deactivatedPropertiesTabId")
                 }
             }
-            verify(propertyOwnershipService, never()).getDeactivatedPropertiesForLandlordUser(any())
+            verify(propertyOwnershipService, never()).getDeactivatedPropertiesForLandlordUser(any(), anyOrNull())
             verify(backLinkStorageService).storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
         }
 
@@ -265,6 +280,216 @@ class LandlordDetailsControllerTests(
                         ),
                     )
                 }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails hides change links and shows the inactive banner for an inactive individual landlord`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                model {
+                    attributeExists("inactiveLandlordNotificationBannerViewModel")
+                    attribute(
+                        "landlord",
+                        Matchers.hasProperty<LandlordViewModel>(
+                            "personalDetails",
+                            Matchers.everyItem(
+                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(false)),
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails shows change links and no inactive banner for an active landlord`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                model {
+                    attributeDoesNotExist(
+                        "inactiveLandlordNotificationBannerViewModel",
+                        "deactivatedPropertiesUrl",
+                        "viewIncompletePropertiesUrl",
+                    )
+                    attribute(
+                        "landlord",
+                        Matchers.hasProperty<LandlordViewModel>(
+                            "personalDetails",
+                            Matchers.hasItem(
+                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(true)),
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getUserLandlordDetails hides change links for an inactive org landlord admin`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val orgLandlord =
+                MockLandlordData
+                    .createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
+                    .apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(true)
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attributeExists("inactiveLandlordNotificationBannerViewModel")
+                    attribute(
+                        "orgLandlord",
+                        Matchers.hasProperty<OrgLandlordViewModel>(
+                            "organisationDetails",
+                            Matchers.everyItem(
+                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(false)),
+                            ),
+                        ),
+                    )
+                    attribute(
+                        "orgLandlordContacts",
+                        Matchers.hasProperty<OrganisationalLandlordContactsViewModel>(
+                            "mainContactCard",
+                            Matchers.hasProperty<SummaryCardViewModel>("actions", Matchers.empty<Any>()),
+                        ),
+                    )
+                    attribute(
+                        "orgLandlordContacts",
+                        Matchers.hasProperty<OrganisationalLandlordContactsViewModel>(
+                            "showGoverningBodyMembersLink",
+                            Matchers.`is`(false),
+                        ),
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails adds the inactive landlord banner attributes for an inactive landlord`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(propertyOwnershipService.doesLandlordHaveDeactivatedProperties(landlord)).thenReturn(true)
+            whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
+
+            val result =
+                mvc
+                    .get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
+                    .andExpect {
+                        status { isOk() }
+                        model {
+                            attribute(
+                                "deactivatedPropertiesUrl",
+                                "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$DEACTIVATED_PROPERTIES_FRAGMENT",
+                            )
+                            attribute("viewIncompletePropertiesUrl", LandlordController.INCOMPLETE_PROPERTIES_URL)
+                            attributeExists("registerPropertyUrl")
+                        }
+                    }.andReturn()
+
+            val bannerViewModel =
+                result.modelAndView?.model?.get("inactiveLandlordNotificationBannerViewModel")
+                    as InactiveLandlordNotificationBannerViewModel
+            assertFalse(bannerViewModel.isOrganisation)
+            assertTrue(bannerViewModel.hasDeactivatedProperties)
+            assertTrue(bannerViewModel.hasIncompleteProperties)
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getUserLandlordDetails uses the organisation banner for an inactive org landlord with no other properties`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val orgLandlord = MockLandlordData.createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(propertyOwnershipService.doesLandlordHaveDeactivatedProperties(orgLandlord)).thenReturn(false)
+            whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(0)
+
+            val result =
+                mvc
+                    .get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
+                    .andExpect { status { isOk() } }
+                    .andReturn()
+
+            val bannerViewModel =
+                result.modelAndView?.model?.get("inactiveLandlordNotificationBannerViewModel")
+                    as InactiveLandlordNotificationBannerViewModel
+            assertTrue(bannerViewModel.isOrganisation)
+            assertFalse(bannerViewModel.hasDeactivatedProperties)
+            assertFalse(bannerViewModel.hasIncompleteProperties)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails is not blocked by the inactive landlord interceptor for an inactive landlord`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
             }
         }
     }

@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.helpers.LandlordDeactivationDateHelper
+import uk.gov.communities.prsdb.webapp.helpers.LandlordScheduledDeactivationDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -82,10 +82,11 @@ class RegisterLandlordController(
         val isOrganisation = landlord.landlordType == LandlordType.ORGANISATION
         model.addAttribute("isOrganisation", isOrganisation)
 
-        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check and always add the deactivation date
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check and always add the scheduled deactivation date
         if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
-            val deactivationDate = LandlordDeactivationDateHelper.getDeactivationDateFromCreatedDate(landlord.createdDate)
-            model.addAttribute("deactivationDate", deactivationDate.toJavaLocalDate())
+            val scheduledDeactivationDate =
+                LandlordScheduledDeactivationDateHelper.getScheduledDeactivationDateFromCreatedDate(landlord.createdDate)
+            model.addAttribute("scheduledDeactivationDate", scheduledDeactivationDate.toJavaLocalDate())
         }
 
         val surveyUrl =
