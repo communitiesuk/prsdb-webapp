@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -36,6 +37,14 @@ class SuperiorLandlordSummaryCardHelper {
                     )
                 }
             }
+
+    fun getSummaryCards(superiorLandlords: Collection<SuperiorLandlord>): List<SummaryCardViewModel> =
+        getSummaryCards(
+            superiorLandlords
+                .sortedBy { it.id }
+                .withIndex()
+                .associate { (index, superiorLandlord) -> index to SuperiorLandlordDataModel.fromSuperiorLandlord(superiorLandlord) },
+        )
 
     private fun getContactRows(superiorLandlord: SuperiorLandlordDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(

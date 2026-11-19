@@ -41,8 +41,7 @@ peopleResponsible:
   freeholder:
     postalAddressNote: A <strong>postal address</strong> was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.
   superiorLandlord:
-    # TODO PDJB-1997 / PDJB-1994: Confirm the wording of postalAddressNote for superior landlords
-    postalAddressNote: A <strong>postal address</strong> was provided for this superior landlord. We’ve used this to tell them that they’re named on this registration.
+    postalAddressNote: A <strong>postal address</strong> was provided for this person in the ownership chain. We’ve used this to tell them that they’re named on this registration.
 landlordDetails:
   heading: Landlords
   registeredLandlords:

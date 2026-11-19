@@ -302,7 +302,10 @@ class MockLandlordData {
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-        ) = SuperiorLandlord(propertyOwnership, name, email)
+            id: Long? = null,
+        ) = SuperiorLandlord(propertyOwnership, name, email).also { superiorLandlord ->
+            if (id != null) ReflectionTestUtils.setField(superiorLandlord, "id", id)
+        }
 
         fun createPropertyManager(
             name: String = "Property Manager",

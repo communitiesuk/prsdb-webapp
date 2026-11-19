@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -42,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createSuperiorLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
@@ -55,6 +57,9 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var freeholderSummaryCardHelper: FreeholderSummaryCardHelper
+
+    @MockitoBean
+    private lateinit var superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper
 
     @MockitoBean
     private lateinit var propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper
@@ -225,6 +230,30 @@ class PropertyDetailsControllerTests(
                 }
 
             verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails adds cards built from the property's persisted superior landlords`() {
+            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_SOLE_FREEHOLD)
+            propertyOwnership.superiorLandlords.add(
+                createSuperiorLandlord(propertyOwnership, name = "Superior One", email = "superior@example.com"),
+            )
+            val expectedCards = listOf(SummaryCardViewModel(title = "Superior One", summaryList = emptyList()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords)).thenReturn(expectedCards)
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("superiorLandlordSummaryCards", expectedCards) }
+                }
+
+            verify(superiorLandlordSummaryCardHelper).getSummaryCards(propertyOwnership.superiorLandlords)
         }
 
         @Test

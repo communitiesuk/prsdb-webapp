@@ -120,6 +120,24 @@
                                     </th:block>
                                 </div>
                             </div>
+                            <div th:if="${propertyDetails.showSuperiorLandlordSection}" id="superior-landlord-section">
+                                <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h3>
+                                <th:block th:if="${propertyDetails.hasSuperiorLandlords}">
+                                    <p th:if="${propertyDetails.showSuperiorLandlordSectionUpdateLink}" class="govuk-body">
+                                        <a id="superior-landlord-update-link" class="govuk-link"
+                                           th:href="@{${propertyDetails.superiorLandlordSectionUpdateUrl}}"
+                                           th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
+                                    </p>
+                                    <div id="superior-landlord-cards">
+                                        <th:block th:each="card : ${superiorLandlordSummaryCards}">
+                                            <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h4', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
+                                        </th:block>
+                                    </div>
+                                </th:block>
+                                <th:block th:unless="${propertyDetails.hasSuperiorLandlords}">
+                                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.superiorLandlordNotUsedRows})}"></dl>
+                                </th:block>
+                            </div>
                         </th:block>
 
                         <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag -->

@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.ModifiableAuditableEntity
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -1784,6 +1785,32 @@ class PropertyOwnershipServiceTests {
             // Assert
             verify(mockFreeholderService).createPlaceholderFreeholder(propertyOwnership)
         }
+
+        @Test
+        fun `updateOwnershipStructure derives the beforePdjb955 ownership type`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = 1,
+                    ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+                )
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateOwnershipStructure(
+                propertyOwnership.id,
+                OwnershipType.SHARE_OF_COMMONHOLD,
+                emptyList(),
+                emptyList(),
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(OwnershipTypeBeforePdjb955.COMMONHOLD, propertyOwnership.ownershipTypeBeforePdjb955)
+        }
     }
 
     // TODO PDJB-2019: drop the beforePdjb955 half of this test along with the legacy column.
@@ -2070,6 +2097,157 @@ class PropertyOwnershipServiceTests {
             verify(mockPropertyOwnershipRepository, never()).save(any())
         }
     }
+
+    @Nested
+    inner class UpdateOwnershipStructure {
+        private val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.SOLE_FREEHOLD,
+                ownershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
+            )
+        private val freeholder = FreeholderDataModel(databaseId = 2, detailsKnown = true, name = "Freeholder")
+        private val superiorLandlord =
+            SuperiorLandlordDataModel(databaseId = 3, detailsKnown = true, name = "Superior landlord")
+
+        @BeforeEach
+        fun setUp() {
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+        }
+
+        private fun updateOwnershipStructure(
+            ownershipType: OwnershipType,
+            freeholders: List<FreeholderDataModel> = emptyList(),
+            superiorLandlords: List<SuperiorLandlordDataModel> = emptyList(),
+            initialLastModifiedDate: Instant = propertyOwnership.getMostRecentlyUpdated(),
+        ) = propertyOwnershipService.updateOwnershipStructure(
+            propertyOwnership.id,
+            ownershipType,
+            freeholders,
+            superiorLandlords,
+            initialLastModifiedDate,
+        )
+
+        @Test
+        fun `updateOwnershipStructure stores the given ownership type`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.SHARE_OF_COMMONHOLD, superiorLandlords = listOf(superiorLandlord))
+
+            // Assert
+            assertEquals(OwnershipType.SHARE_OF_COMMONHOLD, propertyOwnership.ownershipType)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updateOwnershipStructure updates the freeholders when the ownership type requires them`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.JOINT_TENANTS, freeholders = listOf(freeholder))
+
+            // Assert
+            verify(mockFreeholderService).updateFreeholders(propertyOwnership, listOf(freeholder))
+        }
+
+        @Test
+        fun `updateOwnershipStructure clears the freeholders when the ownership type does not require them`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.SOLE_FREEHOLD)
+
+            // Assert
+            verify(mockFreeholderService).clearFreeholders(propertyOwnership)
+        }
+
+        @Test
+        fun `updateOwnershipStructure updates the superior landlords when superior landlord info is required and some are given`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.SHARE_OF_SOLE_FREEHOLD, superiorLandlords = listOf(superiorLandlord))
+
+            // Assert
+            verify(mockSuperiorLandlordService).updateSuperiorLandlords(propertyOwnership, listOf(superiorLandlord))
+        }
+
+        @Test
+        fun `updateOwnershipStructure clears the superior landlords when superior landlord info is not required`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.SOLE_FREEHOLD)
+
+            // Assert
+            verify(mockSuperiorLandlordService).clearSuperiorLandlords(propertyOwnership)
+        }
+
+        @Test
+        fun `updateOwnershipStructure clears the superior landlords when superior landlord info is required but none are given`() {
+            // Act
+            updateOwnershipStructure(OwnershipType.SHARE_OF_SOLE_FREEHOLD)
+
+            // Assert
+            verify(mockSuperiorLandlordService).clearSuperiorLandlords(propertyOwnership)
+        }
+
+        @Test
+        fun `updateOwnershipStructure returns the added freeholders and superior landlords`() {
+            // Arrange
+            val newFreeholder = FreeholderDataModel(detailsKnown = true, name = "New freeholder")
+            val newSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "New superior landlord")
+            whenever(mockFreeholderService.updateFreeholders(propertyOwnership, listOf(freeholder, newFreeholder)))
+                .thenReturn(listOf(newFreeholder))
+            whenever(
+                mockSuperiorLandlordService.updateSuperiorLandlords(
+                    propertyOwnership,
+                    listOf(superiorLandlord, newSuperiorLandlord),
+                ),
+            ).thenReturn(listOf(newSuperiorLandlord))
+
+            // Act
+            val result =
+                updateOwnershipStructure(
+                    OwnershipType.LEASEHOLD_ONLY,
+                    freeholders = listOf(freeholder, newFreeholder),
+                    superiorLandlords = listOf(superiorLandlord, newSuperiorLandlord),
+                )
+
+            // Assert
+            assertEquals(Pair(listOf(newFreeholder), listOf(newSuperiorLandlord)), result)
+        }
+
+        @Test
+        fun `updateOwnershipStructure throws when the ownership type requires freeholders but none are given`() {
+            // Act & Assert
+            assertThrows<IllegalArgumentException> { updateOwnershipStructure(OwnershipType.JOINT_TENANTS) }
+            verifyNoInteractions(mockFreeholderService)
+        }
+
+        @Test
+        fun `updateOwnershipStructure throws UpdateConflictException when a freeholder changed since the journey started`() {
+            // Arrange
+            val journeyStartDate = Instant.parse("2025-01-01T00:00:00Z")
+            ReflectionTestUtils.setField(propertyOwnership, "createdDate", journeyStartDate)
+            propertyOwnership.freeholders.add(
+                MockLandlordData.createFreeholder(propertyOwnership).withCreatedDate("2025-02-01T00:00:00Z"),
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    updateOwnershipStructure(
+                        OwnershipType.JOINT_TENANTS,
+                        freeholders = listOf(freeholder),
+                        initialLastModifiedDate = journeyStartDate,
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+            verifyNoInteractions(mockFreeholderService)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+    }
+
+    private fun <T : ModifiableAuditableEntity> T.withCreatedDate(createdDate: String): T =
+        apply { ReflectionTestUtils.setField(this, "createdDate", Instant.parse(createdDate)) }
 
     @Nested
     inner class UpdateIsOccupied {
