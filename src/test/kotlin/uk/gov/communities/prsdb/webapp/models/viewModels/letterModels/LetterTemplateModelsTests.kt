@@ -22,6 +22,16 @@ class LetterTemplateModelsTests {
                     ),
                     "/letters/FreeholderAddedToPropertyLetter.md",
                 ),
+                LetterTemplateTestData(
+                    SuperiorLandlordAddedToPropertyLetter(
+                        superiorLandlordName = "Daniel Roberts",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                        superiorLandlordAddress = "18 Market Street\nBristol\nBS1 4DJ",
+                        privacyNoticeUrl = "example.test/landlord/privacy-notice",
+                    ),
+                    "/letters/SuperiorLandlordAddedToPropertyLetter.md",
+                ),
             )
     }
 
