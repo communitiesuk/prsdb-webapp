@@ -90,6 +90,7 @@ class AssociatedPartyNotificationService(
         if (name.isNullOrBlank()) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
+        // TODO PDJB-1987, PDJB-1989: double check that the user only has one contact type, otherwise throw
 
         if (!emailAddress.isNullOrBlank()) {
             if (emailTemplate == null) {

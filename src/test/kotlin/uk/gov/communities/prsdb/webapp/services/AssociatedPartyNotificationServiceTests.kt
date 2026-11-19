@@ -182,7 +182,7 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
-    // TODO PDJB-1989: Update this test to expect to throw in this case, you should not have two contact methods
+    // TODO PDJB-1987: Update this test to expect to throw in this case, you should not have two contact methods
     @Test
     fun `freeholder with both contact methods receives no notification while email implementation is pending`() {
         // Arrange
