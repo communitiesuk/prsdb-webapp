@@ -109,7 +109,7 @@
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
                             <div th:if="${propertyDetails.showFreeholderSection}" id="freeholder-section">
                                 <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholderSectionHeadingKey}}">registerProperty.freeholders.checkAnswers.heading</h3>
-                                <p class="govuk-body">
+                                <p th:if="${propertyDetails.showFreeholderSectionUpdateLink}" class="govuk-body">
                                     <a id="freeholder-update-link" class="govuk-link"
                                        th:href="@{${propertyDetails.freeholderSectionUpdateUrl}}"
                                        th:text="#{${propertyDetails.freeholderSectionLinkTextKey}}">registerProperty.freeholders.checkAnswers.changeLink</a>
