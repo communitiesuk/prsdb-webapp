@@ -205,21 +205,22 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `updateFreeholders saves and reports a freeholder the user added`() {
+    fun `updateFreeholders saves and reports a freeholder the user added with their unstored postal address`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(emptyList())
         val newFreeholder =
-            FreeholderDataModel(detailsKnown = true, name = "Alice Freeholder", email = "alice@example.com")
-        val persisted = Freeholder(propertyOwnership, name = "Alice Freeholder", email = "alice@example.com")
-        ReflectionTestUtils.setField(persisted, "id", 42L)
-        whenever(freeholderRepository.save(any())).thenReturn(persisted)
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Alice Freeholder",
+                address = AddressDataModel("1 Freeholder Street, Town, AB1 2CD"),
+            )
 
         // Act
         val added = freeholderService.updateFreeholders(propertyOwnership, listOf(newFreeholder), emptyMap())
 
         // Assert
-        assertEquals(listOf(persisted), added)
+        assertEquals(listOf(newFreeholder), added)
         val captor = argumentCaptor<Freeholder>()
         verify(freeholderRepository).save(captor.capture())
         assertEquals("Alice Freeholder", captor.firstValue.name)
@@ -309,7 +310,7 @@ class FreeholderServiceTests {
         assertEquals("new@example.com", existing.email)
         verify(freeholderRepository).save(existing)
         // Contacting freeholders whose details changed is PDJB-2171, so they are saved but not reported
-        assertEquals(emptyList<Freeholder>(), added)
+        assertEquals(emptyList<FreeholderDataModel>(), added)
     }
 
     @Test
@@ -335,7 +336,7 @@ class FreeholderServiceTests {
             )
 
         // Assert
-        assertEquals(emptyList<Freeholder>(), added)
+        assertEquals(emptyList<FreeholderDataModel>(), added)
         verify(freeholderRepository, never()).save(any())
     }
 
@@ -355,7 +356,7 @@ class FreeholderServiceTests {
             )
 
         // Assert
-        assertEquals(emptyList<Freeholder>(), added)
+        assertEquals(emptyList<FreeholderDataModel>(), added)
         verify(freeholderRepository, never()).save(any())
     }
 
@@ -382,7 +383,7 @@ class FreeholderServiceTests {
             )
 
         // Assert
-        assertEquals(emptyList<Freeholder>(), added)
+        assertEquals(emptyList<FreeholderDataModel>(), added)
         verify(freeholderRepository).save(existing)
     }
 
@@ -414,7 +415,7 @@ class FreeholderServiceTests {
         verify(freeholderRepository).delete(removed)
         verify(freeholderRepository, never()).delete(kept)
         // Contacting removed freeholders is PDJB-2171, so they are deleted but not reported
-        assertEquals(emptyList<Freeholder>(), added)
+        assertEquals(emptyList<FreeholderDataModel>(), added)
     }
 
     @Test
@@ -433,12 +434,6 @@ class FreeholderServiceTests {
                 email = "new@example.com",
             )
         val newFreeholder = FreeholderDataModel(detailsKnown = true, name = "Carol Freeholder", email = "carol@example.com")
-        val persistedNewFreeholder = Freeholder(propertyOwnership, name = "Carol Freeholder", email = "carol@example.com")
-        ReflectionTestUtils.setField(persistedNewFreeholder, "id", 3L)
-        whenever(freeholderRepository.save(any())).thenAnswer { invocation ->
-            val saved = invocation.getArgument<Freeholder>(0)
-            if (saved.name == "Carol Freeholder") persistedNewFreeholder else saved
-        }
 
         // Act
         val added =
@@ -459,7 +454,7 @@ class FreeholderServiceTests {
 
         // Assert
         // Only the new freeholder is reported, even though an existing one was amended and another left alone
-        assertEquals(listOf(persistedNewFreeholder), added)
+        assertEquals(listOf(newFreeholder), added)
         assertEquals("new@example.com", amendedExisting.email)
         verify(freeholderRepository, never()).save(unchanged)
     }
@@ -478,13 +473,10 @@ class FreeholderServiceTests {
             )
 
         // Act
-        val persisted = Freeholder(propertyOwnership, name = "Alice Freeholder", email = "alice@example.com")
-        ReflectionTestUtils.setField(persisted, "id", 3L)
-        whenever(freeholderRepository.save(any())).thenReturn(persisted)
         val added = freeholderService.updateFreeholders(propertyOwnership, listOf(stale), emptyMap())
 
         // Assert
-        assertEquals(listOf(persisted), added)
+        assertEquals(listOf(stale), added)
         verify(freeholderRepository).save(any())
     }
 

@@ -28,7 +28,7 @@ class FreeholderService(
         propertyOwnership: PropertyOwnership,
         freeholders: List<FreeholderDataModel>,
         expectedSnapshot: Map<Long, String>,
-    ): List<Freeholder> {
+    ): List<FreeholderDataModel> {
         val existingFreeholders = getFreeholdersForProperty(propertyOwnership)
         if (getFreeholderSnapshot(existingFreeholders) != expectedSnapshot) {
             throw UpdateConflictException("The freeholders have changed since this update session started.")
@@ -39,7 +39,7 @@ class FreeholderService(
 
         existingFreeholdersKeyedById.values.filter { it.id !in submittedIds }.forEach { removeFreeholder(it) }
 
-        val added = mutableListOf<Freeholder>()
+        val added = mutableListOf<FreeholderDataModel>()
 
         freeholders.forEach { submitted ->
             // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
@@ -47,15 +47,8 @@ class FreeholderService(
             val existingFreeholder = submitted.databaseId?.let { existingFreeholdersKeyedById[it] }
             when {
                 existingFreeholder == null -> {
-                    added.add(
-                        freeholderRepository.save(
-                            Freeholder(
-                                propertyOwnership = propertyOwnership,
-                                name = submitted.name,
-                                email = submitted.email,
-                            ),
-                        ),
-                    )
+                    createFreeholder(propertyOwnership, submitted)
+                    added.add(submitted)
                 }
                 detailsHaveChanged(existingFreeholder, submitted) -> updateFreeholder(existingFreeholder, submitted)
                 // An unchanged freeholder matches no branch, so their row is left alone.
