@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -37,6 +38,21 @@ class AbsoluteUrlProvider(
     }
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
+
+    // TODO PDJB-2234: Use the final privacy notice URL for letters and emails, accessible without logging in.
+    fun buildLandlordPrivacyNoticeUri(): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
+            .build()
+            .toUri()
+
+    fun buildLandlordPrivacyNoticeDisplayUrl(): String =
+        buildLandlordPrivacyNoticeUri()
+            .toString()
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .removePrefix("www.")
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 

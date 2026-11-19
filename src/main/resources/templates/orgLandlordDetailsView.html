@@ -3,10 +3,14 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{${title ?: 'landlordDetails.pageTitle'}(${orgLandlord.name})},~{::main/content()}, false, ${backUrl}, null)}">
 <main>
+    <th:block th:if="${inactiveLandlordNotificationBannerViewModel}">
+        <th:block th:replace="~{fragments/banners/inactiveLandlordNotificationBanner :: inactiveLandlordNotificationBanner(${inactiveLandlordNotificationBannerViewModel}, ${deactivatedPropertiesUrl}, ${viewIncompletePropertiesUrl}, ${registerPropertyUrl})}"></th:block>
+    </th:block>
     <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 
     <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">orgLandlord.name</h1>
 
+    <!--/* TODO PDJB-2030: Hide the delete link when the deregistration journey is removed */-->
     <p class="govuk-body" th:if="${showDeleteLandlordRecordLink}">
         <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
            th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>

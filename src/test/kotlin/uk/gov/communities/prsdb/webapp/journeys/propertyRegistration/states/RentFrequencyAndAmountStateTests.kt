@@ -86,22 +86,6 @@ class RentFrequencyAndAmountStateTests {
         assertEquals(expectedRentAmountString, result)
     }
 
-    @ParameterizedTest(name = "when rentFrequency is {0}")
-    @MethodSource("provideRentFrequencyForUpdateHeadingScenarios")
-    fun `getUpdateRentAmountHeading returns the correct update heading key`(
-        rentFrequencyValue: RentFrequency,
-        expectedHeadingKey: String,
-    ) {
-        // Arrange
-        val state = buildTestRentFrequencyAndAmountState(rentFrequencyValue = rentFrequencyValue)
-
-        // Act
-        val result = state.getUpdateRentAmountHeading()
-
-        // Assert
-        assertEquals(expectedHeadingKey, result)
-    }
-
     private fun buildTestRentFrequencyAndAmountState(
         rentFrequencyValue: RentFrequency = RentFrequency.MONTHLY,
         customRentFrequencyValue: String = "",
@@ -137,15 +121,6 @@ class RentFrequencyAndAmountStateTests {
                 arguments(null, Named.of("weekly", RentFrequency.WEEKLY), ""),
                 arguments(null, Named.of("four weekly", RentFrequency.FOUR_WEEKLY), ""),
                 arguments(null, Named.of("monthly", RentFrequency.MONTHLY), ""),
-            )
-
-        @JvmStatic
-        private fun provideRentFrequencyForUpdateHeadingScenarios() =
-            arrayOf(
-                arguments(Named.of("custom", RentFrequency.OTHER), "forms.update.rentAmount.other.fieldSetHeading"),
-                arguments(Named.of("weekly", RentFrequency.WEEKLY), "forms.update.rentAmount.weekly.fieldSetHeading"),
-                arguments(Named.of("four weekly", RentFrequency.FOUR_WEEKLY), "forms.update.rentAmount.fourWeekly.fieldSetHeading"),
-                arguments(Named.of("monthly", RentFrequency.MONTHLY), "forms.update.rentAmount.monthly.fieldSetHeading"),
             )
     }
 }

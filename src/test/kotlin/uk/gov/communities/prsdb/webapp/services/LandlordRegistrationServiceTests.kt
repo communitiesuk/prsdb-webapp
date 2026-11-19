@@ -15,7 +15,9 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
@@ -33,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -281,6 +284,35 @@ class LandlordRegistrationServiceTests {
                     LandlordRegistrationConfirmationEmail(
                         RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString(),
                         dashboardUri.toString(),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `registerIndividualLandlord sends the confirmation email with a scheduled deactivation date 3 months after creation`() {
+            ReflectionTestUtils.setField(individualLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
+            whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+            landlordRegistrationService.registerIndividualLandlord(
+                baseUserId = "user-123",
+                name = "John Smith",
+                email = "john@test.com",
+                phoneNumber = "07123456789",
+                address = AddressDataModel(singleLineAddress = "3 Home Lane", postcode = "E1 1AA"),
+                dateOfBirth = LocalDate.of(1990, 1, 1),
+                countryOfResidence = "England",
+                isVerified = true,
+                hasAcceptedPrivacyNotice = true,
+            )
+
+            verify(mockRegistrationConfirmationSender).sendEmail(
+                eq("john@test.com"),
+                eq(
+                    LandlordRegistrationConfirmationEmail(
+                        RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString(),
+                        dashboardUri.toString(),
+                        scheduledDeactivationDate = LocalDate.of(2027, 2, 17),
                     ),
                 ),
             )
@@ -539,6 +571,28 @@ class LandlordRegistrationServiceTests {
                         lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
                         prsdURL = orgDashboardUri.toString(),
                         isMultiUserOrganisationsEnabled = isMultiUserOrganisationsEnabled,
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `registerOrganisationLandlord sends the confirmation email with a scheduled deactivation date 3 months after creation`() {
+            ReflectionTestUtils.setField(organisationalLandlord, "createdDate", Instant.parse("2026-11-17T10:00:00Z"))
+            whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS)).thenReturn(false)
+
+            registerOrganisationLandlord()
+
+            verify(mockOrgRegistrationConfirmationSender).sendEmail(
+                eq("admin@example.com"),
+                eq(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
+                        registrantName = "Org Admin",
+                        organisationName = "Test Org",
+                        lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
+                        prsdURL = orgDashboardUri.toString(),
+                        scheduledDeactivationDate = LocalDate.of(2027, 2, 17),
                     ),
                 ),
             )
