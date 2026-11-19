@@ -41,6 +41,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationLicensingDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationTenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -371,15 +373,26 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        val updatedLicence =
-            licenseService.updateLicence(
-                propertyOwnership.license,
-                licensingType,
-                licenceNumber,
-            )
-        propertyOwnership.license = updatedLicence
-        propertyOwnership.licenseProvideLater = false
+        setLicensing(propertyOwnership, licensingType, licenceNumber)
         propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun saveReactivationLicensing(
+        propertyOwnership: PropertyOwnership,
+        licensing: ReactivationLicensingDataModel,
+    ) {
+        setLicensing(propertyOwnership, licensing.licensingType, licensing.licenceNumber)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    private fun setLicensing(
+        propertyOwnership: PropertyOwnership,
+        licensingType: LicensingType,
+        licenceNumber: String?,
+    ) {
+        propertyOwnership.license = licenseService.updateLicence(propertyOwnership.license, licensingType, licenceNumber)
+        propertyOwnership.licenseProvideLater = false
     }
 
     // TODO PDJB-2016: delete this with the flag-off journey, which never asks who the freeholders are and so falls
@@ -532,6 +545,50 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        setTenancyDetails(
+            propertyOwnership,
+            numberOfHouseholds,
+            numberOfPeople,
+            billsIncludedList,
+            customBillsIncluded,
+            furnishedStatus,
+            rentFrequency,
+            customRentFrequency,
+            rentAmount,
+        )
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun saveReactivationTenancyDetails(
+        propertyOwnership: PropertyOwnership,
+        tenancyDetails: ReactivationTenancyDetailsDataModel,
+    ) {
+        setTenancyDetails(
+            propertyOwnership,
+            tenancyDetails.numberOfHouseholds,
+            tenancyDetails.numberOfPeople,
+            tenancyDetails.billsIncludedList,
+            tenancyDetails.customBillsIncluded,
+            tenancyDetails.furnishedStatus,
+            tenancyDetails.rentFrequency,
+            tenancyDetails.customRentFrequency,
+            tenancyDetails.rentAmount,
+        )
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    private fun setTenancyDetails(
+        propertyOwnership: PropertyOwnership,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus,
+        rentFrequency: RentFrequency,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal,
+    ) {
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnership.billsIncludedList = billsIncludedList
@@ -542,7 +599,6 @@ class PropertyOwnershipService(
         propertyOwnership.rentAmount = rentAmount
         // The tenancy details are now provided, so the property record no longer needs to prompt for them.
         propertyOwnership.tenancyProvideLater = false
-        propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional
