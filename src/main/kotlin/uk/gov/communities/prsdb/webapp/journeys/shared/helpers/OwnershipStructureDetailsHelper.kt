@@ -8,8 +8,10 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyoneInOwnershipChain
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholdersOrNull
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlordsOrNull
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipTypeTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
@@ -29,8 +31,8 @@ class OwnershipStructureDetailsHelper(
                     "Check your answers was reached before the ownership type task was complete",
                 )
         return getOwnershipContent(state, ownershipStructureTask.ownershipTypeTask, ownershipType) +
-            getFreeholdersContent(state, ownershipStructureTask, ownershipType) +
-            getSuperiorLandlordsContent(state, ownershipStructureTask, ownershipType)
+            getFreeholdersContent(state, ownershipStructureTask.freeholdersTask, ownershipType) +
+            getSuperiorLandlordsContent(state, ownershipStructureTask.superiorLandlordsTask, ownershipType)
     }
 
     private fun getOwnershipContent(
@@ -77,12 +79,11 @@ class OwnershipStructureDetailsHelper(
 
     private fun getFreeholdersContent(
         state: CheckYourAnswersJourneyState,
-        ownershipStructureTask: OwnershipStructureTask,
+        freeholdersTask: FreeholdersTask,
         ownershipType: OwnershipType,
     ): Map<String, Any?> {
         if (!ownershipType.requiresFreeholderRecords()) return emptyMap()
 
-        val freeholdersTask = ownershipStructureTask.freeholdersTask
         val freeholders =
             freeholdersTask.getFreeholdersOrNull()
                 ?: throw UnrecoverableJourneyStateException(
@@ -102,12 +103,11 @@ class OwnershipStructureDetailsHelper(
 
     private fun getSuperiorLandlordsContent(
         state: CheckYourAnswersJourneyState,
-        ownershipStructureTask: OwnershipStructureTask,
+        superiorLandlordsTask: SuperiorLandlordsTask,
         ownershipType: OwnershipType,
     ): Map<String, Any?> {
         if (!ownershipType.requiresSuperiorLandlordInfo()) return emptyMap()
 
-        val superiorLandlordsTask = ownershipStructureTask.superiorLandlordsTask
         val anyoneInOwnershipChainStep = superiorLandlordsTask.anyoneInOwnershipChainStep
         val anyoneInOwnershipChain =
             superiorLandlordsTask.anyoneInOwnershipChain
