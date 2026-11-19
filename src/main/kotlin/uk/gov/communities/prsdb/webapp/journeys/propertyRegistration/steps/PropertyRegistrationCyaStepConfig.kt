@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -62,7 +61,7 @@ class PropertyRegistrationCyaStepConfig(
         delegationContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val licensingDetails = getLicensingDetailsForState(state, isOccupied)
+        val licensingDetails = licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask)
         val tenancyDetails = getTenancyDetails(state)
         val occupancyDetails = occupancyDetailsHelper.getOccupancySummaryList(state)
         val gasSafetyContent = complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
@@ -381,36 +380,6 @@ class PropertyRegistrationCyaStepConfig(
             "lettingAgentDelegation" to rows,
             "lettingAgentDelegationBodyText" to (whoProvides == WhoProvidesRentalDetails.LETTING_AGENT),
         )
-    }
-
-    private fun getLicensingDetailsForState(
-        state: PropertyRegistrationJourneyState,
-        isOccupied: Boolean,
-    ): List<SummaryListRowViewModel> {
-        val licensingTask = state.licensingTask
-        val licensingType = licensingTask.getLicensingType()
-
-        if (licensingType == LicensingType.NO_LICENSING) {
-            return listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "licensing.checkAnswers.licensingType",
-                    "licensing.checkAnswers.noLicensingRequired",
-                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
-                ),
-            )
-        }
-
-        if (!isOccupied && licensingType == LicensingType.PROVIDE_LATER) {
-            return listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "licensing.checkAnswers.licensingType",
-                    "licensing.checkAnswers.licensingProvideLaterUnoccupied",
-                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
-                ),
-            )
-        }
-
-        return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
 }
 

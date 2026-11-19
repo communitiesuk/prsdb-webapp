@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
@@ -49,6 +50,7 @@ class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
     private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
+    private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
@@ -187,6 +189,12 @@ class PropertyDetailsController(
                 "superiorLandlordSummaryCards",
                 superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
             )
+        }
+        // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed
+        if (propertyDetails.showPropertyManagerSection) {
+            propertyOwnership.propertyManager?.let {
+                modelAndView.addObject("propertyManagerSummaryCard", propertyManagerSummaryCardHelper.getSummaryCard(it))
+            }
         }
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)

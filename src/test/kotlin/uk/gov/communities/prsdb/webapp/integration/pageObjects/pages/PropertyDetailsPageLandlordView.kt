@@ -92,6 +92,15 @@ class PropertyDetailsPageLandlordView(
             return (0 until locator.count()).map { LandlordSummaryCard(locator.nth(it)) }
         }
 
+    val propertyManagerSection: Locator
+        get() = page.locator("#property-manager-section")
+
+    val propertyManagerUpdateLink = Link(page.locator("#property-manager-update-link"))
+
+    val propertyManagerCard = PropertyManagerSummaryCard(page.locator("#property-manager-section .govuk-summary-card"))
+
+    val propertyManagerNotUsedSummaryList = PropertyManagerNotUsedSummaryList(page)
+
     val peopleResponsibleOwnershipSummaryList = PeopleResponsibleOwnershipSummaryList(page)
 
     class PeopleResponsibleOwnershipSummaryList(
@@ -133,6 +142,25 @@ class PropertyDetailsPageLandlordView(
     ) : SummaryList(locator) {
         val registrationNumberRow = getRow("Landlord number")
         val emailAddressRow = getRow("Email address")
+    }
+
+    class PropertyManagerSummaryCard(
+        locator: Locator,
+    ) : SummaryCard(locator, headingLevel = "h4") {
+        override val summaryList = PropertyManagerCardSummaryList(locator)
+        val actionLinks: Locator = locator.locator(".govuk-summary-card__action")
+    }
+
+    class PropertyManagerCardSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val emailAddressRow = getRow("Email address")
+    }
+
+    class PropertyManagerNotUsedSummaryList(
+        page: Page,
+    ) : SummaryList(page.locator("#property-manager-section")) {
+        val usingPropertyManagerRow = getRow("Are you using a property manager?")
     }
 
     class NotificationBannerPropertyDetailsLandlordView(

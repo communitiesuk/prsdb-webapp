@@ -139,4 +139,20 @@
                                 </th:block>
                             </div>
                         </th:block>
+
+                        <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag -->
+                        <div th:if="${propertyDetails.showPropertyManagerSection}" id="property-manager-section">
+                            <h3 class="govuk-heading-s" th:text="#{registerProperty.propertyManager.usingPropertyManager.heading}">registerProperty.propertyManager.usingPropertyManager.heading</h3>
+                            <th:block th:if="${propertyDetails.hasPropertyManager}">
+                                <p th:if="${propertyDetails.showPropertyManagerUpdateLink}" class="govuk-body">
+                                    <a id="property-manager-update-link" class="govuk-link"
+                                       th:href="@{${propertyDetails.propertyManagerUpdateUrl}}"
+                                       th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
+                                </p>
+                                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(${propertyManagerSummaryCard.title}, ${propertyManagerSummaryCard.cardNumber}, ${propertyManagerSummaryCard.actions}, ${propertyManagerSummaryCard.summaryList}, 'h4')}"></div>
+                            </th:block>
+                            <th:block th:unless="${propertyDetails.hasPropertyManager}">
+                                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyManagerNotUsedRows})}"></dl>
+                            </th:block>
+                        </div>
 </div>

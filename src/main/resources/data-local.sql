@@ -419,6 +419,14 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 UPDATE property_ownership SET license_provide_later = true, last_occupied_date = current_date - INTERVAL '7 days' WHERE id = 1;
 UPDATE property_ownership SET license_provide_later = true WHERE id = 9;
 
+-- PDJB-1998: property 37 has a property manager, shown on the property record's people responsible tab
+INSERT INTO property_manager (id, created_date, name, email)
+VALUES (1, current_timestamp, 'Pat Manager', 'pat.manager@example.com');
+
+SELECT setval(pg_get_serial_sequence('property_manager', 'id'), (SELECT MAX(id) FROM property_manager));
+
+UPDATE property_ownership SET property_manager_id = 1 WHERE id = 37;
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (2, 2, '2025-01-15'),

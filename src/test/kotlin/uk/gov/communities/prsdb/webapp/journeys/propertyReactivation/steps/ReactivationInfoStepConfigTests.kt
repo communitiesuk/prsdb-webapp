@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -48,6 +49,42 @@ class ReactivationInfoStepConfigTests {
         val result = stepConfig.getStepSpecificContent(mockState)
 
         assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), result["addressLines"])
+    }
+
+    @Test
+    fun `getStepSpecificContent marks the button as a transaction when there are no details to provide and the address is available`() {
+        val stepConfig = setupStepConfig()
+        mockInactivePropertyWithUprn(uprn = 456L)
+        whenever(mockState.requiredTaskTypes).thenReturn(emptyList())
+        whenever(mockAddressAvailabilityService.isAddressOwned(456L)).thenReturn(false)
+
+        val result = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(true, result["isTransaction"])
+    }
+
+    @Test
+    fun `getStepSpecificContent does not mark the button as a transaction when there are details to provide`() {
+        val stepConfig = setupStepConfig()
+        mockInactivePropertyWithUprn(uprn = 456L)
+        whenever(mockState.requiredTaskTypes).thenReturn(listOf(ReactivationTaskType.GAS_SAFETY))
+
+        val result = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(false, result["isTransaction"])
+        verifyNoInteractions(mockAddressAvailabilityService)
+    }
+
+    @Test
+    fun `getStepSpecificContent does not mark the button as a transaction when the address is already registered`() {
+        val stepConfig = setupStepConfig()
+        mockInactivePropertyWithUprn(uprn = 456L)
+        whenever(mockState.requiredTaskTypes).thenReturn(emptyList())
+        whenever(mockAddressAvailabilityService.isAddressOwned(456L)).thenReturn(true)
+
+        val result = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(false, result["isTransaction"])
     }
 
     @Test

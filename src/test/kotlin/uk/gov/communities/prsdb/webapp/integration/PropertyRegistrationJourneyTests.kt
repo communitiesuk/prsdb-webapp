@@ -807,7 +807,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
 
         // Number of bedrooms - render page
-        assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
+        assertThat(bedroomsPage.header).containsText("Number of bedrooms")
         assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
         bedroomsPage.submitNumOfBedrooms(3)
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
@@ -1191,7 +1191,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
 
         // Select local council - render page
-        assertThat(selectLocalCouncilPage.form.fieldsetHeading).containsText("What local council area is your property in?")
+        assertThat(selectLocalCouncilPage.form.fieldsetHeading).containsText("What local council area is this property in?")
         assertThat(selectLocalCouncilPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
         // fill in and submit
         selectLocalCouncilPage.submitLocalCouncil(
@@ -1208,7 +1208,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
 
         // Number of bedrooms - render page
-        assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
+        assertThat(bedroomsPage.header).containsText("Number of bedrooms")
         assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
         bedroomsPage.submitNumOfBedrooms(3)
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)

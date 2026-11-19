@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 
 class PropertyManagerSummaryCardHelperTests {
     private val helper = PropertyManagerSummaryCardHelper()
@@ -33,6 +34,16 @@ class PropertyManagerSummaryCardHelperTests {
         val card = helper.getSummaryCard(detailsFormModel(), actions)
 
         assertEquals(actions, card.actions)
+    }
+
+    @Test
+    fun `getSummaryCard for a saved property manager is titled with their name and has an email address row but no actions`() {
+        val card = helper.getSummaryCard(createPropertyManager(name = NAME, email = EMAIL))
+
+        assertEquals(NAME, card.title)
+        assertEquals("registerProperty.propertyManager.check.emailAddress", card.summaryList.single().fieldHeading)
+        assertEquals(EMAIL, card.summaryList.single().fieldValue)
+        assertEquals(emptyList<SummaryCardActionViewModel>(), card.actions)
     }
 
     @Test
