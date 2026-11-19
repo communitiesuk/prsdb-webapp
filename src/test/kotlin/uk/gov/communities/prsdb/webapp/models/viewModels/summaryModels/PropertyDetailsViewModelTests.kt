@@ -140,7 +140,7 @@ class PropertyDetailsViewModelTests {
         // Assert
         assertTrue(viewModel.showFreeholdersSection)
         assertEquals(
-            "propertyDetails.peopleResponsible.freeholders.updateJointLink",
+            "propertyDetails.peopleResponsible.freeholders.jointUpdateLink",
             viewModel.freeholdersUpdateLinkTextKey,
         )
     }
@@ -306,7 +306,7 @@ class PropertyDetailsViewModelTests {
                 Triple(
                     OwnershipType.SHARE_OF_JOINT_TENANTS,
                     "propertyDetails.peopleResponsible.freeholders.jointHeading",
-                    "propertyDetails.peopleResponsible.freeholders.updateJointLink",
+                    "propertyDetails.peopleResponsible.freeholders.jointUpdateLink",
                 ),
                 Triple(
                     OwnershipType.LEASEHOLD_ONLY,

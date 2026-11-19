@@ -63,7 +63,7 @@ class PropertyDetailsViewModel(
 
     val freeholdersUpdateLinkTextKey: String =
         if (propertyOwnership.ownershipType.isJointFreeholder()) {
-            "propertyDetails.peopleResponsible.freeholders.updateJointLink"
+            "propertyDetails.peopleResponsible.freeholders.jointUpdateLink"
         } else {
             "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink"
         }
