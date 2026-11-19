@@ -13,12 +13,17 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
 class CompleteReactivationStepConfigTests {
+    @Mock
+    private lateinit var mockPropertyReactivationDataModelFactory: PropertyReactivationDataModelFactory
+
     @Mock
     private lateinit var mockPropertyReactivationService: PropertyReactivationService
 
@@ -30,10 +35,15 @@ class CompleteReactivationStepConfigTests {
     private val propertyOwnershipId = 123L
     private val uprn = 456L
     private val defaultDestination = Destination.ExternalUrl("redirect")
+    private val reactivationData = PropertyReactivationDataModel()
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteReactivationStepConfig(propertyReactivationService = mockPropertyReactivationService)
+        stepConfig =
+            CompleteReactivationStepConfig(
+                propertyReactivationDataModelFactory = mockPropertyReactivationDataModelFactory,
+                propertyReactivationService = mockPropertyReactivationService,
+            )
     }
 
     @Test
@@ -41,12 +51,13 @@ class CompleteReactivationStepConfigTests {
         // Arrange
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockState.uprn).thenReturn(uprn)
+        whenever(mockPropertyReactivationDataModelFactory.fromJourneyState(mockState)).thenReturn(reactivationData)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPropertyReactivationService).reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn)
+        verify(mockPropertyReactivationService).reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, reactivationData)
         verify(mockState, never()).isPropertyAlreadyRegistered = any()
     }
 
@@ -55,7 +66,8 @@ class CompleteReactivationStepConfigTests {
         // Arrange
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockState.uprn).thenReturn(uprn)
-        whenever(mockPropertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn))
+        whenever(mockPropertyReactivationDataModelFactory.fromJourneyState(mockState)).thenReturn(reactivationData)
+        whenever(mockPropertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, reactivationData))
             .thenThrow(EntityExistsException("Address already registered"))
 
         // Act
