@@ -98,7 +98,7 @@ class PropertyRegistrationService(
 
             runAfterTransactionCommits {
                 confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-                sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
+                sendRegistrationNotifications(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
             }
 
             propertyOwnership
@@ -157,7 +157,7 @@ class PropertyRegistrationService(
             )
         }
 
-    private fun sendRegistrationEmails(
+    private fun sendRegistrationNotifications(
         registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
