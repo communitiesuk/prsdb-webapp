@@ -199,6 +199,10 @@ class PropertyOwnershipService(
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
 
+    // The property manager is edited in place in its own row, which does not change the property ownership's last modified date
+    fun getLastModifiedDateIncludingPropertyManager(propertyOwnershipId: Long): Instant =
+        getLastModifiedDateIncludingPropertyManager(getPropertyOwnership(propertyOwnershipId))
+
     fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
     fun getPropertyPaidForUntil(propertyOwnershipId: Long): LocalDate =
@@ -398,7 +402,7 @@ class PropertyOwnershipService(
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        throwErrorIfPropertyManagerLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.propertyManager = null
         propertyOwnershipRepository.save(propertyOwnership)
         // TODO PDJB-2171: Email the property manager when they are removed
@@ -411,7 +415,7 @@ class PropertyOwnershipService(
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        throwErrorIfPropertyManagerLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         val existingPropertyManager = propertyOwnership.propertyManager
         if (existingPropertyManager != null) {
             propertyManagerService.updatePropertyManager(existingPropertyManager, propertyManager.name, propertyManager.email)
@@ -681,6 +685,23 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
+
+    private fun getLastModifiedDateIncludingPropertyManager(propertyOwnership: PropertyOwnership): Instant =
+        listOfNotNull(
+            propertyOwnership.getMostRecentlyUpdated(),
+            propertyOwnership.propertyManager?.getMostRecentlyUpdated(),
+        ).max()
+
+    private fun throwErrorIfPropertyManagerLastModifiedDatesConflict(
+        propertyOwnership: PropertyOwnership,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (getLastModifiedDateIncludingPropertyManager(propertyOwnership) != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership or property manager record has been updated since this update session started.",
+            )
+        }
+    }
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

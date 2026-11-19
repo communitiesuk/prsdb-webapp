@@ -32,7 +32,7 @@ class UpdatePropertyManagerJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDateIncludingPropertyManager(propertyId).toString()
             state.isStateInitialized = true
         }
 

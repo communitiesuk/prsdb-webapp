@@ -211,7 +211,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
         inTransaction {
             propertyOwnershipService.removePropertyManager(
                 propertyOwnershipId,
-                propertyOwnershipRepository.findById(propertyOwnershipId).get().getMostRecentlyUpdated(),
+                propertyOwnershipService.getLastModifiedDateIncludingPropertyManager(propertyOwnershipId),
             )
         }
 

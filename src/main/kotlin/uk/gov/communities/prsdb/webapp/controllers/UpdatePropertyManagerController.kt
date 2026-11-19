@@ -65,7 +65,7 @@ class UpdatePropertyManagerController(
             initialiseJourney = {
                 journeyFactory.initializeJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
+                    propertyOwnershipService.getLastModifiedDateIncludingPropertyManager(propertyOwnershipId),
                 )
             },
             dispatch = dispatch,
