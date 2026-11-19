@@ -17,6 +17,39 @@ const taskArn = `${prefix}task/nft-app/worker`;
 const imageDigest = `sha256:${'c'.repeat(64)}`;
 const config = {taskDefinition: workerArn, runId: '123-1', resetSha: 'b'.repeat(40),
   resetCompatibleTaskDefinition: asyncArn, resetCompatibleSha: 'b'.repeat(40)};
+const scheduleGroup = 'nft-scheduled-tasks-group';
+const scheduledClusterArn = `${prefix.replace(':ecs:', ':ecs:')}cluster/nft-scheduled-tasks`;
+const scheduledRoleArn = 'arn:aws:iam::448120078528:role/nft-scheduled-tasks';
+const maintenanceScheduleDefinitions = [
+  ['nft-jl-invitation-expiry-email-scheduled-task', 'prsdb-jl-invitation-expiry-email-scheduled-task-nft'],
+  ['nft-reconcile-payments-scheduled-task', 'prsdb-reconcile-payments-scheduled-task-nft'],
+  ['nft-incomplete-property-reminder-scheduled-task', 'prsdb-incomplete-property-reminder-scheduled-task-nft'],
+  ['nft-delete-incomplete-properties-scheduled-task', 'prsdb-delete-incomplete-properties-scheduled-task-nft'],
+  ['nft-org-ll-invitation-deletion-scheduled-task', 'prsdb-org-ll-invitation-deletion-scheduled-task-nft'],
+  ['nft-jl-invitation-deletion-scheduled-task', 'prsdb-jl-invitation-deletion-scheduled-task-nft'],
+  ['nft-ngd-address-update-scheduled-task', 'prsdb-ngd-address-update-scheduled-task-nft'],
+];
+
+function maintenanceSchedule(name, taskDefinition, state = 'ENABLED') {
+  return {
+    ActionAfterCompletion: 'NONE',
+    Arn: `arn:aws:scheduler:eu-west-2:448120078528:schedule/${scheduleGroup}/${name}`,
+    FlexibleTimeWindow: {Mode: 'OFF'},
+    GroupName: scheduleGroup,
+    Name: name,
+    ScheduleExpression: 'cron(0 1 * * ? *)',
+    ScheduleExpressionTimezone: 'UTC',
+    State: state,
+    Target: {
+      Arn: scheduledClusterArn,
+      EcsParameters: {
+        LaunchType: 'FARGATE', TaskCount: 1, TaskDefinitionArn: `arn:aws:ecs:eu-west-2:448120078528:task-definition/${taskDefinition}`,
+        NetworkConfiguration: {awsvpcConfiguration: {AssignPublicIp: 'DISABLED', SecurityGroups: ['sg-nft'], Subnets: ['subnet-nft']}},
+      },
+      RoleArn: scheduledRoleArn,
+    },
+  };
+}
 const app = () => ({
   serviceName: 'nft-app', status: 'ACTIVE', taskDefinition: appArn,
   desiredCount: 1, runningCount: 1, pendingCount: 0,
@@ -32,18 +65,32 @@ const asyncWorker = () => ({
 
 function dependencies(overrides = {}) {
   const calls = [];
-  const state = {};
+  const state = {maintenancePaused: true};
+  const schedules = new Map(maintenanceScheduleDefinitions.map(([name, taskDefinition]) =>
+    [name, maintenanceSchedule(name, taskDefinition)]));
   let stopping = false;
   let asyncDesired = 1;
   let polls = 0;
   return {
     calls, state,
+    schedules,
     persist: async () => calls.push(['persist', structuredClone(state)]),
+    checkpoint: async () => calls.push(['checkpoint', structuredClone(state)]),
     sleep: async () => {},
     log: () => {},
     aws: async (service, operation, input = {}) => {
-      calls.push([operation, input]);
+      calls.push([operation, structuredClone(input)]);
       if (operation === 'get-caller-identity') return {Account: '448120078528'};
+      if (service === 'scheduler' && operation === 'list-schedules') {
+        return {Schedules: [...schedules.values()].map(({Arn, Name, GroupName, State}) => ({Arn, Name, GroupName, State}))};
+      }
+      if (service === 'scheduler' && operation === 'get-schedule') {
+        return structuredClone(schedules.get(input.Name));
+      }
+      if (service === 'scheduler' && operation === 'update-schedule') {
+        schedules.set(input.Name, {...schedules.get(input.Name), ...structuredClone(input)});
+        return {};
+      }
       if (operation === 'describe-services') {
         if (input.services.includes('nft-async-worker')) return {services: [{...asyncWorker(), desiredCount: asyncDesired, runningCount: asyncDesired}]};
         return {services: [{...app(), ...(stopping ? {desiredCount: 0, runningCount: 0} : {})}, simulator]};
@@ -54,6 +101,7 @@ function dependencies(overrides = {}) {
         return {};
       }
       if (operation === 'list-tasks') {
+        if (input.cluster === 'nft-scheduled-tasks') return {taskArns: state.scheduledWritersRunning ? ['scheduled-task'] : []};
         if (input.serviceName === 'nft-async-worker') return {taskArns: ['async-task']};
         return {taskArns: input.cluster === 'nft-scheduled-tasks' ? [] : ['app-task']};
       }
@@ -86,6 +134,220 @@ function dependencies(overrides = {}) {
     ...overrides,
   };
 }
+
+async function pausedMaintenanceSchedules({originallyDisabled} = {}) {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+  if (originallyDisabled) {
+    deps.schedules.set(originallyDisabled, {...deps.schedules.get(originallyDisabled), State: 'DISABLED'});
+  }
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  await lifecycle.pauseMaintenanceSchedules(config, deps);
+  return deps;
+}
+
+test('snapshots all seven validated NFT schedule configurations before pausing them', async () => {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+
+  assert.equal(deps.state.maintenanceScheduleSnapshot.length, 7);
+  assert.deepEqual(deps.state.maintenanceScheduleSnapshot.map(schedule => schedule.Name).sort(),
+    maintenanceScheduleDefinitions.map(([name]) => name).sort());
+  assert.deepEqual(deps.state.maintenanceScheduleSnapshot[0].Target, deps.schedules.get(deps.state.maintenanceScheduleSnapshot[0].Name).Target);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-schedule'), false);
+
+  await lifecycle.pauseMaintenanceSchedules(config, deps);
+  const firstUpdate = deps.calls.findIndex(([operation]) => operation === 'update-schedule');
+  const firstPrivateCheckpoint = deps.calls.findIndex(([operation]) => operation === 'checkpoint');
+  assert.ok(firstPrivateCheckpoint >= 0 && firstPrivateCheckpoint < firstUpdate);
+  assert.equal(deps.state.maintenancePaused, true);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'DISABLED'));
+});
+
+test('schedule snapshot rejects an unexpected account, inventory, group, or target', async t => {
+  for (const failure of ['account', 'inventory', 'group', 'target']) await t.test(failure, async () => {
+    const deps = dependencies();
+    deps.state.maintenancePaused = false;
+    const original = deps.aws;
+    if (failure === 'account') {
+      deps.aws = async (service, operation, input) => operation === 'get-caller-identity'
+        ? {Account: '000000000000'} : original(service, operation, input);
+    } else if (failure === 'inventory') {
+      deps.schedules.delete(maintenanceScheduleDefinitions[0][0]);
+    } else if (failure === 'group') {
+      const name = maintenanceScheduleDefinitions[0][0];
+      deps.schedules.set(name, {...deps.schedules.get(name), GroupName: 'other-group'});
+    } else {
+      const name = maintenanceScheduleDefinitions[0][0];
+      deps.schedules.set(name, {...deps.schedules.get(name), Target: {...deps.schedules.get(name).Target, Arn: 'arn:aws:ecs:eu-west-2:000000000000:cluster/other'}});
+    }
+
+    await assert.rejects(lifecycle.snapshotMaintenanceSchedules(config, deps));
+    assert.equal(deps.calls.some(([operation]) => operation === 'update-schedule'), false);
+    assert.equal(deps.state.maintenanceScheduleSnapshot, undefined);
+  });
+});
+
+test('schedule pause preserves originally disabled jobs and drains already-running tasks', async () => {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+  const originallyDisabled = maintenanceScheduleDefinitions[0][0];
+  deps.schedules.set(originallyDisabled, {...deps.schedules.get(originallyDisabled), State: 'DISABLED'});
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  deps.state.scheduledWritersRunning = true;
+  const original = deps.aws;
+  let polls = 0;
+  deps.aws = async (service, operation, input) => {
+    if (operation === 'list-tasks' && input.cluster === 'nft-scheduled-tasks') {
+      return {taskArns: ++polls < 3 ? ['scheduled-task'] : []};
+    }
+    return original(service, operation, input);
+  };
+  await lifecycle.pauseMaintenanceSchedules(config, deps);
+
+  const updates = deps.calls.filter(([operation]) => operation === 'update-schedule');
+  assert.equal(updates.length, 6);
+  assert.equal(updates.some(([, input]) => input.Name === originallyDisabled), false);
+  assert.equal(deps.schedules.get(originallyDisabled).State, 'DISABLED');
+  assert.ok(polls >= 3);
+  assert.equal(deps.state.maintenancePaused, true);
+});
+
+test('partial schedule pause persists ownership and resumes safely after an API failure', async () => {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  const original = deps.aws;
+  let updates = 0;
+  deps.aws = async (service, operation, input) => {
+    if (operation === 'update-schedule' && ++updates === 2) throw new Error('controlled schedule update failure');
+    return original(service, operation, input);
+  };
+
+  await assert.rejects(lifecycle.pauseMaintenanceSchedules(config, deps), /controlled schedule update failure/);
+  assert.equal(deps.state.maintenancePaused, false);
+  assert.ok(Object.values(deps.state.maintenanceScheduleProgress).some(progress => progress.pauseAttempted));
+  deps.aws = original;
+  await lifecycle.pauseMaintenanceSchedules(config, deps);
+  assert.equal(deps.state.maintenancePaused, true);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'DISABLED'));
+});
+
+test('schedule drift after snapshot blocks pause before any update', async () => {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  const name = maintenanceScheduleDefinitions[0][0];
+  deps.schedules.set(name, {...deps.schedules.get(name), ScheduleExpression: 'rate(1 hour)'});
+
+  await assert.rejects(lifecycle.pauseMaintenanceSchedules(config, deps), /changed|drift/i);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-schedule'), false);
+});
+
+test('writer shutdown refuses to proceed before maintenance isolation is complete', async () => {
+  const deps = dependencies();
+  deps.state.maintenancePaused = false;
+
+  await assert.rejects(stopNftWriters(config, deps), /maintenance schedules must be paused and drained/i);
+  assert.equal(deps.calls.some(([operation]) => operation === 'update-service' || operation === 'run-task'), false);
+});
+
+test('cleanup restores a partial schedule pause only when destructive work never began', async () => {
+  const deps = dependencies();
+  const schedule = deps.schedules.get(maintenanceScheduleDefinitions[0][0]);
+  deps.state.runId = config.runId;
+  deps.state.taskDefinition = config.taskDefinition;
+  deps.state.maintenancePaused = false;
+  deps.state.maintenanceScheduleSnapshot = [...deps.schedules.values()].map(value => structuredClone(value));
+  deps.state.maintenanceScheduleProgress = {[schedule.Name]: {pauseAttempted: true, paused: true}};
+  deps.schedules.set(schedule.Name, {...schedule, State: 'DISABLED'});
+
+  await cleanupNftEnvironment(config, async () => null, deps);
+
+  assert.equal(deps.schedules.get(schedule.Name).State, 'ENABLED');
+  assert.equal(deps.state.maintenanceRestored, true);
+  assert.equal(deps.calls.some(([operation]) => operation === 'run-task' || operation === 'update-service'), false);
+});
+
+test('maintenance schedules resume to exact original states only after reset, QA, and async verification', async () => {
+  const originallyDisabled = maintenanceScheduleDefinitions[0][0];
+  const deps = await pausedMaintenanceSchedules({originallyDisabled});
+  const original = new Map(deps.state.maintenanceScheduleSnapshot.map(schedule => [schedule.Name, schedule]));
+  const updatesBeforeRecovery = deps.calls.filter(([operation]) => operation === 'update-schedule').length;
+
+  await assert.rejects(lifecycle.restoreMaintenanceSchedules({
+    ...config, resetVerified: false, recoveryVerified: false,
+  }, deps), /verified database reset/i);
+  assert.equal(deps.calls.filter(([operation]) => operation === 'update-schedule').length, updatesBeforeRecovery);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'DISABLED'));
+
+  Object.assign(deps.state, {resetVerified: true, qaVerified: true, asyncRestored: true, loadPassed: false});
+  const recoveryConfig = {...config, resetVerified: true, recoveryVerified: true};
+  await lifecycle.restoreMaintenanceSchedules(recoveryConfig, deps);
+  for (const [name, schedule] of original) assert.deepEqual(deps.schedules.get(name), schedule);
+  assert.equal(deps.state.maintenanceRestored, true);
+  const updatesAfterRecovery = deps.calls.filter(([operation]) => operation === 'update-schedule').length;
+  await lifecycle.restoreMaintenanceSchedules(recoveryConfig, deps);
+  assert.equal(deps.calls.filter(([operation]) => operation === 'update-schedule').length, updatesAfterRecovery);
+});
+
+test('maintenance recovery leaves schedules paused when QA or async recovery is unverified', async () => {
+  const deps = await pausedMaintenanceSchedules();
+  Object.assign(deps.state, {resetVerified: true, asyncRestored: true});
+  const updatesBeforeRecovery = deps.calls.filter(([operation]) => operation === 'update-schedule').length;
+
+  await assert.rejects(lifecycle.restoreMaintenanceSchedules({
+    ...config, resetVerified: true, recoveryVerified: true,
+  }, deps), /verified database reset, application QA, and async recovery/i);
+  assert.equal(deps.calls.filter(([operation]) => operation === 'update-schedule').length, updatesBeforeRecovery);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'DISABLED'));
+});
+
+test('partial maintenance restoration retries without overwriting progress', async () => {
+  const deps = await pausedMaintenanceSchedules();
+  Object.assign(deps.state, {resetVerified: true, qaVerified: true, asyncRestored: true});
+  const originalAws = deps.aws;
+  let restores = 0;
+  deps.aws = async (service, operation, input) => {
+    if (operation === 'update-schedule' && input.State === 'ENABLED' && ++restores === 2) {
+      throw new Error('controlled schedule restore failure');
+    }
+    return originalAws(service, operation, input);
+  };
+  const recoveryConfig = {...config, resetVerified: true, recoveryVerified: true};
+
+  await assert.rejects(lifecycle.restoreMaintenanceSchedules(recoveryConfig, deps), /controlled schedule restore failure/);
+  assert.equal(deps.state.maintenancePaused, true);
+  assert.equal([...deps.schedules.values()].filter(schedule => schedule.State === 'ENABLED').length, 1);
+  deps.aws = originalAws;
+  await lifecycle.restoreMaintenanceSchedules(recoveryConfig, deps);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'ENABLED'));
+  assert.equal(deps.state.maintenanceRestored, true);
+});
+
+test('schedule configuration drift blocks restoration before any schedule is resumed', async () => {
+  const deps = await pausedMaintenanceSchedules();
+  Object.assign(deps.state, {resetVerified: true, qaVerified: true, asyncRestored: true});
+  const updatesBeforeRecovery = deps.calls.filter(([operation]) => operation === 'update-schedule').length;
+  const driftedName = maintenanceScheduleDefinitions.at(-1)[0];
+  deps.schedules.set(driftedName, {...deps.schedules.get(driftedName), ScheduleExpression: 'rate(1 hour)'});
+
+  await assert.rejects(lifecycle.restoreMaintenanceSchedules({
+    ...config, resetVerified: true, recoveryVerified: true,
+  }, deps), /drifted/i);
+  assert.equal(deps.calls.filter(([operation]) => operation === 'update-schedule').length, updatesBeforeRecovery);
+  assert.ok([...deps.schedules.values()].every(schedule => schedule.State === 'DISABLED'));
+});
+
+test('QA recovery marker requires an explicitly verified reset and restored app', async () => {
+  const deps = dependencies();
+  Object.assign(deps.state, {runId: config.runId, taskDefinition: config.taskDefinition,
+    maintenancePaused: true, appRestored: true});
+  await assert.rejects(lifecycle.markQaVerified({...config, resetVerified: false}, deps), /verified post-reset app state/i);
+  await lifecycle.markQaVerified({...config, resetVerified: true}, deps);
+  assert.equal(deps.state.qaVerified, true);
+});
 
 test('records async ownership before stopping it and confirms tasks stopped before restore', async () => {
   const deps = dependencies();
@@ -164,12 +426,24 @@ test('does not launch a restore while a recorded async task is still running', a
 
 test('workflow attempts async recovery independently after a successful reset', async () => {
   const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
-  const job = workflow.split('  restore-async-after-database-reset:')[1]?.split('\n  marker:')[0];
+  const job = workflow.split('  restore-async-after-database-reset:')[1]?.split('\n  restore-maintenance-schedules:')[0];
   assert.ok(job);
   assert.match(job, /always\(\)/);
   assert.match(job, /needs\.reset-database\.result == 'success'/);
   assert.doesNotMatch(job, /needs\.restore-app-after-database-reset\.result == 'success'/);
   assert.match(job, /nft-vpc-restore\.mjs restore-async/);
+});
+
+test('workflow restores maintenance after recovery even when the performance load fails', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const job = workflow.split('  restore-maintenance-schedules:')[1]?.split('\n  maintenance-recovery-required:')[0];
+  assert.ok(job);
+  assert.match(job, /always\(\)/);
+  assert.match(job, /needs\.reset-database\.result == 'success'/);
+  assert.match(job, /needs\.restore-app-after-database-reset\.result == 'success'/);
+  assert.match(job, /needs\.restore-async-after-database-reset\.result == 'success'/);
+  assert.doesNotMatch(job, /needs\.performance-tests\.result == 'success'/);
+  assert.match(job, /nft-vpc-restore\.mjs restore-maintenance/);
 });
 
 test('workflow gates every upload phase on candidate worker readiness and checkpoints its partial changes', async () => {
@@ -448,7 +722,7 @@ test('rejects a retired restore worker before stopping the healthy app', async (
     : original(service, operation, input);
   await assert.rejects(stopNftWriters(config, deps), /Restore task revision is unavailable/);
   assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
-  assert.deepEqual(deps.state, {});
+  assert.deepEqual(deps.state, {maintenancePaused: true});
 });
 
 test('rejects a workflow SHA that is not deployed before app shutdown', async () => {
@@ -639,6 +913,18 @@ test('manual NFT reset and verification use the NFT revision rather than the dis
 
 test('workflow separates reusable classes from versioned recovery checkpoints and fresh workloads', async () => {
   const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const restore = workflow.split('  restore-dataset:')[1].split('\n  performance-tests:')[0];
+  const scheduleSnapshot = restore.indexOf('nft-vpc-restore.mjs snapshot-maintenance');
+  const scheduleCheckpoint = restore.indexOf('nft-recovery-state.mjs upload restore-checkpoint');
+  const schedulePause = restore.indexOf('nft-vpc-restore.mjs pause-maintenance');
+  const stopApp = restore.indexOf('nft-vpc-restore.mjs stop');
+  assert.ok(scheduleSnapshot >= 0 && scheduleSnapshot < scheduleCheckpoint && scheduleCheckpoint < schedulePause && schedulePause < stopApp);
+  const reset = workflow.split('  reset-database:')[1].split('\n  restore-app-after-database-reset:')[0];
+  assert.match(reset, /needs: \[changes, restore-dataset, stop-writers-for-reset\]/);
+  assert.match(reset, /needs\.restore-dataset\.result == 'success'/);
+  const scheduleRecovery = workflow.split('  restore-maintenance-schedules:')[1].split('\n  maintenance-recovery-required:')[0];
+  assert.ok(scheduleRecovery.indexOf('restore-app-after-database-reset.result == \'success\'') < scheduleRecovery.indexOf('nft-vpc-restore.mjs restore-maintenance'));
+  assert.ok(scheduleRecovery.indexOf('restore-async-after-database-reset.result == \'success\'') < scheduleRecovery.indexOf('nft-vpc-restore.mjs restore-maintenance'));
   const compile = workflow.split('  compile-gatling:')[1].split('\n  restore-dataset:')[0];
   assert.match(compile, /name: gatling-classes-\$\{\{ github\.run_id \}\}\s+overwrite: true/);
   assert.doesNotMatch(compile, /github\.run_attempt/);

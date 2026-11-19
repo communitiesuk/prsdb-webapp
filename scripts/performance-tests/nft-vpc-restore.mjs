@@ -1,16 +1,33 @@
 import {readFile, rename, writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import {isDeepStrictEqual} from 'node:util';
 import {
   account, appName, awsCommand, cloneForScanWorker, cluster, region, requireCondition, scanQueueArn,
   scanQueueName, scanQueueUrl, servicesFactory, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
-import {recoveryOwner, requireFreshAttempt} from './nft-recovery-state.mjs';
+import {recoveryOwner, requireFreshAttempt, uploadRecoveryCheckpoints} from './nft-recovery-state.mjs';
 
 const asyncName = 'nft-async-worker';
+const maintenanceGroup = 'nft-scheduled-tasks-group';
+const scheduledCluster = 'nft-scheduled-tasks';
+const scheduledClusterArn = `arn:aws:ecs:${region}:${account}:cluster/${scheduledCluster}`;
+const scheduledRoleArn = `arn:aws:iam::${account}:role/nft-scheduled-tasks`;
+const maintenanceSchedules = new Map([
+  ['nft-jl-invitation-expiry-email-scheduled-task', 'prsdb-jl-invitation-expiry-email-scheduled-task-nft'],
+  ['nft-reconcile-payments-scheduled-task', 'prsdb-reconcile-payments-scheduled-task-nft'],
+  ['nft-incomplete-property-reminder-scheduled-task', 'prsdb-incomplete-property-reminder-scheduled-task-nft'],
+  ['nft-delete-incomplete-properties-scheduled-task', 'prsdb-delete-incomplete-properties-scheduled-task-nft'],
+  ['nft-org-ll-invitation-deletion-scheduled-task', 'prsdb-org-ll-invitation-deletion-scheduled-task-nft'],
+  ['nft-jl-invitation-deletion-scheduled-task', 'prsdb-jl-invitation-deletion-scheduled-task-nft'],
+  ['nft-ngd-address-update-scheduled-task', 'prsdb-ngd-address-update-scheduled-task-nft'],
+]);
+const scheduleUpdateFields = [
+  'ActionAfterCompletion', 'Description', 'EndDate', 'FlexibleTimeWindow', 'GroupName', 'KmsKeyArn', 'Name',
+  'ScheduleExpression', 'ScheduleExpressionTimezone', 'StartDate', 'State', 'Target',
+];
 
 function validate(config) {
   const definition = config.taskDefinition ?? '';
@@ -23,7 +40,7 @@ function validate(config) {
 
 function runtime(overrides) {
   return {
-    aws: awsCommand, state: {}, persist: async () => {}, log: console.log,
+    aws: awsCommand, state: {}, persist: async () => {}, checkpoint: async () => {}, log: console.log,
     sleep: ms => new Promise(resolve => setTimeout(resolve, ms)), now: Date.now,
     timeoutMs: 1800000, pollMs: 10000,
     ...overrides,
@@ -32,6 +49,235 @@ function runtime(overrides) {
 
 async function identity(aws) {
   requireCondition((await aws('sts', 'get-caller-identity')).Account === account, 'Wrong NFT AWS account');
+}
+
+function scheduleUpdate(schedule, state = schedule.State) {
+  return Object.fromEntries(scheduleUpdateFields
+    .filter(field => Object.hasOwn(schedule, field))
+    .map(field => [field, field === 'State' ? state : schedule[field]]));
+}
+
+function validateMaintenanceSchedule(schedule, name) {
+  const taskDefinition = maintenanceSchedules.get(name);
+  const target = schedule?.Target;
+  const ecs = target?.EcsParameters;
+  const network = ecs?.NetworkConfiguration?.awsvpcConfiguration;
+  requireCondition(schedule?.Name === name && schedule.GroupName === maintenanceGroup &&
+    schedule.Arn === `arn:aws:scheduler:${region}:${account}:schedule/${maintenanceGroup}/${name}`,
+  'Unexpected NFT maintenance schedule identity');
+  requireCondition(['ENABLED', 'DISABLED'].includes(schedule.State), 'Unexpected NFT maintenance schedule state');
+  requireCondition(schedule.ScheduleExpressionTimezone === 'UTC' && schedule.FlexibleTimeWindow?.Mode === 'OFF',
+    'Unexpected NFT maintenance schedule configuration');
+  requireCondition(target?.Arn === scheduledClusterArn && target.RoleArn === scheduledRoleArn &&
+    ecs?.TaskDefinitionArn === `arn:aws:ecs:${region}:${account}:task-definition/${taskDefinition}` &&
+    ecs.LaunchType === 'FARGATE' && ecs.TaskCount === 1 && network?.AssignPublicIp === 'DISABLED' &&
+    Array.isArray(network.Subnets) && network.Subnets.length > 0 &&
+    Array.isArray(network.SecurityGroups) && network.SecurityGroups.length > 0,
+  'Unexpected NFT maintenance schedule target');
+}
+
+function scheduleConfigMatches(current, original) {
+  const currentConfig = scheduleUpdate(current);
+  const originalConfig = scheduleUpdate(original);
+  delete currentConfig.State;
+  delete originalConfig.State;
+  return isDeepStrictEqual(currentConfig, originalConfig);
+}
+
+async function getMaintenanceSchedule(aws, name) {
+  const schedule = await aws('scheduler', 'get-schedule', {GroupName: maintenanceGroup, Name: name});
+  validateMaintenanceSchedule(schedule, name);
+  return schedule;
+}
+
+async function persistMaintenanceProgress(deps) {
+  await deps.persist();
+  await deps.checkpoint();
+}
+
+export async function snapshotMaintenanceSchedules(config, overrides = {}) {
+  validate(config);
+  const deps = runtime(overrides);
+  const {aws, state, persist} = deps;
+  requireCondition(state.runId === undefined || state.runId === config.runId,
+    'NFT maintenance snapshot belongs to another workflow');
+  requireCondition(state.taskDefinition === undefined || state.taskDefinition === config.taskDefinition,
+    'NFT maintenance snapshot uses another restore revision');
+  await identity(aws);
+  if (state.maintenanceScheduleSnapshot) return state;
+
+  const listed = await aws('scheduler', 'list-schedules', {GroupName: maintenanceGroup, MaxResults: 100});
+  const schedules = Array.isArray(listed.Schedules) ? listed.Schedules : [];
+  const names = schedules.map(schedule => schedule.Name).sort();
+  requireCondition(!listed.NextToken && !listed.nextToken && Array.isArray(listed.Schedules) &&
+    schedules.length === maintenanceSchedules.size &&
+    isDeepStrictEqual(names, [...maintenanceSchedules.keys()].sort()),
+  'NFT maintenance schedule inventory is incomplete or unexpected');
+
+  const snapshots = [];
+  for (const name of [...maintenanceSchedules.keys()].sort()) {
+    const listedSchedule = schedules.find(schedule => schedule.Name === name);
+    requireCondition(listedSchedule.GroupName === maintenanceGroup &&
+      listedSchedule.Arn === `arn:aws:scheduler:${region}:${account}:schedule/${maintenanceGroup}/${name}`,
+    'Unexpected NFT maintenance schedule listing');
+    snapshots.push(await getMaintenanceSchedule(aws, name));
+  }
+
+  state.runId = config.runId;
+  state.taskDefinition = config.taskDefinition;
+  state.expectedSha = config.expectedSha;
+  state.resetSha = config.resetSha;
+  state.maintenanceScheduleSnapshot = snapshots;
+  state.maintenanceScheduleProgress = {};
+  state.maintenancePaused = false;
+  await persist();
+  return state;
+}
+
+export async function pauseMaintenanceSchedules(config, overrides = {}) {
+  validate(config);
+  const deps = runtime(overrides);
+  const {aws, state, log} = deps;
+  await identity(aws);
+  requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition &&
+    Array.isArray(state.maintenanceScheduleSnapshot) && state.maintenanceScheduleSnapshot.length === maintenanceSchedules.size,
+  'NFT maintenance schedule snapshot is missing or belongs to another workflow');
+  state.maintenanceScheduleProgress ??= {};
+
+  for (const original of state.maintenanceScheduleSnapshot) {
+    const name = original.Name;
+    validateMaintenanceSchedule(original, name);
+    const current = await getMaintenanceSchedule(aws, name);
+    requireCondition(scheduleConfigMatches(current, original),
+      'NFT maintenance schedule configuration changed after snapshot; refusing pause');
+    const progress = state.maintenanceScheduleProgress[name] ?? {};
+    requireCondition(original.State === 'DISABLED'
+      ? current.State === 'DISABLED'
+      : current.State === 'DISABLED'
+        ? progress.pauseAttempted === true
+        : current.State === 'ENABLED' && progress.paused !== true,
+    'NFT maintenance schedule state changed outside this recovery');
+  }
+
+  for (const original of state.maintenanceScheduleSnapshot) {
+    const name = original.Name;
+    validateMaintenanceSchedule(original, name);
+    const current = await getMaintenanceSchedule(aws, name);
+    requireCondition(scheduleConfigMatches(current, original),
+      'NFT maintenance schedule configuration changed after snapshot; refusing pause');
+    const progress = state.maintenanceScheduleProgress[name] ?? {};
+    if (original.State === 'DISABLED') {
+      requireCondition(current.State === 'DISABLED', 'Disabled NFT maintenance schedule changed externally');
+      state.maintenanceScheduleProgress[name] = {...progress, paused: true, preservedDisabled: true};
+      await persistMaintenanceProgress(deps);
+      continue;
+    }
+    requireCondition(current.State === 'DISABLED'
+      ? progress.pauseAttempted === true
+      : current.State === 'ENABLED' && progress.paused !== true,
+    'NFT maintenance schedule state changed outside this recovery');
+    if (current.State === 'ENABLED') {
+      state.maintenanceScheduleProgress[name] = {...progress, pauseAttempted: true, paused: false};
+      await persistMaintenanceProgress(deps);
+      await aws('scheduler', 'update-schedule', scheduleUpdate(original, 'DISABLED'));
+    }
+    const verified = await getMaintenanceSchedule(aws, name);
+    requireCondition(verified.State === 'DISABLED' && scheduleConfigMatches(verified, original),
+      'NFT maintenance schedule pause could not be verified');
+    state.maintenanceScheduleProgress[name] = {...state.maintenanceScheduleProgress[name], paused: true};
+    await persistMaintenanceProgress(deps);
+  }
+
+  await waitFactory(deps)('Scheduled NFT writer drain', async () => {
+    const tasks = await aws('ecs', 'list-tasks', {cluster: scheduledCluster});
+    requireCondition(!tasks.nextToken && Array.isArray(tasks.taskArns), 'Cannot identify scheduled NFT writers');
+    return tasks.taskArns.length === 0;
+  }, false, deps.signal);
+  state.maintenancePaused = true;
+  state.maintenancePauseComplete = true;
+  await persistMaintenanceProgress(deps);
+  log('All seven NFT maintenance schedules are disabled or preserved disabled; scheduled writers are drained.');
+  return state;
+}
+
+export async function restoreMaintenanceSchedules(config, overrides = {}) {
+  validate(config);
+  const deps = runtime(overrides);
+  const {aws, state, log} = deps;
+  await identity(aws);
+  requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition &&
+    Array.isArray(state.maintenanceScheduleSnapshot) && state.maintenanceScheduleSnapshot.length === maintenanceSchedules.size,
+  'NFT maintenance schedule recovery snapshot is missing or belongs to another workflow');
+  const safeAbort = config.safeAbort === true;
+  if (safeAbort) {
+    requireCondition(!state.originalApp && !state.stopAttempted && !state.launchAttempted && !state.restorePassed &&
+      !state.asyncRegistrationAttempted && !state.asyncSwitchAttempted && !state.environmentRestored,
+    'Destructive NFT work may have started; keep maintenance schedules paused');
+  } else {
+    requireCondition(config.recoveryVerified === true && config.resetVerified === true &&
+      state.resetVerified === true && state.qaVerified === true && state.asyncRestored === true &&
+      (state.maintenancePaused === true || state.maintenanceRestored === true),
+    'Verified database reset, application QA, and async recovery are required before resuming maintenance');
+  }
+  state.maintenanceScheduleProgress ??= {};
+
+  for (const original of state.maintenanceScheduleSnapshot) {
+    const name = original.Name;
+    validateMaintenanceSchedule(original, name);
+    const current = await getMaintenanceSchedule(aws, name);
+    requireCondition(scheduleConfigMatches(current, original),
+      'NFT maintenance schedule configuration drifted; refusing recovery');
+    const progress = state.maintenanceScheduleProgress[name] ?? {};
+    if (original.State === 'DISABLED') {
+      requireCondition(current.State === 'DISABLED', 'Originally disabled NFT schedule was changed externally');
+    } else if (current.State === 'ENABLED') {
+      requireCondition(progress.restoreAttempted === true || safeAbort,
+        'NFT maintenance schedule was enabled outside this recovery');
+    } else {
+      requireCondition(current.State === 'DISABLED' && progress.pauseAttempted === true &&
+        (progress.paused === true || safeAbort),
+      'NFT maintenance schedule pause is not owned by this recovery');
+    }
+  }
+
+  for (const original of state.maintenanceScheduleSnapshot) {
+    const name = original.Name;
+    validateMaintenanceSchedule(original, name);
+    const current = await getMaintenanceSchedule(aws, name);
+    requireCondition(scheduleConfigMatches(current, original),
+      'NFT maintenance schedule configuration drifted; refusing recovery');
+    const progress = state.maintenanceScheduleProgress[name] ?? {};
+    if (original.State === 'DISABLED') {
+      requireCondition(current.State === 'DISABLED', 'Originally disabled NFT schedule was changed externally');
+      state.maintenanceScheduleProgress[name] = {...progress, restored: true};
+      await persistMaintenanceProgress(deps);
+      continue;
+    }
+    if (current.State === 'ENABLED') {
+      requireCondition(progress.restoreAttempted === true || safeAbort,
+        'NFT maintenance schedule was enabled outside this recovery');
+      state.maintenanceScheduleProgress[name] = {...progress, restored: true};
+      await persistMaintenanceProgress(deps);
+      continue;
+    }
+    requireCondition(current.State === 'DISABLED' && progress.pauseAttempted === true &&
+      (progress.paused === true || safeAbort),
+      'NFT maintenance schedule pause is not owned by this recovery');
+    state.maintenanceScheduleProgress[name] = {...progress, restoreAttempted: true};
+    await persistMaintenanceProgress(deps);
+    await aws('scheduler', 'update-schedule', scheduleUpdate(original));
+    const verified = await getMaintenanceSchedule(aws, name);
+    requireCondition(verified.State === original.State && isDeepStrictEqual(scheduleUpdate(verified), scheduleUpdate(original)),
+      'NFT maintenance schedule restoration could not be verified');
+    state.maintenanceScheduleProgress[name] = {...state.maintenanceScheduleProgress[name], restored: true};
+    await persistMaintenanceProgress(deps);
+  }
+
+  state.maintenancePaused = false;
+  state.maintenanceRestored = true;
+  await persistMaintenanceProgress(deps);
+  log('All seven NFT maintenance schedules match their exact snapshotted states.');
+  return state;
 }
 
 async function noScheduledWriters(aws) {
@@ -151,6 +397,8 @@ export async function stopNftWriters(config, overrides = {}) {
   validate(config);
   const deps = runtime(overrides);
   const {aws, state, persist, log} = deps;
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules must be paused and drained before stopping writers');
   await identity(aws);
   await noScheduledWriters(aws);
   const {app, simulator} = await servicesFactory(aws)();
@@ -257,6 +505,14 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
   await identity(deps.aws);
   requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition,
     'Cleanup state belongs to another workflow');
+  if (state.maintenanceScheduleSnapshot && !state.originalApp && !state.stopAttempted &&
+      !state.launchAttempted && !state.restorePassed && !state.asyncRegistrationAttempted &&
+      !state.asyncSwitchAttempted && !state.environmentRestored) {
+    await restoreMaintenanceSchedules({...config, safeAbort: true}, deps);
+    return;
+  }
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules are not safely isolated; refusing cleanup and reset');
   const errors = [];
   try {
     await stopRestoreTask(deps);
@@ -318,6 +574,8 @@ export async function restoreInVpc(config, overrides = {}) {
   validate(config);
   const deps = runtime(overrides);
   const {aws, state, persist, log, signal} = deps;
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules must remain paused through database replacement');
   await identity(aws);
   requireCondition(await scanQueueEmpty(aws), 'NFT scan queue is not empty; refusing database replacement');
   requireCondition(state.writersStopped && state.taskDefinition === config.taskDefinition &&
@@ -389,6 +647,8 @@ export async function restoreAsyncWorker(config, overrides = {}) {
   const deps = runtime(overrides);
   const {aws, state, persist} = deps;
   await identity(aws);
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules must remain paused through async recovery');
   requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition &&
     state.originalAsync && Number.isSafeInteger(state.originalAsync.desiredCount) &&
     state.originalAsync.desiredCount >= 0 && state.asyncStopAttempted,
@@ -413,6 +673,7 @@ export async function restoreAsyncWorker(config, overrides = {}) {
     return stable(current, state.originalAsync.taskDefinition, state.originalAsync.desiredCount);
   }, true);
   state.asyncRestored = true;
+  if (config.resetVerified === true) state.resetVerified = true;
   await persist();
 }
 
@@ -462,6 +723,8 @@ export async function startAsyncWorker(config, overrides = {}) {
   const deps = runtime(overrides);
   const {aws, state, persist, signal, log} = deps;
   await identity(aws);
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules must remain paused during performance preparation');
   requireCondition(state.restorePassed === true && state.runId === config.runId &&
     state.taskDefinition === config.taskDefinition && state.originalAsync && state.asyncStopAttempted,
   'Successful database restore and owned worker state are required');
@@ -526,8 +789,10 @@ async function healthyAppTarget(aws, app) {
 
 export async function startNftApp(overrides = {}, {afterReset = false} = {}) {
   const deps = runtime(overrides);
-  const {aws, state} = deps;
+  const {aws, state, persist} = deps;
   await identity(aws);
+  requireCondition(state.maintenancePaused === true,
+    'NFT maintenance schedules must remain paused while the performance environment is active');
   requireCondition(state.originalApp && (state.restorePassed || afterReset), 'Successful database operation required');
   const {app} = await servicesFactory(aws)();
   requireCondition(app.taskDefinition === state.originalApp.taskDefinition, 'Refusing to start a different app revision');
@@ -538,6 +803,21 @@ export async function startNftApp(overrides = {}, {afterReset = false} = {}) {
     if (!stable(current, state.originalApp.taskDefinition, 1)) return false;
     return healthyAppTarget(aws, current);
   });
+  state.appRestored = true;
+  await persist();
+}
+
+export async function markQaVerified(config, overrides = {}) {
+  validate(config);
+  const deps = runtime(overrides);
+  const {aws, state, persist} = deps;
+  await identity(aws);
+  requireCondition(config.resetVerified === true && state.runId === config.runId &&
+    state.taskDefinition === config.taskDefinition && state.appRestored === true &&
+    state.maintenancePaused === true,
+  'Verified post-reset app state and QA action are required before maintenance recovery');
+  state.qaVerified = true;
+  await persist();
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -547,7 +827,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   process.on('SIGINT', abort);
   try {
     const command = process.argv[2];
-    if (['stop', 'run', 'start', 'start-async'].includes(command)) requireFreshAttempt();
+    if (['snapshot-maintenance', 'stop', 'run', 'start', 'start-async'].includes(command)) requireFreshAttempt();
     const path = process.env.NFT_RESTORE_STATE_PATH ||
       (process.env.RUNNER_TEMP && join(process.env.RUNNER_TEMP, 'nft-restore-state.json'));
     requireCondition(path, 'NFT_RESTORE_STATE_PATH is required');
@@ -559,26 +839,38 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       resetSha: process.env.GITHUB_SHA,
       resetCompatibleTaskDefinition: process.env.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION,
       resetCompatibleSha: process.env.NFT_RESET_COMPATIBLE_APP_SHA,
+      recoveryVerified: process.env.NFT_MAINTENANCE_RECOVERY_VERIFIED === 'true',
     };
     const state = await readFile(path, 'utf8').then(JSON.parse).catch(error => {
-      if (command === 'stop' && error.code === 'ENOENT') return {};
+      if (['snapshot-maintenance', 'stop'].includes(command) && error.code === 'ENOENT') return {};
       throw new Error('NFT restore state is missing or unreadable; manual recovery required');
     });
     if (command === 'start-async') config.taskDefinition = state.taskDefinition;
-    if (['cleanup', 'start-after-reset', 'restore-async'].includes(command)) {
+    if (['cleanup', 'pause-maintenance', 'restore-maintenance', 'mark-qa-verified', 'start-after-reset', 'restore-async'].includes(command)) {
       config.runId = recoveryOwner(state, {
         runId: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT,
       });
     }
+    const checkpoint = ['pause-maintenance', 'restore-maintenance'].includes(command)
+      ? () => uploadRecoveryCheckpoints(dirname(path), {
+        runId: process.env.GITHUB_RUN_ID,
+        attempt: process.env.GITHUB_RUN_ATTEMPT,
+        phase: 'restore-state',
+      })
+      : async () => {};
     const deps = runtime({
-      state, signal: controller.signal,
+      state, signal: controller.signal, checkpoint,
       persist: async () => {
         const temporary = `${path}.tmp`;
         await writeFile(temporary, JSON.stringify(state), {mode: 0o600});
         await rename(temporary, path);
       },
     });
-    if (command === 'stop') {
+    if (command === 'snapshot-maintenance') await snapshotMaintenanceSchedules(config, deps);
+    else if (command === 'pause-maintenance') await pauseMaintenanceSchedules(config, deps);
+    else if (command === 'restore-maintenance') await restoreMaintenanceSchedules(config, deps);
+    else if (command === 'mark-qa-verified') await markQaVerified(config, deps);
+    else if (command === 'stop') {
       requireCondition(config.expectedSha, 'EXPECTED_NFT_SHA is required before stopping the app');
       await stopNftWriters(config, deps);
     }

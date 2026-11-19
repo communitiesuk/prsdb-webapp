@@ -1,5 +1,5 @@
 import {spawn, spawnSync} from 'node:child_process';
-import {chmod, mkdir, open, readdir} from 'node:fs/promises';
+import {chmod, cp, lstat, mkdir, open, readdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
@@ -49,6 +49,82 @@ function uploadDiagnostic(path, key, env) {
   if (result.error || result.status !== 0) throw new Error('Private diagnostic upload failed');
 }
 
+function reportError(status) {
+  return Object.assign(new Error('Gatling report capture failed'), {reportStatus: status});
+}
+
+async function reportEntries(directory) {
+  let info;
+  try {
+    info = await lstat(directory);
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+  if (!info.isDirectory() || info.isSymbolicLink()) throw reportError('unsafe');
+  const entries = await readdir(directory, {withFileTypes: true});
+  if (entries.some(entry => !entry.isDirectory() || entry.isSymbolicLink())) throw reportError('unsafe');
+  return entries;
+}
+
+async function validateReportTree(directory) {
+  const root = await lstat(directory);
+  if (!root.isDirectory() || root.isSymbolicLink()) throw reportError('unsafe');
+  let hasIndex = false;
+  let hasSimulationLog = false;
+  async function visit(current, atRoot = false) {
+    for (const entry of await readdir(current, {withFileTypes: true})) {
+      const path = join(current, entry.name);
+      const info = await lstat(path);
+      if (info.isSymbolicLink() || (!info.isDirectory() && !info.isFile())) throw reportError('unsafe');
+      if (info.isDirectory()) await visit(path);
+      else if (atRoot && entry.name === 'index.html') hasIndex = true;
+      else if (atRoot && entry.name === 'simulation.log') hasSimulationLog = true;
+    }
+  }
+  await visit(directory, true);
+  if (!hasIndex || !hasSimulationLog) throw reportError('missing');
+}
+
+async function retainStageReport({cwd, outputDirectory, stage, previousReports}) {
+  const sourceDirectory = join(cwd, 'build', 'reports', 'gatling');
+  const entries = await reportEntries(sourceDirectory);
+  const generated = entries.filter(entry => !previousReports.has(entry.name));
+  if (generated.length !== 1 || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(generated[0]?.name ?? '')) {
+    throw reportError(generated.length ? 'unsafe' : 'missing');
+  }
+  const source = join(sourceDirectory, generated[0].name);
+  await validateReportTree(source);
+  const reportsDirectory = join(outputDirectory, 'reports');
+  await mkdir(reportsDirectory, {recursive: true, mode: 0o700});
+  const destination = join(reportsDirectory, stage);
+  await cp(source, destination, {recursive: true, errorOnExist: true, force: false});
+  await validateReportTree(destination);
+}
+
+async function createReportArchive(outputDirectory, diagnosticsDirectory) {
+  const reportsDirectory = join(outputDirectory, 'reports');
+  const entries = await reportEntries(reportsDirectory);
+  if (!entries.length) return undefined;
+  for (const entry of entries) {
+    if (!stages.has(entry.name)) throw reportError('unsafe');
+    await validateReportTree(join(reportsDirectory, entry.name));
+  }
+  const archive = join(diagnosticsDirectory, 'reports.tar.gz');
+  let handle;
+  try {
+    handle = await open(archive, 'wx', 0o600);
+    await handle.close();
+    const result = spawnSync('tar', ['-czf', archive, '-C', outputDirectory, 'reports'], {stdio: 'ignore'});
+    if (result.error || result.status !== 0) throw reportError('failed');
+    await chmod(archive, 0o600);
+    return archive;
+  } catch (error) {
+    if (handle) await handle.close().catch(() => {});
+    throw error.reportStatus ? error : reportError('failed');
+  }
+}
+
 export async function publishDiagnostics({env = process.env, log = line => console.log(line), now = Date.now} = {}) {
   const {runId, attempt, runnerTemp} = requireRunIdentity(env);
   const outputDirectory = join(runnerTemp, 'nft-gatling-diagnostics', `${runId}-${attempt}`);
@@ -66,6 +142,8 @@ export async function publishDiagnostics({env = process.env, log = line => conso
   const files = [];
   const pairs = new Map();
   for (const entry of entries) {
+    if ((entry.name === 'reports' && entry.isDirectory()) ||
+        (entry.name === 'reports.tar.gz' && entry.isFile())) continue;
     const match = filePattern.exec(entry.name);
     if (!entry.isFile() || !match) throw new Error('Unexpected private diagnostic file');
     const stem = `${match[1]}-${match[2]}`;
@@ -78,19 +156,38 @@ export async function publishDiagnostics({env = process.env, log = line => conso
 
   let uploadedFileCount = 0;
   let uploadFailed = false;
+  let reportArchiveStatus = 'none';
+  try {
+    const archive = await createReportArchive(outputDirectory, outputDirectory);
+    if (archive) {
+      files.push({
+        path: archive,
+        key: `performance-recovery/${runId}/${attempt}/gatling/reports.tar.gz`,
+        reportArchive: true,
+      });
+      reportArchiveStatus = 'complete';
+    } else if (files.length) {
+      reportArchiveStatus = 'missing';
+      uploadFailed = true;
+    }
+  } catch (error) {
+    reportArchiveStatus = error.reportStatus ?? 'failed';
+    uploadFailed = true;
+  }
   for (const file of files) {
     try {
       uploadDiagnostic(file.path, file.key, env);
       uploadedFileCount++;
     } catch {
       uploadFailed = true;
+      if (file.reportArchive) reportArchiveStatus = 'failed';
     }
   }
   const elapsedSeconds = Math.max(0, Math.floor((now() - startedAt) / 1000));
   const exitCode = uploadFailed ? 1 : 0;
   const status = uploadFailed ? 'failed' : 'complete';
-  log(`NFT_GATLING_DIAGNOSTICS status=${status} elapsed_seconds=${elapsedSeconds} uploaded_file_count=${uploadedFileCount} exit_code=${exitCode}`);
-  return {exitCode, uploadedFileCount, status};
+  log(`NFT_GATLING_DIAGNOSTICS status=${status} elapsed_seconds=${elapsedSeconds} uploaded_file_count=${uploadedFileCount} exit_code=${exitCode} report_archive_status=${reportArchiveStatus}`);
+  return {exitCode, uploadedFileCount, reportArchiveStatus, status};
 }
 
 function launchProcess(command, args, env, stdout, stderr, cwd) {
@@ -149,6 +246,8 @@ export async function runGatlingStage({
 
   const {runId, attempt, runnerTemp} = requireRunIdentity(env);
   const outputDirectory = join(runnerTemp, 'nft-gatling-diagnostics', `${runId}-${attempt}`);
+  const reportsDirectory = join(cwd, 'build', 'reports', 'gatling');
+  const previousReports = new Set((await reportEntries(reportsDirectory)).map(entry => entry.name));
   await mkdir(outputDirectory, {recursive: true, mode: 0o700});
   await chmod(outputDirectory, 0o700);
   const launchId = randomUUID();
@@ -172,18 +271,26 @@ export async function runGatlingStage({
 
   let childResult;
   try {
-    childResult = await launchProcess(command, args, env, stdout, stderr, cwd);
+    childResult = await launchProcess(command, args, {...env, NFT_GATLING_STAGE: stage}, stdout, stderr, cwd);
   } finally {
     clearInterval(heartbeat);
     await Promise.all([stdout.close(), stderr.close()]);
   }
 
-  const childExitCode = childResult.code ?? signalExitCode(childResult.signal);
+  const gradleExitCode = childResult.code ?? signalExitCode(childResult.signal);
   const aborted = Boolean(childResult.signal || childResult.requestedSignal);
-  const exitCode = childExitCode;
+  let reportStatus;
+  try {
+    await retainStageReport({cwd, outputDirectory, stage, previousReports});
+    reportStatus = 'complete';
+  } catch (error) {
+    reportStatus = error.reportStatus ?? 'failed';
+  }
+  const exitCode = gradleExitCode === 0 && reportStatus !== 'complete' ? 1 : gradleExitCode;
   const status = aborted ? 'aborted' : exitCode === 0 ? 'complete' : 'failed';
   log(`NFT_GATLING stage=${stage} status=${status} elapsed_seconds=${elapsedSeconds()} exit_code=${exitCode}`);
-  return {exitCode, status};
+  log(`NFT_GATLING stage=${stage} gradle_exit_code=${gradleExitCode} report_status=${reportStatus} exit_code=${exitCode}`);
+  return {exitCode, gradleExitCode, reportStatus, status};
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

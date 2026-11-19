@@ -47,11 +47,23 @@ async function setup(t, {gradleExitCode = 0, gradleDelayMs = 0, readyFile} = {})
 
   const gradle = join(directory, 'gradlew');
   await writeFile(gradle, `#!/usr/bin/env node
-const {appendFileSync, writeFileSync} = require('node:fs');
+const {appendFileSync, mkdirSync, symlinkSync, writeFileSync} = require('node:fs');
+const {join} = require('node:path');
+const {randomUUID} = require('node:crypto');
 appendFileSync(process.env.FAKE_GRADLE_ARGS, JSON.stringify(process.argv.slice(2)) + '\\n');
-if (process.env.FAKE_GRADLE_READY) writeFileSync(process.env.FAKE_GRADLE_READY, 'ready', {mode: 0o600});
 process.stdout.write('${marker}_STDOUT https://private.test/path?token=private-token body=private-body');
 process.stderr.write('${marker}_STDERR cookie=private-cookie');
+const reportMode = process.env.FAKE_GATLING_REPORT_MODE ?? 'valid';
+if (reportMode !== 'missing') {
+  const stage = process.env.NFT_GATLING_STAGE ?? 'unknown';
+  const report = join(process.cwd(), 'build', 'reports', 'gatling', stage + '-' + randomUUID());
+  mkdirSync(join(report, 'assets'), {recursive: true});
+  writeFileSync(join(report, 'index.html'), '${marker}_REPORT_' + stage);
+  writeFileSync(join(report, 'assets', 'chart.js'), '${marker}_CHART_' + stage);
+  writeFileSync(join(report, 'simulation.log'), '${marker}_EVENTS_' + stage);
+  if (reportMode === 'symlink') symlinkSync(process.env.FAKE_SYMLINK_TARGET, join(report, 'assets', 'outside'));
+}
+if (process.env.FAKE_GRADLE_READY) writeFileSync(process.env.FAKE_GRADLE_READY, 'ready', {mode: 0o600});
 const exitCode = Number(process.env.FAKE_GRADLE_EXIT_CODE ?? '${gradleExitCode}');
 setTimeout(() => process.exit(exitCode), Number(process.env.FAKE_GRADLE_DELAY_MS ?? '${gradleDelayMs}'));
 `);
@@ -65,6 +77,7 @@ const args = process.argv.slice(2);
 appendFileSync(process.env.FAKE_AWS_CALLS, JSON.stringify(args) + '\\n');
 process.stderr.write('PRIVATE_AWS_CANARY');
 if (process.env.FAKE_AWS_UPLOAD_FAILURE === 'true') process.exit(9);
+  if (process.env.FAKE_AWS_REPORT_UPLOAD_FAILURE === 'true' && args[3]?.endsWith('/reports.tar.gz')) process.exit(9);
 if (args[0] !== 's3' || args[1] !== 'cp') process.exit(8);
 const destination = args[3];
 const prefix = 's3://prsdb-seed-data-nft/';
@@ -97,10 +110,13 @@ copyFileSync(args[2], target);
       FAKE_GRADLE_ARGS: gradleArgs,
       FAKE_GRADLE_EXIT_CODE: String(gradleExitCode),
       FAKE_GRADLE_DELAY_MS: String(gradleDelayMs),
+      FAKE_GATLING_REPORT_MODE: 'valid',
+      FAKE_SYMLINK_TARGET: join(directory, 'outside-report-file'),
       FAKE_GRADLE_READY: readyFile ?? '',
       FAKE_AWS_CALLS: awsCalls,
       FAKE_PRIVATE_DIRECTORY: privateDirectory,
       FAKE_AWS_UPLOAD_FAILURE: 'false',
+      FAKE_AWS_REPORT_UPLOAD_FAILURE: 'false',
     },
   };
 }
@@ -126,7 +142,7 @@ async function privateObjects(state) {
     for (const entry of await readdir(directory, {withFileTypes: true})) {
       const path = join(directory, entry.name);
       if (entry.isDirectory()) await visit(path);
-      else files.push(path);
+      else if (entry.name.endsWith('.stdout.log') || entry.name.endsWith('.stderr.log')) files.push(path);
     }
   }
   await visit(state.privateDirectory);
@@ -143,9 +159,12 @@ test('all workflow Gatling launches use the fixed-stage output gate', async () =
   assert.equal(directGradleLaunches.length, 0);
   const credentials = workflow.indexOf('- name: Refresh credentials for private recovery checkpoint');
   const publisher = workflow.indexOf('- name: Publish private Gatling diagnostics');
+  const reportGuidance = workflow.indexOf('- name: Add private report download guidance');
   const readiness = workflow.indexOf('- name: Store readiness state privately');
-  assert.ok(credentials >= 0 && credentials < publisher && publisher < readiness);
+  assert.ok(credentials >= 0 && credentials < publisher && publisher < reportGuidance && reportGuidance < readiness);
   assert.match(workflow.slice(publisher, readiness), /if: always\(\)/);
+  assert.match(workflow.slice(reportGuidance, readiness), /aws s3 cp s3:\/\/prsdb-seed-data-nft\/performance-recovery/);
+  assert.doesNotMatch(workflow.slice(reportGuidance, readiness), /X-Amz-Signature|https?:\/\/|PRIVATE_GATLING_CANARY/);
 });
 
 test('every workflow Gatling command runs through the gate without publishing canaries', async t => {
@@ -179,7 +198,7 @@ test('every workflow Gatling command runs through the gate without publishing ca
   const published = publishHelper(state);
   assert.equal(published.status, 0);
   assert.doesNotMatch(published.stdout + published.stderr, /PRIVATE_|private-token|private-body|private-cookie|private\.test/);
-  assert.match(published.stdout, /NFT_GATLING_DIAGNOSTICS status=complete elapsed_seconds=\d+ uploaded_file_count=38 exit_code=0/);
+  assert.match(published.stdout, /NFT_GATLING_DIAGNOSTICS status=complete elapsed_seconds=\d+ uploaded_file_count=39 exit_code=0 report_archive_status=complete/);
   assert.equal((await privateObjects(state)).length, stages.length * 2);
 });
 
@@ -206,11 +225,14 @@ test('successful launch keeps canaries private and publishes only fixed progress
   const published = publishHelper(state);
   assert.equal(published.status, 0);
   assert.doesNotMatch(published.stdout + published.stderr, /PRIVATE_|private-token|private-body|private-cookie|private\.test/);
-  assert.match(published.stdout, /uploaded_file_count=2 exit_code=0/);
+  assert.match(published.stdout, /uploaded_file_count=3 exit_code=0 report_archive_status=complete/);
   const calls = (await readFile(state.awsCalls, 'utf8')).trim().split('\n').map(line => JSON.parse(line));
-  assert.equal(calls.length, 2);
-  assert.ok(calls.every(args => args[0] === 's3' && args[1] === 'cp' &&
+  assert.equal(calls.length, 3);
+  const logCalls = calls.filter(args => args[3].includes('/gatling/rampedJourneys/'));
+  assert.equal(logCalls.length, 2);
+  assert.ok(logCalls.every(args => args[0] === 's3' && args[1] === 'cp' &&
     args[3].startsWith('s3://prsdb-seed-data-nft/performance-recovery/123/2/gatling/rampedJourneys/')));
+  assert.ok(calls.some(args => args[3] === 's3://prsdb-seed-data-nft/performance-recovery/123/2/gatling/reports.tar.gz'));
 
   const objects = await privateObjects(state);
   assert.equal(objects.length, 2);
@@ -242,7 +264,7 @@ test('failed private diagnostic upload fails an otherwise successful launch safe
   assert.equal(result.status, 1);
   assert.doesNotMatch(result.stdout + result.stderr, /PRIVATE_|private-token|private-body|private-cookie|private\.test/);
   assert.match(result.stdout, /NFT_GATLING_DIAGNOSTICS status=failed elapsed_seconds=\d+ uploaded_file_count=0 exit_code=1/);
-  assert.equal((await readFile(state.awsCalls, 'utf8')).trim().split('\n').length, 2);
+  assert.equal((await readFile(state.awsCalls, 'utf8')).trim().split('\n').length, 3);
 });
 
 test('aborted launch captures and uploads diagnostics before returning signal exit status', async t => {
@@ -277,6 +299,7 @@ test('aborted launch captures and uploads diagnostics before returning signal ex
   assert.match(stdout, /status=aborted elapsed_seconds=\d+ exit_code=143/);
   const published = publishHelper(state);
   assert.equal(published.status, 0);
+  assert.match(published.stdout, /report_archive_status=complete/);
   assert.doesNotMatch(published.stdout + published.stderr, /PRIVATE_|private-token|private-body|private-cookie|private\.test/);
   assert.equal((await privateObjects(state)).length, 2);
 });
@@ -306,4 +329,76 @@ test('unknown stages are rejected without launching Gradle or printing the suppl
 
   assert.equal(result.status, 1);
   assert.doesNotMatch(result.stdout + result.stderr, /private-stage-value|PRIVATE_|private-token/);
+});
+
+test('successful and failed Gradle stages retain their own HTML, assets, and raw events', async t => {
+  const state = await setup(t);
+  const successful = runHelper(state, 'basicJourneys');
+  const failed = runHelper(state, 'rampedJourneys', [], {...state.env, FAKE_GRADLE_EXIT_CODE: '23'});
+
+  assert.equal(successful.status, 0);
+  assert.equal(failed.status, 23);
+  assert.match(successful.stdout, /gradle_exit_code=0 report_status=complete exit_code=0/);
+  assert.match(failed.stdout, /gradle_exit_code=23 report_status=complete exit_code=23/);
+  assert.doesNotMatch(successful.stdout + successful.stderr + failed.stdout + failed.stderr,
+    /PRIVATE_GATLING_CANARY|private-token|private-body|private-cookie|private\.test/);
+
+  const reports = join(state.runnerTemp, 'nft-gatling-diagnostics', '123-2', 'reports');
+  const stages = (await readdir(reports)).sort();
+  assert.equal(stages.length, 2);
+  const contents = await Promise.all(stages.map(async directory => {
+    const reportDirectory = join(reports, directory);
+    return Promise.all([
+      readFile(join(reportDirectory, 'index.html'), 'utf8'),
+      readFile(join(reportDirectory, 'assets', 'chart.js'), 'utf8'),
+      readFile(join(reportDirectory, 'simulation.log'), 'utf8'),
+    ]);
+  }));
+  assert.deepEqual(contents.map(files => files.map(file => file.match(/_(?:REPORT|CHART|EVENTS)_(\w+)/)?.[1])), [
+    ['basicJourneys', 'basicJourneys', 'basicJourneys'],
+    ['rampedJourneys', 'rampedJourneys', 'rampedJourneys'],
+  ]);
+
+  const published = publishHelper(state);
+  assert.equal(published.status, 0);
+  assert.doesNotMatch(published.stdout + published.stderr, /PRIVATE_GATLING_CANARY|private-token|private-body|private-cookie|private\.test/);
+  assert.match(published.stdout, /report_archive_status=complete/);
+  const archive = join(state.privateDirectory, 'performance-recovery', '123', '2', 'gatling', 'reports.tar.gz');
+  const listing = spawnSync('tar', ['-tzf', archive], {encoding: 'utf8'});
+  assert.equal(listing.status, 0);
+  assert.match(listing.stdout, /reports\/basicJourneys\/index\.html/);
+  assert.match(listing.stdout, /reports\/basicJourneys\/assets\/chart\.js/);
+  assert.match(listing.stdout, /reports\/basicJourneys\/simulation\.log/);
+  assert.match(listing.stdout, /reports\/rampedJourneys\/index\.html/);
+  assert.match(listing.stdout, /reports\/rampedJourneys\/simulation\.log/);
+});
+
+test('report archive upload failure is distinct from successfully published stage diagnostics', async t => {
+  const state = await setup(t);
+  assert.equal(runHelper(state).status, 0);
+  const result = publishHelper(state, {...state.env, FAKE_AWS_REPORT_UPLOAD_FAILURE: 'true'});
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /uploaded_file_count=2 exit_code=1 report_archive_status=failed/);
+  assert.equal((await readFile(state.awsCalls, 'utf8')).trim().split('\n').length, 3);
+  assert.equal((await privateObjects(state)).length, 2);
+});
+
+test('missing report fails explicitly while preserving the Gradle result', async t => {
+  const state = await setup(t);
+  const result = runHelper(state, 'basicJourneys', [], {...state.env, FAKE_GATLING_REPORT_MODE: 'missing'});
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /gradle_exit_code=0 report_status=missing exit_code=1/);
+  assert.equal((await privateObjects({...state, privateDirectory: join(state.runnerTemp, 'nft-gatling-diagnostics', '123-2')})).length, 2);
+});
+
+test('report capture rejects symlinked report content without copying it', async t => {
+  const state = await setup(t);
+  const result = runHelper(state, 'basicJourneys', [], {...state.env, FAKE_GATLING_REPORT_MODE: 'symlink'});
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /gradle_exit_code=0 report_status=unsafe exit_code=1/);
+  const reports = join(state.runnerTemp, 'nft-gatling-diagnostics', '123-2', 'reports');
+  assert.equal(await readdir(reports).catch(error => error.code), 'ENOENT');
 });

@@ -115,10 +115,17 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Snapshot all seven maintenance schedules before mutation
+        run: node scripts/performance-tests/nft-vpc-restore.mjs snapshot-maintenance
+      - name: Store schedule snapshot privately before mutation
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-checkpoint
+      - name: Pause maintenance schedules and drain scheduled writers
+        run: node scripts/performance-tests/nft-vpc-restore.mjs pause-maintenance
       - name: Stop NFT app and async worker while replacing the database
         run: node scripts/performance-tests/nft-vpc-restore.mjs stop
-      - name: Store pre-restore recovery checkpoint privately
-        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-checkpoint
+      - name: Store writer-stop recovery checkpoint privately, including partial failure
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state
       - name: Restore pinned seed dump inside the NFT VPC
         run: node scripts/performance-tests/nft-vpc-restore.mjs run
       - name: Migrate and verify the restored NFT database through SSM
@@ -925,6 +932,18 @@ jobs:
       - name: Publish private Gatling diagnostics
         if: always()
         run: node scripts/performance-tests/nft-gatling.mjs publish
+      - name: Add private report download guidance
+        if: always()
+        env:
+          NFT_RUN_ID: ${{ github.run_id }}
+          NFT_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          {
+            echo '### Private Gatling report'
+            echo 'When the preceding report archive status is complete, authorized NFT operators can retrieve the private archive with:'
+            echo "aws s3 cp s3://prsdb-seed-data-nft/performance-recovery/${NFT_RUN_ID}/${NFT_RUN_ATTEMPT}/gatling/reports.tar.gz reports.tar.gz --region eu-west-2"
+            echo 'No public or presigned report URL is created.'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Store readiness state privately
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload readiness-state
@@ -975,10 +994,11 @@ jobs:
 
   reset-database:
     name: Reset NFT database
-    needs: [changes, stop-writers-for-reset]
+    needs: [changes, restore-dataset, stop-writers-for-reset]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
+      needs.restore-dataset.result == 'success' &&
       needs.stop-writers-for-reset.result == 'success'
     uses: ./.github/workflows/reset-database.yml
     with:
@@ -1002,6 +1022,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -1026,6 +1049,20 @@ jobs:
         uses: ./.github/actions/verify-nft-database
         with:
           mode: qa
+      - name: Restore NFT orchestrator credentials for private recovery checkpoints
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-reset-checkpoint-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Record successful QA verification in the private recovery state
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs mark-qa-verified
+      - name: Store post-reset QA checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
 
   restore-async-after-database-reset:
     name: Restore async service after QA reset
@@ -1062,10 +1099,75 @@ jobs:
         run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Restore the exact recorded async task revision and count
         run: node scripts/performance-tests/nft-vpc-restore.mjs restore-async
+      - name: Store async recovery checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+
+  restore-maintenance-schedules:
+    name: Restore NFT maintenance schedules after verified recovery
+    needs: [changes, restore-dataset, reset-database, restore-app-after-database-reset, restore-async-after-database-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.restore-dataset.result == 'success' &&
+      needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success' &&
+      needs.restore-async-after-database-reset.result == 'success'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
+      NFT_MAINTENANCE_RECOVERY_VERIFIED: ${{ needs.restore-dataset.result == 'success' && needs.reset-database.result == 'success' && needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-schedule-recovery-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
+      - name: Restore exact prior maintenance schedule states
+        run: node scripts/performance-tests/nft-vpc-restore.mjs restore-maintenance
+      - name: Store final recovery checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+
+  maintenance-recovery-required:
+    name: Report incomplete NFT maintenance recovery
+    needs: [changes, restore-dataset, stop-writers-for-reset, reset-database, restore-app-after-database-reset, restore-async-after-database-reset, restore-maintenance-schedules]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.restore-maintenance-schedules.result != 'success' &&
+      !(needs.restore-dataset.result != 'success' && needs.stop-writers-for-reset.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require operator recovery
+        run: |
+          {
+            echo '### NFT maintenance recovery required'
+            echo 'The seven maintenance schedules were not verified in their exact original states. If database reset, app QA, or async recovery failed, leave any paused schedules disabled.'
+            echo 'Use this run’s private recovery checkpoint and the NFT recovery procedure; do not enable schedules against an unverified schema.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo '::error::NFT maintenance schedule recovery is incomplete; operator action is required.'
+          exit 1
 
   marker:
     name: Record successful NFT head
-    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset, restore-async-after-database-reset]
+    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset, restore-async-after-database-reset, restore-maintenance-schedules]
     if: >-
       always() && github.ref == 'refs/heads/nft' &&
       inputs.fail-smoke != true && inputs.fail-gatling != true &&
@@ -1073,7 +1175,8 @@ jobs:
       needs.changes.outputs.run == 'true' &&
       (inputs.expected-app-sha == '' || inputs.expected-app-sha == needs.changes.outputs.sha) &&
       needs.performance-tests.result == 'success' && needs.reset-database.result == 'success' &&
-      needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success'
+      needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success' &&
+      needs.restore-maintenance-schedules.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
