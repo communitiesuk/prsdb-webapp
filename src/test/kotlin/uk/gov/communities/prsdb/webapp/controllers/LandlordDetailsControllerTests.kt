@@ -290,6 +290,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
@@ -349,37 +350,6 @@ class LandlordDetailsControllerTests(
             }
         }
 
-        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
-        @Test
-        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-        fun `getUserLandlordDetails does not show the inactive variant when ACTIVE_INACTIVE is disabled`() {
-            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
-            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
-            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(
-                propertyOwnershipService.getActivePropertiesForLandlordUser(
-                    landlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
-                ),
-            ).thenReturn(emptyList())
-
-            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
-                status { isOk() }
-                model {
-                    attributeDoesNotExist("inactiveLandlordNotificationBannerViewModel")
-                    attribute(
-                        "landlord",
-                        Matchers.hasProperty<LandlordViewModel>(
-                            "personalDetails",
-                            Matchers.hasItem(
-                                Matchers.hasProperty<SummaryListRowViewModel>("hasActions", Matchers.`is`(true)),
-                            ),
-                        ),
-                    )
-                }
-            }
-        }
-
         @Test
         @WithMockUser(roles = ["ORG_ADMIN"])
         fun `getUserLandlordDetails hides change links for an inactive org landlord admin`() {
@@ -390,6 +360,7 @@ class LandlordDetailsControllerTests(
                     .createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
                     .apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
@@ -437,6 +408,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
@@ -476,6 +448,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val orgLandlord = MockLandlordData.createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
@@ -501,14 +474,17 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-        fun `getUserLandlordDetails is not blocked for an inactive landlord`() {
-            whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
-            val landlord = MockLandlordData.createIndividualLandlord()
+        fun `getUserLandlordDetails is not blocked by the inactive landlord interceptor for an inactive landlord`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
-                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
                 ),
             ).thenReturn(emptyList())
 

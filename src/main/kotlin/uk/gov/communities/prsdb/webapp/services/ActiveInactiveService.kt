@@ -21,10 +21,11 @@ class ActiveInactiveService(
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
     fun isCurrentLandlordInactive(): Boolean =
-        featureFlagManager.checkFeature(ACTIVE_INACTIVE) &&
-            userToLandlordService.getCurrentLandlordForUserOrNull()?.isActive == false
+        userToLandlordService.getCurrentLandlordForUserOrNull()?.let { isLandlordInactive(it) } ?: false
+
+    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+    fun isLandlordInactive(landlord: Landlord): Boolean = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
 
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional

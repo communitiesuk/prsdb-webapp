@@ -345,6 +345,30 @@ class ActiveInactiveServiceTests {
     }
 
     @Test
+    fun `isLandlordInactive returns true for an inactive landlord`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
+
+        assertTrue(activeInactiveService.isLandlordInactive(landlord))
+    }
+
+    @Test
+    fun `isLandlordInactive returns false for an active landlord`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        assertFalse(activeInactiveService.isLandlordInactive(MockLandlordData.createIndividualLandlord()))
+    }
+
+    // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
+    @Test
+    fun `isLandlordInactive returns false for an inactive landlord when ACTIVE_INACTIVE is disabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
+
+        assertFalse(activeInactiveService.isLandlordInactive(landlord))
+    }
+
+    @Test
     fun `isCurrentLandlordInactive returns true when the current landlord is inactive`() {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
@@ -354,29 +378,10 @@ class ActiveInactiveServiceTests {
     }
 
     @Test
-    fun `isCurrentLandlordInactive returns false when the current landlord is active`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        whenever(userToLandlordService.getCurrentLandlordForUserOrNull())
-            .thenReturn(MockLandlordData.createIndividualLandlord())
-
-        assertFalse(activeInactiveService.isCurrentLandlordInactive())
-    }
-
-    @Test
     fun `isCurrentLandlordInactive returns false when the user has no landlord`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
 
         assertFalse(activeInactiveService.isCurrentLandlordInactive())
-    }
-
-    // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
-    @Test
-    fun `isCurrentLandlordInactive returns false without looking up the landlord when ACTIVE_INACTIVE is disabled`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
-
-        assertFalse(activeInactiveService.isCurrentLandlordInactive())
-        verifyNoInteractions(userToLandlordService)
     }
 
     companion object {
