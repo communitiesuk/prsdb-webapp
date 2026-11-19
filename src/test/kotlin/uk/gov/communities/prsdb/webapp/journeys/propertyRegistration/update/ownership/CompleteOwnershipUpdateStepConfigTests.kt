@@ -84,7 +84,7 @@ class CompleteOwnershipUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached passes the freeholders when the ownership type only requires freeholder records`() {
+    fun `afterStepIsReached passes the freeholders when the ownership type requires freeholder records`() {
         // Arrange
         whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.JOINT_TENANTS)
 

@@ -656,7 +656,7 @@ VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111
        ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, current_date),
        ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, current_date);
 
--- Property-record freeholder card fixtures used by integration tests and seeded locally.
+-- Property-record freeholder and superior landlord card fixtures used by integration tests and seeded locally.
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (90, current_timestamp, 1502423354, 0),
        (91, current_timestamp, 1502423355, 0),
@@ -706,6 +706,10 @@ FROM (VALUES ('Jordan Joint', 'joint.freeholder@example.com', 54),
              ('Alex Non-Joint', NULL, 55),
              (NULL, NULL, 55)) AS v(name, email, property_ownership_id)
 WHERE NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = v.property_ownership_id);
+
+INSERT INTO superior_landlord (name, email, property_ownership_id)
+SELECT 'Sam Superior', 'superior.landlord@example.com', 55
+WHERE NOT EXISTS (SELECT 1 FROM superior_landlord s WHERE s.property_ownership_id = 55);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));

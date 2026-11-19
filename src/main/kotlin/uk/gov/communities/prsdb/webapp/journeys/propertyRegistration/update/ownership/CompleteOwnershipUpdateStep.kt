@@ -51,8 +51,6 @@ class CompleteOwnershipUpdateStepConfig(
                 emptyList()
             }
 
-        // TODO PDJB-1987, PDJB-1988, PDJB-1989, PDJB-1990: notify the added freeholders and superior landlords returned here,
-        //  before the journey is deleted. Their postal addresses only exist in journey state (PDJB-2226).
         try {
             propertyOwnershipService.updateOwnershipStructure(
                 id = state.propertyId,
@@ -66,6 +64,8 @@ class CompleteOwnershipUpdateStepConfig(
             throw ex
         }
 
+        // TODO PDJB-1992: notify the added freeholders and superior landlords returned by updateOwnershipStructure here.
+        //  Their postal addresses only exist in journey state (PDJB-2226).
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The property’s ownership"))
     }
 

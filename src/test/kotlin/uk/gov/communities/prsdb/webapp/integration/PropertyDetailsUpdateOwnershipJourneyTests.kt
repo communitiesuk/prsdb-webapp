@@ -40,9 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class PropertyDetailsUpdateOwnershipJourneyTests :
-    IntegrationTestWithMutableData(
-        listOf("data-local.sql", "data-overlay-property-has-freeholders-and-superior-landlords.sql"),
-    ) {
+    IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
     lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
@@ -58,8 +56,8 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
     // Seeded as SOLE_FREEHOLD with no freeholders or superior landlords
     private val soleFreeholdPropertyId = 33L
 
-    // Seeded by the overlay as SHARE_OF_JOINT_TENANTS with one named freeholder and one named superior landlord
-    private val propertyWithPartiesId = 34L
+    // Seeded as LEASEHOLD_ONLY with two named freeholders, one "no details known" freeholder and one named superior landlord
+    private val propertyWithPartiesId = 55L
 
     @Test
     fun `a landlord can change to a share of joint tenants, keeping the existing freeholder and adding new parties`(page: Page) {
@@ -244,7 +242,7 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(OwnershipType.SHARE_OF_JOINT_TENANTS, ownershipTypeOf(propertyWithPartiesId))
         val freeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyWithPartiesId)
-        assertEquals(listOf("Fiona Freeholder"), freeholders.map { it.name })
+        assertEquals(listOf("Alex Non-Joint", "Taylor Non-Joint", null), freeholders.map { it.name }.sortedWith(nullsLast()))
         assertEquals(0, superiorLandlordRepository.findAllByPropertyOwnership_Id(propertyWithPartiesId).size)
     }
 
@@ -255,13 +253,15 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
 
         checkAnswersPage.changeJointFreeholdersLink.clickAndWait()
         val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
-        assertThat(freeholdersListPage.getSummaryCard(0).title).containsText("Fiona Freeholder")
+        val cardTitles = (0..2).map { freeholdersListPage.getSummaryCard(it).title.getText() }
+        assertContains(cardTitles, "Taylor Non-Joint")
 
         freeholdersListPage.backLink.clickAndWait()
         checkAnswersPage = assertPageIs(page, OwnershipCheckAnswersPagePropertyDetailsUpdate::class, urlArguments)
         assertThat(checkAnswersPage.summaryList.freeholdTypeRow.value).containsText("Joint tenants")
     }
 
+    // TODO PDJB-2016: delete this test along with the ASSOCIATED_PARTIES flag
     @Test
     fun `the ownership update journey is not available when the associated parties flag is disabled`() {
         featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
