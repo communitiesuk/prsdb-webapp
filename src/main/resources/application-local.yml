@@ -173,6 +173,9 @@ features:
     - name: "pdjb-844-active-inactive"
       enabled: true
       expiry-date: "2027-01-01"
+    - name: "pdjb-1878-international-addresses"
+      enabled: true
+      expiry-date: "2027-01-01"
 
 ---
 
