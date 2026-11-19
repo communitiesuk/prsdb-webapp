@@ -51,7 +51,7 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: Remove only the associatedPartiesEnabled check when the ASSOCIATED_PARTIES flag is removed;
     //  retain the landlord-view and ownership-type conditions.
     val showFreeholdersSection: Boolean =
-        viewType.isLandlordView && associatedPartiesEnabled && propertyOwnership.ownershipType.requiresFreeholderRecords()
+        showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
     val freeholdersHeadingKey: String =
         if (propertyOwnership.ownershipType.isJointFreeholder()) {
