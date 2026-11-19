@@ -48,8 +48,6 @@ class PropertyDetailsViewModel(
     val peopleResponsibleOwnershipSection: List<SummaryListRowViewModel> =
         if (showPeopleResponsibleOwnership) ownershipAnswerRows() else emptyList()
 
-    // TODO PDJB-2016: Remove only the associatedPartiesEnabled check when the ASSOCIATED_PARTIES flag is removed;
-    //  retain the landlord-view and ownership-type conditions.
     val showFreeholdersSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
