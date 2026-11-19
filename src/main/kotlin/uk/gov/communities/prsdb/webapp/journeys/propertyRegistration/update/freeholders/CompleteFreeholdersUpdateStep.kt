@@ -34,8 +34,8 @@ class CompleteFreeholdersUpdateStepConfig(
             state.deleteJourney()
             throw ex
         }
-        // TODO PDJB-1987, PDJB-1988: send creation notifications to the named freeholders returned by
-        //  updateFreeholders once the freeholder templates are available.
+        // TODO PDJB-1987, PDJB-1988: send creation notifications to newly added freeholders once the email template is available.
+        //  Match the returned entities to the submitted journey data to use postal addresses, which are not persisted.
     }
 
     override fun resolveNextDestination(
