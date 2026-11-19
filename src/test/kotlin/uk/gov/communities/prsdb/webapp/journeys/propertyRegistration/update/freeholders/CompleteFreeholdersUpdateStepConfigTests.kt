@@ -6,9 +6,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -47,6 +50,31 @@ class CompleteFreeholdersUpdateStepConfigTests {
         stepConfig.afterStepIsReached(journeyState)
 
         verify(freeholderService).updateFreeholders(propertyOwnership, submittedFreeholders, snapshot)
+    }
+
+    @Test
+    fun `completion throws when the freeholder list is missing`() {
+        val propertyOwnership = createPropertyOwnership()
+        whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
+        whenever(journeyState.freeholdersMap).thenReturn(null)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                freeholderService,
+                propertyOwnershipService,
+            )
+
+        val exception =
+            assertThrows(PrsdbWebException::class.java) {
+                stepConfig.afterStepIsReached(journeyState)
+            }
+
+        assertEquals(
+            "Freeholder update journey for property ${propertyOwnership.id} has no freeholder list.",
+            exception.message,
+        )
+        verify(freeholderService, never()).updateFreeholders(any(), any(), any())
     }
 
     @Test
