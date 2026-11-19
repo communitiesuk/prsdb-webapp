@@ -305,7 +305,8 @@ class ActiveInactiveServiceTests {
         assertEquals(1, failureCount)
         verify(propertyOwnershipRepository).findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff())
         verify(transactionTemplate, times(3)).executeWithoutResult(any())
-        // PROPERTY_ID property failed, so no delegation deletion should be attempted for it
+
+        verify(lettingAgentAccessService, never()).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(firstSuccessfulProperty.id)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(secondSuccessfulProperty.id)
     }

@@ -17,7 +17,7 @@ class PropertyWithProvideLaterTasksPersistenceTests :
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @Test
-    fun `returns active properties created before the cutoff with any provide later flag set`() {
+    fun `returns active properties created before the cutoff where any provide later status is true`() {
         assertEquals(
             ELIGIBLE_PROPERTY_IDS,
             propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
@@ -26,7 +26,7 @@ class PropertyWithProvideLaterTasksPersistenceTests :
 
     @Test
     fun `does not return properties created exactly at the cutoff`() {
-        val cutoffThirtyDaysAgo = cutoff(PROVIDE_LATER_DEADLINE_DAYS.toLong() + 2)
+        val cutoffThirtyDaysAgo = cutoff(30)
 
         assertEquals(
             emptyList<Long>(),
