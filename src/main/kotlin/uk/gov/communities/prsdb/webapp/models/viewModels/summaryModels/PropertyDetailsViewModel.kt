@@ -65,6 +65,8 @@ class PropertyDetailsViewModel(
     //  drives in fragments/peopleResponsible.html when the ASSOCIATED_PARTIES flag is removed.
     val showPropertyManagerSection: Boolean = showPeopleResponsibleOwnership
 
+    val propertyManagerSectionHeadingKey: String = "registerProperty.propertyManager.usingPropertyManager.heading"
+
     val hasPropertyManager: Boolean = propertyOwnership.propertyManager != null
 
     // TODO PDJB-1995: Replace this placeholder URL with the property manager update journey route.

@@ -370,14 +370,15 @@ class PropertyDetailsViewModelTests {
                 messageSource = mockMessageSource,
             )
 
-        viewModel.propertyManagerNotUsedRows
-            .flatMap { listOf(it.fieldHeading, it.fieldValue as String) }
-            .forEach { messageKey ->
-                val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
-                assertNotEquals(messageKey, resolvedMessage) {
-                    "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
-                }
+        (
+            viewModel.propertyManagerNotUsedRows.flatMap { listOf(it.fieldHeading, it.fieldValue as String) } +
+                viewModel.propertyManagerSectionHeadingKey
+        ).forEach { messageKey ->
+            val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+            assertNotEquals(messageKey, resolvedMessage) {
+                "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
             }
+        }
     }
 
     // TODO PDJB-1999: update or remove this test when the property manager is shown in the local council view
