@@ -127,6 +127,24 @@ class FreeholderServiceTests {
     }
 
     @Test
+    fun `getFreeholdersForProperty returns freeholders sorted by ID`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val freeholders =
+            listOf(
+                MockLandlordData.createFreeholder(propertyOwnership, name = "Second", id = 2),
+                MockLandlordData.createFreeholder(propertyOwnership, name = "First", id = 1),
+            )
+        whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(freeholders)
+
+        // Act
+        val result = freeholderService.getFreeholdersForProperty(propertyOwnership)
+
+        // Assert
+        assertEquals(listOf(1L, 2L), result.map { it.id })
+    }
+
+    @Test
     fun `updateFreeholder overwrites the details of an existing freeholder`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()

@@ -13,7 +13,7 @@ class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
 ) {
     fun getFreeholdersForProperty(propertyOwnership: PropertyOwnership): List<Freeholder> =
-        freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)
+        freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).sortedBy { it.id }
 
     fun getFreeholderSnapshot(freeholders: List<Freeholder>): Map<Long, String> =
         freeholders.associate { it.id to it.getMostRecentlyUpdated().toString() }
