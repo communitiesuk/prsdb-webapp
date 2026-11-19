@@ -460,8 +460,9 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `updateFreeholders treats a freeholder whose saved row has gone as a new one`() {
+    fun `updateFreeholders treats a freeholder whose id matches no saved row as a new one`() {
         // Arrange
+        // The snapshot check normally prevents this, so an empty snapshot is used to reach the defensive fallback
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(emptyList())
         val stale =

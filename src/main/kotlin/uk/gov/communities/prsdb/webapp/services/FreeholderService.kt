@@ -42,8 +42,8 @@ class FreeholderService(
         val added = mutableListOf<FreeholderDataModel>()
 
         freeholders.forEach { submitted ->
-            // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
-            // a new freeholder rather than losing the user's answers.
+            // The snapshot check means every submitted id should match a saved row. Defensively treat an
+            // unmatched id as a new freeholder rather than losing the user's answers.
             val existingFreeholder = submitted.databaseId?.let { existingFreeholdersKeyedById[it] }
             when {
                 existingFreeholder == null -> {
