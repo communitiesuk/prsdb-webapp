@@ -124,7 +124,7 @@
 
                         <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag -->
                         <div th:if="${propertyDetails.showPropertyManagerSection}" id="property-manager-section">
-                            <h3 class="govuk-heading-s" th:text="#{${propertyDetails.propertyManagerSectionHeadingKey}}">registerProperty.propertyManager.usingPropertyManager.heading</h3>
+                            <h3 class="govuk-heading-s" th:text="#{registerProperty.propertyManager.usingPropertyManager.heading}">registerProperty.propertyManager.usingPropertyManager.heading</h3>
                             <th:block th:if="${propertyDetails.hasPropertyManager}">
                                 <p th:if="${propertyDetails.showPropertyManagerUpdateLink}" class="govuk-body">
                                     <a id="property-manager-update-link" class="govuk-link"
