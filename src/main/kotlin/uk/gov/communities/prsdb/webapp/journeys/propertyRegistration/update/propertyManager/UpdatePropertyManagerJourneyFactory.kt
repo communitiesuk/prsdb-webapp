@@ -71,7 +71,6 @@ class UpdatePropertyManagerJourneyFactory(
                     }
                 }
                 configureStep(journey.propertyManagerTask.checkPropertyManagerStep) {
-                    backUrl { propertyDetailsRoute }
                     withAdditionalContentProperties {
                         mapOf(
                             "insetText" to "forms.update.propertyManager.check.insetText",

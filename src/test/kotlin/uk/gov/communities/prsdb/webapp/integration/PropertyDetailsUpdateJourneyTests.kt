@@ -1268,18 +1268,18 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
 
         @Test
-        fun `the back link on the check page returns to the property record when the property already has a property manager`(page: Page) {
+        fun `the back link on the check page goes to the details page when the property already has a property manager`(page: Page) {
             navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
             val checkPage =
                 assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
 
             checkPage.backLink.clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
         }
 
         @Test
-        fun `the back link on the check page returns to the property record after adding a property manager`(page: Page) {
+        fun `the back link on the check page goes to the details page after adding a property manager`(page: Page) {
             navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
             assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitYes()
             assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
@@ -1289,7 +1289,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             checkPage.backLink.clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
         }
 
         @Test
