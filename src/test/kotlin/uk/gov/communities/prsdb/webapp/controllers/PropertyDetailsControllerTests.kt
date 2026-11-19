@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
@@ -53,6 +54,9 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockitoBean
+    private lateinit var freeholderSummaryCardHelper: FreeholderSummaryCardHelper
 
     @MockitoBean
     private lateinit var superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper
@@ -206,16 +210,18 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-        fun `getPropertyDetails shows the property's persisted freeholders`() {
+        fun `getPropertyDetails adds cards built from the property's persisted freeholders`() {
             // Arrange
             val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
             propertyOwnership.freeholders.add(
                 createFreeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
             )
+            val expectedCards = listOf(SummaryCardViewModel(title = "Freeholder One", summaryList = emptyList()))
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
 
             // Act
             val result =
@@ -229,8 +235,9 @@ class PropertyDetailsControllerTests(
             // Assert
             result.andExpect {
                 status { isOk() }
-                content { string(containsString("freeholder@example.com")) }
+                model { attribute("freeholderSummaryCards", expectedCards) }
             }
+            verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
         }
 
         @Test

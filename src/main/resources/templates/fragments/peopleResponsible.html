@@ -117,7 +117,7 @@
                                     </a>
                                 </p>
                                 <div id="freeholder-cards">
-                                    <th:block th:each="card : ${propertyDetails.freeholderSummaryCards}">
+                                    <th:block th:each="card : ${freeholderSummaryCards}">
                                         <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h4', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
                                     </th:block>
                                 </div>

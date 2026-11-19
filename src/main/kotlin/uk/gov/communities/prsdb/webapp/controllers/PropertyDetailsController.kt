@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -47,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 @RequestMapping
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
     private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
     private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
     private val backLinkStorageService: BackUrlStorageService,
@@ -176,6 +178,12 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
+        if (propertyDetails.showFreeholdersSection) {
+            modelAndView.addObject(
+                "freeholderSummaryCards",
+                freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
+            )
+        }
         if (propertyDetails.showSuperiorLandlordSection) {
             modelAndView.addObject(
                 "superiorLandlordSummaryCards",

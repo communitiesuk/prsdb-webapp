@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -16,7 +15,6 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
     associatedPartiesEnabled: Boolean = true,
-    freeholderSummaryCardHelper: FreeholderSummaryCardHelper = FreeholderSummaryCardHelper(),
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         viewType,
@@ -74,13 +72,6 @@ class PropertyDetailsViewModel(
             UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
         } else {
             null
-        }
-
-    val freeholderSummaryCards: List<SummaryCardViewModel> =
-        if (showFreeholdersSection) {
-            freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)
-        } else {
-            emptyList()
         }
 
     val showSuperiorLandlordSection: Boolean =

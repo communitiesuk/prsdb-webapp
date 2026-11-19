@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createFreeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -102,14 +101,13 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `freeholder section is shown for eligible ownership types with an update link and saved cards`() {
+    fun `freeholder section is shown for eligible ownership types with an update link`() {
         // Arrange
         val propertyOwnership =
             createPropertyOwnership(
                 ownershipType = OwnershipType.LEASEHOLD_ONLY,
                 id = 123,
             )
-        propertyOwnership.freeholders.add(createFreeholder(propertyOwnership, name = "Freeholder", email = "freeholder@example.com"))
 
         // Act
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
@@ -124,7 +122,6 @@ class PropertyDetailsViewModelTests {
             "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink",
             viewModel.freeholdersUpdateLinkTextKey,
         )
-        assertEquals("Freeholder", viewModel.freeholderSummaryCards.single().title)
     }
 
     @Test
@@ -173,10 +170,8 @@ class PropertyDetailsViewModelTests {
         // Assert
         assertFalse(ineligibleViewModel.showFreeholdersSection)
         assertNull(ineligibleViewModel.freeholdersUpdateLink)
-        assertTrue(ineligibleViewModel.freeholderSummaryCards.isEmpty())
         assertFalse(disabledFeatureViewModel.showFreeholdersSection)
         assertNull(disabledFeatureViewModel.freeholdersUpdateLink)
-        assertTrue(disabledFeatureViewModel.freeholderSummaryCards.isEmpty())
     }
 
     @Test
