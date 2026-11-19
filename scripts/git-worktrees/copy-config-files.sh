@@ -31,14 +31,20 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MAIN_REPO_PATH="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WORKTREE_BASE="$(dirname "$MAIN_REPO_PATH")"
 
+# Treat Windows drive paths (e.g. C:/... from `git worktree list` in Git Bash) as absolute
+WINDOWS_ABSOLUTE_PATH='^[A-Za-z]:[\/]'
+is_absolute() {
+    [[ "$1" == /* || "$1" =~ $WINDOWS_ABSOLUTE_PATH ]]
+}
+
 # If not an absolute path, treat as a sibling name
-if [[ "$SOURCE_INPUT" != /* ]]; then
+if ! is_absolute "$SOURCE_INPUT"; then
     SOURCE_PATH="$WORKTREE_BASE/$SOURCE_INPUT"
 else
     SOURCE_PATH="$SOURCE_INPUT"
 fi
 
-if [[ "$DEST_INPUT" != /* ]]; then
+if ! is_absolute "$DEST_INPUT"; then
     DEST_PATH="$WORKTREE_BASE/$DEST_INPUT"
 else
     DEST_PATH="$DEST_INPUT"

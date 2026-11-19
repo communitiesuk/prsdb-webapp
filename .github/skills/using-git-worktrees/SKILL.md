@@ -1,7 +1,7 @@
 ---
 name: using-git-worktrees
 description: Use when creating or removing git worktrees for prsdb repositories. Ensures the project scripts are used so that gitignored files are copied and unique local ports are assigned.
-allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(powershell -File scripts\git-worktrees\new-worktree.ps1:*) shell(powershell -File scripts\git-worktrees\remove-worktree.ps1:*) shell(./scripts/git-worktrees/new-worktree.sh:*) shell(./scripts/git-worktrees/remove-worktree.sh:*) shell(git worktree list) shell(node scripts/git-worktrees/assign-worktree-ports.mjs:*)'
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(powershell -File scripts\git-worktrees\new-worktree.ps1:*) shell(powershell -File scripts\git-worktrees\remove-worktree.ps1:*) shell(./scripts/git-worktrees/new-worktree.sh:*) shell(./scripts/git-worktrees/remove-worktree.sh:*) shell(git worktree list) shell(node scripts/git-worktrees/assign-worktree-ports.mjs:*) shell(powershell -File scripts\git-worktrees\copy-config-files.ps1:*) shell(./scripts/git-worktrees/copy-config-files.sh:*)'
 ---
 
 # Git Worktrees
@@ -51,29 +51,25 @@ session is archived.
 ### Verify the setup
 
 The output of these setup scripts is not shown to you, and they don't run if the user
-hasn't accepted the repository configuration in the app. Check the setup before relying
-on it:
+hasn't accepted the repository configuration in the app. Before relying on the setup,
+from the worktree root:
 
-1. `.env` and the PEM keys in `src/main/resources/` exist in the worktree.
-2. `.env` sets `SERVER_PORT` to something other than `8080`.
-3. `node_modules/` exists in the worktree.
+1. If `.env` or the PEM keys in `src/main/resources/` are missing, copy them from the
+   main checkout (the first path listed by `git worktree list`):
+   ```powershell
+   powershell -File scripts\git-worktrees\copy-config-files.ps1 -SourcePath "<main-checkout-path>" -DestinationPath "<worktree-path>"
+   ```
+   ```bash
+   ./scripts/git-worktrees/copy-config-files.sh <main-checkout-path> <worktree-path>
+   ```
+2. Run `node scripts/git-worktrees/assign-worktree-ports.mjs .`. It keeps the existing
+   ports if no other worktree uses them and assigns new ones otherwise, which also fixes
+   clashes between sessions that were created at the same time.
+3. If `node_modules/` is missing, run `npm install`.
 
-Fix anything that is missing, using the main checkout (the first path listed by
-`git worktree list`) as the source:
-
-- **Missing config files** — run the `copy-config-files` script, which also assigns
-  ports:
-  ```powershell
-  powershell -File scripts\git-worktrees\copy-config-files.ps1 -SourcePath "<main-checkout-path>" -DestinationPath "<worktree-path>"
-  ```
-  ```bash
-  ./scripts/git-worktrees/copy-config-files.sh <main-checkout-path> <worktree-path>
-  ```
-- **Default or missing ports** — `node scripts/git-worktrees/assign-worktree-ports.mjs <worktree-path>`
-- **Missing `node_modules/`** — `npm install`
-
-If the config files or ports were missing, suggest that the user accepts the repository
-configuration in the app so future sessions are set up automatically.
+If `node_modules/` was missing, the setup script didn't run, so suggest that the user
+accepts the repository configuration in the app so future sessions are set up
+automatically.
 
 ## Removing a worktree
 
