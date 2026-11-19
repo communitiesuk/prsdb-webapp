@@ -186,7 +186,7 @@ class RegisterPropertyController(
         isOccupied &&
             (
                 propertyCompliance == null ||
-                    propertyCompliance.isGasSafetyCertMissing ||
+                    propertyCompliance.isGasSafetyCertMissing == true ||
                     propertyComplianceService.isElectricalSafetyMissing(propertyCompliance) ||
                     propertyCompliance.epcHasFaults
             )

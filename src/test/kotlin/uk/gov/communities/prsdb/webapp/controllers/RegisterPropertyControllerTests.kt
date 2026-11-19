@@ -230,7 +230,7 @@ class RegisterPropertyControllerTests(
             )
         val compliance =
             mock<PropertyCompliance> {
-                on { isGasSafetyCertMissing } doReturn false
+                on { isGasSafetyCertMissing } doReturn null
                 on { epcHasFaults } doReturn false
                 on { gasSafetyCertProvideLater } doReturn true
                 on { electricalSafetyCertProvideLater } doReturn true
@@ -293,8 +293,7 @@ class RegisterPropertyControllerTests(
                 MockMvcRequestBuilders
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
-            )
-            .andExpect(MockMvcResultMatchers.status().isOk)
+            ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
     }
