@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
@@ -176,7 +175,7 @@ class PropertyRegistrationService(
         jointLandlordInvitations: List<JointLandlordInvitation>,
         landlordReactivated: Boolean,
     ) {
-        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
+        sendNotificationAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
             sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
         }
 
@@ -192,19 +191,19 @@ class PropertyRegistrationService(
         }
 
         lettingAgentInvitation?.let { invitation ->
-            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)
             }
         }
 
         jointLandlordInvitations.forEach { invitation ->
-            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationEmail(invitation)
             }
         }
 
         if (jointLandlordInvitations.isNotEmpty()) {
-            sendEmailAndLogFailures(
+            sendNotificationAndLogFailures(
                 "the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}",
             ) {
                 jointLandlordInvitationService.sendInvitationConfirmationEmails(
