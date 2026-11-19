@@ -52,20 +52,47 @@ class OccupancyDetailsHelper {
                 }
             }
 
+    fun getCheckYourAnswersSummaryListWithoutProvideLater(
+        state: CheckYourAnswersJourneyState,
+        tenancyDetailsState: TenancyDetailsState,
+        messageSource: MessageSource,
+    ): List<SummaryListRowViewModel> =
+        buildList {
+            addAll(
+                this@OccupancyDetailsHelper.getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
+                    state,
+                    tenancyDetailsState.householdsAndTenantsTask,
+                ),
+            )
+            addAll(
+                this@OccupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(
+                    state,
+                    tenancyDetailsState.rentIncludesBillsTask,
+                    messageSource,
+                ),
+            )
+            add(this@OccupancyDetailsHelper.getFurnishedStatusRow(state, tenancyDetailsState.furnishedStatus))
+            addAll(
+                this@OccupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(
+                    state,
+                    tenancyDetailsState.rentFrequencyAndAmountTask,
+                    messageSource,
+                ),
+            )
+        }
+
     fun <T> getCheckYourAnswersSummaryListWithoutProvideLater(
         state: T,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-            getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource) +
-            getFurnishedStatusRow(state, state.furnishedStatus) +
-            getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource)
+        getCheckYourAnswersSummaryListWithoutProvideLater(state, state, messageSource)
 
-    fun <T> getTenancyDetailsCyaContent(
-        state: T,
+    fun getTenancyDetailsCyaContent(
+        state: CheckYourAnswersJourneyState,
+        tenancyDetailsState: TenancyDetailsState,
         messageSource: MessageSource,
-    ): Map<String, Any?> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
-        mapOf("tenancyRows" to getCheckYourAnswersSummaryListWithoutProvideLater(state, messageSource))
+    ): Map<String, Any?> =
+        mapOf("tenancyRows" to getCheckYourAnswersSummaryListWithoutProvideLater(state, tenancyDetailsState, messageSource))
 
     fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
         state: CheckYourAnswersJourneyState,

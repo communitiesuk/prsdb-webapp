@@ -185,10 +185,13 @@ class OccupancyDetailsHelperTests {
     fun `getTenancyDetailsCyaContent returns the tenancy rows without provide later as tenancyRows`() {
         stubCompletedTenancyDetails(mockTenancyState)
 
-        val content = helper.getTenancyDetailsCyaContent(mockTenancyState, mockMessageSource)
+        val content = helper.getTenancyDetailsCyaContent(mockTenancyState, mockTenancyState, mockMessageSource)
 
         assertEquals(setOf("tenancyRows"), content.keys)
-        assertEquals(helper.getCheckYourAnswersSummaryListWithoutProvideLater(mockTenancyState, mockMessageSource), content["tenancyRows"])
+        assertEquals(
+            helper.getCheckYourAnswersSummaryListWithoutProvideLater(mockTenancyState, mockTenancyState, mockMessageSource),
+            content["tenancyRows"],
+        )
     }
 
     @Test

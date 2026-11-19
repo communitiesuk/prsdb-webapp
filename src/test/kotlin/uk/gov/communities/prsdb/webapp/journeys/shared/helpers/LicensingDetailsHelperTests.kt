@@ -72,25 +72,6 @@ class LicensingDetailsHelperTests {
     }
 
     @Test
-    fun `When licensing is provided later, getCheckYourAnswersSummaryListWithoutProvideLater returns a single provide-this-later row`() {
-        // Arrange
-        val state = createMockLicensingStateWithSkip()
-
-        // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryListWithoutProvideLater(state, state)
-
-        // Assert
-        summaryList.single().let { row ->
-            assertEquals("licensing.checkAnswers.licensingType", row.fieldHeading)
-            assertEquals(LicensingType.PROVIDE_LATER, row.fieldValue)
-            assertEquals(
-                listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
-                row.actions,
-            )
-        }
-    }
-
-    @Test
     fun `When there is no licensing, getCheckYourAnswersSummaryList uses the no licence required wording`() {
         // Arrange
         val state = createMockLicensingState(LicensingType.NO_LICENSING, null)

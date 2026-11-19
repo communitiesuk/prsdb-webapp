@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -119,6 +118,8 @@ class PropertyReactivationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.checkAnswersParents() }
+                // TODO PDJB-2045: route through the remaining reactivation steps to completeReactivationStep, and stop
+                //  the check answers step deleting the journey
                 nextUrl { confirmationUrl(propertyOwnershipId) }
             }
             step(journey.completeReactivationStep) {
@@ -222,12 +223,6 @@ class PropertyReactivationJourney(
     override val allowProvideLicensingLaterRoute: Boolean = false
     override var isPropertyAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isPropertyAlreadyRegistered")
 
-    // Aliases for nested steps and tasks required by TenancyDetailsState
-    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
-    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
-    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
-    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
-
     override val cyaStep
         get() = checkAnswersStep
     override var cyaJourneys: Map<String, String> = mapOf()
@@ -255,7 +250,6 @@ interface PropertyReactivationJourneyState :
     ElectricalSafetyDependencies,
     EpcDependencies,
     HouseholdsAndTenantsDependencies,
-    TenancyDetailsState,
     CheckYourAnswersJourneyState {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep

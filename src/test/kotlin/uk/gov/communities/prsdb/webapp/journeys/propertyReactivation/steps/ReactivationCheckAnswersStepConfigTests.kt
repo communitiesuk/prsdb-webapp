@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyRea
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -48,6 +49,9 @@ class ReactivationCheckAnswersStepConfigTests {
 
     @Mock
     lateinit var mockGasSafetyTask: GasSafetyTask
+
+    @Mock
+    lateinit var mockTenancyDetailsTask: TenancyDetailsTask
 
     private val propertyOwnershipId = 123L
 
@@ -84,7 +88,8 @@ class ReactivationCheckAnswersStepConfigTests {
         whenever(mockComplianceDetailsHelper.getGasSafetyCyaContent(mockState, mockGasSafetyTask))
             .thenReturn(mapOf("gasSupplyRows" to gasSupplyRows))
         val tenancyRows = listOf(mock<SummaryListRowViewModel>())
-        whenever(mockOccupancyDetailsHelper.getTenancyDetailsCyaContent(mockState, mockMessageSource))
+        whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
+        whenever(mockOccupancyDetailsHelper.getTenancyDetailsCyaContent(mockState, mockTenancyDetailsTask, mockMessageSource))
             .thenReturn(mapOf("tenancyRows" to tenancyRows))
 
         val content = stepConfig.getStepSpecificContent(mockState)

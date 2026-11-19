@@ -41,7 +41,7 @@ class ReactivationCheckAnswersStepConfig(
         val epcContent = if (showEpc) complianceDetailsHelper.getEpcCyaContent(state, state.epcTask) else emptyMap()
         val tenancyContent =
             if (showTenancyDetails) {
-                occupancyDetailsHelper.getTenancyDetailsCyaContent(state, messageSource)
+                occupancyDetailsHelper.getTenancyDetailsCyaContent(state, state.tenancyDetailsTask, messageSource)
             } else {
                 emptyMap()
             }
