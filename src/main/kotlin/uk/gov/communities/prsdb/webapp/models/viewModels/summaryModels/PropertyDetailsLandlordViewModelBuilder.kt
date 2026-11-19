@@ -5,17 +5,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
-        private fun landlordEmail(landlord: Landlord): String =
-            when (landlord) {
-                is IndividualLandlord -> landlord.email
-                is OrganisationalLandlord -> landlord.wholeOrgEmail
-                else -> throw IllegalArgumentException("Unknown landlord type")
-            }
-
         fun buildSummaryCards(
             landlords: Set<Landlord>,
             currentLandlord: Landlord,
@@ -62,7 +56,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlordEmail(landlord),
+                    fieldValue = landlord.getContactEmail(),
                 ),
             )
 

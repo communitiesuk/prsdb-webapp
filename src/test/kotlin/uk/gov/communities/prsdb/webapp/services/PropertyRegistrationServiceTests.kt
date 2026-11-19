@@ -27,6 +27,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
+import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -47,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -55,6 +57,8 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.net.URI
 import java.time.LocalDate
 import java.time.MonthDay
@@ -91,6 +95,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
+
+    @Mock
+    private lateinit var mockAssociatedPartyNotificationService: AssociatedPartyNotificationService
 
     @Mock
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
@@ -1785,10 +1792,17 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty creates the invitations but neither sets the last PRN registered this session nor sends emails before commit`() {
+    fun `registerProperty creates invitations but sends no notifications before commit`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholderWithAddress =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val freeholderWithEmail = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts", email = "daniel@example.com")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(createLettingAgentInvitation(propertyOwnership))
@@ -1797,12 +1811,15 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.initSynchronization()
 
         // Act
-        propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        propertyRegistrationService.registerProperty(
+            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithEmail)),
+        )
 
         // Assert
         verify(mockLettingAgentAccessService).createInvitation(propertyOwnership, LETTING_AGENT_EMAIL)
         verify(mockJointLandlordInvitationService).createInvitations(JOINT_LANDLORD_EMAILS, propertyOwnership, landlord)
         verifyNoMoreInteractions(mockJointLandlordInvitationService)
+        verifyNoInteractions(mockAssociatedPartyNotificationService)
         verifyNoInteractions(
             mockConfirmationEmailSender,
             mockDelegateToLettingAgentEmailService,
@@ -1811,10 +1828,17 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sets the last PRN registered this session and sends every email once the transaction it is part of commits`() {
+    fun `registerProperty sends notifications after the transaction it is part of commits`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholderWithAddress =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val freeholderWithEmail = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts", email = "daniel@example.com")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         val currentUserEmail = "admin@example.com"
@@ -1828,13 +1852,19 @@ class PropertyRegistrationServiceTests {
         TransactionSynchronizationManager.initSynchronization()
 
         // Act
-        propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        propertyRegistrationService.registerProperty(
+            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithEmail)),
+        )
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
 
         // Assert
         verify(mockPropertyRegistrationConfirmationService).setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
         verify(mockPropertyRegistrationConfirmationService).setLandlordReactivatedByLastRegistration(false)
         verify(mockConfirmationEmailSender).sendEmail(eq(currentUserEmail), any())
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(freeholderWithAddress, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(freeholderWithEmail, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -1853,10 +1883,16 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty still returns the property and sends the other emails when an email fails to send`() {
+    fun `registerProperty still returns the property and sends other notifications when a notification fails to send`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
@@ -1868,9 +1904,14 @@ class PropertyRegistrationServiceTests {
         whenever(mockJointLandlordInvitationService.sendInvitationEmail(any()))
             .thenThrow(RuntimeException("Email failed to send"))
             .thenAnswer { }
+        whenever(mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(any(), any()))
+            .thenThrow(RuntimeException("Letter failed to send"))
 
         // Act
-        val registeredPropertyOwnership = propertyRegistrationService.registerProperty(registrationDataWithInvitations)
+        val registeredPropertyOwnership =
+            propertyRegistrationService.registerProperty(
+                registrationDataWithInvitations.copy(freeholders = listOf(freeholder)),
+            )
 
         // Assert
         assertEquals(propertyOwnership, registeredPropertyOwnership)
@@ -1887,6 +1928,86 @@ class PropertyRegistrationServiceTests {
             propertyOwnership,
             landlord,
         )
+    }
+
+    @Test
+    fun `registerProperty reports a freeholder notification skipped because details are fully redacted`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholder = FreeholderDataModel(detailsKnown = false)
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership),
+        ).thenReturn(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED)
+        TransactionSynchronizationManager.initSynchronization()
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+
+        // Act
+        System.setOut(PrintStream(outContent))
+        try {
+            propertyRegistrationService.registerProperty(
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(freeholders = listOf(freeholder)),
+            )
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        // Assert
+        assertEquals(
+            "Not sending freeholder 1 added-to-property notification for property ownership ${propertyOwnership.id}: " +
+                "details are fully redacted",
+            outContent.toString().trim(),
+        )
+    }
+
+    @Test
+    fun `registerProperty attempts the next freeholder notification when the previous one fails`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val firstFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Sarah Thompson",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val secondFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = "Daniel Roberts",
+                address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                firstFreeholder,
+                propertyOwnership,
+            ),
+        ).thenThrow(RuntimeException("Letter failed to send"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                freeholders = listOf(firstFreeholder, secondFreeholder),
+            ),
+        )
+
+        // Assert
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(
+                firstFreeholder,
+                propertyOwnership,
+            )
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToFreeholderAddedToProperty(
+                secondFreeholder,
+                propertyOwnership,
+            )
     }
 
     // TODO PDJB-1734: Remove "when payments is enabled" from this test name when the PAYMENTS flag is removed
