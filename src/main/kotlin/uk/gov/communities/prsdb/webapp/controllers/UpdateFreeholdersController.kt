@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
@@ -77,9 +78,6 @@ class UpdateFreeholdersController(
             "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-freeholders"
 
         fun getUpdateFreeholdersFirstStepRoute(propertyOwnershipId: Long): String =
-            "${UPDATE_FREEHOLDERS_ROUTE.replace(
-                "{propertyOwnershipId}",
-                propertyOwnershipId.toString(),
-            )}/${FreeholdersListStep.ROUTE_SEGMENT}"
+            "${UriTemplate(UPDATE_FREEHOLDERS_ROUTE).expand(propertyOwnershipId).toASCIIString()}/${FreeholdersListStep.ROUTE_SEGMENT}"
     }
 }
