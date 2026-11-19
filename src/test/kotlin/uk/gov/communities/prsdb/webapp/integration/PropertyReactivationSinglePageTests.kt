@@ -249,6 +249,27 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
+        fun `later gas pages reached by changing an answer from check answers link back to the previous page`(page: Page) {
+            var checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersGasCertUploaded(),
+                )
+
+            checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).submitHasGasSupply()
+            assertPageIs(page, HasGasCertFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+
+            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
+                .submitDate(PropertyRegistrationJourneyTests.validGasSafetyCertIssueDate)
+            assertPageIs(page, CheckGasCertUploadsFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
         fun `the EIC issue date change link navigates to the issue date page, which links back to check answers`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
 
@@ -288,6 +309,26 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             electricalCertUploadsPage.backLink.clickAndWait()
 
             assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `later electrical pages reached by changing an answer from check answers link back to the previous page`(page: Page) {
+            var checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
+
+            checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments).submitHasEic()
+            assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
+                .submitDate(PropertyRegistrationJourneyTests.validEicIssueDate)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
+                .submitDate(PropertyRegistrationJourneyTests.validEicIssueDate)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyReactivation::class, urlArguments)
         }
 
         private fun skipToCheckAnswersPageWithElectricalCertUploaded(certificateType: CertificateType) =

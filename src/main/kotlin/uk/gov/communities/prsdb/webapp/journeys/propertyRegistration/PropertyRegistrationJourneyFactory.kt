@@ -111,7 +111,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoPr
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
-import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -330,13 +329,17 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
-                HasGasCertStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
-                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                }
+
+                HasGasCertStep.ROUTE_SEGMENT -> {
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyTask.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep,
+                    )
                 }
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
@@ -352,12 +355,6 @@ class PropertyRegistrationJourneyFactory(
                 CheckEicrUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
                 }
 
                 // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
@@ -592,7 +589,6 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
             section {
                 withHeadingMessageKey("propertyCompliance.epcTask.sectionHeading", shouldUseNumbering = false)

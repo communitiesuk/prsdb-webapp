@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -77,7 +76,6 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
-            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyDetailsTask)
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -134,12 +132,6 @@ class UpdateElectricalSafetyJourneyFactory(
                 else -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
-            }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                backDestination { journey.returnToCyaPageDestination }
-            }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                backDestination { journey.returnToCyaPageDestination }
             }
 
             step(journey.finishCyaStep) {

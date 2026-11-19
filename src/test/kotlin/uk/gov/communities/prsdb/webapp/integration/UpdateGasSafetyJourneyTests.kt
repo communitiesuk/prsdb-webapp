@@ -135,4 +135,24 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.gasSafetyCard.summaryList.certificateStatusRow.value).containsText("Expired")
     }
+
+    @Test
+    fun `The back link on the check uploads page returns to the issue date page when the date is changed from check answers`(page: Page) {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
+
+        assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments).submitHasGasSupply()
+        assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments).submitHasCertificate()
+        assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments).submitDate(currentDate)
+        assertPageIs(page, UploadGasCertFormPageUpdateGasSafety::class, urlArguments)
+            .uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        assertPageIs(page, CheckGasCertUploadsFormPageUpdateGasSafety::class, urlArguments).form.submit()
+
+        val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+        checkAnswersPage.certSummaryList.issueDateRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments).submitDate(currentDate)
+        assertPageIs(page, CheckGasCertUploadsFormPageUpdateGasSafety::class, urlArguments).backLink.clickAndWait()
+        assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
+    }
 }
