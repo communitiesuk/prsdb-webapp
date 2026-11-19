@@ -27,6 +27,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
+import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -56,6 +57,8 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.net.URI
 import java.time.LocalDate
 import java.time.MonthDay
@@ -1924,6 +1927,40 @@ class PropertyRegistrationServiceTests {
             JOINT_LANDLORD_EMAILS,
             propertyOwnership,
             landlord,
+        )
+    }
+
+    @Test
+    fun `registerProperty reports a freeholder notification skipped because details are fully redacted`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val freeholder = FreeholderDataModel(detailsKnown = false)
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership),
+        ).thenReturn(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED)
+        TransactionSynchronizationManager.initSynchronization()
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+
+        // Act
+        System.setOut(PrintStream(outContent))
+        try {
+            propertyRegistrationService.registerProperty(
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(freeholders = listOf(freeholder)),
+            )
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        // Assert
+        assertEquals(
+            "Not sending freeholder 1 added-to-property notification for property ownership ${propertyOwnership.id}: " +
+                "details are fully redacted",
+            outContent.toString().trim(),
         )
     }
 

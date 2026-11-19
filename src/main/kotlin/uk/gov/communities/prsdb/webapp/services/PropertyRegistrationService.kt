@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -183,10 +184,18 @@ class PropertyRegistrationService(
             sendNotificationAndLogFailures(
                 "the freeholder ${index + 1} added-to-property notification for property ownership ${propertyOwnership.id}",
             ) {
-                associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
-                    freeholder,
-                    propertyOwnership,
-                )
+                val outcome =
+                    associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                        freeholder,
+                        propertyOwnership,
+                    )
+                if (outcome == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
+                    println(
+                        "Not sending freeholder ${index + 1} added-to-property notification " +
+                            "for property ownership ${propertyOwnership.id}: " +
+                            "details are fully redacted",
+                    )
+                }
             }
         }
 
