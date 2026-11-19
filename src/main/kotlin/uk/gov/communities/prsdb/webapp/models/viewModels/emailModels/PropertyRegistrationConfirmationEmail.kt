@@ -17,6 +17,7 @@ data class PropertyRegistrationConfirmationEmail(
     val electricalSafetyCertProvideLater: Boolean = false,
     val epcProvideLater: Boolean = false,
     val tenancyProvideLater: Boolean = false,
+    val landlordReactivated: Boolean = false,
     // TODO PDJB-1734: Make non-nullable when the PAYMENTS flag is removed
     val paymentDetails: PaymentDetails? = null,
 ) : EmailTemplateModel {
@@ -37,6 +38,7 @@ data class PropertyRegistrationConfirmationEmail(
     private val lettingAgentProvideListKey = "lettingAgentProvideList"
     private val hasMissingDetailsKey = "hasMissingDetails"
     private val missingDetailsListKey = "missingDetailsList"
+    private val landlordReactivatedKey = "landlordReactivated"
     private val paymentAmountKey = "payment amount"
     private val paymentDateKey = "payment date"
     private val renewalDateKey = "renewal date"
@@ -74,6 +76,8 @@ data class PropertyRegistrationConfirmationEmail(
         val showMissingDetails = !isDelegatedToLettingAgent && isOccupied && missingDetails.isNotEmpty()
         baseMap[hasMissingDetailsKey] = if (showMissingDetails) "yes" else "no"
         baseMap[missingDetailsListKey] = if (showMissingDetails) formatAsBulletList(missingDetails) else ""
+
+        baseMap[landlordReactivatedKey] = if (landlordReactivated) "yes" else "no"
 
         // TODO PDJB-1734: Always add the payment details when the PAYMENTS flag is removed
         paymentDetails?.let {

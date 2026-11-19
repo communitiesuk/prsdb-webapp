@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
@@ -99,7 +100,14 @@ class PropertyRegistrationService(
             runAfterTransactionCommits {
                 confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
                 confirmationService.setLandlordReactivatedByLastRegistration(landlordReactivated)
-                sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
+                sendRegistrationEmails(
+                    registrationData,
+                    landlord,
+                    propertyOwnership,
+                    lettingAgentInvitation,
+                    jointLandlordInvitations,
+                    landlordReactivated,
+                )
             }
 
             propertyOwnership
@@ -164,9 +172,10 @@ class PropertyRegistrationService(
         propertyOwnership: PropertyOwnership,
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
+        landlordReactivated: Boolean,
     ) {
         sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
-            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
+            sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
         }
 
         lettingAgentInvitation?.let { invitation ->
@@ -196,6 +205,7 @@ class PropertyRegistrationService(
         registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
+        landlordReactivated: Boolean,
     ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -214,6 +224,8 @@ class PropertyRegistrationService(
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcProvideLater = epcProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
+                // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+                landlordReactivated = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && landlordReactivated,
                 // TODO PDJB-1734: Always get the payment details when the PAYMENTS flag is removed
                 paymentDetails = if (featureFlagManager.checkFeature(PAYMENTS)) getPaymentDetails(propertyOwnership) else null,
             ),
