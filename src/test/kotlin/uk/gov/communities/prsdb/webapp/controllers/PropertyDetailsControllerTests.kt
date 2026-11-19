@@ -205,7 +205,7 @@ class PropertyDetailsControllerTests(
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                        content { string(containsString("freeholder@example.com")) }
+                    content { string(containsString("freeholder@example.com")) }
                 }
         }
 
