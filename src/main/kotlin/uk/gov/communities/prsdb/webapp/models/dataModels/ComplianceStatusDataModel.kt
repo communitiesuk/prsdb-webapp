@@ -107,7 +107,7 @@ data class ComplianceStatusDataModel(
                 when {
                     this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
                     this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
+                    this.isGasSafetyCertMissing != false -> ComplianceCertStatus.HAS_FAULTS
                     isGasSafetyCertExpired(isGas14MonthExpiryEnabled) == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }

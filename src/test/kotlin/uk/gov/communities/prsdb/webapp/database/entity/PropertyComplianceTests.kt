@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions.assumeTrue
@@ -98,35 +97,29 @@ class PropertyComplianceTests {
         assertTrue(propertyCompliance.isEpcExpired!!)
     }
 
-    @ParameterizedTest(name = "{1} when certs {0}")
-    @MethodSource("providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses")
-    fun `isXMissing or xHasFaults returns`(
-        propertyCompliance: PropertyCompliance,
-        expectedIsXMissing: Boolean?,
+    @ParameterizedTest(name = "{2} when {0} and certificate issue date is {1}")
+    @MethodSource("provideGasSafetyCertMissingStatuses")
+    fun `isGasSafetyCertMissing returns`(
+        hasGasSupply: Boolean?,
+        issueDate: LocalDate?,
+        expectedIsMissing: Boolean?,
     ) {
-        assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.epcHasFaults)
+        val propertyCompliance =
+            PropertyCompliance().apply {
+                this.hasGasSupply = hasGasSupply
+                gasSafetyCertIssueDate = issueDate
+            }
+
+        assertEquals(expectedIsMissing, propertyCompliance.isGasSafetyCertMissing)
     }
 
-    @Test
-    fun `epcHasFaults returns true when EPC rating is low and there's no MEES exemption`() {
-        val propertyCompliance =
-            PropertyComplianceBuilder()
-                .withEpc()
-                .withLowEpcRating()
-                .build()
-        assertTrue(propertyCompliance.epcHasFaults)
-    }
-
-    @Test
-    fun `epcHasFaults returns false when EPC rating is low and there is a MEES exemption`() {
-        val propertyCompliance =
-            PropertyComplianceBuilder()
-                .withEpc()
-                .withLowEpcRating()
-                .withMeesExemption()
-                .build()
-        assertFalse(propertyCompliance.epcHasFaults)
+    @ParameterizedTest(name = "{1} when certs {0}")
+    @MethodSource("providePropertyCompliancesWithExpectedEpcFaultStatuses")
+    fun `epcHasFaults returns`(
+        propertyCompliance: PropertyCompliance,
+        expectedEpcHasFaults: Boolean,
+    ) {
+        assertEquals(expectedEpcHasFaults, propertyCompliance.epcHasFaults)
     }
 
     @ParameterizedTest(name = "{1} when EPC rating {0}")
@@ -182,8 +175,23 @@ class PropertyComplianceTests {
             propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, true, null))
 
         @JvmStatic
-        private fun providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses() =
-            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, true))
+        private fun provideGasSafetyCertMissingStatuses() =
+            arrayOf(
+                arguments(named("has gas supply", true), null, true),
+                arguments(named("has gas supply", true), named("today", currentDate), false),
+                arguments(named("doesn't have gas supply", false), null, false),
+                arguments(named("doesn't have gas supply", false), named("today", currentDate), false),
+                arguments(named("gas supply status is unknown", null), null, null),
+                arguments(named("gas supply status is unknown", null), named("today", currentDate), null),
+            )
+
+        @JvmStatic
+        private fun providePropertyCompliancesWithExpectedEpcFaultStatuses() =
+            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, true)) +
+                listOf(
+                    arguments(named("have a low EPC rating with no MEES exemption", lowEpcNoMeesPropertyCompliance), true),
+                    arguments(named("have a low EPC rating with a MEES exemption", lowEpcWithMeesPropertyCompliance), false),
+                )
 
         @JvmStatic
         private fun providePropertyCompliancesWithEpcRatingStatuses() =
