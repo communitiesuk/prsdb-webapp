@@ -423,7 +423,8 @@ class PropertyOwnershipService(
         val addedFreeholders =
             if (ownershipType.requiresFreeholderRecords()) {
                 require(freeholders.isNotEmpty()) { "Ownership type $ownershipType requires at least one freeholder" }
-                freeholderService.updateFreeholders(propertyOwnership, freeholders)
+                val freeholderSnapshot = freeholderService.getFreeholderSnapshot(propertyOwnership.freeholders.toList())
+                freeholderService.updateFreeholders(propertyOwnership, freeholders, freeholderSnapshot)
             } else {
                 freeholderService.clearFreeholders(propertyOwnership)
                 emptyList()
