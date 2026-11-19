@@ -101,6 +101,7 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `freeholder section is shown for eligible ownership types with an update link and saved cards`() {
+        // Arrange
         val propertyOwnership =
             createPropertyOwnership(
                 ownershipType = OwnershipType.LEASEHOLD_ONLY,
@@ -108,8 +109,10 @@ class PropertyDetailsViewModelTests {
             )
         propertyOwnership.freeholders.add(createFreeholder(propertyOwnership, name = "Freeholder", email = "freeholder@example.com"))
 
+        // Act
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
+        // Assert
         assertTrue(viewModel.showFreeholdersSection)
         assertEquals(
             "/landlord/property-details/123/update-freeholders/freeholders-list",
@@ -124,14 +127,17 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `freeholder section uses joint wording for joint ownership`() {
+        // Arrange
         val propertyOwnership =
             createPropertyOwnership(
                 ownershipType = OwnershipType.JOINT_TENANTS,
                 id = 123,
             )
 
+        // Act
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
+        // Assert
         assertTrue(viewModel.showFreeholdersSection)
         assertEquals(
             "propertyDetails.peopleResponsible.freeholders.updateJointLink",
@@ -141,6 +147,7 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `freeholder section is hidden for ineligible ownership types and when associated parties are disabled`() {
+        // Arrange
         val ineligibleProperty =
             createPropertyOwnership(
                 ownershipType = OwnershipType.SOLE_FREEHOLD,
@@ -152,6 +159,7 @@ class PropertyDetailsViewModelTests {
                 id = 124,
             )
 
+        // Act
         val ineligibleViewModel = PropertyDetailsViewModel(ineligibleProperty, messageSource = mockMessageSource)
         val disabledFeatureViewModel =
             PropertyDetailsViewModel(
@@ -160,6 +168,7 @@ class PropertyDetailsViewModelTests {
                 associatedPartiesEnabled = false,
             )
 
+        // Assert
         assertFalse(ineligibleViewModel.showFreeholdersSection)
         assertNull(ineligibleViewModel.freeholdersUpdateLink)
         assertTrue(ineligibleViewModel.freeholderSummaryCards.isEmpty())
@@ -291,6 +300,7 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `the freeholder section uses ownership specific update link text`() {
+        // Arrange
         val ownershipTypes =
             listOf(
                 Triple(
@@ -305,6 +315,7 @@ class PropertyDetailsViewModelTests {
                 ),
             )
 
+        // Act & Assert
         ownershipTypes.forEach { (ownershipType, headingKey, linkTextKey) ->
             val viewModel =
                 PropertyDetailsViewModel(

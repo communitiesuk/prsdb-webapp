@@ -240,7 +240,8 @@ class FreeholderServiceTests {
                 1L to Instant.parse("2025-01-01T00:00:00Z").toString(),
                 2L to removed.getMostRecentlyUpdated().toString(),
             )
-        // Act, Assert
+
+        // Act & Assert
         assertThrows(UpdateConflictException::class.java) {
             freeholderService.updateFreeholders(
                 propertyOwnership,
@@ -269,7 +270,7 @@ class FreeholderServiceTests {
         val concurrentlyAdded = savedFreeholder(propertyOwnership, id = 2, name = "Bob Freeholder", email = "bob@example.com")
         whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(listOf(existing, concurrentlyAdded))
 
-        // Act, Assert
+        // Act & Assert
         assertThrows(UpdateConflictException::class.java) {
             freeholderService.updateFreeholders(
                 propertyOwnership,

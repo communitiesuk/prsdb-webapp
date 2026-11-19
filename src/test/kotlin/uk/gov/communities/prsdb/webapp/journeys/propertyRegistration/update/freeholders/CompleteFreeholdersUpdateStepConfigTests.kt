@@ -32,6 +32,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
 
     @Test
     fun `completion reconciles the submitted freeholders against the saved snapshot`() {
+        // Arrange
         val propertyOwnership = createPropertyOwnership()
         val submittedFreeholders =
             listOf(FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com"))
@@ -47,13 +48,16 @@ class CompleteFreeholdersUpdateStepConfigTests {
                 propertyOwnershipService,
             )
 
+        // Act
         stepConfig.afterStepIsReached(journeyState)
 
+        // Assert
         verify(freeholderService).updateFreeholders(propertyOwnership, submittedFreeholders, snapshot)
     }
 
     @Test
     fun `completion throws when the freeholder list is missing`() {
+        // Arrange
         val propertyOwnership = createPropertyOwnership()
         whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
         whenever(journeyState.freeholdersMap).thenReturn(null)
@@ -65,6 +69,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
                 propertyOwnershipService,
             )
 
+        // Act & Assert
         val exception =
             assertThrows(PrsdbWebException::class.java) {
                 stepConfig.afterStepIsReached(journeyState)
@@ -79,6 +84,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
 
     @Test
     fun `completion discards the journey when the freeholder snapshot is stale`() {
+        // Arrange
         val propertyOwnership = createPropertyOwnership()
         val submittedFreeholders = emptyList<FreeholderDataModel>()
         val snapshot = emptyMap<Long, String>()
@@ -96,6 +102,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
                 propertyOwnershipService,
             )
 
+        // Act & Assert
         assertThrows(UpdateConflictException::class.java) {
             stepConfig.afterStepIsReached(journeyState)
         }
@@ -105,11 +112,14 @@ class CompleteFreeholdersUpdateStepConfigTests {
 
     @Test
     fun `resolveNextDestination deletes the journey and returns the default destination`() {
+        // Arrange
         val stepConfig = CompleteFreeholdersUpdateStepConfig(freeholderService, propertyOwnershipService)
         val defaultDestination = Destination.ExternalUrl("/landlord/property-details/1#people-responsible")
 
+        // Act
         val result = stepConfig.resolveNextDestination(journeyState, defaultDestination)
 
+        // Assert
         verify(journeyState).deleteJourney()
         assertEquals(defaultDestination, result)
     }

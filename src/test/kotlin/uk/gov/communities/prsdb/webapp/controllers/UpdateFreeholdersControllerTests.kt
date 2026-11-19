@@ -56,15 +56,17 @@ class UpdateFreeholdersControllerTests(
     // TODO PDJB-2016: Remove this nested class when the ASSOCIATED_PARTIES flag is removed.
     @Nested
     inner class BeforePdjb955AssociatedParties {
-        @BeforeEach
-        fun disableAssociatedPartiesFeature() {
-            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
-        }
-
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getUpdateStep returns 404 when associated parties feature is disabled`() {
-            mvc.get(updateStepRoute).andExpect {
+            // Arrange
+            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+
+            // Act
+            val result = mvc.get(updateStepRoute)
+
+            // Assert
+            result.andExpect {
                 status { isNotFound() }
             }
         }
@@ -72,14 +74,21 @@ class UpdateFreeholdersControllerTests(
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `postUpdateStep returns 404 when associated parties feature is disabled`() {
-            mvc
-                .post(updateStepRoute) {
+            // Arrange
+            whenever(featureFlagManager.checkFeature(ASSOCIATED_PARTIES)).thenReturn(false)
+
+            // Act
+            val result =
+                mvc.post(updateStepRoute) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = formContent
                     with(csrf())
-                }.andExpect {
-                    status { isNotFound() }
                 }
+
+            // Assert
+            result.andExpect {
+                status { isNotFound() }
+            }
         }
     }
 }

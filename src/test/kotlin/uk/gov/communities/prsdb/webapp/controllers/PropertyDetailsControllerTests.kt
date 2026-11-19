@@ -202,6 +202,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails shows the property's persisted freeholders`() {
+            // Arrange
             val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
             propertyOwnership.freeholders.add(
                 createFreeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
@@ -211,12 +212,20 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
-                .andExpect {
-                    status { isOk() }
-                    content { string(containsString("freeholder@example.com")) }
-                }
+            // Act
+            val result =
+                mvc.get(
+                    PropertyDetailsController.getPropertyDetailsPath(
+                        propertyOwnership.id,
+                        isLocalCouncilView = false,
+                    ),
+                )
+
+            // Assert
+            result.andExpect {
+                status { isOk() }
+                content { string(containsString("freeholder@example.com")) }
+            }
         }
 
         @Test
