@@ -193,7 +193,7 @@ class NftDataSeederDao(
             """
             INSERT INTO freeholder 
             (created_date, property_ownership_id, name, email) 
-            VALUES (?, ?, ?, ?) 
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -203,7 +203,7 @@ class NftDataSeederDao(
             """
             INSERT INTO superior_landlord 
             (created_date, property_ownership_id, name, email) 
-            VALUES (?, ?, ?, ?) 
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
