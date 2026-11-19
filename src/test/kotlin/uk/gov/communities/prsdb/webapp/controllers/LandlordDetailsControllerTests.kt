@@ -300,7 +300,7 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
                 model {
-                    attribute("showInactiveLandlordBanner", true)
+                    attributeExists("inactiveLandlordNotificationBannerViewModel")
                     attribute(
                         "landlord",
                         Matchers.hasProperty<LandlordViewModel>(
@@ -331,7 +331,6 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
                 model {
-                    attribute("showInactiveLandlordBanner", false)
                     attributeDoesNotExist(
                         "inactiveLandlordNotificationBannerViewModel",
                         "deactivatedPropertiesUrl",
@@ -367,7 +366,6 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
                 model {
-                    attribute("showInactiveLandlordBanner", false)
                     attributeDoesNotExist("inactiveLandlordNotificationBannerViewModel")
                     attribute(
                         "landlord",
@@ -404,7 +402,7 @@ class LandlordDetailsControllerTests(
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
                 model {
-                    attribute("showInactiveLandlordBanner", true)
+                    attributeExists("inactiveLandlordNotificationBannerViewModel")
                     attribute(
                         "orgLandlord",
                         Matchers.hasProperty<OrgLandlordViewModel>(
