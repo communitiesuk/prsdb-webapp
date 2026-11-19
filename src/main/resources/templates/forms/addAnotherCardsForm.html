@@ -6,6 +6,7 @@
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="addAnotherButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButton" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="addAnotherTitle" type="java.lang.String"*/-->
 <!--/*@thymesVar id="optionalAddAnotherTitleParam" type="java.lang.Int"*/-->
@@ -32,11 +33,11 @@
             </a>
         </div>
         <div class="govuk-!-margin-top-2">
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}">submit</button>
+            <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}">submit</button>
         </div>
     </div>
     <th:block th:unless="${addAnotherUrl != null and addAnotherButtonText != null}">
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}">submit</button>
+        <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}">submit</button>
     </th:block>
 </th:block>
 </html>

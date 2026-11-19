@@ -55,6 +55,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
         var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyUpdate::class, urlArguments)
         assertThat(freeholdersListPage.heading).containsText("You’ve added 1 freeholder")
+        assertThat(freeholdersListPage.form.submitButton).hasAttribute("data-plausible-event", "Transaction")
         freeholdersListPage.addAnotherButton.click()
         assertPageIs(page, FreeholderProvideDetailsFormPagePropertyUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("New Freeholder")
