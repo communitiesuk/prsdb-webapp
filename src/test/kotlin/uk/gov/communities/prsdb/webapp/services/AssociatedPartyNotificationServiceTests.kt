@@ -79,7 +79,7 @@ class AssociatedPartyNotificationServiceTests {
     ) = SuperiorLandlordDataModel(detailsKnown = name != null, name = name, email = email, address = address)
 
     @Test
-    fun `buildFreeholderAddedToPropertyLetter includes the property and registered individual and organisational landlords`() {
+    fun `buildFreeholderAddedToPropertyLetter includes property and freeholder details with landlords sorted by name`() {
         // Arrange
         val propertyOwnership =
             createPropertyOwnership(
@@ -183,16 +183,9 @@ class AssociatedPartyNotificationServiceTests {
                 email = "sarah@example.com",
                 address = postalAddress,
             )
-        val service =
-            AssociatedPartyNotificationService(
-                emailNotificationService,
-                letterNotificationService,
-                AbsoluteUrlProvider("example.test", "example.test"),
-            )
-
         // Act
         val outcome =
-            service.sendNotificationToFreeholderAddedToProperty(
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
                 createPropertyOwnership(),
             )
