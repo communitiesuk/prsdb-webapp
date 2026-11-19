@@ -27,8 +27,6 @@ data class FreeholderDataModel(
     fun hasUnstoredPostalAddress() = detailsKnown && email == null && address == null
 
     companion object {
-        // TODO PDJB-1993: use this to pre-populate the freeholders list from the database when the
-        //  update journey starts.
         fun fromFreeholder(freeholder: Freeholder) =
             FreeholderDataModel(
                 databaseId = freeholder.id,
