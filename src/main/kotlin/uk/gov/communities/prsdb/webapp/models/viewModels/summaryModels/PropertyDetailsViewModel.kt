@@ -8,14 +8,14 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtension
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
-    isLandlordView: Boolean = true,
+    viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
     messageSource: MessageSource,
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
     associatedPartiesEnabled: Boolean = true,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
-        if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
+        viewType,
         messageSource,
     ) {
     val showTenancySection: Boolean = isOccupied
@@ -29,7 +29,8 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this property, showOwnershipSectionOnPropertyDetailsTab and the
     //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
     //  Once PDJB-1999 is done both views always use the flag-on version.
-    val showPeopleResponsibleOwnership: Boolean = isLandlordView && associatedPartiesEnabled
+    val showPeopleResponsibleOwnership: Boolean =
+        viewType.isLandlordView && associatedPartiesEnabled
 
     val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
@@ -53,6 +54,8 @@ class PropertyDetailsViewModel(
     val freeholderSectionHeadingKey: String = "registerProperty.freeholders.checkAnswers.heading.$freeholderHeadingType"
 
     val freeholderSectionLinkTextKey: String = "registerProperty.freeholders.checkAnswers.changeLink.$freeholderHeadingType"
+
+    val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 
     // TODO PDJB-1993: Replace this placeholder URL with the freeholder update journey route.
     val freeholderSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
@@ -90,7 +93,7 @@ class PropertyDetailsViewModel(
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
     val licensingProvideLaterParagraph: String? =
-        if (isLicensingProvideLater && !isLandlordView) {
+        if (isLicensingProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
             if (hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
@@ -104,7 +107,7 @@ class PropertyDetailsViewModel(
 
     val tenancyProvideLaterParagraph: String? =
         when {
-            !showTenancySection || isLandlordView -> {
+            !showTenancySection || viewType != PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 null
             }
 
