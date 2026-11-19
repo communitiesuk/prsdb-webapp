@@ -140,7 +140,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property notification is not sent when the freeholder name is missing`() {
+    fun `freeholder with no name does not receive a notification`() {
         // Arrange
         val freeholder = createFreeholderModel(address = postalAddress)
 
