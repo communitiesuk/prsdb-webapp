@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
-import uk.gov.communities.prsdb.webapp.application.DeactivatePropertiesWithOverdueTasksTaskLogic
+import uk.gov.communities.prsdb.webapp.application.DeactivateMissingDetailPropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredJointLandlordInvitationsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredOrganisationalLandlordInvitationsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
@@ -121,7 +121,7 @@ class PrsdbTaskApplicationTests {
                 SwapToIndividualNudgeEmailService::class.simpleBeanName,
                 IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
                 DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
-                DeactivatePropertiesWithOverdueTasksTaskLogic::class.simpleBeanName,
+                DeactivateMissingDetailPropertiesTaskLogic::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
                 DeleteExpiredJointLandlordInvitationsTaskLogic::class.simpleBeanName,
                 OrganisationalLandlordInvitationDeletionService::class.simpleBeanName,

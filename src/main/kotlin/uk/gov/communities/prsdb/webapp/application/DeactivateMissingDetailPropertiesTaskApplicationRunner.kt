@@ -11,15 +11,15 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import kotlin.system.exitProcess
 
-@PrsdbScheduledTask("deactivate-properties-with-overdue-tasks-scheduled-task")
-class DeactivatePropertiesWithOverdueTasksTaskApplicationRunner(
+@PrsdbScheduledTask("deactivate-missing-detail-properties")
+class DeactivateMissingDetailPropertiesTaskApplicationRunner(
     private val context: ApplicationContext,
-    private val taskLogic: DeactivatePropertiesWithOverdueTasksTaskLogic,
+    private val taskLogic: DeactivateMissingDetailPropertiesTaskLogic,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        println("Executing deactivate properties with overdue tasks scheduled task")
+        println("Executing deactivate missing detail properties task")
 
-        val failureCount = taskLogic.deactivatePropertiesWithOverdueTasks()
+        val failureCount = taskLogic.deactivateMissingDetailProperties()
 
         val exitCode = if (failureCount > 0) 1 else 0
         val code =
@@ -31,11 +31,11 @@ class DeactivatePropertiesWithOverdueTasksTaskApplicationRunner(
 }
 
 @PrsdbTaskService
-class DeactivatePropertiesWithOverdueTasksTaskLogic(
+class DeactivateMissingDetailPropertiesTaskLogic(
     private val activeInactiveService: ActiveInactiveService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun deactivatePropertiesWithOverdueTasks(): Int {
+    fun deactivateMissingDetailProperties(): Int {
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
         if (!featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             println("Active/inactive feature is disabled; no properties were deactivated.")
@@ -44,7 +44,7 @@ class DeactivatePropertiesWithOverdueTasksTaskLogic(
 
         val failureCount = activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()
 
-        println("Overdue property deactivation task complete. There were $failureCount failures.")
+        println("Missing detail property deactivation task complete. There were $failureCount failures.")
         return failureCount
     }
 }
