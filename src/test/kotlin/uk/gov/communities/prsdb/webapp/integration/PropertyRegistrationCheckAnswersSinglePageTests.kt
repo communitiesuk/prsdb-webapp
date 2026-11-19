@@ -310,7 +310,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val headings = checkAnswersPage.sectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
-            val licensingIndex = headings.indexOf("Tell us if the property needs a license")
+            val licensingIndex = headings.indexOf("Tell us if the property needs a licence")
 
             assertTrue(occupancyIndex >= 0 && rentedOutIndex >= 0 && licensingIndex >= 0)
             assertTrue(rentedOutIndex > occupancyIndex, "Rented-out section should appear after occupied section")

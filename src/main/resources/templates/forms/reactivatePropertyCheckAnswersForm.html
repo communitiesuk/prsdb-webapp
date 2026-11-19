@@ -1,0 +1,90 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showLicensing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showGasSafety" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showElectricalSafety" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showEpc" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showTenancyDetails" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="licensingRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasCertRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasInsetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="electricalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="electricalInsetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCardTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCardActions" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcCardRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcExpiredTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="tenancyCheckRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="lowRatingTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="exemptionReasonRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="nonEpcRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcInsetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="tenancyRows" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.checkPropertyAnswers.headingPrefix} + ' ' + ${propertyName}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-xl" th:text="#{forms.checkPropertyAnswers.headingPrefix} + ' ' + ${propertyName}">
+            forms.checkPropertyAnswers.headingPrefix
+        </h1>
+        <div class="govuk-inset-text" th:text="#{reactivateProperty.checkAnswers.insetText}">
+            reactivateProperty.checkAnswers.insetText
+        </div>
+        <th:block th:if="${showLicensing}">
+            <h2 class="govuk-heading-m" th:text="#{licensing.checkAnswers.heading}">licensing.checkAnswers.heading</h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${licensingRows})}"></dl>
+        </th:block>
+        <th:block th:if="${showGasSafety}">
+            <h2 class="govuk-heading-m" th:text="#{checkGasSafety.heading}">checkGasSafety.heading</h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
+            <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
+                <h3 class="govuk-heading-m" th:text="#{checkGasSafety.certSubHeading}">checkGasSafety.certSubHeading</h3>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
+            </th:block>
+            <th:block th:if="${gasInsetTextKey != null}">
+                <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}">gasInsetTextKey</div>
+            </th:block>
+        </th:block>
+        <th:block th:if="${showElectricalSafety}">
+            <h2 class="govuk-heading-m" th:text="#{checkElectricalSafety.heading}">checkElectricalSafety.heading</h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${electricalRows})}"></dl>
+            <th:block th:if="${electricalInsetTextKey != null}">
+                <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}">electricalInsetTextKey</div>
+            </th:block>
+        </th:block>
+        <th:block th:if="${showEpc}">
+            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}">
+                propertyCompliance.epcTask.checkEpcAnswers.heading
+            </h2>
+            <th:block th:if="${epcCardTitle != null}">
+                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows}, 'h3')}"></div>
+            </th:block>
+            <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}">epcExpiredTextKey</p>
+            <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyCheckRows})}"></dl>
+            </th:block>
+            <p th:if="${lowRatingTextKey != null}" class="govuk-body" th:utext="#{${lowRatingTextKey}}">lowRatingTextKey</p>
+            <th:block th:if="${!#lists.isEmpty(exemptionReasonRows)}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${exemptionReasonRows})}"></dl>
+            </th:block>
+            <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${nonEpcRows})}"></dl>
+            </th:block>
+            <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
+                <p class="govuk-body" th:text="#{${epcInsetTextKey}}">epcInsetTextKey</p>
+            </div>
+        </th:block>
+        <th:block th:if="${showTenancyDetails}">
+            <h2 class="govuk-heading-m" th:text="#{tenancyDetails.checkAnswers.heading}">tenancyDetails.checkAnswers.heading</h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyRows})}"></dl>
+        </th:block>
+        <div th:replace="~{fragments/warningText :: warningText(#{reactivateProperty.checkAnswers.warning})}"></div>
+    </th:block>
+    <th:block id="form-content">
+        <input type="hidden" name="answersLastChangedAt" th:value="${answersLastChangedAt}"/>
+        <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{reactivateProperty.checkAnswers.submitButton})}"></button>
+    </th:block>
+</html>

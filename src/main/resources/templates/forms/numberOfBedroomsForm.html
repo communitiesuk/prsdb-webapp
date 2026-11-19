@@ -11,24 +11,16 @@
     <p class="govuk-body" th:text="#{forms.numberOfBedrooms.paragraph.one}">
         forms.numberOfBedrooms.paragraph.one
     </p>
-    <p class="govuk-body" th:text="#{forms.numberOfBedrooms.paragraph.two}">
-        forms.numberOfBedrooms.paragraph.two
-    </p>
-    <details  id="details" th:replace="~{fragments/details :: details(#{forms.numberOfBedrooms.details.summary}, ~{::#details/content()})}" >
-        <div class="govuk-details__text" th:text="#{forms.numberOfBedrooms.details.text}"></div>
-    </details>
-    <p class="govuk-body" th:text="#{forms.numberOfBedrooms.paragraph.three}">
-        forms.numberOfBedrooms.paragraph.three
-    </p>
     <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.numberOfBedrooms.bullet.one}">forms.numberOfBedrooms.bullet.one</li>
         <li th:text="#{forms.numberOfBedrooms.bullet.two}">forms.numberOfBedrooms.bullet.two</li>
-        <li th:text="#{forms.numberOfBedrooms.bullet.three}">forms.numberOfBedrooms.bullet.three</li>
     </ul>
-    <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfBedrooms', null, null)}">
-        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfBedrooms', null, 2)}">
-        </div>
+    <th:block th:with="labelSize='m'">
+        <th:block id="fieldset-content"
+                  th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfBedrooms', null, null)}">
+            <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfBedrooms', null, 2)}">
+            </div>
+        </th:block>
     </th:block>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>

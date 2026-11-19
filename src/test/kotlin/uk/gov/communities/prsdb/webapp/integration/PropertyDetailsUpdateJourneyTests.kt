@@ -61,6 +61,8 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    // TODO PDJB-1992: test the property record after updating to each ownership type.
+    // TODO PDJB-1993: test freeholder cards after updates for email, postal address and unknown details.
     @Autowired
     lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 
@@ -105,7 +107,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         private val landlordAccountEmail = "alex.surname@example.com"
 
         @Test
-        fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
+        fun `Resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
             page: Page,
         ) {
             val newNumberOfBedrooms = 4
@@ -132,7 +134,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
 
         @Test
-        fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
+        fun `Resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
             // The correspondence email update below must change the data, otherwise the last-modified date is not bumped
             assertNotEquals(
                 landlordAccountEmail,
@@ -461,12 +463,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 checkLicensingAnswersPage.summaryName.getText(),
                 "You have removed this property’s licence",
             )
-            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value)
+                .containsText("This property does not need a licence")
         }
 
         @Test
@@ -544,7 +547,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 mapOf("propertyOwnershipId" to undelegatedPropertyOwnershipId.toString())
 
             @Test
-            fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
+            fun `Making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
                 // The property starts occupied and delegated to a letting agent
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
@@ -584,7 +587,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `keeping a delegated property occupied shows the check answers page and retains the delegation`(page: Page) {
+            fun `Keeping a delegated property occupied shows the check answers page and retains the delegation`(page: Page) {
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
@@ -608,7 +611,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `going back from the interruption returns to the occupancy page without saving the change`(page: Page) {
+            fun `Going back from the interruption returns to the occupancy page without saving the change`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -632,7 +635,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `making an undelegated property vacant skips the interruption`(page: Page) {
+            fun `Making an undelegated property vacant skips the interruption`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -654,7 +657,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `a vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
+            fun `A vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -677,7 +680,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `navigating directly to the interruption for an undelegated property redirects to the property record`(page: Page) {
+            fun `Navigating directly to the interruption for an undelegated property redirects to the property record`(page: Page) {
                 navigator.navigate(
                     UpdateOccupancyController.getUpdateOccupancyRoute(undelegatedPropertyOwnershipId) +
                         "/${OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT}",
@@ -686,7 +689,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `a property delegated after the journey started still shows the interruption`(page: Page) {
+            fun `A property delegated after the journey started still shows the interruption`(page: Page) {
                 // Start the journey while the property has no letting agent, so any cached delegation would be false
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
@@ -707,7 +710,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `the occupancy answer can be changed from the check answers page`(page: Page) {
+            fun `The occupancy answer can be changed from the check answers page`(page: Page) {
                 // The property starts occupied and delegated; make it vacant to reach the check answers page
                 navigator
                     .goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
@@ -866,7 +869,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
@@ -888,7 +891,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
@@ -1127,14 +1130,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update rent frequency
-                assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
+                assertThat(rentFrequencyPage.header).containsText("How often do you charge rent?")
                 rentFrequencyPage.selectRentFrequency(newRentFrequency)
                 rentFrequencyPage.form.submit()
                 val rentAmountPage =
                     assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
                 // Update rent amount
-                assertThat(rentAmountPage.header).containsText("Update your weekly rent")
+                assertThat(rentAmountPage.header).containsText("Rent charged each week")
                 rentAmountPage.submitRentAmount(newRentAmount)
                 val checkYourAnswersPage =
                     assertPageIs(
@@ -1196,7 +1199,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         private val propertyWithoutPropertyManagerId = 1L
         private val propertyWithoutPropertyManagerUrlArguments =
             mapOf("propertyOwnershipId" to propertyWithoutPropertyManagerId.toString())
-        private val propertyWithPropertyManagerId = 5L
+        private val propertyWithPropertyManagerId = 37L
         private val propertyWithPropertyManagerUrlArguments =
             mapOf("propertyOwnershipId" to propertyWithPropertyManagerId.toString())
 

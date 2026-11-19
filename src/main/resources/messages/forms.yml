@@ -202,13 +202,12 @@ countryOfResidence:
 selectLocalCouncil:
   error:
     missing: Select a local council to continue
-  fieldSetHeading: What local council area is your property in?
-  fieldSetHint: Select the local council that your property falls under.
+  fieldSetHeading: What local council area is this property in?
+  subHeading: Find this property’s local council
   paragraph:
-    one:
-      beforeLink: You can
-      linkText: find your local council by searching using the property postcode (opens in new tab)
-      afterLink: .
+    beforeLink: You can
+    linkText: find your local council by searching using the property postcode (opens in new tab)
+    afterLink: .
   select:
     label: Select a local council
 date:
@@ -322,19 +321,13 @@ occupancy:
 numberOfBedrooms:
   input:
     error: 'Enter the number of bedrooms, like 3 or 8'
-  heading: How many bedrooms in your property?
+  heading: Number of bedrooms
   paragraph:
-    one: A bedroom is any room built or converted for sleeping, even if it is currently being used for another purpose (such as an office).
-    two: In an HMO, a bedroom is any room built or converted for sleeping. To be counted, a room must meet the minimum floor area and natural light requirements set by your local council and be for the tenant’s exclusive use.
-    three: 'Do not include:'
+    one: 'Include:'
   bullet:
-    one: kitchens or bathrooms
-    two: landings and hallways
-    three: any room smaller than 4.64 square metres
-  details:
-    summary: Where to find this information
-    text: If your property is an HMO with an active licence, you may find it helpful to consult your licence documentation. This will confirm the maximum number of bedrooms and occupants permitted for the property.
-  label: Enter the number of bedrooms
+    one: rooms built as bedrooms that are being used for another purpose, such as a home office
+    two: living rooms or other rooms that have been converted into a bedroom
+  label: How many bedrooms does this property have?
 hmoShared:
   detail:
     paragraph:
@@ -426,19 +419,6 @@ update:
       insetText: We’ll notify anyone you add or remove.
     remove:
       insetText: If you’ve given this property manager access, you’ll need to remove this on the property registration page.
-  numberOfBedrooms:
-    heading: Update how many bedrooms are in your property
-  rentFrequency:
-    heading: Update when you charge rent
-  rentAmount:
-    weekly:
-      fieldSetHeading: Update your weekly rent
-    fourWeekly:
-      fieldSetHeading: Update your 4-weekly rent
-    monthly:
-      fieldSetHeading: Update your monthly rent
-    other:
-      fieldSetHeading: Update your monthly rent
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers

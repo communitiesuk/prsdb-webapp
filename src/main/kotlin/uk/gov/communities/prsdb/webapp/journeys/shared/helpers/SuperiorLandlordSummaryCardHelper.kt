@@ -25,8 +25,7 @@ class SuperiorLandlordSummaryCardHelper {
                                 ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
                         summaryList = contactRows,
                         actions = actions,
-                        // A named superior landlord with no contact rows was contacted by post, but their address was not stored
-                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
+                        bodyTextKey = if (superiorLandlord.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(

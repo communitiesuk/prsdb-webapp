@@ -80,8 +80,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     fun isGasSafetyCertExpired(isGas14MonthExpiryEnabled: Boolean): Boolean? =
         gasSafetyCertIssueDate?.let { CertificateExpiryHelper.isGasIssueDateExpired(it, isGas14MonthExpiryEnabled) }
 
-    val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null && hasGasSupply == true
+    val isGasSafetyCertMissing: Boolean?
+        get() = hasGasSupply?.let { it && gasSafetyCertIssueDate == null }
 
     val isEpcExpired: Boolean?
         get() = epcExpiryDate?.let { CertificateExpiryHelper.isEpcExpiryDateExpired(it) }

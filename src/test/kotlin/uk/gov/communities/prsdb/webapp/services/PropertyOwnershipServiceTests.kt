@@ -39,6 +39,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.GAS_CERTIFICATE_14_MONTH_EXPIRY
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -861,8 +862,15 @@ class PropertyOwnershipServiceTests {
                 )
             whenever(mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id))
                 .thenReturn(listOf(deactivatedProperty))
+            val expectedCurrentUrlKey = 12
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(DEACTIVATED_PROPERTIES_FRAGMENT))
+                .thenReturn(expectedCurrentUrlKey)
 
-            val result = propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(landlord)
+            val result =
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                )
 
             assertEquals(
                 listOf(
@@ -872,6 +880,10 @@ class PropertyOwnershipServiceTests {
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(deactivatedProperty.registrationNumber)
                                 .toString(),
+                        recordLink =
+                            PropertyDetailsController
+                                .getPropertyDetailsPath(deactivatedProperty.id)
+                                .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                 ),
                 result,
@@ -2136,6 +2148,107 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(null, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        }
+
+        @Test
+        fun `updateIsOccupied nulls compliance provide-later flags when property transitions to unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val propertyCompliance =
+                PropertyCompliance(
+                    propertyOwnership = propertyOwnership,
+                    epcUrl = "https://example.test/epc",
+                    gasSafetyCertProvideLater = true,
+                    electricalSafetyCertProvideLater = true,
+                    epcProvideLater = true,
+                )
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = false,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertNull(propertyCompliance.gasSafetyCertProvideLater)
+            assertNull(propertyCompliance.electricalSafetyCertProvideLater)
+            assertNull(propertyCompliance.epcProvideLater)
+            assertEquals("https://example.test/epc", propertyCompliance.epcUrl)
+        }
+
+        @Test
+        fun `updateIsOccupied clears stale tenancy and compliance data when property is already unoccupied`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true).apply {
+                    isOccupied = false
+                }
+            val propertyCompliance =
+                PropertyCompliance(
+                    propertyOwnership = propertyOwnership,
+                    tenancyStartedBeforeEpcExpiry = true,
+                    gasSafetyCertProvideLater = true,
+                    electricalSafetyCertProvideLater = true,
+                    epcProvideLater = true,
+                )
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = false,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertFalse(propertyOwnership.isOccupied)
+            assertEquals(0, propertyOwnership.currentNumHouseholds)
+            assertEquals(0, propertyOwnership.currentNumTenants)
+            assertNull(propertyOwnership.billsIncludedList)
+            assertNull(propertyOwnership.customBillsIncluded)
+            assertNull(propertyOwnership.furnishedStatus)
+            assertNull(propertyOwnership.rentFrequency)
+            assertNull(propertyOwnership.customRentFrequency)
+            assertNull(propertyOwnership.rentAmount)
+            assertNull(propertyOwnership.tenancyProvideLater)
+            assertNull(propertyCompliance.tenancyStartedBeforeEpcExpiry)
+            assertNull(propertyCompliance.gasSafetyCertProvideLater)
+            assertNull(propertyCompliance.electricalSafetyCertProvideLater)
+            assertNull(propertyCompliance.epcProvideLater)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updateIsOccupied doesn't throw when property without compliance information transitions to unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", null)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            assertDoesNotThrow {
+                propertyOwnershipService.updateIsOccupied(
+                    propertyOwnership.id,
+                    isOccupied = false,
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+                )
+            }
+
+            // Assert
+            assertFalse(propertyOwnership.isOccupied)
+            assertNull(propertyOwnership.propertyCompliance)
+            assertNull(propertyOwnership.tenancyProvideLater)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
 
         @Test

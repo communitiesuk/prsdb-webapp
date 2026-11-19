@@ -41,6 +41,13 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
     private fun countRowsIn(table: String) = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $table", Int::class.java)!!
 
+    private fun propertyManagerNameFor(propertyOwnershipId: Long) =
+        jdbcTemplate.queryForObject(
+            "SELECT pm.name FROM property_manager pm JOIN property_ownership po ON po.property_manager_id = pm.id WHERE po.id = ?",
+            String::class.java,
+            propertyOwnershipId,
+        )
+
     private fun countRowsFor(
         table: String,
         propertyOwnershipId: Long,
@@ -185,14 +192,7 @@ class AssociatedPartyPersistenceTests : IntegrationTestWithMutableData("data-loc
 
         // Assert
         assertEquals(seededPropertyManagerCount + 1, countRowsIn("property_manager"))
-        assertEquals(
-            "Second Manager",
-            jdbcTemplate.queryForObject(
-                "SELECT pm.name FROM property_manager pm JOIN property_ownership po ON po.property_manager_id = pm.id WHERE po.id = ?",
-                String::class.java,
-                propertyOwnershipId,
-            ),
-        )
+        assertEquals("Second Manager", propertyManagerNameFor(propertyOwnershipId))
     }
 
     @Test

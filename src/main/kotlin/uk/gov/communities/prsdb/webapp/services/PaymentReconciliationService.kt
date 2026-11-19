@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualIntervention
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -59,7 +59,7 @@ class PaymentReconciliationService(
         expectedStatus: PaymentStatus,
     ): PaymentStatus {
         if (writeManualIntervention(paymentId, reason, expectedStatus)) {
-            sendEmailAndLogFailures("the manual intervention email for payment $paymentId") {
+            sendNotificationAndLogFailures("the manual intervention email for payment $paymentId") {
                 emailSupportAboutManualIntervention(paymentId, reason)
             }
         }
