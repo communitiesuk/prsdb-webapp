@@ -8,11 +8,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.FurnishedStatusFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasElectricalCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HasGasSupplyFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.HmoMandatoryLicenceFormPagePropertyReactivation
@@ -140,6 +142,19 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
             assertThat(updatedCheckAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("3")
             assertThat(updatedCheckAnswersPage.tenancySummaryList.numberOfTenantsRow.value).containsText("5")
+        }
+
+        @Test
+        fun `changing the furnished status returns to check answers with the new answer`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(inactivePropertyOwnershipId)
+            assertThat(checkAnswersPage.tenancySummaryList.furnishedStatusRow.value).containsText("Fully furnished")
+
+            checkAnswersPage.tenancySummaryList.furnishedStatusRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, FurnishedStatusFormPagePropertyReactivation::class, urlArguments)
+                .submitFurnishedStatus(FurnishedStatus.UNFURNISHED)
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+            assertThat(updatedCheckAnswersPage.tenancySummaryList.furnishedStatusRow.value).containsText("Unfurnished")
         }
 
         @Test

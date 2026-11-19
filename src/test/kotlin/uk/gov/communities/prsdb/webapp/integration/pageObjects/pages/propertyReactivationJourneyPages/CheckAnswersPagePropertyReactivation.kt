@@ -57,6 +57,7 @@ class CheckAnswersPagePropertyReactivation(
     ) : SummaryList(page) {
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
+        val furnishedStatusRow = getRow("Furniture provided")
         val rentAmountRow = getRow("Rent amount")
     }
 }
