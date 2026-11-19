@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
@@ -32,8 +33,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 
-// TODO PDJB-2016: Remove ASSOCIATED_PARTIES feature flag setup once the flag is removed.
 class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    // TODO PDJB-2016: Remove ASSOCIATED_PARTIES feature flag setup once the flag is removed.
+    @BeforeEach
+    fun enableAssociatedPartiesFeature() {
+        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+    }
+
     @Autowired
     private lateinit var freeholderRepository: FreeholderRepository
 
@@ -45,7 +51,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `landlord can add email, postal-address, and unknown freeholders in the non-joint update journey`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -106,7 +111,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `landlord can add email, postal-address, and unknown freeholders in the joint update journey`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow()
         propertyOwnership.ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS
         propertyOwnershipRepository.save(propertyOwnership)
@@ -172,7 +176,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `invalid email returns the registration format error in the update journey`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -194,7 +197,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `blank postcode returns the required error on freeholder address lookup during an update`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -215,7 +217,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `changing a known freeholder to details unknown clears their details without replacing the record`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = "existing@example.com"
@@ -249,7 +250,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `freeholder update list shows the submission warning`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -262,7 +262,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `back from the freeholder update list returns to the people responsible tab`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -277,7 +276,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `a postal address can be provided for a freeholder during an update`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = null
@@ -316,7 +314,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `a freeholder can be given a manual postal address during an update`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = null
@@ -363,7 +360,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `resuming an abandoned freeholder update after another property update discards earlier progress`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val landlordAccountEmail = "alex.surname@example.com"
         assertNotEquals(
@@ -398,7 +394,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `landlord can add a freeholder without removing the existing last freeholder`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -422,7 +417,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `abandoning a freeholder update does not persist a newly added freeholder`() {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -441,7 +435,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `editing a saved freeholder updates the existing record without adding a record`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = "existing@example.com"
@@ -478,7 +471,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `persisted freeholder can be removed while the existing freeholder remains`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val existingFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         freeholderRepository.save(
             Freeholder(
@@ -508,7 +500,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `blank freeholder name returns the registration validation error in the update journey`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -527,7 +518,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `adding editing and removing freeholders in one session reconciles saved records`(page: Page) {
-        featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
         val freeholderA = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         freeholderA.name = "Freeholder A"
         freeholderA.email = "a@example.com"
