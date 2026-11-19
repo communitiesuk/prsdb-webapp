@@ -182,8 +182,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyUpdate::class, urlArguments)
-        assertEquals(MANUAL_ADDRESS_CHOSEN, selectAddressPage.form.addressRadios.selectedValue)
-        selectAddressPage.form.submit()
+        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
 
         val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyUpdate::class, urlArguments)
         manualAddressPage.submitAddress(
