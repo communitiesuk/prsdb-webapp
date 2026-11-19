@@ -56,6 +56,7 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
@@ -113,6 +114,7 @@ class PrsdbTaskApplicationTests {
                 IncompletePropertiesService::class.simpleBeanName,
                 ActiveInactiveService::class.simpleBeanName,
                 LettingAgentAccessService::class.simpleBeanName,
+                UserToLandlordService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
                 JointLandlordInvitationDeletionService::class.simpleBeanName,
