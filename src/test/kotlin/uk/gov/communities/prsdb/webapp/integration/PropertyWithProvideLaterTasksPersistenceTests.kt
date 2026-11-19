@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,10 +19,8 @@ class PropertyWithProvideLaterTasksPersistenceTests :
 
     @Test
     fun `returns active properties created before the cutoff where any provide later status is true`() {
-        assertEquals(
-            ELIGIBLE_PROPERTY_IDS,
-            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
-        )
+        assertThat(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
+            .containsExactlyInAnyOrderElementsOf(ELIGIBLE_PROPERTY_IDS)
     }
 
     @Test
