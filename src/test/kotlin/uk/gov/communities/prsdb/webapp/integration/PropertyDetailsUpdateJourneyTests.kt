@@ -457,7 +457,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value)
+                .containsText("This property does not need a licence")
         }
 
         @Test

@@ -32,7 +32,7 @@ class LicensingDetailsHelperTests {
         // Assert
         summaryList.single().let { row ->
             assertEquals("propertyDetails.propertyRecord.licensingInformation.licensingType", row.fieldHeading)
-            assertEquals("licensing.checkAnswers.noLicensingRequired", row.fieldValue)
+            assertEquals(LicensingType.NO_LICENSING, row.fieldValue)
             assertEquals(
                 listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
                 row.actions,
@@ -109,7 +109,7 @@ class LicensingDetailsHelperTests {
         assertEquals(setOf("licensingRows"), content.keys)
         @Suppress("UNCHECKED_CAST")
         val rows = content["licensingRows"] as List<SummaryListRowViewModel>
-        assertEquals("licensing.checkAnswers.noLicensingRequired", rows.single().fieldValue)
+        assertEquals(LicensingType.NO_LICENSING, rows.single().fieldValue)
     }
 
     interface TestableLicensingState :

@@ -15,12 +15,10 @@ class LicensingDetailsHelper {
     ): List<SummaryListRowViewModel> {
         val licensingType = licensingState.getLicensingType()
         val licensingTypeValue: Any =
-            when {
-                licensingType == LicensingType.NO_LICENSING -> "licensing.checkAnswers.noLicensingRequired"
-                licensingType == LicensingType.PROVIDE_LATER && licensingState.isOccupied == false ->
-                    "licensing.checkAnswers.licensingProvideLaterUnoccupied"
-
-                else -> licensingType
+            if (licensingType == LicensingType.PROVIDE_LATER && licensingState.isOccupied == false) {
+                "licensing.checkAnswers.licensingProvideLaterUnoccupied"
+            } else {
+                licensingType
             }
 
         return listOfNotNull(

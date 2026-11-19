@@ -21,7 +21,7 @@ class CheckAnswersPagePropertyReactivation(
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-xl"))
     val licensingHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if the property needs a license")))
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if the property needs a licence")))
     val gasSafetyHeading = Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Gas safety certificate")))
     val electricalSafetyHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Electrical safety certificate")))

@@ -84,7 +84,7 @@ class LettingAgentUpdateLicensingJourneyTests : IntegrationTestWithMutableData("
         checkYourAnswersPage.confirm()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
-        assertThat(propertyDetailsPage.summaryList.licensingTypeRow.value).containsText("None")
+        assertThat(propertyDetailsPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
     }
 
     @Test
