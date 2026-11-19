@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
@@ -45,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 @RequestMapping
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
@@ -172,6 +174,12 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
+        // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed
+        if (propertyDetails.showPropertyManagerSection) {
+            propertyOwnership.propertyManager?.let {
+                modelAndView.addObject("propertyManagerSummaryCard", propertyManagerSummaryCardHelper.getSummaryCard(it))
+            }
+        }
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         // The notification banner prompts for actions that a deactivated record can't take

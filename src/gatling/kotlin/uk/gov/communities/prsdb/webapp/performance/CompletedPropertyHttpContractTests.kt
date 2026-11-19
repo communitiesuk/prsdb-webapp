@@ -106,7 +106,7 @@ class CompletedPropertyHttpContractTests {
 
                 fun licenceSummary(): Map<String, String> =
                     when (licenceTypes[id]) {
-                        "NO_LICENSING" -> mapOf("Licensing type" to "None")
+                        "NO_LICENSING" -> mapOf("Licensing type" to "This property does not need a licence")
                         else ->
                             mapOf(
                                 "Licensing type" to

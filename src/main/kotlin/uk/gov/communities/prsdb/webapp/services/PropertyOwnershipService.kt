@@ -150,13 +150,19 @@ class PropertyOwnershipService(
                 // TODO PDJB-2016: delete this branch with the flag. The flag-off journey never asks who
                 //  the freeholders are, so we use createPlaceholderFreeholder to supply one if required
                 //  by the OwnershipType.
-                freeholders == null -> freeholderService.createPlaceholderFreeholder(propertyOwnership)
-                freeholders.isEmpty() ->
+                freeholders == null -> {
+                    freeholderService.createPlaceholderFreeholder(propertyOwnership)
+                }
+
+                freeholders.isEmpty() -> {
                     throw IllegalArgumentException(
                         "An ownership type requiring freeholder records cannot be registered with no freeholders",
                     )
+                }
 
-                else -> freeholderService.createFreeholders(propertyOwnership, freeholders)
+                else -> {
+                    freeholderService.createFreeholders(propertyOwnership, freeholders)
+                }
             }
         }
 
@@ -420,13 +426,16 @@ class PropertyOwnershipService(
             propertyOwnership.lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
             propertyOwnership.tenancyProvideLater = true
         }
-        if (wasOccupied && !propertyOwnership.isOccupied) {
-            // Becoming unoccupied: tenancy details no longer apply, so clear them rather than holding onto stale data.
+        if (!propertyOwnership.isOccupied) {
+            // Tenancy details don't apply, so clear them rather than potentially holding onto stale data.
             clearTenancyDetails(propertyOwnership)
             propertyOwnership.tenancyProvideLater = null
-        }
-        if (!propertyOwnership.isOccupied) {
-            propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
+            propertyOwnership.propertyCompliance?.apply {
+                tenancyStartedBeforeEpcExpiry = null
+                gasSafetyCertProvideLater = null
+                electricalSafetyCertProvideLater = null
+                epcProvideLater = null
+            }
         }
         propertyOwnershipRepository.save(propertyOwnership)
     }

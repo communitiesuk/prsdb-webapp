@@ -8,14 +8,15 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <fieldset id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilId', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.one.beforeLink}">forms.selectLocalCouncil.paragraph.one.beforeLink</span>
-            <a class="govuk-link" target="_blank" th:href="${findLocalCouncilUrl}" th:text="#{forms.selectLocalCouncil.paragraph.one.linkText}">forms.selectLocalCouncil.paragraph.one.linkText
-            </a><span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.one.afterLink}">forms.selectLocalCouncil.paragraph.one.afterLink</span>
-        </p>
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'localCouncilId', #{${fieldSetHeading}}, null)}">
         <select th:replace="~{fragments/forms/select :: select(#{${selectLabel}},'localCouncilId',null, ${selectOptions})}"></select>
     </fieldset>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <h2 class="govuk-heading-s" th:text="#{forms.selectLocalCouncil.subHeading}">forms.selectLocalCouncil.subHeading</h2>
+    <p class="govuk-body">
+        <span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.beforeLink}">forms.selectLocalCouncil.paragraph.beforeLink</span>
+        <a class="govuk-link" target="_blank" th:href="${findLocalCouncilUrl}" th:text="#{forms.selectLocalCouncil.paragraph.linkText}">forms.selectLocalCouncil.paragraph.linkText
+        </a><span th:remove="tag" th:text="#{forms.selectLocalCouncil.paragraph.afterLink}">forms.selectLocalCouncil.paragraph.afterLink</span>
+    </p>
 </th:block>
 </html>

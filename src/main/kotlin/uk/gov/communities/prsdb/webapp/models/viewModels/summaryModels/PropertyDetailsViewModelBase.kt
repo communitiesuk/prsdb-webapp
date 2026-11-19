@@ -468,7 +468,8 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
-        // TODO PDJB-1992: remove once the ownership answer rows link to their real update routes.
+        // TODO PDJB-1992, PDJB-1995: remove once the ownership answer rows and property manager section link to their
+        //  real update routes.
         protected const val PLACEHOLDER_ACTION_LINK = "#"
 
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)

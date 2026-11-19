@@ -126,23 +126,6 @@ class ComplianceStatusDataModelTests {
     }
 
     @Test
-    fun `fromPropertyCompliance returns NOT_REQUIRED gas safety status when property has no gas supply`() {
-        // Arrange
-        val propertyCompliance =
-            PropertyComplianceBuilder()
-                .withOccupiedPropertyOwnership()
-                .withHasGasSupply(false)
-                .withElectricalCertType()
-                .build()
-
-        // Act
-        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
-
-        // Assert
-        assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
-    }
-
-    @Test
     fun `fromPropertyCompliance returns a ComplianceStatusDataModel with correct non-status values`() {
         // Arrange
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
@@ -202,18 +185,27 @@ class ComplianceStatusDataModelTests {
     }
 
     @ParameterizedTest(name = "when {0}")
-    @MethodSource("providePropertyCompliancesAndStatuses")
-    fun `fromPropertyCompliance returns a ComplianceStatusDataModel with correct status values`(
+    @MethodSource("provideGasSafetyStatuses")
+    fun `fromPropertyCompliance returns the correct gas safety status`(
         propertyCompliance: PropertyCompliance,
-        expectedCertStatus: ComplianceCertStatus,
+        expectedStatus: ComplianceCertStatus,
+    ) {
+        val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
+        assertEquals(expectedStatus, complianceStatusDataModel.gasSafetyStatus)
+    }
+
+    @ParameterizedTest(name = "when {0}")
+    @MethodSource("provideElectricalAndEpcStatuses")
+    fun `fromPropertyCompliance returns the correct electrical and EPC statuses`(
+        propertyCompliance: PropertyCompliance,
+        expectedStatus: ComplianceCertStatus,
     ) {
         // Act
         val complianceStatusDataModel = createComplianceStatus(propertyCompliance)
 
         // Assert
-        assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
-        assertEquals(expectedCertStatus, complianceStatusDataModel.electricalSafetyStatus)
-        assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatus)
+        assertEquals(expectedStatus, complianceStatusDataModel.electricalSafetyStatus)
+        assertEquals(expectedStatus, complianceStatusDataModel.epcStatus)
     }
 
     companion object {
@@ -235,7 +227,65 @@ class ComplianceStatusDataModelTests {
             )
 
         @JvmStatic
-        private fun providePropertyCompliancesAndStatuses() =
+        private fun provideGasSafetyStatuses() =
+            listOf(
+                arguments(
+                    named(
+                        "the property has no gas supply",
+                        PropertyComplianceBuilder().withOccupiedPropertyOwnership().withHasGasSupply(false).build(),
+                    ),
+                    ComplianceCertStatus.NOT_REQUIRED,
+                ),
+                arguments(
+                    named(
+                        "gas supply status is unknown and gas details will be provided later",
+                        PropertyComplianceBuilder()
+                            .withOccupiedPropertyOwnership()
+                            .withGasSafetyCertProvideLater()
+                            .build(),
+                    ),
+                    ComplianceCertStatus.PROVIDE_LATER,
+                ),
+                arguments(
+                    named(
+                        "gas supply status is unknown and the provide-later flag has been cleared",
+                        PropertyComplianceBuilder().withOccupiedPropertyOwnership().build(),
+                    ),
+                    ComplianceCertStatus.HAS_FAULTS,
+                ),
+                arguments(
+                    named(
+                        "the property has a gas supply without a certificate",
+                        PropertyComplianceBuilder().withOccupiedPropertyOwnership().withHasGasSupply().build(),
+                    ),
+                    ComplianceCertStatus.HAS_FAULTS,
+                ),
+                arguments(
+                    named(
+                        "a gas certificate has expired",
+                        PropertyComplianceBuilder()
+                            .withOccupiedPropertyOwnership()
+                            .withHasGasSupply()
+                            .withExpiredGasSafetyCert()
+                            .build(),
+                    ),
+                    ComplianceCertStatus.EXPIRED,
+                ),
+                arguments(
+                    named(
+                        "an in-date gas certificate has been added",
+                        PropertyComplianceBuilder()
+                            .withOccupiedPropertyOwnership()
+                            .withHasGasSupply()
+                            .withGasSafetyCert()
+                            .build(),
+                    ),
+                    ComplianceCertStatus.ADDED,
+                ),
+            )
+
+        @JvmStatic
+        private fun provideElectricalAndEpcStatuses() =
             listOf(
                 arguments(
                     named("when in-date certs have been added", PropertyComplianceBuilder.createWithInDateCerts()),
@@ -251,7 +301,7 @@ class ComplianceStatusDataModelTests {
                 ),
                 arguments(
                     named(
-                        "when gas and electric and missing and epc has a low energy rating",
+                        "when electrical is missing and epc has a low energy rating",
                         PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(true),
                     ),
                     ComplianceCertStatus.HAS_FAULTS,

@@ -451,12 +451,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 checkLicensingAnswersPage.summaryName.getText(),
                 "You have removed this property’s licence",
             )
-            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value)
+                .containsText("This property does not need a licence")
         }
 
         @Test
@@ -856,7 +857,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
@@ -878,7 +879,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
