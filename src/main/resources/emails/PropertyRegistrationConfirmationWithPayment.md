@@ -42,6 +42,10 @@ Renewal date: ((renewal date))
 
 ((hasDelegatedToLettingAgent??To keep the property registered, they must provide these details within 28 days. We’ll notify you when they’ve provided this information.))
 
+((landlordReactivated??## Your landlord account))
+
+((landlordReactivated??Your landlord account is now active.))
+
 You should save this email so you can reference it if needed.
 
 ---

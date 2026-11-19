@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
@@ -14,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
@@ -60,6 +62,7 @@ class PropertyRegistrationService(
                     renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
                 )
 
+            val landlordReactivated = !landlord.isActive
             activeInactiveService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
@@ -98,12 +101,14 @@ class PropertyRegistrationService(
 
             runAfterTransactionCommits {
                 confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+                confirmationService.setLandlordReactivatedByLastRegistration(landlordReactivated)
                 sendRegistrationNotifications(
                     registrationData,
                     landlord,
                     propertyOwnership,
                     lettingAgentInvitation,
                     jointLandlordInvitations,
+                    landlordReactivated,
                 )
             }
 
@@ -169,9 +174,10 @@ class PropertyRegistrationService(
         propertyOwnership: PropertyOwnership,
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
+        landlordReactivated: Boolean,
     ) {
-        sendNotificationAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
-            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
+        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
+            sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
         }
 
         registrationData.freeholders.orEmpty().forEachIndexed { index, freeholder ->
@@ -186,19 +192,19 @@ class PropertyRegistrationService(
         }
 
         lettingAgentInvitation?.let { invitation ->
-            sendNotificationAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
+            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)
             }
         }
 
         jointLandlordInvitations.forEach { invitation ->
-            sendNotificationAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
+            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationEmail(invitation)
             }
         }
 
         if (jointLandlordInvitations.isNotEmpty()) {
-            sendNotificationAndLogFailures(
+            sendEmailAndLogFailures(
                 "the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}",
             ) {
                 jointLandlordInvitationService.sendInvitationConfirmationEmails(
@@ -214,6 +220,7 @@ class PropertyRegistrationService(
         registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
+        landlordReactivated: Boolean,
     ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -232,6 +239,8 @@ class PropertyRegistrationService(
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcProvideLater = epcProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
+                // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+                landlordReactivated = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && landlordReactivated,
                 // TODO PDJB-1734: Always get the payment details when the PAYMENTS flag is removed
                 paymentDetails = if (featureFlagManager.checkFeature(PAYMENTS)) getPaymentDetails(propertyOwnership) else null,
             ),
