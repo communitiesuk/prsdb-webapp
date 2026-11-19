@@ -137,7 +137,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
     }
 
     @Test
-    fun `The back link on the check uploads page returns to the issue date page when the date is changed from check answers`(page: Page) {
+    fun `The back links on the gas cert pages are correct when changing answers from the check answers page`(page: Page) {
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
         propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
@@ -149,7 +149,16 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
             .uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         assertPageIs(page, CheckGasCertUploadsFormPageUpdateGasSafety::class, urlArguments).form.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+        var checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+
+        checkAnswersPage.certSummaryList.validGasCertRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments).backLink.clickAndWait()
+        checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+
+        checkAnswersPage.certSummaryList.issueDateRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments).backLink.clickAndWait()
+        checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+
         checkAnswersPage.certSummaryList.issueDateRow.clickFirstActionLinkAndWait()
         assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments).submitDate(currentDate)
         assertPageIs(page, CheckGasCertUploadsFormPageUpdateGasSafety::class, urlArguments).backLink.clickAndWait()

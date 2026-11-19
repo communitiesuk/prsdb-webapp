@@ -359,24 +359,27 @@ class PropertyRegistrationJourneyFactory(
 
                 // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep,
+                    )
                 }
 
                 EicIssueDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep,
+                    )
                 }
 
                 EicrExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep,
+                    )
                 }
 
                 StartEpcStep.ROUTE_SEGMENT -> {
