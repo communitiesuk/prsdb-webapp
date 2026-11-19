@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -78,12 +77,7 @@ class PropertyDetailsViewModel(
 
     val freeholderSummaryCards: List<SummaryCardViewModel> =
         if (showFreeholdersSection) {
-            freeholderSummaryCardHelper.getSummaryCards(
-                propertyOwnership.freeholders
-                    .sortedBy { it.id }
-                    .mapIndexed { index, freeholder -> (index + 1) to FreeholderDataModel.fromFreeholder(freeholder) }
-                    .toMap(),
-            )
+            freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)
         } else {
             emptyList()
         }
