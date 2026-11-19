@@ -86,7 +86,7 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
-        if (propertyDetails.showFreeholderSection) {
+        if (propertyDetails.showFreeholdersSection) {
             modelAndView.addObject(
                 "freeholderSummaryCards",
                 freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),

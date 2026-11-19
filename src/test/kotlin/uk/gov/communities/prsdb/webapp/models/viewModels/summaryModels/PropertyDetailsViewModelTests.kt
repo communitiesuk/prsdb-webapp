@@ -288,18 +288,18 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the freeholder section uses ownership specific labels and update url`() {
+    fun `the freeholder section uses ownership specific update link text`() {
         val ownershipTypes =
             listOf(
                 Triple(
                     OwnershipType.SHARE_OF_JOINT_TENANTS,
-                    "registerProperty.freeholders.checkAnswers.heading.joint",
-                    "registerProperty.freeholders.checkAnswers.changeLink.joint",
+                    "propertyDetails.peopleResponsible.freeholders.heading",
+                    "propertyDetails.peopleResponsible.freeholders.updateJointLink",
                 ),
                 Triple(
                     OwnershipType.LEASEHOLD_ONLY,
-                    "registerProperty.freeholders.checkAnswers.heading.nonJoint",
-                    "registerProperty.freeholders.checkAnswers.changeLink.nonJoint",
+                    "propertyDetails.peopleResponsible.freeholders.heading",
+                    "propertyDetails.peopleResponsible.freeholders.updateLink",
                 ),
             )
 
@@ -311,11 +311,10 @@ class PropertyDetailsViewModelTests {
                     messageSource = mockMessageSource,
                 )
 
-            assertTrue(viewModel.showFreeholderSection)
-            assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
-            assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
-            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
-            assertEquals("#", viewModel.freeholderSectionUpdateUrl)
+            assertTrue(viewModel.showFreeholdersSection)
+            assertEquals(headingKey, viewModel.freeholdersHeadingKey)
+            assertEquals(linkTextKey, viewModel.freeholdersUpdateLinkTextKey)
+            assertTrue(viewModel.freeholdersUpdateLink != null)
         }
     }
 
@@ -330,7 +329,7 @@ class PropertyDetailsViewModelTests {
                 associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showFreeholderSection)
+        assertFalse(viewModel.showFreeholdersSection)
     }
 
     @Test
@@ -343,7 +342,7 @@ class PropertyDetailsViewModelTests {
                 associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showFreeholderSection)
+        assertFalse(viewModel.showFreeholdersSection)
     }
 
     @Test
@@ -406,7 +405,7 @@ class PropertyDetailsViewModelTests {
                     associatedPartiesEnabled = false,
                 )
 
-            assertFalse(viewModel.showFreeholderSection)
+            assertFalse(viewModel.showFreeholdersSection)
         }
 
         @Test
