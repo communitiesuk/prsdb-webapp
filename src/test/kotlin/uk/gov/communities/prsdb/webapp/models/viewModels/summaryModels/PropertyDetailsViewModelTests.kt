@@ -165,6 +165,7 @@ class PropertyDetailsViewModelTests {
         assertTrue(ineligibleViewModel.freeholderSummaryCards.isEmpty())
         assertFalse(disabledFeatureViewModel.showFreeholdersSection)
         assertNull(disabledFeatureViewModel.freeholdersUpdateLink)
+        assertTrue(disabledFeatureViewModel.freeholderSummaryCards.isEmpty())
     }
 
     @Test
