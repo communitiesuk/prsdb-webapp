@@ -7,12 +7,15 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
+import org.hibernate.envers.Audited
+import org.hibernate.envers.RelationTargetAuditMode
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("0")
+@Audited
 class IndividualLandlord() : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
@@ -20,6 +23,7 @@ class IndividualLandlord() : Landlord() {
 
     @OneToOne
     @JoinColumn(name = "individual_subject_identifier", unique = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     lateinit var baseUser: PrsdbUser
         private set
 
@@ -34,6 +38,7 @@ class IndividualLandlord() : Landlord() {
 
     @ManyToOne
     @JoinColumn(name = "individual_address_id")
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     override lateinit var address: Address
 
     @Column(name = "individual_country_of_residence")

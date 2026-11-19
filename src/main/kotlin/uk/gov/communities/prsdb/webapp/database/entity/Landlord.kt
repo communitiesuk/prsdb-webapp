@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
+import org.hibernate.envers.Audited
+import org.hibernate.envers.RelationTargetAuditMode
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import java.time.LocalDate
 import java.time.MonthDay
@@ -20,6 +22,7 @@ import java.time.MonthDay
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "landlord_type", discriminatorType = DiscriminatorType.INTEGER)
+@Audited
 // Hibernate creates subclass proxies for this inheritance root, so it and its persistent getters must remain open.
 abstract class Landlord : ModifiableAuditableEntity() {
     @get:Transient
@@ -37,6 +40,7 @@ abstract class Landlord : ModifiableAuditableEntity() {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "registration_number_id", nullable = false, unique = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     open lateinit var registrationNumber: RegistrationNumber
         protected set
 
