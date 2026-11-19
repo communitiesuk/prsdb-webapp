@@ -22,7 +22,7 @@ private fun freeholderAddressUrlPath(
     return "$route/${FreeholderAddressTask.ROUTE_SEGMENT}/$stepRouteSegment"
 }
 
-class FreeholderLookupAddressFormPagePropertyUpdate(
+class FreeholderLookupAddressFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : LookupAddressFormPage(
@@ -30,7 +30,7 @@ class FreeholderLookupAddressFormPagePropertyUpdate(
         freeholderAddressUrlPath(urlArguments["propertyOwnershipId"]!!.toLong(), LookupAddressStep.ROUTE_SEGMENT),
     )
 
-class FreeholderSelectAddressFormPagePropertyUpdate(
+class FreeholderSelectAddressFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : SelectAddressFormPage(
@@ -38,7 +38,7 @@ class FreeholderSelectAddressFormPagePropertyUpdate(
         freeholderAddressUrlPath(urlArguments["propertyOwnershipId"]!!.toLong(), SelectAddressStep.ROUTE_SEGMENT),
     )
 
-class FreeholderManualAddressFormPagePropertyUpdate(
+class FreeholderManualAddressFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : ManualAddressFormPage(

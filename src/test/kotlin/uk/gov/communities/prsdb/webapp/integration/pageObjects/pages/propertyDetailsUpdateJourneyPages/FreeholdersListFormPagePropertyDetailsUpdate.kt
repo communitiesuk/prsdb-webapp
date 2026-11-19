@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.P
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SummaryCardListFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 
-class FreeholdersListFormPagePropertyUpdate(
+class FreeholdersListFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : SummaryCardListFormBasePage(
@@ -23,7 +23,7 @@ class FreeholdersListFormPagePropertyUpdate(
         get() = page.locator(".govuk-summary-card__action:has-text('Remove')").count()
 }
 
-class FreeholderProvideDetailsFormPagePropertyUpdate(
+class FreeholderProvideDetailsFormPagePropertyDetailsUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : PageWithYesNoRadios(
