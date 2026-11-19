@@ -111,6 +111,20 @@ If a migration inserts reference data that tests rely on, add that table to `PRE
 A migration that renames a preserved table must update `PRESERVED_TABLES` too, or the renamed table will be
 truncated. `IntegrationTestHelperTests` covers this.
 
+### Audited Entities (Envers)
+
+Landlord and property record entities are annotated `@Audited` (Hibernate Envers). Each has a `<table>_aud` table
+holding one row per revision, linked to `audit_revision` (time, One Login subject identifier, letting agent access id).
+
+- When adding, renaming or retyping a column on an audited table, make the same change to its `_aud` table in the
+  same migration. Schema validation (`ddl-auto: validate`) fails at startup if they diverge.
+- Relations from an audited entity to a non-audited entity need
+  `@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)`; non-audited collections and DB-generated
+  columns need `@NotAudited`.
+- Secrets (tokens, password hashes) are `@NotAudited`.
+- Envers only sees changes made through Hibernate. Bulk JPQL updates, native SQL and DB `ON DELETE CASCADE` are not
+  audited, so delete audited child rows through JPA (e.g. `orphanRemoval`).
+
 ## Search with Trigrams
 - Use `pg_trgm` extension for fuzzy text search
 - See existing search implementations for patterns
