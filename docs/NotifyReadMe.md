@@ -11,6 +11,7 @@ Follow [Notify's formatting guidance for emails and letters](https://www.notific
 when writing markdown templates. Notify supports a limited set of Markdown features, and support differs between emails and letters:
 - Use `# Heading` for headings in both emails and letters. `## Subheading` is supported for emails, not letters.
 - Both support bullet points and numbered steps.
+- Use `^ Inset text` for the grey sidebar in emails; Inset text is not supported in letters.
 - Use `***` on its own line to insert a page break in a letter.
 - Bold, italics and underlined text are not supported.
 

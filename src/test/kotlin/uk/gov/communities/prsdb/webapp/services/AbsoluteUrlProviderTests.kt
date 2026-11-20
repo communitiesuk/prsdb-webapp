@@ -138,5 +138,6 @@ class AbsoluteUrlProviderTests {
     private fun createProvider(
         landlordBaseUrl: String = "https://example.test/landlord",
         localCouncilBaseUrl: String = "https://example.test/local-council",
-    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl)
+        gdsStartPageUrl: String = "https://example.test/gds-start-page",
+    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl, gdsStartPageUrl)
 }
