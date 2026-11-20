@@ -39,7 +39,7 @@ class LettingAgentAccessInterceptor(
             journeyId?.let { lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
                 ?: return redirectToInvalidLink(response)
 
-        return allowIfTokenValid(token, response)
+        return allowIfTokenValid(token, request, response)
     }
 
     // Property-details pages carry the token in the URL and require the session to have been authorised for it.
@@ -49,7 +49,7 @@ class LettingAgentAccessInterceptor(
     ): Boolean {
         val token = extractToken(request.requestURI) ?: return redirectToInvalidLink(response)
 
-        if (!allowIfTokenValid(token, response)) {
+        if (!allowIfTokenValid(token, request, response)) {
             return false
         }
 
@@ -61,13 +61,17 @@ class LettingAgentAccessInterceptor(
         return false
     }
 
-    // Returns true if the token is valid, so the request may proceed. Otherwise it prunes the token from the
-    // session's authorised tokens, redirects to the invalid-link page, and returns false.
+    // Returns true if the token is valid, so the request may proceed, and records the letting agent access on the
+    // request so that audit revisions can attribute changes to it. Otherwise it prunes the token from the session's
+    // authorised tokens, redirects to the invalid-link page, and returns false.
     private fun allowIfTokenValid(
         token: String,
+        request: HttpServletRequest,
         response: HttpServletResponse,
     ): Boolean {
-        if (lettingAgentAccessService.getTokenIsValid(token)) {
+        val accessId = lettingAgentAccessService.getAccessIdForTokenOrNull(token)
+        if (accessId != null) {
+            request.setAttribute(LETTING_AGENT_ACCESS_ID_ATTRIBUTE, accessId)
             return true
         }
         lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
@@ -98,5 +102,7 @@ class LettingAgentAccessInterceptor(
     companion object {
         private const val PROPERTY_DETAILS_ROUTE_PREFIX =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/"
+
+        const val LETTING_AGENT_ACCESS_ID_ATTRIBUTE = "lettingAgentAccessId"
     }
 }
