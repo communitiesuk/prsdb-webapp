@@ -24,8 +24,7 @@ class DelegateToLettingAgentEmailService(
     private val cancelLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>,
     private val invitationEmailService: EmailNotificationService<DelegateToLettingAgentInvitationEmail>,
     private val invitationWithDeadlineEmailService: EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>,
-    private val propertyDeactivatedLettingAgentNotificationEmailService:
-        EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
+    private val lettingAgentPropertyDeactivatedEmailService: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
     private val currentUserService: CurrentUserService,
 ) {
     fun sendDelegationEmailToLandlords(
@@ -146,7 +145,7 @@ class DelegateToLettingAgentEmailService(
         propertyOwnership: PropertyOwnership,
         lettingAgentEmail: String,
     ) {
-        propertyDeactivatedLettingAgentNotificationEmailService.sendEmail(
+        lettingAgentPropertyDeactivatedEmailService.sendEmail(
             lettingAgentEmail,
             LettingAgentPropertyDeactivatedNotificationEmail(
                 propertyAddress = propertyOwnership.address.toMultiLineAddress(),
