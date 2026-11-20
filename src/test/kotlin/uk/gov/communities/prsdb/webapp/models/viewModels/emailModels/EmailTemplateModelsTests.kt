@@ -377,8 +377,10 @@ class EmailTemplateModelsTests {
                         propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
                         propertyRecordUrl = "https://example.com/property",
                         propertyRegistrationNumber = "P-GD47-39FX",
+                        landlordReactivated = true,
                     ),
                     "/emails/JointLandlordInvitationAccepted.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
@@ -643,6 +645,29 @@ class EmailTemplateModelsTests {
                 modelHashMap.keys.single { key -> key == parameter }
             }
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `joint landlord invitation accepted email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        // Arrange
+        val email =
+            JointLandlordInvitationAcceptedEmail(
+                recipientName = "Jill",
+                propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
+                propertyRecordUrl = "https://example.com/property",
+                propertyRegistrationNumber = "P-GD47-39FX",
+                landlordReactivated = landlordReactivated,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedPersonalisation, hashMap["landlordReactivated"])
     }
 
     @ParameterizedTest

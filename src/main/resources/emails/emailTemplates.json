@@ -240,8 +240,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
   },
   {
-    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
-    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "test_id": "227a40c5-f571-4869-a3cf-61a9a0cfd68e",
+    "prod_id": "72c37078-c575-4c83-8685-1951fe447b90",
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’re now a registered landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
