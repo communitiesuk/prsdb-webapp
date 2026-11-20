@@ -222,19 +222,19 @@ class PropertyComplianceService(
 
     @Transactional
     fun saveReactivationComplianceData(
-        propertyOwnershipId: Long,
+        propertyOwnership: PropertyOwnership,
         gasSafety: GasSafetyDetailsDataModel?,
         electricalSafety: ElectricalSafetyDetailsDataModel?,
         epc: EpcDetailsDataModel?,
     ) {
-        val record = getComplianceForProperty(propertyOwnershipId)
+        val record = getComplianceForProperty(propertyOwnership.id)
         gasSafety?.let { setGasSafety(record, it) }
         electricalSafety?.let { setElectricalSafety(record, it) }
         epc?.let { setEpc(record, it) }
         propertyComplianceRepository.save(record)
 
         updateFileUploadVirusScanningCallbacks(
-            propertyOwnershipId = propertyOwnershipId,
+            propertyOwnershipId = propertyOwnership.id,
             gasSafetyCertUploadIds = gasSafety?.uploadIds ?: emptyList(),
             electricalSafetyCertUploadIds = electricalSafety?.uploadIds ?: emptyList(),
             electricalCertType = electricalSafety?.certType,

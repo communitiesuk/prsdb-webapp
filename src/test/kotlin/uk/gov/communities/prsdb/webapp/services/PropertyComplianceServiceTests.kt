@@ -702,7 +702,7 @@ class PropertyComplianceServiceTests {
             }
 
         @Test
-        fun `only updates the gas safety details when only they are provided, without sending any emails`() {
+        fun `updates the gas safety details and leaves the others unchanged when only gas safety is provided, without sending emails`() {
             // Arrange
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
             whenever(fileUploadRepository.getReferenceById(10L))
@@ -711,7 +711,7 @@ class PropertyComplianceServiceTests {
 
             // Act
             propertyComplianceService.saveReactivationComplianceData(
-                propertyOwnershipId = propertyOwnershipId,
+                propertyOwnership = mockPropertyOwnership,
                 gasSafety = GasSafetyDetailsDataModel(hasGasSupply = true, issueDate = issueDate, uploadIds = listOf(10L)),
                 electricalSafety = null,
                 epc = null,
@@ -739,7 +739,7 @@ class PropertyComplianceServiceTests {
 
             // Act
             propertyComplianceService.saveReactivationComplianceData(
-                propertyOwnershipId = propertyOwnershipId,
+                propertyOwnership = mockPropertyOwnership,
                 gasSafety = null,
                 electricalSafety =
                     ElectricalSafetyDetailsDataModel(

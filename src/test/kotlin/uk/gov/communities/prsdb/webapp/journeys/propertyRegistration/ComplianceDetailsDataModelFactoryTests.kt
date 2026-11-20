@@ -102,8 +102,11 @@ class ComplianceDetailsDataModelFactoryTests {
             // Arrange
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
 
-            // Act & Assert
-            assertThrows<IllegalStateException> { factory.fromGasSafetyDetailState(mockDetailsTask) }
+            // Act
+            val exception = assertThrows<IllegalStateException> { factory.fromGasSafetyDetailState(mockDetailsTask) }
+
+            // Assert
+            assertEquals("Gas safety can only be provided later when registering a property", exception.message)
         }
     }
 
@@ -175,8 +178,11 @@ class ComplianceDetailsDataModelFactoryTests {
             // Arrange
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
 
-            // Act & Assert
-            assertThrows<IllegalStateException> { factory.fromElectricalSafetyDetailState(mockDetailsTask) }
+            // Act
+            val exception = assertThrows<IllegalStateException> { factory.fromElectricalSafetyDetailState(mockDetailsTask) }
+
+            // Assert
+            assertEquals("Electrical safety can only be provided later when registering a property", exception.message)
         }
     }
 
@@ -261,8 +267,11 @@ class ComplianceDetailsDataModelFactoryTests {
             // Arrange
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
 
-            // Act & Assert
-            assertThrows<IllegalStateException> { factory.fromEpcDetailState(mockDetailsTask) }
+            // Act
+            val exception = assertThrows<IllegalStateException> { factory.fromEpcDetailState(mockDetailsTask) }
+
+            // Assert
+            assertEquals("The EPC can only be provided later when registering a property", exception.message)
         }
 
         private fun stubFormSteps(
