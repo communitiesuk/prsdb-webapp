@@ -54,7 +54,7 @@ confirmLandlordForProperty:
   successBanner:
     title: Success
     heading: Account created
-    body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."
+    body: "Your landlord number is <strong>{0}</strong>. We’ve sent this to you in an email."
 rejectionConfirmation:
   pageTitle: Joint landlord invitation rejected
   banner:
