@@ -36,6 +36,8 @@ const val INTERNATIONAL_ADDRESSES = "pdjb-1878-international-addresses"
 
 const val PASSPHRASE_SMS = "pdjb-2227-passphrase-sms"
 
+const val PASSPHRASE_EMAIL = "pdjb-2227-passphrase-email"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -52,4 +54,5 @@ val featureFlagNames =
         ACTIVE_INACTIVE,
         INTERNATIONAL_ADDRESSES,
         PASSPHRASE_SMS,
+        PASSPHRASE_EMAIL,
     )

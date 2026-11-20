@@ -27,6 +27,9 @@ class NotifyEmailDeliveryService(
         val emailParameters = email.toHashMap()
         try {
             val idValue = notifyIdService.getNotifyIdValue(email.template)
+            if (idValue.isBlank()) {
+                throw PersistentEmailSendException("No Notify template ID is configured for ${email.template}. No email was sent.")
+            }
             notificationClient.sendEmail(idValue, recipientAddress, emailParameters, null)
         } catch (notifyException: NotificationClientException) {
             throwEmailSendException(notifyException)
