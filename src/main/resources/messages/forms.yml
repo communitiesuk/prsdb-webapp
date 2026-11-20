@@ -445,6 +445,10 @@ update:
   checkPropertyManager:
     pageTitle: Check your property manager answers
     summaryName: You have updated the property manager
+  checkOwnership:
+    pageTitle: Check your ownership answers
+    subheading: You’ve updated the property’s ownership
+    insetText: We’ll notify anyone you add.
   checkHouseholdsAndTenants:
     pageTitle: Check your households and tenants answers
   checkRentIncludesBills:

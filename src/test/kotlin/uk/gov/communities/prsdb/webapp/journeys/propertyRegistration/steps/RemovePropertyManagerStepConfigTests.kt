@@ -82,7 +82,7 @@ class RemovePropertyManagerStepConfigTests {
                 "fieldSetHint" to "registerProperty.propertyManager.remove.fieldSetHint",
                 "optionalFieldSetHeadingParam" to "Jerry Mouse",
                 "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-                "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+                "submitButtonText" to "forms.buttons.saveAndContinue",
                 "showSectionHeader" to true,
             ),
             content,
