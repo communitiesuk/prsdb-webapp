@@ -50,6 +50,39 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Test
+    fun `freeholder update list is pre-populated with all existing freeholders`(page: Page) {
+        val existingFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        freeholderRepository.saveAll(
+            listOf(
+                Freeholder(
+                    propertyOwnership = existingFreeholder.propertyOwnership,
+                    name = "Email Freeholder",
+                    email = "existing@example.com",
+                ),
+                Freeholder(
+                    propertyOwnership = existingFreeholder.propertyOwnership,
+                    name = "Postal Freeholder",
+                ),
+            ),
+        )
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("You’ve added 3 freeholders")
+        assertEquals(3, page.locator(".govuk-summary-card").count())
+        assertThat(freeholdersListPage.getSummaryCard("Email Freeholder")).containsText("existing@example.com")
+        assertThat(freeholdersListPage.getSummaryCard("Postal Freeholder")).containsText(
+            "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+        )
+        assertThat(freeholdersListPage.getSummaryCard("Unknown freeholder")).containsText(
+            "You told us there was another freeholder, but you cannot currently provide their details. " +
+                "Return and add these details when you can.",
+        )
+    }
+
+    @Test
     fun `landlord can add email, postal-address, and unknown freeholders in the non-joint update journey`(page: Page) {
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
