@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Browser
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -356,6 +358,59 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         freeholdersListPage.submit()
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(initialFreeholderCount, propertyDetailsPage.freeholderCards.size)
+    }
+
+    @Test
+    fun `resuming an abandoned freeholder update after another journey adds a freeholder discards earlier progress`(
+        page: Page,
+        browser: Browser,
+    ) {
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Unsaved Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
+        FreeholderEmailFormPagePropertyRegistration(page).submitEmail("unsaved@example.com")
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.getSummaryCard("Unsaved Freeholder").title).hasText("Unsaved Freeholder")
+
+        browser.newContext().use { otherContext ->
+            val otherPage = otherContext.newPage()
+            val otherPropertyDetailsPage = Navigator(otherPage, port).goToPropertyDetailsLandlordView(propertyOwnershipId)
+            otherPropertyDetailsPage.tabs.goToPeopleResponsible()
+            otherPropertyDetailsPage.freeholderUpdateLink.clickAndWait()
+
+            assertPageIs(otherPage, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+            assertPageIs(otherPage, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+            FreeholderNameFormPagePropertyRegistration(otherPage).submitName("Saved Freeholder")
+            FreeholderContactTypeFormPagePropertyRegistration(otherPage).submitContactType(FreeholderContactType.EMAIL)
+            FreeholderEmailFormPagePropertyRegistration(otherPage).submitEmail("saved@example.com")
+            assertPageIs(otherPage, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
+
+            val updatedPropertyDetailsPage = assertPageIs(otherPage, PropertyDetailsPageLandlordView::class, urlArguments)
+            assertEquals(
+                listOf("Saved Freeholder", "Unknown freeholder"),
+                updatedPropertyDetailsPage.freeholderCards.map { it.title.getText() }.sorted(),
+            )
+        }
+
+        propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        assertEquals(2, page.locator(".govuk-summary-card").count())
+        assertThat(freeholdersListPage.getSummaryCard("Saved Freeholder")).containsText("saved@example.com")
+        assertThat(freeholdersListPage.getSummaryCard("Unknown freeholder").title).hasText("Unknown freeholder")
+        freeholdersListPage.submit()
+
+        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(
+            listOf("Saved Freeholder", "Unknown freeholder"),
+            propertyDetailsPage.freeholderCards.map { it.title.getText() }.sorted(),
+        )
     }
 
     @Test
