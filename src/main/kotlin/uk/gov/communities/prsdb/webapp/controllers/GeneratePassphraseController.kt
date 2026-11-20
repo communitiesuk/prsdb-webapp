@@ -18,8 +18,8 @@ import uk.gov.communities.prsdb.webapp.constants.GENERATE_PASSPHRASE_PATH_SEGMEN
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_FOR_SMS
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.exceptions.PersistentSmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.TransientSmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.dataModels.PendingPassphrase
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SendPassphraseSmsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.PassphraseSms
@@ -93,12 +93,15 @@ class GeneratePassphraseController(
                 smsNotificationService.sendSms(phoneNumber, PassphraseSms(passphrase))
                 redirectAttributes.addFlashAttribute("recipient", phoneNumber)
                 "generatePassphrase.sms.accepted"
-            } catch (exception: TransientSmsSendException) {
-                logger.warn("Passphrase SMS was not accepted by Notify", exception)
-                "generatePassphrase.sms.failed"
-            } catch (exception: PersistentSmsSendException) {
-                logger.warn("Passphrase SMS could not be confirmed", exception)
-                "generatePassphrase.sms.unknown"
+            } catch (exception: SmsSendException) {
+                logger.warn("Passphrase SMS submission failed: {}", exception.reason, exception)
+                when (exception.reason) {
+                    SmsSendFailureReason.INVALID_REQUEST -> "generatePassphrase.sms.invalid"
+                    SmsSendFailureReason.TECHNICAL -> "generatePassphrase.sms.technical"
+                    SmsSendFailureReason.DAILY_LIMIT -> "generatePassphrase.sms.dailyLimit"
+                    SmsSendFailureReason.MINUTE_LIMIT -> "generatePassphrase.sms.minuteLimit"
+                    SmsSendFailureReason.UNKNOWN -> "generatePassphrase.sms.unknown"
+                }
             }
         redirectAttributes.addFlashAttribute("smsStatus", status)
         redirectAttributes.addFlashAttribute("attemptedPassphrase", passphrase)

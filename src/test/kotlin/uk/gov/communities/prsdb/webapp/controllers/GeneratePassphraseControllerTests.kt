@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
@@ -24,8 +25,8 @@ import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePassphraseController.Companion.GENERATE_PASSPHRASE_URL
-import uk.gov.communities.prsdb.webapp.exceptions.PersistentSmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.TransientSmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SendPassphraseSmsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.PassphraseSms
 import uk.gov.communities.prsdb.webapp.services.PassphraseService
@@ -147,7 +148,7 @@ class GeneratePassphraseControllerTests(
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["sms.failed", "sms.unknown"])
+    @ValueSource(strings = ["sms.invalid", "sms.technical", "sms.dailyLimit", "sms.minuteLimit", "sms.unknown"])
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `failed or uncertain SMS submissions do not render a success page`(outcome: String) {
         mvc.get(GENERATE_PASSPHRASE_URL) {
@@ -159,6 +160,8 @@ class GeneratePassphraseControllerTests(
             content {
                 string(containsString("role=\"status\""))
                 string(not(containsString("govuk-notification-banner--success")))
+                string(not(containsString("Use this passphrase in a letter")))
+                string(not(containsString("Send text message")))
             }
         }
 
@@ -283,7 +286,7 @@ class GeneratePassphraseControllerTests(
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `sendSms rejects resubmitting the same form after an uncertain failure`() {
         val (session, token) = generateSmsForm()
-        doThrow(PersistentSmsSendException("Unknown outcome"))
+        doThrow(SmsSendException(SmsSendFailureReason.UNKNOWN, "Unknown outcome"))
             .whenever(smsNotificationService)
             .sendSms(any(), any())
 
@@ -309,11 +312,22 @@ class GeneratePassphraseControllerTests(
         verify(smsNotificationService).sendSms(any(), any())
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource(
+        "INVALID_REQUEST, invalid, Check the telephone number",
+        "TECHNICAL, technical, Contact support",
+        "DAILY_LIMIT, dailyLimit, sent again tomorrow",
+        "MINUTE_LIMIT, minuteLimit, Wait a short time",
+        "UNKNOWN, unknown, Ask the landlord if it arrives",
+    )
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `sendSms reports a temporary rejection without retrying`() {
+    fun `sendSms reports the reason without retrying`(
+        reason: SmsSendFailureReason,
+        status: String,
+        guidance: String,
+    ) {
         val (session, token) = generateSmsForm()
-        doThrow(TransientSmsSendException("Rate limited"))
+        doThrow(SmsSendException(reason, "Simulated failure"))
             .whenever(smsNotificationService)
             .sendSms(any(), any())
 
@@ -324,10 +338,18 @@ class GeneratePassphraseControllerTests(
                 param("phoneNumber", "07400123456")
                 param("passphraseToken", token)
             }.andExpect {
-                flash { attribute("smsStatus", "generatePassphrase.sms.failed") }
+                flash {
+                    attribute("smsStatus", "generatePassphrase.sms.$status")
+                    attribute("attemptedPassphrase", "time anything costume")
+                }
             }
 
         verify(smsNotificationService).sendSms(eq("07400123456"), any())
+        mvc.get(GENERATE_PASSPHRASE_URL) {
+            flashAttrs = mapOf("attemptedPassphrase" to "time anything costume", "smsStatus" to "generatePassphrase.sms.$status")
+        }.andExpect {
+            content { string(containsString(guidance)) }
+        }
     }
 
     @Test

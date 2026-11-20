@@ -7,10 +7,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.system.CapturedOutput
 import org.springframework.boot.test.system.OutputCaptureExtension
-import uk.gov.communities.prsdb.webapp.exceptions.PersistentSmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.TransientSmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @ExtendWith(OutputCaptureExtension::class)
@@ -35,22 +36,24 @@ class SmsNotificationStubServiceTests {
     }
 
     @Test
-    fun `sendSms simulates persistent failures for the configured number`() {
+    fun `sendSms simulates technical failures for the configured number`() {
         // Arrange
         val service = SmsNotificationStubService<SmsTemplateModel>()
         service.persistentExceptionPhoneNumber = "+447700900123"
 
         // Act & Assert
-        assertThrows<PersistentSmsSendException> { service.sendSms("+447700900123", mock()) }
+        val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", mock()) }
+        assertEquals(SmsSendFailureReason.TECHNICAL, exception.reason)
     }
 
     @Test
-    fun `sendSms simulates transient failures for the configured number`() {
+    fun `sendSms simulates rate limiting for the configured number`() {
         // Arrange
         val service = SmsNotificationStubService<SmsTemplateModel>()
         service.transientExceptionPhoneNumber = "+447700900123"
 
         // Act & Assert
-        assertThrows<TransientSmsSendException> { service.sendSms("+447700900123", mock()) }
+        val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", mock()) }
+        assertEquals(SmsSendFailureReason.MINUTE_LIMIT, exception.reason)
     }
 }

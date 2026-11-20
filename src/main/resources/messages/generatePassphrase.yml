@@ -22,6 +22,9 @@ sms:
       invalid: Enter a valid mobile telephone number
   send: Send text message
   accepted: The text message has been submitted to {0,,recipient}.
-  failed: The text message could not be sent. Generate a new passphrase before trying again.
-  unknown: We could not confirm whether the text message was sent. You may need to send again.
+  invalid: The text message was not submitted. Check the telephone number. If it is correct, contact support.
+  technical: The text message was not submitted because of a technical problem. Contact support.
+  dailyLimit: The text message was not submitted. The daily text message limit has been reached. Text messages can be sent again tomorrow.
+  minuteLimit: The text message was not submitted. Wait a short time, then generate a new passphrase before trying again.
+  unknown: We could not confirm whether the text message was submitted. Ask the landlord if it arrives. If it does not arrive after a short wait, generate a new passphrase and try again. If an earlier message arrives later, use only the newest passphrase.
   expired: That passphrase is no longer available to send. A new passphrase has been generated.

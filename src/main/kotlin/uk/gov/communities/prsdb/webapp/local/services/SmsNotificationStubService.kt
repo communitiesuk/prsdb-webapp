@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.exceptions.PersistentSmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.TransientSmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
 import uk.gov.communities.prsdb.webapp.services.SmsNotificationService
 
@@ -25,10 +25,16 @@ class SmsNotificationStubService<SmsModel : SmsTemplateModel> : SmsNotificationS
         sms: SmsModel,
     ) {
         if (phoneNumber == persistentExceptionPhoneNumber) {
-            throw PersistentSmsSendException("SMS messages sent to $persistentExceptionPhoneNumber always persistently fail")
+            throw SmsSendException(
+                SmsSendFailureReason.TECHNICAL,
+                "SMS messages to $persistentExceptionPhoneNumber simulate technical failure",
+            )
         }
         if (phoneNumber == transientExceptionPhoneNumber) {
-            throw TransientSmsSendException("SMS messages sent to $transientExceptionPhoneNumber always transiently fail")
+            throw SmsSendException(
+                SmsSendFailureReason.MINUTE_LIMIT,
+                "SMS messages to $transientExceptionPhoneNumber simulate per-minute rate limiting",
+            )
         }
 
         val consoleString =
