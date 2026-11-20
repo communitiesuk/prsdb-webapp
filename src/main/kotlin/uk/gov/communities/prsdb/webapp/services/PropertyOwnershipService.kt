@@ -67,7 +67,7 @@ class PropertyOwnershipService(
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
     private val landlordRepository: LandlordRepository,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -574,7 +574,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
         landlord.markAsHavingRegisteredProperty()
         landlordRepository.save(landlord)
-        activeInactiveService.reactivateLandlordIfInactive(landlord)
+        activationService.reactivateLandlordIfInactive(landlord)
     }
 
     @Transactional

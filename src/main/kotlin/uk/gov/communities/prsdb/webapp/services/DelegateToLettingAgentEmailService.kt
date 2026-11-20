@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import java.util.UUID
 
 @PrsdbWebService
@@ -23,6 +24,8 @@ class DelegateToLettingAgentEmailService(
     private val cancelLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>,
     private val invitationEmailService: EmailNotificationService<DelegateToLettingAgentInvitationEmail>,
     private val invitationWithDeadlineEmailService: EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>,
+    private val propertyDeactivatedLettingAgentNotificationEmailService:
+        EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
     private val currentUserService: CurrentUserService,
 ) {
     fun sendDelegationEmailToLandlords(
@@ -133,6 +136,19 @@ class DelegateToLettingAgentEmailService(
         cancelLettingAgentNotificationEmailService.sendEmail(
             lettingAgentEmail,
             CancelDelegationLettingAgentNotificationEmail(
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+            ),
+        )
+    }
+
+    fun sendLettingAgentPropertyDeactivatedEmail(
+        propertyOwnership: PropertyOwnership,
+        lettingAgentEmail: String,
+    ) {
+        propertyDeactivatedLettingAgentNotificationEmailService.sendEmail(
+            lettingAgentEmail,
+            LettingAgentPropertyDeactivatedNotificationEmail(
                 propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
             ),

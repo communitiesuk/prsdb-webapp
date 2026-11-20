@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService.RegisteredUserDetails
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -61,6 +62,10 @@ class DelegateToLettingAgentEmailServiceTests {
         EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>
 
     @Mock
+    private lateinit var mockPropertyDeactivatedLettingAgentNotificationEmailService:
+        EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
+
+    @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
     private val propertyOwnershipId = 123L
@@ -82,6 +87,7 @@ class DelegateToLettingAgentEmailServiceTests {
                 mockCancelLettingAgentNotificationEmailService,
                 mockInvitationEmailService,
                 mockInvitationWithDeadlineEmailService,
+                mockPropertyDeactivatedLettingAgentNotificationEmailService,
                 mockCurrentUserService,
             )
     }
@@ -293,5 +299,20 @@ class DelegateToLettingAgentEmailServiceTests {
         assertEquals(propertyOwnership.address.singleLineAddress, captor.firstValue.singleLineAddress)
         verify(mockCancelLandlordConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockCancelJointLandlordNotificationEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendLettingAgentPropertyDeactivatedEmail sends the property deactivated email to the letting agent`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5)
+
+        emailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, agentEmail)
+
+        verify(mockPropertyDeactivatedLettingAgentNotificationEmailService).sendEmail(
+            agentEmail,
+            LettingAgentPropertyDeactivatedNotificationEmail(
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+            ),
+        )
     }
 }

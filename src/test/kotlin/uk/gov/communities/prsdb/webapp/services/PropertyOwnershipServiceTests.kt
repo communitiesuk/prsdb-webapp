@@ -133,7 +133,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockActivationService: ActivationService
 
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
@@ -2743,7 +2743,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
 
             // Assert
-            verify(mockActiveInactiveService).reactivateLandlordIfInactive(newLandlord)
+            verify(mockActivationService).reactivateLandlordIfInactive(newLandlord)
         }
     }
 

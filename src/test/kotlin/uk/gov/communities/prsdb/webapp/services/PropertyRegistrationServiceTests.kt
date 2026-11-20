@@ -110,7 +110,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPaymentRepository: PaymentRepository
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockActivationService: ActivationService
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -1979,7 +1979,7 @@ class PropertyRegistrationServiceTests {
         propertyRegistrationService.registerProperty(MockPropertyRegistrationData.createPropertyRegistrationDataModel())
 
         // Assert
-        verify(mockActiveInactiveService).reactivateLandlordIfInactive(landlord)
+        verify(mockActivationService).reactivateLandlordIfInactive(landlord)
     }
 
     private fun stubPropertyOwnershipCreation(

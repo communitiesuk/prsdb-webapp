@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 @JourneyFrameworkComponent
 class ConfirmDeactivationStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val deactivationService: DeactivationService,
     private val userToLandlordService: UserToLandlordService,
     private val currentUserService: CurrentUserService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -44,7 +44,7 @@ class ConfirmDeactivationStepConfig(
         val landlordWillBeDeactivated = isCurrentLandlordsLastActiveProperty(state.propertyOwnershipId)
         val currentUser = currentUserService.getRegisteredUserDetails()
 
-        activeInactiveService.deactivateProperty(state.propertyOwnershipId)
+        deactivationService.deactivateProperty(state.propertyOwnershipId)
 
         // TODO PDJB-1274: Update emails to account for other users in the org
         EmailHelper.sendEmailAndLogFailures("the property deactivation confirmation email for property ownership ${propertyOwnership.id}") {
@@ -73,7 +73,7 @@ class ConfirmDeactivationStepConfig(
 
     private fun isCurrentLandlordsLastActiveProperty(propertyOwnershipId: Long): Boolean {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        return !activeInactiveService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId)
+        return !deactivationService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId)
     }
 }
 

@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -100,7 +100,7 @@ class PropertyDeactivationJointLandlordJourneyTests :
     private lateinit var landlordRepository: LandlordRepository
 
     @Autowired
-    private lateinit var activeInactiveService: ActiveInactiveService
+    private lateinit var deactivationService: DeactivationService
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyDeactivationConfirmationEmail>
@@ -136,7 +136,7 @@ class PropertyDeactivationJointLandlordJourneyTests :
 
     @Test
     fun `deactivating the landlord's last active property shows the account section and deactivates the landlord`(page: Page) {
-        activeInactiveService.deactivateProperty(jointPropertyOwnershipId)
+        deactivationService.deactivateProperty(jointPropertyOwnershipId)
 
         val confirmPage = navigator.goToPropertyDeactivationConfirmPage(solePropertyOwnershipId)
         assertThat(confirmPage.landlordAccountHeading).isVisible()

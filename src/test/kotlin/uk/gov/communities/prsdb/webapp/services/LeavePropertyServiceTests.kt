@@ -49,7 +49,7 @@ class LeavePropertyServiceTests {
     private lateinit var mockCurrentUserService: CurrentUserService
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockDeactivationService: DeactivationService
 
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
@@ -220,7 +220,7 @@ class LeavePropertyServiceTests {
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
 
-        verify(mockActiveInactiveService).deactivateLandlordIfNoActiveProperties(landlord)
+        verify(mockDeactivationService).deactivateLandlordIfNoActiveProperties(landlord)
     }
 
     @Test
@@ -235,7 +235,7 @@ class LeavePropertyServiceTests {
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
         doAnswer { landlord.deactivate(LocalDate.now()) }
-            .whenever(mockActiveInactiveService)
+            .whenever(mockDeactivationService)
             .deactivateLandlordIfNoActiveProperties(landlord)
         whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(DASHBOARD_URL))
@@ -280,7 +280,7 @@ class LeavePropertyServiceTests {
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "Alice", email = "alice@example.com"))
         doAnswer { landlord.deactivate(LocalDate.now()) }
-            .whenever(mockActiveInactiveService)
+            .whenever(mockDeactivationService)
             .deactivateLandlordIfNoActiveProperties(landlord)
         whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
 

@@ -9,13 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
+import uk.gov.communities.prsdb.webapp.services.ActivationService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.time.LocalDate
 
-class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
+class ActivationAndDeactivationPersistenceTests : IntegrationTestWithMutableData(
+    "data-mockuser-landlord-with-sole-and-joint-properties.sql",
+) {
     @Autowired
-    private lateinit var activeInactiveService: ActiveInactiveService
+    private lateinit var activationService: ActivationService
+
+    @Autowired
+    private lateinit var deactivationService: DeactivationService
 
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -28,7 +34,7 @@ class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("da
 
     @Test
     fun `deactivating a jointly owned property deactivates only the landlord with no other active property`() {
-        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
 
         val property = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get()
         assertFalse(property.isActive)
@@ -41,10 +47,10 @@ class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("da
 
     @Test
     fun `reactivating a property reactivates its inactive landlords`() {
-        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
         assertFalse(landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get().isActive)
 
-        activeInactiveService.reactivateProperty(JOINT_PROPERTY_ID)
+        activationService.reactivateProperty(JOINT_PROPERTY_ID)
 
         assertTrue(propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().isActive)
         val reactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
@@ -54,11 +60,11 @@ class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("da
 
     @Test
     fun `reactivating a property leaves its already active landlords unchanged`() {
-        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
         val activeLandlordBefore = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
         assertTrue(activeLandlordBefore.isActive)
 
-        activeInactiveService.reactivateProperty(JOINT_PROPERTY_ID)
+        activationService.reactivateProperty(JOINT_PROPERTY_ID)
 
         val activeLandlordAfter = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
         assertTrue(activeLandlordAfter.isActive)
@@ -68,16 +74,16 @@ class ActiveInactiveServicePersistenceTests : IntegrationTestWithMutableData("da
 
     @Test
     fun `deactivating a landlord's last active property deactivates the landlord`() {
-        activeInactiveService.deactivateProperty(SOLE_PROPERTY_ID)
+        deactivationService.deactivateProperty(SOLE_PROPERTY_ID)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
 
-        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
         assertFalse(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
     }
 
     @Test
     fun `adding an inactive landlord to an active property reactivates the landlord`() {
-        activeInactiveService.deactivateProperty(JOINT_PROPERTY_ID)
+        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
         val inactiveLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
         assertFalse(inactiveLandlord.isActive)
 
