@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckEicrUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasCertUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicExpiryDateFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicIssueDateFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicrExpiryDateFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EpcExemptionFormPagePropertyReactivation
@@ -278,6 +280,27 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             issueDatePage.backLink.clickAndWait()
 
             assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `the EIC expiry date change link navigates to the expiry date page, which links back to check answers`(page: Page) {
+            featureFlagManager.disableFeature(EIC_ISSUE_DATE)
+            var checkAnswersPage =
+                navigator.skipToPropertyReactivationCheckAnswersPage(
+                    inactivePropertyOwnershipId,
+                    PropertyReactivationStateSessionBuilder.beforeCheckAnswersEicWithExpiryDateUploaded(),
+                )
+
+            checkAnswersPage.complianceSummaryList.eicExpiryDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, EicExpiryDateFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+
+            checkAnswersPage.complianceSummaryList.eicExpiryDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, EicExpiryDateFormPagePropertyReactivation::class, urlArguments)
+                .submitDate(PropertyRegistrationJourneyTests.validExpiryDate)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyReactivation::class, urlArguments).backLink.clickAndWait()
+            assertPageIs(page, EicExpiryDateFormPagePropertyReactivation::class, urlArguments)
         }
 
         @Test

@@ -62,6 +62,9 @@ class CheckAnswersPagePropertyReactivation(
         val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
         val meesExemptionRow = getRow("Registered exemption")
 
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        val eicExpiryDateRow = getRow("Expiry date")
+
         fun electricalCertDateRow(certificateType: CertificateType) =
             getRow(CheckElectricalSafetyAnswersSummaryList.certificateDateKey(certificateType))
     }

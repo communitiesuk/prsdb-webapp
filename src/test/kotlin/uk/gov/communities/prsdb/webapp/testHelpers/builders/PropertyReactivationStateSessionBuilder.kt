@@ -37,6 +37,13 @@ class PropertyReactivationStateSessionBuilder :
                 epc = { withNoEpcExempt() },
             )
 
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        fun beforeCheckAnswersEicWithExpiryDateUploaded() =
+            beforeCheckAnswersWith(
+                electricalSafety = { withEic().withEicExpiryDate().withEicUploads().withCheckElectricalSafetyAnswersComplete() },
+                epc = { withNoEpcExempt() },
+            )
+
         fun beforeCheckAnswersEicrUploaded() =
             beforeCheckAnswersWith(
                 electricalSafety = { withEicr().withEicrExpiryDate().withEicrUploads().withCheckElectricalSafetyAnswersComplete() },
