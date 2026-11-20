@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {chmod, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile} from 'node:fs/promises';
 import {spawn, spawnSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
@@ -30,10 +31,8 @@ const stages = [
   'offboardingJourneys',
 ];
 
-async function setup(t, {gradleExitCode = 0, gradleDelayMs = 0, readyFile} = {}) {
-  const sessionFiles = process.env.TMPDIR;
-  assert.ok(sessionFiles, 'TMPDIR must point to the private session workspace');
-  const directory = await mkdtemp(join(sessionFiles, 'nft-gatling-output-'));
+async function setup(t, {gradleExitCode = 0, gradleDelayMs = 0} = {}) {
+  const directory = await mkdtemp(join(process.env.RUNNER_TEMP || tmpdir(), 'nft-gatling-output-'));
   await chmod(directory, 0o700);
   t.after(() => rm(directory, {recursive: true, force: true}));
 
@@ -42,6 +41,7 @@ async function setup(t, {gradleExitCode = 0, gradleDelayMs = 0, readyFile} = {})
   const privateDirectory = join(directory, 'private-upload');
   const gradleArgs = join(directory, 'gradle-arguments.json');
   const awsCalls = join(directory, 'aws-calls.jsonl');
+  const readyFile = join(directory, 'gradle-ready');
   await mkdir(bin, {mode: 0o700});
   await mkdir(privateDirectory, {mode: 0o700});
 
@@ -112,7 +112,7 @@ copyFileSync(args[2], target);
       FAKE_GRADLE_DELAY_MS: String(gradleDelayMs),
       FAKE_GATLING_REPORT_MODE: 'valid',
       FAKE_SYMLINK_TARGET: join(directory, 'outside-report-file'),
-      FAKE_GRADLE_READY: readyFile ?? '',
+      FAKE_GRADLE_READY: '',
       FAKE_AWS_CALLS: awsCalls,
       FAKE_PRIVATE_DIRECTORY: privateDirectory,
       FAKE_AWS_UPLOAD_FAILURE: 'false',
@@ -268,11 +268,9 @@ test('failed private diagnostic upload fails an otherwise successful launch safe
 });
 
 test('aborted launch captures and uploads diagnostics before returning signal exit status', async t => {
-  const sessionFiles = process.env.TMPDIR;
-  assert.ok(sessionFiles, 'TMPDIR must point to the private session workspace');
-  const readyFile = join(sessionFiles, `nft-gatling-abort-ready-${process.pid}`);
-  t.after(() => rm(readyFile, {force: true}));
-  const state = await setup(t, {gradleDelayMs: 30000, readyFile});
+  const state = await setup(t, {gradleDelayMs: 30000});
+  const readyFile = state.readyFile;
+  state.env.FAKE_GRADLE_READY = readyFile;
   const child = spawn(process.execPath, [
     helperPath, 'basicJourneys', '--', './gradlew', 'gatlingRun', '--simulation', 'SyntheticSimulation',
   ], {cwd: state.directory, env: state.env, stdio: ['ignore', 'pipe', 'pipe']});
