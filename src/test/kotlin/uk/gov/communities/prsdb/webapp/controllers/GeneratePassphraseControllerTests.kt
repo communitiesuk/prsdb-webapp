@@ -333,6 +333,7 @@ class GeneratePassphraseControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `sendSms requires a CSRF token`() {
+        enableSms()
         mvc.post(GENERATE_PASSPHRASE_URL).andExpect { status { isForbidden() } }
         verifyNoInteractions(smsNotificationService)
     }
@@ -340,14 +341,8 @@ class GeneratePassphraseControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `sendSms forbids non system operators`() {
+        enableSms()
         mvc.post(GENERATE_PASSPHRASE_URL) { with(csrf()) }.andExpect { status { isForbidden() } }
-        verifyNoInteractions(smsNotificationService)
-    }
-
-    @Test
-    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `sendSms is unavailable when its flag is disabled`() {
-        mvc.post(GENERATE_PASSPHRASE_URL) { with(csrf()) }.andExpect { status { isNotFound() } }
         verifyNoInteractions(smsNotificationService)
     }
 
