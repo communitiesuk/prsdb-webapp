@@ -1,14 +1,20 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
+import kotlin.test.assertEquals
 
 class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -72,6 +78,27 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
             // Choose Manual Address
             noAddressFoundPage.form.submit()
             BasePage.assertPageIs(page, ManualAddressFormPageUpdateLandlordDetails::class)
+        }
+    }
+
+    @Nested
+    inner class InactiveLandlord : NestedIntegrationTestWithImmutableData("data-mockuser-inactive-landlord.sql") {
+        // TODO PDJB-2149: Remove this setup when the ACTIVE_INACTIVE flag is removed
+        @BeforeEach
+        fun enableActiveInactiveFlag() {
+            featureFlagManager.enableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Test
+        fun `An inactive landlord cannot reach a landlord record update page`(page: Page) {
+            val response =
+                navigator.navigate(
+                    "${UpdateLandlordPhoneNumberController.UPDATE_PHONE_NUMBER_ROUTE}/${PhoneNumberStep.ROUTE_SEGMENT}",
+                )
+
+            assertEquals(403, response?.status())
+            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            BaseComponent.assertThat(errorPage.heading).containsText("You do not have permission to access this page")
         }
     }
 }

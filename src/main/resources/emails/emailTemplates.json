@@ -23,20 +23,27 @@
   {
     "test_id": "52b635dd-2a57-4f90-a2ca-f2c3f84bd36c",
     "prod_id": "b04f9192-3c44-4877-b174-d396b658d493",
+    "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844",
+    "subject": "You have registered as a landlord",
+    "bodyLocation": "/emails/LandlordRegistrationConfirmationBefore844.md"
+  },
+  {
+    "test_id": "1a0b2de3-55ef-49b1-9d15-c3ad059aabcb",
+    "prod_id": "620ce926-2f48-4a67-a899-daa0b42d1c59",
     "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "You have registered as a landlord",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "3f121222-95c4-41c4-bd40-d923058c6f21",
-    "prod_id": "a20ab90c-451c-4f2e-be56-1a4d69ec5339",
+    "test_id": "d5a11670-e816-4a0f-a46f-8207b89d94b8",
+    "prod_id": "91d89d3b-c213-4dd7-893b-f9e8ceb8d843",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "b7baefef-634e-4bce-9d74-4ac4862a7f00",
-    "prod_id": "e8f2b6b5-53d5-430f-a8fa-8d1b63db4e36",
+    "test_id": "71714210-1f5a-42fe-bf01-cc5fb8007a02",
+    "prod_id": "98737797-3323-4254-9165-98255e0039c2",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION_WITH_PAYMENT",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmationWithPayment.md"
@@ -233,8 +240,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
   },
   {
-    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
-    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "test_id": "227a40c5-f571-4869-a3cf-61a9a0cfd68e",
+    "prod_id": "72c37078-c575-4c83-8685-1951fe447b90",
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’re now a registered landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
@@ -312,6 +319,13 @@
   {
     "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
     "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
+    "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844",
+    "subject": "Confirmation of landlord registration",
+    "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmationBefore844.md"
+  },
+  {
+    "test_id": "91f760ab-08b4-4aa0-8277-6df27cf366ee",
+    "prod_id": "59248af4-feef-4141-b71b-a1e45c21c66c",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Confirmation of landlord registration",
     "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"
@@ -448,5 +462,12 @@
     "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
     "subject": "A property registration payment needs checking",
     "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
+  },
+  {
+    "test_id": "df60db12-0141-4927-aa6a-a4fd1e28ad60",
+    "prod_id": "a59546df-b789-4dab-9883-a60c9d834c08",
+    "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
+    "subject": "Landlord account deactivated",
+    "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
   }
 ]

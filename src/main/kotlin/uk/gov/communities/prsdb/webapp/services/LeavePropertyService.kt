@@ -10,11 +10,10 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmationAccountDeactivated
-import kotlin.String
 
 @PrsdbWebService
 class LeavePropertyService(
@@ -58,7 +57,9 @@ class LeavePropertyService(
         val landlordWasDeactivated = !landlord.isActive
 
         TransactionHelper.runAfterTransactionCommits {
-            EmailHelper.sendEmailAndLogFailures("the leave property confirmation email for property ownership ${propertyOwnership.id}") {
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the leave property confirmation email for property ownership ${propertyOwnership.id}",
+            ) {
                 // TODO PDJB-2149: Remove the feature flag check when ACTIVE_INACTIVE is removed
                 if (landlordWasDeactivated && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
                     confirmationAccountDeactivatedEmailSender.sendEmail(
@@ -80,7 +81,9 @@ class LeavePropertyService(
                 }
             }
             // TODO: PDJB-1274: Update emails to account for other users in the org
-            EmailHelper.sendEmailAndLogFailures("the swap to individual nudge email for property ownership ${propertyOwnership.id}") {
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the swap to individual nudge email for property ownership ${propertyOwnership.id}",
+            ) {
                 swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
             }
         }

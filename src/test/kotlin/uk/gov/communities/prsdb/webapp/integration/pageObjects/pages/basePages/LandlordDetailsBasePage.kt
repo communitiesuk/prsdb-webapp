@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.InactiveLandlordNotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -15,6 +16,7 @@ abstract class LandlordDetailsBasePage(
 ) : BasePage(page, urlSegment) {
     open val tabs: LandlordDetailsTabs = LandlordDetailsTabs(page)
     val backLink = BackLink.default(page)
+    val inactiveLandlordNotificationBanner = InactiveLandlordNotificationBanner(page)
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
     val noRegisteredPropertiesMessage = Paragraph.byTestId(page, "no-registered-properties-msg")

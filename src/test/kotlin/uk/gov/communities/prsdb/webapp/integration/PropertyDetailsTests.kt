@@ -2,17 +2,23 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -38,36 +44,143 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     @Nested
     inner class PropertyDetailsLandlordView {
         @Test
-        fun `the property details page loads with the property details tab selected by default`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+        fun `the people responsible tab shows the saved freeholder as a read only card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
+            detailsPage.tabs.goToPeopleResponsible()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
+            assertThat(detailsPage.freeholderSection).containsText("Freeholders")
+            val freeholderCard = detailsPage.freeholderCards.single()
+            assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertEquals(0, freeholderCard.actionLinks.count())
         }
 
         @Test
-        fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`(page: Page) {
+        fun `the people responsible tab shows a freeholder update link`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
+                "href",
+                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/start",
+            )
+        }
+
+        @Test
+        fun `the people responsible tab shows the postal address note on a saved freeholder card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_JOINT_FREEHOLDERS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Casey Joint" }
+            assertThat(freeholderCard.bodyText).hasText(
+                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(freeholderCard.bodyText.locator("strong")).hasText("postal address")
+        }
+
+        @Test
+        fun `the people responsible tab shows the email address on a saved freeholder card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_JOINT_FREEHOLDERS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Jordan Joint" }
+            assertThat(freeholderCard).containsText("joint.freeholder@example.com")
+        }
+
+        @Test
+        fun `the people responsible tab shows saved superior landlords as read only cards`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).containsText("Other people in the property’s ownership chain")
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow).isHidden()
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+        }
+
+        @Test
+        fun `the people responsible tab shows a superior landlord update link`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasAttribute("href", "#")
+        }
+
+        @Test
+        fun `the people responsible tab shows the postal address note on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Robin Superior" }
+            assertThat(superiorLandlordCard.bodyText).hasText(
+                "A postal address was provided for this person in the ownership chain. " +
+                    "We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(superiorLandlordCard.bodyText.locator("strong")).hasText("postal address")
+        }
+
+        @Test
+        fun `the people responsible tab shows the email address on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Sam Superior" }
+            assertThat(superiorLandlordCard).containsText("superior.landlord@example.com")
+        }
+
+        @Test
+        fun `the people responsible tab shows a no row when there are no superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow.value).hasText("No")
+            assertEquals(0, detailsPage.superiorLandlordCards.size)
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasCount(0)
+        }
+
+        @Test
+        fun `the people responsible tab shows a change link on the no superior landlords row`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val row = detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(row.actions.firstActionLink.locator).hasAttribute("href", "#")
+        }
+
+        @Test
+        fun `the property details page loads with the property details tab selected by default`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+
+            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
+        }
+
+        @Test
+        fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "people-responsible")
+            assertEquals("people-responsible", detailsPage.tabs.activeTabPanelId)
         }
 
         @Test
-        fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`(page: Page) {
+        fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToComplianceInformation()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, detailsPage.tabs.activeTabPanelId)
         }
 
         @Test
-        fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
+        fun `when the landlord details tab is active clicking the property details tab shows property details tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
             detailsPage.tabs.goToPropertyDetails()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
+            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
         }
 
         @Test
@@ -106,7 +219,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `individual property shows invite text link and not invite button on landlord tab`(page: Page) {
+        fun `individual property shows invite text link and not invite button on landlord tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -116,7 +229,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `joint property with multiple landlords shows invite button on landlord tab`(page: Page) {
+        fun `joint property with multiple landlords shows invite button on landlord tab`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -126,7 +239,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `joint property with sole landlord shows mark as single landlord inset text on landlord tab and invite button`(page: Page) {
+        fun `joint property with sole landlord shows mark as single landlord inset text on landlord tab and invite button`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(13)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -143,7 +256,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class NotificationBanner {
             @Test
-            fun `is visible and includes correct messages when all certs are missing`(page: Page) {
+            fun `is visible and includes correct messages when all certs are missing`() {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
@@ -154,7 +267,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is visible and includes correct messages when all certs are expired`(page: Page) {
+            fun `is visible and includes correct messages when all certs are expired`() {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
@@ -163,7 +276,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
+            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`() {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
@@ -174,7 +287,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is not visible when all certs are compliant`(page: Page) {
+            fun `is not visible when all certs are compliant`() {
                 val propertyOwnershipId = 11
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
@@ -182,7 +295,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `includes a link to the compliance information tab`(page: Page) {
+            fun `includes a link to the compliance information tab`() {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
@@ -197,7 +310,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class ComplianceTab {
             @Test
-            fun `notification banner is visible when certs are expired`(page: Page) {
+            fun `notification banner is visible when certs are expired`() {
                 // Property 9: unoccupied, gas expired, EPC expired
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
                 detailsPage.tabs.goToComplianceInformation()
@@ -206,7 +319,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `gas safety card has certificate status row`(page: Page) {
+            fun `gas safety card has certificate status row`() {
                 // Property 37: has gas cert, electrical cert, and EPC
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
                 detailsPage.tabs.goToComplianceInformation()
@@ -215,7 +328,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `electrical safety card has certificate status row`(page: Page) {
+            fun `electrical safety card has certificate status row`() {
                 // Property 37: has gas cert, electrical cert, and EPC
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
                 detailsPage.tabs.goToComplianceInformation()
@@ -224,7 +337,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `epc card has certificate status row`(page: Page) {
+            fun `epc card has certificate status row`() {
                 // Property 9: has expired EPC
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
                 detailsPage.tabs.goToComplianceInformation()
@@ -233,7 +346,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `gas card shows a single provide-later row and hides the cert row`(page: Page) {
+            fun `gas card shows a single provide-later row and hides the cert row`() {
                 // Property 39: occupied, gas cert "provide later" (with deadline)
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
                 detailsPage.tabs.goToComplianceInformation()
@@ -246,7 +359,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class LandlordDetails {
             @Test
-            fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -256,7 +369,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the ownership answers are shown, omitting the rows for questions that were not asked`(page: Page) {
+            fun `the ownership answers are shown, omitting the rows for questions that were not asked`() {
                 // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, so freehold type is not asked
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToPeopleResponsible()
@@ -264,13 +377,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow).not().isVisible()
-                // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
-                    .hasAttribute("href", "#")
+                    .hasAttribute(
+                        "href",
+                        UpdateOwnershipController.getUpdateOwnershipRoute(1) + "/${InitialiseOwnershipUpdateStep.ROUTE_SEGMENT}",
+                    )
             }
 
             @Test
-            fun `the ownership answers include the freehold type for a freehold property`(page: Page) {
+            fun `the ownership answers include the freehold type for a freehold property`() {
                 // Property 37 is seeded with OwnershipType.SOLE_FREEHOLD, so all three rows are shown
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
                 detailsPage.tabs.goToPeopleResponsible()
@@ -281,7 +396,36 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `multiple landlord cards are displayed with logged in user first then alphabetically`(page: Page) {
+            fun `the people responsible tab shows the saved property manager as a read only card`() {
+                // Property 37 is seeded with a property manager
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
+                assertEquals("Pat Manager", detailsPage.propertyManagerCard.title.getText())
+                assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
+                assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
+                assertThat(detailsPage.propertyManagerUpdateLink.locator)
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(37))
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
+            }
+
+            @Test
+            fun `the people responsible tab shows that no property manager is used when there is none`() {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
+                    .containsText("No, I manage this property (or another joint landlord does)")
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(1))
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).not().isVisible()
+            }
+
+            @Test
+            fun `multiple landlord cards are displayed with logged in user first then alphabetically`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -300,7 +444,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `joint property with org landlord shows org landlord card with LRN and email`(page: Page) {
+            fun `joint property with org landlord shows org landlord card with LRN and email`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -318,7 +462,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class LettingAgentPanel {
             @Test
-            fun `occupied property without letting agent shows delegate copy`(page: Page) {
+            fun `occupied property without letting agent shows delegate copy`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(4)
 
                 assertThat(detailsPage.lettingAgentPanel).containsText(
@@ -328,7 +472,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `occupied property with letting agent shows cancel delegation copy`(page: Page) {
+            fun `occupied property with letting agent shows cancel delegation copy`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
                 assertThat(detailsPage.lettingAgentPanel).containsText(
@@ -338,7 +482,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `unoccupied property shows unoccupied letting agent copy`(page: Page) {
+            fun `unoccupied property shows unoccupied letting agent copy`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
 
                 assertThat(detailsPage.lettingAgentPanel).containsText(
@@ -347,37 +491,113 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.delegateToLettingAgentLink).not().isVisible()
             }
         }
+
+        @Nested
+        inner class DeactivatedProperty {
+            // Property 52: inactive, occupied, all details "provide later", owned by the mock landlord
+            private val inactivePropertyOwnershipId = 52L
+
+            @Test
+            fun `the deactivated caption and reactivation panel are shown`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                assertThat(detailsPage.caption).hasText("Deactivated property")
+                assertThat(detailsPage.reactivatePropertyPanel).containsText("Your property has been deactivated")
+            }
+
+            @Test
+            fun `the reactivate button starts the reactivation journey`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                detailsPage.reactivatePropertyButton.clickAndWait()
+
+                assertPageIs(
+                    page,
+                    InfoFormPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to inactivePropertyOwnershipId.toString()),
+                )
+            }
+
+            @Test
+            fun `the property tab has no change links, letting agent panel, deactivate link or deregister link`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.actionLinks).hasCount(0)
+                assertThat(detailsPage.delegateToLettingAgentLink).isHidden()
+                assertThat(detailsPage.deactivatePropertyLink).isHidden()
+                assertThat(detailsPage.deregisterPropertyLink).isHidden()
+            }
+
+            @Test
+            fun `the people responsible tab has no invite or remove actions`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertEquals(1, detailsPage.landlordSummaryCards.size)
+                assertThat(detailsPage.inviteJointLandlordLink).isHidden()
+                assertThat(detailsPage.inviteJointLandlordButton).isHidden()
+            }
+
+            @Test
+            fun `the compliance tab has no change actions or notification banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.gasSafetyCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.electricalSafetyCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.epcCard.getAction("Change")).isHidden()
+                assertThat(detailsPage.notificationBanner).isHidden()
+            }
+        }
     }
 
     @Nested
     inner class PropertyDetailsLocalCouncilView {
+        // TODO PDJB-1999: remove this test when freeholders are shown in the local council view
         @Test
-        fun `the property details page loads with the property details tab selected by default`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+        fun `the people responsible tab does not show saved freeholders`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
+            detailsPage.tabs.goToPeopleResponsible()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
+            assertThat(detailsPage.freeholderSection).hasCount(0)
+        }
+
+        // TODO PDJB-1999: remove this test when superior landlords are shown in the local council view
+        @Test
+        fun `the people responsible tab does not show saved superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).hasCount(0)
         }
 
         @Test
-        fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`(page: Page) {
+        fun `the property details page loads with the property details tab selected by default`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
+        }
+
+        @Test
+        fun `loading the landlord details page and clicking landlord details tab shows the landlords details tab`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "people-responsible")
+            assertEquals("people-responsible", detailsPage.tabs.activeTabPanelId)
         }
 
         @Test
-        fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`(page: Page) {
+        fun `loading the landlord details page and clicking compliance information tab shows the compliance information tab`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToComplianceInformation()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, detailsPage.tabs.activeTabPanelId)
         }
 
         @Nested
         inner class ComplianceTab {
             @Test
-            fun `gas card shows a single provide-later row and hides the cert row`(page: Page) {
+            fun `gas card shows a single provide-later row and hides the cert row`() {
                 // Property 39: occupied, gas cert "provide later" (with deadline)
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
                 detailsPage.tabs.goToComplianceInformation()
@@ -388,13 +608,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `when the landlord details tab is active clicking the property details tab shows property details tab`(page: Page) {
+        fun `when the landlord details tab is active clicking the property details tab shows property details tab`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToPeopleResponsible()
 
             detailsPage.tabs.goToPropertyDetails()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
+            assertEquals("property-details", detailsPage.tabs.activeTabPanelId)
         }
 
         @Test
@@ -405,7 +625,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `the property record has no change links`(page: Page) {
+        fun `the property record has no change links`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.propertyDetailsSummaryList.actionLinks).hasCount(0)
@@ -414,7 +634,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class LandlordDetails {
             @Test
-            fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`(page: Page) {
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -424,8 +644,16 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals("Tobias Evans", detailsPage.landlordSummaryCards[2].title.getText())
             }
 
+            // TODO PDJB-1999: replace with a positive assertion when the local council view shows the property manager
             @Test
-            fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`(page: Page) {
+            fun `the property manager section is not shown`() {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+                assertThat(detailsPage.propertyManagerSection).hasCount(0)
+            }
+
+            @Test
+            fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -437,7 +665,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `when joint landlords flag is enabled the landlord cards have a view landlord record action`(page: Page) {
+            fun `when joint landlords flag is enabled the landlord cards have a view landlord record action`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -452,7 +680,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `an org landlord is shown as a card with name, LRN, email and a view landlord record link`(page: Page) {
+            fun `an org landlord is shown as a card with name, LRN, email and a view landlord record link`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(48)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -472,7 +700,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class NotificationBanner {
             @Test
-            fun `is visible and includes correct messages when all certs are missing`(page: Page) {
+            fun `is visible and includes correct messages when all certs are missing`() {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
@@ -481,7 +709,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is visible and includes correct messages when all certs are expired`(page: Page) {
+            fun `is visible and includes correct messages when all certs are expired`() {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
@@ -490,7 +718,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
+            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`() {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
@@ -499,7 +727,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is not visible when all certs are compliant`(page: Page) {
+            fun `is not visible when all certs are compliant`() {
                 val propertyOwnershipId = 11
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
@@ -511,7 +739,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     @Nested
     inner class PropertyDetailsInvitations : NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
         @Test
-        fun `property details page shows pending invitations section with correct email`(page: Page) {
+        fun `property details page shows pending invitations section with correct email`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -521,7 +749,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `property details page shows expired invitations section with correct email`(page: Page) {
+        fun `property details page shows expired invitations section with correct email`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -531,7 +759,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `pending invitation shows expiry and sent date details`(page: Page) {
+        fun `pending invitation shows expiry and sent date details`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -540,7 +768,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `expired invitation shows expired date`(page: Page) {
+        fun `expired invitation shows expired date`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -582,10 +810,26 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `letting agent panel is not shown on local council view`(page: Page) {
+        fun `letting agent panel is not shown on local council view`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.lettingAgentPanel).not().isVisible()
+        }
+    }
+
+    // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
+    @Nested
+    inner class BeforeAssociatedParties {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
+        @Test
+        fun `the landlord view does not show the property manager section`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.propertyManagerSection).hasCount(0)
         }
     }
 
@@ -594,7 +838,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     //  local council view onto the people responsible tab, after which no view shows the legacy row.
     inner class OwnershipBeforePdjb955 {
         @Test
-        fun `local council view keeps the ownership row on the property record`(page: Page) {
+        fun `local council view keeps the ownership row on the property record`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
@@ -604,7 +848,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     @Nested
     inner class PropertyDetailsTab {
         @Test
-        fun `landlord view groups the property record into sections`(page: Page) {
+        fun `landlord view groups the property record into sections`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
             assertThat(detailsPage.sectionHeading("Property details")).isVisible()
@@ -619,21 +863,21 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `landlord view displays the custom property type when set`(page: Page) {
+        fun `landlord view displays the custom property type when set`() {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
-        fun `local council view displays the custom property type when set`(page: Page) {
+        fun `local council view displays the custom property type when set`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
-        fun `landlord view hides the tenancy section for an unoccupied property`(page: Page) {
+        fun `landlord view hides the tenancy section for an unoccupied property`() {
             // Property 12: unoccupied, no licence, tenancy details not applicable.
             val detailsPage = navigator.goToPropertyDetailsLandlordView(12)
 
@@ -655,7 +899,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 
             @Test
-            fun `landlord view shows provide later rows with the deadline date for both licensing and tenancy`(page: Page) {
+            fun `landlord view shows provide later rows with the deadline date for both licensing and tenancy`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
@@ -669,7 +913,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows provide later paragraphs with the deadline date for both licensing and tenancy`(page: Page) {
+            fun `local council view shows provide later paragraphs with the deadline date for both licensing and tenancy`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
 
                 assertThat(
@@ -684,7 +928,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             // than last_occupied_date (7 days ago), i.e. it became occupied after registration. Such properties
             // show a provide-later prompt with no deadline date.
             @Test
-            fun `landlord view shows no-deadline provide later rows for both licensing and tenancy`(page: Page) {
+            fun `landlord view shows no-deadline provide later rows for both licensing and tenancy`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
@@ -698,7 +942,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows not provided paragraphs for both licensing and tenancy`(page: Page) {
+            fun `local council view shows not provided paragraphs for both licensing and tenancy`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
 
                 assertThat(
@@ -711,7 +955,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class UnoccupiedWithLicensingSkipped {
             // Property 9: unoccupied (0 tenants), no licence.
             @Test
-            fun `landlord view shows a provide later licensing row and hides the tenancy section`(page: Page) {
+            fun `landlord view shows a provide later licensing row and hides the tenancy section`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
@@ -721,7 +965,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows a not provided licensing paragraph and hides the tenancy section`(page: Page) {
+            fun `local council view shows a not provided licensing paragraph and hides the tenancy section`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(9)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
@@ -735,7 +979,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class OccupiedWithAllFieldsCompleted {
             // Property 40: occupied (2 tenants, 1 household), licence present, full tenancy details.
             @Test
-            fun `landlord view shows the licensing type and the tenancy details`(page: Page) {
+            fun `landlord view shows the licensing type and the tenancy details`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
@@ -744,7 +988,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the licensing type and the tenancy details`(page: Page) {
+            fun `local council view shows the licensing type and the tenancy details`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
@@ -760,7 +1004,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class UnoccupiedWithAllFieldsCompleted {
             // Property 7: unoccupied (0 tenants), licence present.
             @Test
-            fun `landlord view shows the licensing type and hides the tenancy section`(page: Page) {
+            fun `landlord view shows the licensing type and hides the tenancy section`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
@@ -769,7 +1013,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the licensing type and hides the tenancy section`(page: Page) {
+            fun `local council view shows the licensing type and hides the tenancy section`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
@@ -783,7 +1027,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class ProvideLaterNotificationBanner {
             @Test
-            fun `landlord view shows the tenancy-only provide-later banner`(page: Page) {
+            fun `landlord view shows the tenancy-only provide-later banner`() {
                 // Property 41: occupied, licence present, tenancy skipped, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
 
@@ -795,7 +1039,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the tenancy-only provide-later banner`(page: Page) {
+            fun `local council view shows the tenancy-only provide-later banner`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
 
                 assertThat(detailsPage.notificationBanner).isVisible()
@@ -805,7 +1049,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `landlord view shows the licensing-only provide-later banner`(page: Page) {
+            fun `landlord view shows the licensing-only provide-later banner`() {
                 // Property 42: occupied, no licence, tenancy provided, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
 
@@ -817,7 +1061,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the licensing-only provide-later banner`(page: Page) {
+            fun `local council view shows the licensing-only provide-later banner`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
 
                 assertThat(detailsPage.notificationBanner).isVisible()
@@ -854,7 +1098,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `landlord view shows the combined provide-later and compliance banner`(page: Page) {
+            fun `landlord view shows the combined provide-later and compliance banner`() {
                 // Property 39: occupied, no licence, no tenancy details, has a compliance issue.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
 
@@ -864,7 +1108,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the combined provide-later and compliance banner`(page: Page) {
+            fun `local council view shows the combined provide-later and compliance banner`() {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
 
                 assertThat(detailsPage.notificationBanner).isVisible()
@@ -882,7 +1126,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `no notification banner is shown when all fields are completed and the property is compliant`(page: Page) {
+            fun `no notification banner is shown when all fields are completed and the property is compliant`() {
                 // Property 40: occupied, licence present, full tenancy details, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
@@ -895,7 +1139,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     inner class PropertyDetailsLocalCouncilInvitations :
         NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
         @Test
-        fun `local council view shows pending invitations section with correct email`(page: Page) {
+        fun `local council view shows pending invitations section with correct email`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -905,7 +1149,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `local council view shows expired invitations section with correct email`(page: Page) {
+        fun `local council view shows expired invitations section with correct email`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -915,7 +1159,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `local council view does not show action links on pending invitations`(page: Page) {
+        fun `local council view does not show action links on pending invitations`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -924,7 +1168,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `local council view does not show action links on expired invitations`(page: Page) {
+        fun `local council view does not show action links on expired invitations`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
             detailsPage.tabs.goToPeopleResponsible()
 
@@ -932,12 +1176,19 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.expiredInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
         }
     }
+
+    companion object {
+        private const val PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID = 1L
+        private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
+        private const val PROPERTY_WITH_SUPERIOR_LANDLORDS_ID = 57L
+        private const val PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID = 1L
+    }
 }
 
 @WithOrgLandlordProfile
 class PropertyDetailsOrgLandlordTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
-    fun `property solely owned by org landlord shows your organisation in card title`(page: Page) {
+    fun `property solely owned by org landlord shows your organisation in card title`() {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(47)
         detailsPage.tabs.goToPeopleResponsible()
 
@@ -947,7 +1198,7 @@ class PropertyDetailsOrgLandlordTests : IntegrationTestWithImmutableData("data-l
     }
 
     @Test
-    fun `joint property shows your organisation for org landlord and not for other landlord`(page: Page) {
+    fun `joint property shows your organisation for org landlord and not for other landlord`() {
         val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
         detailsPage.tabs.goToPeopleResponsible()
 

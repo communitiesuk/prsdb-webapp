@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -19,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
@@ -35,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumber
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import java.math.BigDecimal
@@ -128,21 +124,6 @@ class UpdateTenancyDetailsCyaConfigTests {
         lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(FurnishedStatus.FURNISHED)
         lenient().`when`(mockRentFrequencyFormModel.rentFrequency).thenReturn(RentFrequency.MONTHLY)
         lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn(rentAmount)
-    }
-
-    @Test
-    fun `getStepSpecificContent does not include rent bills and furnishings rows when tenancy is provide this later`() {
-        // Arrange
-        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.PROVIDE_THIS_LATER)
-        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
-        whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
-
-        // Act
-        val content = stepConfig.getStepSpecificContent(mockState)
-        val rows = content["summaryListData"] as List<SummaryListRowViewModel>
-
-        // Assert
-        assertEquals(1, rows.size)
     }
 
     @Test

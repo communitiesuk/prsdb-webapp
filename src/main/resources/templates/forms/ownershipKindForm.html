@@ -25,5 +25,6 @@
         </details>
         <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null, 'ownershipKinds', null, ${checkboxOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </html>

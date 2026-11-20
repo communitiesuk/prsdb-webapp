@@ -5,12 +5,16 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationConfirmationServiceTests {
@@ -62,5 +66,34 @@ class PropertyRegistrationConfirmationServiceTests {
 
         // Assert
         assertFalse(wasDeleted)
+    }
+
+    @Test
+    fun `setLandlordReactivatedByLastRegistration stores whether the landlord was reactivated`() {
+        // Act
+        propertyRegistrationConfirmationService.setLandlordReactivatedByLastRegistration(true)
+
+        // Assert
+        verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION, true)
+    }
+
+    @Test
+    fun `wasLandlordReactivatedByLastRegistration returns true when the session records a reactivation`() {
+        // Arrange
+        whenever(mockSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION)).thenReturn(true)
+
+        // Act, Assert
+        assertTrue(propertyRegistrationConfirmationService.wasLandlordReactivatedByLastRegistration())
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = [false])
+    fun `wasLandlordReactivatedByLastRegistration returns false when the session does not record a reactivation`(sessionValue: Boolean?) {
+        // Arrange
+        whenever(mockSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION)).thenReturn(sessionValue)
+
+        // Act, Assert
+        assertFalse(propertyRegistrationConfirmationService.wasLandlordReactivatedByLastRegistration())
     }
 }

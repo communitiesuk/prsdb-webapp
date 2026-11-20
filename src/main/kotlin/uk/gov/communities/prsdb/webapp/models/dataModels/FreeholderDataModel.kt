@@ -21,9 +21,12 @@ data class FreeholderDataModel(
     val manualCounty: String? = null,
     val manualPostcode: String? = null,
 ) {
+    // We must post to a freeholder with no email, but we are not allowed to store their address. So a named
+    // freeholder loaded from the database will have neither, while one added in the current journey will
+    // still have the address they entered.
+    fun hasUnstoredPostalAddress() = detailsKnown && email == null && address == null
+
     companion object {
-        // TODO PDJB-1993: use this to pre-populate the freeholders list from the database when the
-        //  update journey starts.
         fun fromFreeholder(freeholder: Freeholder) =
             FreeholderDataModel(
                 databaseId = freeholder.id,

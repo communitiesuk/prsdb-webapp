@@ -19,12 +19,19 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
 
@@ -40,23 +47,70 @@ class ActiveInactiveServiceTests {
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @Mock
-    private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
+    private lateinit var userToLandlordService: UserToLandlordService
 
     // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE flag is removed
     @Mock
     private lateinit var featureFlagManager: FeatureFlagManager
 
+    @Mock
+    private lateinit var landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>
+
+    @Mock
+    private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
+
+    @Mock
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     @InjectMocks
     private lateinit var activeInactiveService: ActiveInactiveService
 
     @Test
-    fun `deactivateLandlord marks an active landlord inactive with today's date and saves it`() {
+    fun `deactivateLandlord marks an active landlord inactive and saves it without emailing them when ACTIVE_INACTIVE is disabled`() {
         val landlord = MockLandlordData.createIndividualLandlord()
 
-        activeInactiveService.deactivateLandlord(landlord)
+        activeInactiveService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
 
         assertFalse(landlord.isActive)
         assertEquals(today(), landlord.lastDeactivatedDate)
+        verify(landlordRepository).save(landlord)
+        verifyNoInteractions(landlordDeactivatedEmailSender)
+    }
+
+    @Test
+    fun `deactivateLandlord emails the landlord that their account is deactivated when ACTIVE_INACTIVE is enabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord =
+            MockLandlordData.createIndividualLandlord(
+                name = "Jill Jones",
+                registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 123456L),
+            )
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(DASHBOARD_URI)
+
+        activeInactiveService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+
+        verify(landlordDeactivatedEmailSender).sendEmailToLandlord(
+            landlord,
+            LandlordDeactivatedEmail(
+                recipientName = "Jill Jones",
+                registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123456L).toString(),
+                reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
+                dashboardUrl = DASHBOARD_URI.toString(),
+            ),
+        )
+    }
+
+    @Test
+    fun `deactivateLandlord still deactivates the landlord when the email fails to send`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(DASHBOARD_URI)
+        whenever(landlordDeactivatedEmailSender.sendEmailToLandlord(any(), any()))
+            .thenThrow(NoLandlordEmailRecipientsException(landlord.id))
+
+        activeInactiveService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+
+        assertFalse(landlord.isActive)
         verify(landlordRepository).save(landlord)
     }
 
@@ -65,10 +119,13 @@ class ActiveInactiveServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         landlord.deactivate(ORIGINAL_DATE)
 
-        assertThrows<IllegalStateException> { activeInactiveService.deactivateLandlord(landlord) }
+        assertThrows<IllegalStateException> {
+            activeInactiveService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        }
 
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
+        verifyNoInteractions(landlordDeactivatedEmailSender)
     }
 
     @Test
@@ -76,11 +133,14 @@ class ActiveInactiveServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(true)
 
-        assertThrows<IllegalStateException> { activeInactiveService.deactivateLandlord(landlord) }
+        assertThrows<IllegalStateException> {
+            activeInactiveService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        }
 
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
+        verifyNoInteractions(landlordDeactivatedEmailSender)
     }
 
     @Test
@@ -424,10 +484,51 @@ class ActiveInactiveServiceTests {
         assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
     }
 
+    @Test
+    fun `isLandlordInactive returns true for an inactive landlord`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
+
+        assertTrue(activeInactiveService.isLandlordInactive(landlord))
+    }
+
+    @Test
+    fun `isLandlordInactive returns false for an active landlord`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        assertFalse(activeInactiveService.isLandlordInactive(MockLandlordData.createIndividualLandlord()))
+    }
+
+    // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
+    @Test
+    fun `isLandlordInactive returns false for an inactive landlord when ACTIVE_INACTIVE is disabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
+
+        assertFalse(activeInactiveService.isLandlordInactive(landlord))
+    }
+
+    @Test
+    fun `isCurrentLandlordInactive returns true when the current landlord is inactive`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(ORIGINAL_DATE) }
+        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+
+        assertTrue(activeInactiveService.isCurrentLandlordInactive())
+    }
+
+    @Test
+    fun `isCurrentLandlordInactive returns false when the user has no landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+
+        assertFalse(activeInactiveService.isCurrentLandlordInactive())
+    }
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
+        private val DASHBOARD_URI = URI("https://example.com/landlord/dashboard")
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
     }

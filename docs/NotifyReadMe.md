@@ -6,6 +6,16 @@ You should register for Notify-prod using your MHCLG email address.
 
 Note: When running the app locally we stub the calls to notify by default.
 
+## Formatting templates
+Follow [Notify's formatting guidance for emails and letters](https://www.notifications.service.gov.uk/using-notify/formatting)
+when writing markdown templates. Notify supports a limited set of Markdown features, and support differs between emails and letters:
+- Use `# Heading` for headings in both emails and letters. `## Subheading` is supported for emails, not letters.
+- Both support bullet points and numbered steps.
+- Use `***` on its own line to insert a page break in a letter.
+- Bold, italics and underlined text are not supported.
+
+Check the letter PDF preview in Notify after changing formatting, especially page breaks that could split related content.
+
 ## Emails
 ### Creating emails
 When creating a new email you should do so in a markdown file in `src/main/resources/emails`.
@@ -113,11 +123,16 @@ Use `LetterNotificationService.sendLetter(recipientAddress, letter)`, where `rec
 Letters are stubbed locally in the same way as emails, and are printed to the console instead.
 Letters whose last address line matches a postcode in `local.letters` in `application-local.yml` always fail, so error handling can be tested.
 
+The `use-notify` profile switches both emails and letters to real Notify calls.
+To inspect letter output without calling Notify, keep `local` active, remove `use-notify`, and restart the app.
+Trigger a letter-sending action in the app, then look for `STUB LETTER SENT` in the console to see the recipient, template and personalisation.
+Emails are also stubbed in this configuration; real emails and stub letters cannot be enabled separately.
+
 Real letters must never be sent locally.
 To send test letters through Notify locally, use the `use-notify` profile as described in [Sending emails Locally](#sending-emails-locally) with a test api key.
 Letters use the same `EMAILNOTIFICATIONS_APIKEY` as emails, so check the key's
 [api key type](https://docs.notifications.service.gov.uk/java.html#api-keys) first:
-- **Test** - Notify accepts the letter and shows it in the dashboard, but never prints or posts it. This is the only type to use locally.
+- **Test** - Notify simulates sending the letter, but it does not appear in the dashboard and is never printed or posted. This is the only type to use locally.
 - **Team and guest list** - Notify rejects the letter, as letters cannot be restricted to team members. If your key is this type, you need a test key to send test letters.
 - **Live** - Notify prints and posts the letter. Never use a live key locally.
 

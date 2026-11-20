@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyManagerRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckCorrespondenceAddressAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPropertyManagerPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailCyaPagePropertyDetailsUpdate
@@ -41,11 +43,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyManagerDetailsFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.PropertyManagerFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RemovePropertyManagerFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentAmountFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentFrequencyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.OccupancyLettingAgentInterruptionStep
 import java.util.UUID
 import kotlin.test.assertContains
@@ -53,11 +60,15 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    // TODO PDJB-1993: test freeholder cards after updates for email, postal address and unknown details.
     @Autowired
     lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 
     @Autowired
     lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @Autowired
+    lateinit var propertyManagerRepository: PropertyManagerRepository
 
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
@@ -94,7 +105,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         private val landlordAccountEmail = "alex.surname@example.com"
 
         @Test
-        fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
+        fun `Resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
             page: Page,
         ) {
             val newNumberOfBedrooms = 4
@@ -121,7 +132,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
 
         @Test
-        fun `resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
+        fun `Resuming an abandoned multi-step update after completing another update discards the earlier progress`(page: Page) {
             // The correspondence email update below must change the data, otherwise the last-modified date is not bumped
             assertNotEquals(
                 landlordAccountEmail,
@@ -450,12 +461,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 checkLicensingAnswersPage.summaryName.getText(),
                 "You have removed this property’s licence",
             )
-            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("None")
+            assertThat(checkLicensingAnswersPage.summaryList.licensingTypeRow.value).containsText("This property does not need a licence")
             checkLicensingAnswersPage.confirm()
             propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
             // Check changes have occurred
-            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+            assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value)
+                .containsText("This property does not need a licence")
         }
 
         @Test
@@ -533,7 +545,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 mapOf("propertyOwnershipId" to undelegatedPropertyOwnershipId.toString())
 
             @Test
-            fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
+            fun `Making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
                 // The property starts occupied and delegated to a letting agent
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
@@ -573,7 +585,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `keeping a delegated property occupied shows the check answers page and retains the delegation`(page: Page) {
+            fun `Keeping a delegated property occupied shows the check answers page and retains the delegation`(page: Page) {
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
@@ -597,7 +609,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `going back from the interruption returns to the occupancy page without saving the change`(page: Page) {
+            fun `Going back from the interruption returns to the occupancy page without saving the change`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -621,7 +633,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `making an undelegated property vacant skips the interruption`(page: Page) {
+            fun `Making an undelegated property vacant skips the interruption`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -643,7 +655,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `a vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
+            fun `A vacant property can be updated to occupied and defaults to providing tenancy details later`(page: Page) {
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                 val updateOccupancyPage =
@@ -666,7 +678,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `navigating directly to the interruption for an undelegated property redirects to the property record`(page: Page) {
+            fun `Navigating directly to the interruption for an undelegated property redirects to the property record`(page: Page) {
                 navigator.navigate(
                     UpdateOccupancyController.getUpdateOccupancyRoute(undelegatedPropertyOwnershipId) +
                         "/${OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT}",
@@ -675,7 +687,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `a property delegated after the journey started still shows the interruption`(page: Page) {
+            fun `A property delegated after the journey started still shows the interruption`(page: Page) {
                 // Start the journey while the property has no letting agent, so any cached delegation would be false
                 val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
                 propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
@@ -696,7 +708,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `the occupancy answer can be changed from the check answers page`(page: Page) {
+            fun `The occupancy answer can be changed from the check answers page`(page: Page) {
                 // The property starts occupied and delegated; make it vacant to reach the check answers page
                 navigator
                     .goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
@@ -763,7 +775,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of households
                 val newNumberOfHouseholds = 1
-                assertThat(updateNumberOfHouseholdsPage.header).containsText("Households in your property")
+                assertThat(updateNumberOfHouseholdsPage.header).containsText("Number of households")
                 updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
                 val updateNumberOfPeoplePage =
                     assertPageIs(
@@ -774,7 +786,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of people
                 val newNumberOfPeople = 3
-                assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
+                assertThat(updateNumberOfPeoplePage.header).containsText("How many people live here in total?")
                 updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
                 val checkOccupancyAnswersPage =
                     assertPageIs(
@@ -855,7 +867,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
@@ -877,7 +889,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
                 // Update number of bedrooms
-                assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                assertThat(updateNumberOfBedroomsPage.header).containsText("Number of bedrooms")
                 updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
@@ -907,7 +919,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update rent includes bills to yes
-                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
+                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Does the rent include any bills?")
                 updateRentIncludesBillsPage.submitIsIncluded()
                 val billsIncludedPage =
                     assertPageIs(
@@ -918,7 +930,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update bills included
                 val expectedBillsIncluded = "Gas, Electricity, Water"
-                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Update which of these you include in the rent")
+                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Which bills are included?")
                 billsIncludedPage.selectGasElectricityWater()
                 billsIncludedPage.form.submit()
                 val checkYourAnswersPage =
@@ -1079,7 +1091,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Update furnished status
                 val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
                 assertThat(updateFurnishedStatusPage.form.fieldsetHeading)
-                    .containsText("Update is the property furnished")
+                    .containsText("How is the property furnished?")
                 updateFurnishedStatusPage.submitFurnishedStatus(newFurnishedStatus)
                 propertyDetailsPage =
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
@@ -1116,14 +1128,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     )
 
                 // Update rent frequency
-                assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
+                assertThat(rentFrequencyPage.header).containsText("How often do you charge rent?")
                 rentFrequencyPage.selectRentFrequency(newRentFrequency)
                 rentFrequencyPage.form.submit()
                 val rentAmountPage =
                     assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
                 // Update rent amount
-                assertThat(rentAmountPage.header).containsText("Update your weekly rent")
+                assertThat(rentAmountPage.header).containsText("Rent charged each week")
                 rentAmountPage.submitRentAmount(newRentAmount)
                 val checkYourAnswersPage =
                     assertPageIs(
@@ -1177,6 +1189,161 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Check CYA page displays value without leading zeros
                 assertThat(checkYourAnswersPage.summaryList.rentAmountRow).containsText("£500.50")
             }
+        }
+    }
+
+    @Nested
+    inner class PropertyManagerUpdates {
+        private val propertyWithoutPropertyManagerId = 1L
+        private val propertyWithoutPropertyManagerUrlArguments =
+            mapOf("propertyOwnershipId" to propertyWithoutPropertyManagerId.toString())
+        private val propertyWithPropertyManagerId = 37L
+        private val propertyWithPropertyManagerUrlArguments =
+            mapOf("propertyOwnershipId" to propertyWithPropertyManagerId.toString())
+
+        // TODO PDJB-2016: Remove this setup when the ASSOCIATED_PARTIES flag is removed
+        @BeforeEach
+        fun enableAssociatedParties() {
+            featureFlagManager.enableFeature(ASSOCIATED_PARTIES)
+        }
+
+        @Test
+        fun `a property manager can be added to a property without one`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            val propertyManagerPage =
+                assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+            propertyManagerPage.submitYes()
+
+            val detailsPage =
+                assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+            detailsPage.submitDetails("New Agent", "new.agent@example.com")
+
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+            assertThat(checkPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("new.agent@example.com")
+            assertThat(checkPage.form.submitButton).hasText("Confirm and submit update")
+            checkPage.confirm()
+
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals("New Agent", propertyDetailsPage.propertyManagerCard.title.getText())
+            assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("new.agent@example.com")
+        }
+
+        @Test
+        fun `the back link on the first page returns to the property record when there is no property manager`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            val propertyManagerPage =
+                assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+
+            propertyManagerPage.backLink.clickAndWait()
+
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+        }
+
+        @Test
+        fun `an existing property manager's details can be changed`(page: Page) {
+            val originalPropertyManager =
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager!!
+
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+            assertThat(checkPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText(originalPropertyManager.email)
+            checkPage.clickChangeAndWait()
+
+            val detailsPage =
+                assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+            assertThat(detailsPage.form.nameInput.locator).hasValue(originalPropertyManager.name)
+            detailsPage.submitDetails("Changed Agent", "changed.agent@example.com")
+
+            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments).confirm()
+
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals("Changed Agent", propertyDetailsPage.propertyManagerCard.title.getText())
+            assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("changed.agent@example.com")
+            assertEquals(
+                originalPropertyManager.id,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager?.id,
+            )
+        }
+
+        @Test
+        fun `the back link on the check page goes to the details page when the property already has a property manager`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+
+            checkPage.backLink.clickAndWait()
+
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+        }
+
+        @Test
+        fun `the back link on the check page goes to the details page after adding a property manager`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitYes()
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+                .submitDetails("New Agent", "new.agent@example.com")
+            val checkPage =
+                assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+
+            checkPage.backLink.clickAndWait()
+
+            assertPageIs(page, PropertyManagerDetailsFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+        }
+
+        @Test
+        fun `an existing property manager can be removed`(page: Page) {
+            val propertyManagerCount = propertyManagerRepository.count()
+
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId)
+            assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+                .clickRemoveAndWait()
+            assertPageIs(page, RemovePropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments)
+                .submitYes()
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments).submitNo()
+
+            val checkYourAnswersPage =
+                assertPageIs(
+                    page,
+                    UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class,
+                    propertyWithPropertyManagerUrlArguments,
+                )
+            assertThat(checkYourAnswersPage.summaryList.usingPropertyManagerRow.value).containsText("No, I manage this property")
+            assertThat(checkYourAnswersPage.form.submitButton).hasText("Confirm and submit update")
+            checkYourAnswersPage.confirm()
+
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertThat(propertyDetailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
+                .containsText("No, I manage this property")
+            assertEquals(propertyManagerCount - 1, propertyManagerRepository.count())
+        }
+
+        @Test
+        fun `the change link on the check your answers page returns to the property manager question`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitNo()
+
+            assertPageIs(
+                page,
+                UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class,
+                propertyWithoutPropertyManagerUrlArguments,
+            ).clickChangeAndWait()
+
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
+        }
+
+        @Test
+        fun `entering the journey part-way through redirects to the property record`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId, PropertyManagerStep.ROUTE_SEGMENT)
+
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
         }
     }
 }

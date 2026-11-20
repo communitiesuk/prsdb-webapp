@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -47,7 +47,9 @@ class ConfirmDeactivationStepConfig(
         activeInactiveService.deactivateProperty(state.propertyOwnershipId)
 
         // TODO PDJB-1274: Update emails to account for other users in the org
-        EmailHelper.sendEmailAndLogFailures("the property deactivation confirmation email for property ownership ${propertyOwnership.id}") {
+        NotificationHelper.sendNotificationAndLogFailures(
+            "the property deactivation confirmation email for property ownership ${propertyOwnership.id}",
+        ) {
             confirmationEmailSender.sendEmail(
                 currentUser.email,
                 PropertyDeactivationConfirmationEmail(

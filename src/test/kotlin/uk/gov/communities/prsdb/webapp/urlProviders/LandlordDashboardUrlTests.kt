@@ -185,6 +185,7 @@ class LandlordDashboardUrlTests(
                 propertyOwnershipRepository = mock(),
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
+                associatedPartyNotificationService = mock(),
                 propertyComplianceService = mock(),
                 lettingAgentAccessService = mock(),
                 delegateToLettingAgentEmailService = mock(),

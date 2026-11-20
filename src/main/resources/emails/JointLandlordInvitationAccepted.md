@@ -16,6 +16,10 @@ When advertising this property for rent, you must include this Property Registra
 
 If something changes (like the rent charged) you must update this property's details on the service. All landlords have a shared responsibility to keep the property up to date.
 
+((landlordReactivated??## Your landlord account))
+
+((landlordReactivated??Your landlord account is now active.))
+
 ---
 
 This is an automated email – do not reply.

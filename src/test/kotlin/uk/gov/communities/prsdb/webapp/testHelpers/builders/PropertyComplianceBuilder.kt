@@ -221,6 +221,7 @@ class PropertyComplianceBuilder {
     companion object {
         fun createWithInDateCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withElectricalSafety()
@@ -230,6 +231,7 @@ class PropertyComplianceBuilder {
 
         fun createWithInDateCertsAndLowEpcRating(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withElectricalSafety()
@@ -242,6 +244,7 @@ class PropertyComplianceBuilder {
             exemption: MeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
             propertyIsOccupied: Boolean = false,
         ) = PropertyComplianceBuilder()
+            .withHasGasSupply()
             .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
             .withGasSafetyCert()
             .withElectricalSafety()
@@ -253,6 +256,7 @@ class PropertyComplianceBuilder {
 
         fun createWithExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withExpiredElectricalSafety()
@@ -262,6 +266,7 @@ class PropertyComplianceBuilder {
 
         fun createWithExpiredCertsAndLowEpcRating(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withExpiredElectricalSafety()
@@ -272,6 +277,7 @@ class PropertyComplianceBuilder {
 
         fun createWithNaturallyExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 // TODO: PDJB-1926: Use GAS_SAFETY_CERT_VALIDITY_MONTHS
                 .withGasSafetyCert(
@@ -283,6 +289,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasAndElectricalSafetyExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withExpiredElectricalSafety()
@@ -292,6 +299,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withElectricalSafety()
@@ -301,6 +309,7 @@ class PropertyComplianceBuilder {
 
         fun createWithElectricalSafetyAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredElectricalSafety()
@@ -310,6 +319,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasCertExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withElectricalSafety()
@@ -319,6 +329,7 @@ class PropertyComplianceBuilder {
 
         fun createWithElectricalSafetyExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredElectricalSafety()
@@ -328,6 +339,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasCertExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredGasSafetyCert()
@@ -338,6 +350,7 @@ class PropertyComplianceBuilder {
 
         fun createWithElectricalSafetyExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withElectricalSafety()
@@ -348,6 +361,7 @@ class PropertyComplianceBuilder {
 
         fun createWithOnlyEpcExpiredCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withElectricalSafety()
@@ -368,6 +382,7 @@ class PropertyComplianceBuilder {
             epcExemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
             propertyIsOccupied: Boolean = false,
         ) = PropertyComplianceBuilder()
+            .withHasGasSupply()
             .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
             .withGasSafetyCert()
             .withElectricalSafety()
@@ -384,6 +399,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasAndElectricalSafetyMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withElectricalCertType()
                 .withEpc()
@@ -391,6 +407,7 @@ class PropertyComplianceBuilder {
 
         fun createWithGasAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withElectricalSafety()
                 .withElectricalCertType()
@@ -398,6 +415,7 @@ class PropertyComplianceBuilder {
 
         fun createWithElectricalSafetyAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withElectricalCertType()
                 .withGasSafetyCert()
@@ -414,6 +432,7 @@ class PropertyComplianceBuilder {
 
         fun createWithOnlyElectricalSafetyMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withElectricalCertType()
                 .withGasSafetyCert()
@@ -422,6 +441,7 @@ class PropertyComplianceBuilder {
 
         fun createWithOnlyEpcMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
+                .withHasGasSupply()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withElectricalSafety()

@@ -293,18 +293,31 @@ class MockLandlordData {
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-        ) = Freeholder(propertyOwnership, name, email)
+            id: Long? = null,
+        ) = Freeholder(propertyOwnership, name, email).also { freeholder ->
+            if (id != null) ReflectionTestUtils.setField(freeholder, "id", id)
+        }
 
         fun createSuperiorLandlord(
             propertyOwnership: PropertyOwnership = createPropertyOwnership(),
             name: String? = null,
             email: String? = null,
-        ) = SuperiorLandlord(propertyOwnership, name, email)
+            id: Long? = null,
+        ) = SuperiorLandlord(propertyOwnership, name, email).also { superiorLandlord ->
+            if (id != null) ReflectionTestUtils.setField(superiorLandlord, "id", id)
+        }
 
         fun createPropertyManager(
             name: String = "Property Manager",
             email: String = "manager@example.com",
-        ) = PropertyManager(name, email)
+            createdDate: Instant = Instant.now(),
+            lastModifiedDate: Instant? = null,
+        ): PropertyManager {
+            val propertyManager = PropertyManager(name, email)
+            ReflectionTestUtils.setField(propertyManager, "createdDate", createdDate)
+            ReflectionTestUtils.setField(propertyManager, "lastModifiedDate", lastModifiedDate)
+            return propertyManager
+        }
 
         fun createOccupiedPropertyOwnership(
             ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,

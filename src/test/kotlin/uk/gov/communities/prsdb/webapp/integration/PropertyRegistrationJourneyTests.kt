@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -169,8 +171,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
@@ -220,7 +225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private val propertyDetailsSectionHeader = "Property details"
     private val peopleResponsibleSectionHeader = "People responsible for this property"
     private val occupiedSectionHeader = "Tell us if this property is occupied"
-    private val licenseSectionHeader = "Tell us if your property needs a licence"
+    private val licenseSectionHeader = "Tell us if this property needs a licence"
     private val gasSafetyHeader = "Gas safety certificate"
     private val electricalSafetyHeader = "Electrical safety certificate"
     private val epcSectionHeader = "Energy performance certificate (EPC)"
@@ -389,195 +394,225 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         createValidPage(otherPage, NumberOfBedroomsFormPagePropertyRegistration::class).submitNumOfBedrooms(7)
     }
 
-    @Nested
-    inner class EnableFeatureFlags {
-        @Test
-        fun `completing the payment journey successfully reaches the confirmation page`(page: Page) {
-            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+    @Test
+    fun `completing the payment journey successfully reaches the confirmation page`(page: Page) {
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
 
-            checkAnswersPage.confirm()
+        checkAnswersPage.confirm()
 
-            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
-            val payment = getCreatedPayment()
-            assertEquals(PaymentStatus.SUCCEEDED, payment.status)
-            verify(govUkPayClient).capturePayment(payment.paymentId)
+        val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
+        val payment = getCreatedPayment()
+        assertEquals(PaymentStatus.SUCCEEDED, payment.status)
+        verify(govUkPayClient).capturePayment(payment.paymentId)
 
-            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-            assertThat(confirmationPage.paymentSummaryHeading).isVisible()
-            assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
-                .containsText(PaymentHelper.formatPence(payment.amountInPence))
-            assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
-                .containsText(payment.quoteDate.format(dateFormatter))
-            assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
-                .containsText(payment.forPeriodEnding.format(dateFormatter))
+        val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+        assertThat(confirmationPage.paymentSummaryHeading).isVisible()
+        assertThat(confirmationPage.paymentSummaryList.paymentRow.value)
+            .containsText(PaymentHelper.formatPence(payment.amountInPence))
+        assertThat(confirmationPage.paymentSummaryList.paymentDateRow.value)
+            .containsText(payment.quoteDate.format(dateFormatter))
+        assertThat(confirmationPage.paymentSummaryList.renewalDateRow.value)
+            .containsText(payment.forPeriodEnding.format(dateFormatter))
+    }
+
+    @Test
+    fun `with JavaScript enabled, a failed payment shows the payment failed page and the payment can then be retried`(page: Page) {
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+
+        submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
+
+        val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+        assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
+        assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
+        assertThat(paymentFailedPage.backLink).isHidden()
+        paymentFailedPage.tryAgainLink.clickAndWait()
+
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+        completePropertyRegistrationPaymentSuccessfully(page)
+
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(govUkPayClient, times(2)).createPayment(requestCaptor.capture())
+        val retriedPayment = paymentRepository.findAll().single { it.reference == requestCaptor.secondValue.reference }
+        assertEquals(PaymentStatus.SUCCEEDED, retriedPayment.status)
+        verify(govUkPayClient).capturePayment(retriedPayment.paymentId)
+    }
+
+    @Test
+    fun `with JavaScript enabled, an unfinished payment shows the processing message then redirects once the payment completes`(
+        page: Page,
+    ) {
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        page.waitForResponse({ it.request().resourceType() == "fetch" && it.url().contains(PaymentReturnStep.ROUTE_SEGMENT) }) {
+            submitPaymentSummary(page)
         }
+        val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+        assertThat(paymentReturnPage.doNotCloseParagraph).isVisible()
+        assertThat(paymentReturnPage.notConfirmedParagraph).isHidden()
 
-        @Test
-        fun `with JavaScript enabled, a failed payment shows the payment failed page and the payment can then be retried`(page: Page) {
-            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
-            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            checkAnswersPage.confirm()
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-            submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
+        page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") }
+        assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+    }
 
-            val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
-            assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
-            assertThat(paymentFailedPage.heading).containsText("Your payment has been declined")
-            assertThat(paymentFailedPage.backLink).isHidden()
-            paymentFailedPage.tryAgainLink.clickAndWait()
+    @Test
+    fun `with JavaScript enabled but the payment status poller unable to load, the user can check the payment status manually`(
+        page: Page,
+    ) {
+        page.route("**/assets/js/index.js") { route -> route.abort() }
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        val paymentReturnPage = submitPaymentSummary(page)
+        assertThat(paymentReturnPage.notConfirmedParagraph).isVisible()
+        assertThat(paymentReturnPage.doNotCloseParagraph).isHidden()
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-            completePropertyRegistrationPaymentSuccessfully(page)
+        paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
-            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
-            verify(govUkPayClient, times(2)).createPayment(requestCaptor.capture())
-            val retriedPayment = paymentRepository.findAll().single { it.reference == requestCaptor.secondValue.reference }
-            assertEquals(PaymentStatus.SUCCEEDED, retriedPayment.status)
-            verify(govUkPayClient).capturePayment(retriedPayment.paymentId)
-        }
+        assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+    }
 
-        @Test
-        fun `with JavaScript enabled, an unfinished payment shows the processing message then redirects once the payment completes`(
-            page: Page,
-        ) {
-            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            checkAnswersPage.confirm()
-            page.waitForResponse({ it.request().resourceType() == "fetch" && it.url().contains(PaymentReturnStep.ROUTE_SEGMENT) }) {
-                submitPaymentSummary(page)
-            }
-            val paymentReturnPage = assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-            assertThat(paymentReturnPage.doNotCloseParagraph).isVisible()
-            assertThat(paymentReturnPage.notConfirmedParagraph).isHidden()
-
-            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-
-            page.waitForURL { url -> url.contains("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") }
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `with JavaScript enabled but the payment status poller unable to load, the user can check the payment status manually`(
-            page: Page,
-        ) {
-            page.route("**/assets/js/index.js") { route -> route.abort() }
+    @Test
+    fun `with JavaScript disabled, checking an unfinished payment returns the user to the payment processing page`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
             val paymentReturnPage = submitPaymentSummary(page)
             assertThat(paymentReturnPage.notConfirmedParagraph).isVisible()
             assertThat(paymentReturnPage.doNotCloseParagraph).isHidden()
-            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
             paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
+            assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
+            verify(govUkPayClient, never()).capturePayment(any())
+        }
+    }
+
+    @Test
+    fun `with JavaScript disabled, a user can resume from the GOV UK Pay return URL after their session expires while paying`(
+        browser: Browser,
+    ) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page)
+            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+            verify(govUkPayClient).createPayment(requestCaptor.capture())
+
+            // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
+            page.context().clearCookies()
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+            page.navigate(requestCaptor.firstValue.returnUrl)
+
             assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
+    }
 
-        @Test
-        fun `with JavaScript disabled, checking an unfinished payment returns the user to the payment processing page`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                val paymentReturnPage = submitPaymentSummary(page)
-                assertThat(paymentReturnPage.notConfirmedParagraph).isVisible()
-                assertThat(paymentReturnPage.doNotCloseParagraph).isHidden()
+    @Test
+    fun `with JavaScript disabled, a completed payment goes straight to the confirmation page`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
 
-                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+            submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
 
-                assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-                assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
-                verify(govUkPayClient, never()).capturePayment(any())
-            }
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
         }
+    }
 
-        @Test
-        fun `with JavaScript disabled, a user can resume from the GOV UK Pay return URL after their session expires while paying`(
-            browser: Browser,
-        ) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                submitPaymentSummary(page)
-                val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
-                verify(govUkPayClient).createPayment(requestCaptor.capture())
+    @Test
+    fun `with JavaScript disabled, a declined payment goes straight to the payment failed page`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
 
-                // Clearing the cookies drops the session, as if it had expired while the user was on GOV.UK Pay
-                page.context().clearCookies()
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-                page.navigate(requestCaptor.firstValue.returnUrl)
+            submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
 
-                assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-                assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
-            }
+            assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
         }
+    }
 
-        @Test
-        fun `with JavaScript disabled, a completed payment goes straight to the confirmation page`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
+    @Test
+    fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment not completed page`(
+        browser: Browser,
+    ) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            checkAnswersPage.confirm()
+            submitPaymentSummary(page)
+            val replacedPayment = getCreatedPayment()
+            val replacedPaymentReturnUrl = page.url()
+            // GOV.UK Pay refuses to cancel a payment while the user is part-way through 3D Secure, so it stays CANCELLING
+            doThrow(GovUkPayException("Cancel refused")).whenever(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+            val otherPage = page.context().newPage()
+            Navigator(otherPage, port).navigate(
+                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentSummaryStep.ROUTE_SEGMENT}" +
+                    "?${JourneyIdProvider.PARAMETER_NAME}=${getJourneyId(page)}",
+            )
+            createValidPage(otherPage, PaymentSummaryFormPagePropertyRegistration::class).form.submit()
+            createValidPage(otherPage, PaymentReturnFormPagePropertyRegistration::class)
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-                submitPaymentSummaryAndWaitForRedirectTo(page, CONFIRMATION_PATH_SEGMENT)
+            page.navigate(replacedPaymentReturnUrl)
 
-                assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-                assertEquals(PaymentStatus.SUCCEEDED, getCreatedPayment().status)
-            }
+            val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
+            assertThat(paymentFailedPage.heading).containsText("Your payment was not completed")
+            assertThat(paymentFailedPage.tryAgainLink).isVisible()
+            assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
+            verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
+            verify(govUkPayClient, never()).capturePayment(any())
         }
+    }
 
-        @Test
-        fun `with JavaScript disabled, a declined payment goes straight to the payment failed page`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.FAILED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
+    @Test
+    fun `submitting the payment summary creates a GOV UK Pay payment and returns to the payment return page`(page: Page) {
+        // Stops the poller redirecting away from the payment return page
+        stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
 
-                submitPaymentSummaryAndWaitForRedirectTo(page, PaymentFailedStep.ROUTE_SEGMENT)
+        paymentSummaryPage.form.submit()
 
-                assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
-                assertEquals(PaymentStatus.FAILED, getCreatedPayment().status)
-            }
-        }
+        assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
+        val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
+        verify(govUkPayClient).createPayment(requestCaptor.capture())
+        val request = requestCaptor.firstValue
+        assertEquals("Register your rental property", request.description)
+        assertTrue(request.amount > 0)
+        assertTrue(
+            request.returnUrl.endsWith(
+                "${PaymentReturnStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId" +
+                    "&${PaymentReferenceParameterService.PARAMETER_NAME}=${request.reference}",
+            ),
+        )
+        val payment = paymentRepository.findAll().single { it.reference == request.reference }
+        assertEquals(PaymentStatus.CREATED, payment.status)
+        assertEquals(request.amount, payment.amountInPence)
+        assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), payment.quoteDate)
+    }
 
-        @Test
-        fun `with JavaScript disabled, returning from a payment replaced in another tab shows the payment not completed page`(
-            browser: Browser,
-        ) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                submitPaymentSummary(page)
-                val replacedPayment = getCreatedPayment()
-                val replacedPaymentReturnUrl = page.url()
-                // GOV.UK Pay refuses to cancel a payment while the user is part-way through 3D Secure, so it stays CANCELLING
-                doThrow(GovUkPayException("Cancel refused")).whenever(govUkPayClient).cancelPayment(replacedPayment.paymentId)
-                val otherPage = page.context().newPage()
-                Navigator(otherPage, port).navigate(
-                    "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${PaymentSummaryStep.ROUTE_SEGMENT}" +
-                        "?${JourneyIdProvider.PARAMETER_NAME}=${getJourneyId(page)}",
-                )
-                createValidPage(otherPage, PaymentSummaryFormPagePropertyRegistration::class).form.submit()
-                createValidPage(otherPage, PaymentReturnFormPagePropertyRegistration::class)
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-
-                page.navigate(replacedPaymentReturnUrl)
-
-                val paymentFailedPage = assertPageIs(page, PaymentFailedFormPagePropertyRegistration::class)
-                assertThat(paymentFailedPage.heading).containsText("Your payment was not completed")
-                assertThat(paymentFailedPage.tryAgainLink).isVisible()
-                assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
-                verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
-                verify(govUkPayClient, never()).capturePayment(any())
-            }
-        }
-
-        @Test
-        fun `submitting the payment summary creates a GOV UK Pay payment and returns to the payment return page`(page: Page) {
-            // Stops the poller redirecting away from the payment return page
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `answers changed in another tab after confirming but before the payment is captured cancel the payment and do not register the property`(
+        browser: Browser,
+    ) {
+        withJavaScriptDisabled(browser) { page, navigator ->
             stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
@@ -585,2378 +620,2343 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
 
             paymentSummaryPage.form.submit()
+            val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
 
-            assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
-            val requestCaptor = argumentCaptor<GovUkPayCreatePaymentRequest>()
-            verify(govUkPayClient).createPayment(requestCaptor.capture())
-            val request = requestCaptor.firstValue
-            assertEquals("Register your rental property", request.description)
-            assertTrue(request.amount > 0)
-            assertTrue(
-                request.returnUrl.endsWith(
-                    "${PaymentReturnStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId" +
-                        "&${PaymentReferenceParameterService.PARAMETER_NAME}=${request.reference}",
-                ),
-            )
-            val payment = paymentRepository.findAll().single { it.reference == request.reference }
-            assertEquals(PaymentStatus.CREATED, payment.status)
-            assertEquals(request.amount, payment.amountInPence)
-            assertEquals(LocalDate.now(DateTimeHelper.UK_ZONE), payment.quoteDate)
+            changeBedroomsInSecondTab(page, journeyId)
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
+
+            paymentReturnPage.checkPaymentStatusButton.clickAndWait()
+
+            val errorPage = createValidPage(page, ErrorPage::class)
+            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+            val payment = getCreatedPayment()
+            assertEquals(PaymentStatus.CANCELLED, payment.status)
+            verify(govUkPayClient).cancelPayment(payment.paymentId)
+            verify(govUkPayClient, never()).capturePayment(any())
+            verify(propertyOwnershipRepository, never()).save(any())
         }
+    }
 
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `answers changed in another tab after confirming but before the payment is captured cancel the payment and do not register the property`(
-            browser: Browser,
-        ) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-                val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
-
-                paymentSummaryPage.form.submit()
-                val paymentReturnPage = createValidPage(page, PaymentReturnFormPagePropertyRegistration::class)
-
-                changeBedroomsInSecondTab(page, journeyId)
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-
-                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
-
-                val errorPage = createValidPage(page, ErrorPage::class)
-                assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
-                val payment = getCreatedPayment()
-                assertEquals(PaymentStatus.CANCELLED, payment.status)
-                verify(govUkPayClient).cancelPayment(payment.paymentId)
-                verify(govUkPayClient, never()).capturePayment(any())
-                verify(propertyOwnershipRepository, never()).save(any())
-            }
-        }
-
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `answers changed in another tab before accepting the payment summary does not create the payment`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-                val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
-
-                changeBedroomsInSecondTab(page, journeyId)
-
-                paymentSummaryPage.form.submit()
-
-                val errorPage = createValidPage(page, ErrorPage::class)
-                verify(govUkPayClient, never()).createPayment(any())
-                assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
-            }
-        }
-
-        @Test
-        fun `answers changed in another tab after loading the CYA page stop the user confirming`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                changeBedroomsInSecondTab(page, getJourneyId(page))
-
-                checkAnswersPage.confirm()
-
-                val errorPage = createValidPage(page, ErrorPage::class)
-                assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
-                verify(govUkPayClient, never()).createPayment(any())
-            }
-        }
-
-        @Test
-        fun `visiting the task list in another tab after loading the CYA page does not stop the user confirming`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                val journeyId = getJourneyId(page)
-                val otherPage = page.context().newPage()
-                Navigator(otherPage, port).navigate(
-                    "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId",
-                )
-
-                checkAnswersPage.confirm()
-
-                createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-            }
-        }
-
-        @Test
-        fun `submitting the payment summary for an address registered since the journey started shows the already registered page`(
-            page: Page,
-        ) {
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `answers changed in another tab before accepting the payment summary does not create the payment`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
             val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-            doReturn(true).whenever(addressAvailabilityService).isAddressOwned(uprnForSelectedAddress)
+            val journeyId = ensureIncompletePropertyExistsForCurrentJourney(page)
+
+            changeBedroomsInSecondTab(page, journeyId)
 
             paymentSummaryPage.form.submit()
 
-            assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+            val errorPage = createValidPage(page, ErrorPage::class)
+            verify(govUkPayClient, never()).createPayment(any())
+            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+        }
+    }
+
+    @Test
+    fun `answers changed in another tab after loading the CYA page stop the user confirming`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            changeBedroomsInSecondTab(page, getJourneyId(page))
+
+            checkAnswersPage.confirm()
+
+            val errorPage = createValidPage(page, ErrorPage::class)
+            assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
             verify(govUkPayClient, never()).createPayment(any())
         }
+    }
 
-        @Test
-        fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
-            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
-            val staleQuote =
-                PropertyRegistrationPaymentQuote(
-                    amountInPence = 1000,
-                    quoteDate = today.minusDays(1),
-                    renewalDate = today.plusYears(1),
-                )
-            doReturn(staleQuote).doCallRealMethod().whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
+    @Test
+    fun `visiting the task list in another tab after loading the CYA page does not stop the user confirming`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+            val journeyId = getJourneyId(page)
+            val otherPage = page.context().newPage()
+            Navigator(otherPage, port).navigate(
+                "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId",
+            )
+
+            checkAnswersPage.confirm()
+
+            createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Test
+    fun `submitting the payment summary for an address registered since the journey started shows the already registered page`(
+        page: Page,
+    ) {
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        doReturn(true).whenever(addressAvailabilityService).isAddressOwned(uprnForSelectedAddress)
+
+        paymentSummaryPage.form.submit()
+
+        assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+        verify(govUkPayClient, never()).createPayment(any())
+    }
+
+    @Test
+    fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
+        val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+        val staleQuote =
+            PropertyRegistrationPaymentQuote(
+                amountInPence = 1000,
+                quoteDate = today.minusDays(1),
+                renewalDate = today.plusYears(1),
+            )
+        doReturn(staleQuote).doCallRealMethod().whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+        assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
+
+        paymentSummaryPage.form.submit()
+
+        val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
+        verify(govUkPayClient, never()).createPayment(any())
+    }
+
+    @Test
+    fun `submitting a payment summary page with an older quote than the stored quote refreshes the summary without creating a payment`(
+        page: Page,
+    ) {
+        val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
+        checkAnswersPage.confirm()
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        ensureIncompletePropertyExistsForCurrentJourney(page)
+        val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+        page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", today.minusDays(1).toString())
+
+        paymentSummaryPage.form.submit()
+
+        val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+        val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+        assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
+        verify(govUkPayClient, never()).createPayment(any())
+    }
+
+    @Test
+    fun `returning from GOV UK Pay on a later day than the quote cancels the payment and shows the payment summary`(browser: Browser) {
+        withJavaScriptDisabled(browser) { page, navigator ->
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
             val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
             checkAnswersPage.confirm()
-            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-            assertThat(paymentSummaryPage.summaryList.paymentDateRow.value).hasText(today.minusDays(1).format(dateFormatter))
+            val paymentReturnPage = submitPaymentSummary(page)
+            val payment = getCreatedPayment()
+            jdbcTemplate.update(
+                "UPDATE payment SET quote_date = ? WHERE payment_id = ?",
+                payment.quoteDate.minusDays(1),
+                payment.paymentId,
+            )
+            stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
 
-            paymentSummaryPage.form.submit()
+            paymentReturnPage.checkPaymentStatusButton.clickAndWait()
 
-            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
-            verify(govUkPayClient, never()).createPayment(any())
+            assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
+            assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
+            verify(govUkPayClient).cancelPayment(payment.paymentId)
+            verify(govUkPayClient, never()).capturePayment(any())
         }
-
-        @Test
-        fun `submitting a payment summary page with an older quote than the stored quote refreshes the summary without creating a payment`(
-            page: Page,
-        ) {
-            val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-            checkAnswersPage.confirm()
-            val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
-            ensureIncompletePropertyExistsForCurrentJourney(page)
-            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
-            page.locator("input[name='quoteDate']").evaluate("(input, value) => input.value = value", today.minusDays(1).toString())
-
-            paymentSummaryPage.form.submit()
-
-            val refreshedSummaryPage = assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-            val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-            assertThat(refreshedSummaryPage.summaryList.paymentDateRow.value).hasText(today.format(dateFormatter))
-            verify(govUkPayClient, never()).createPayment(any())
-        }
-
-        @Test
-        fun `returning from GOV UK Pay on a later day than the quote cancels the payment and shows the payment summary`(browser: Browser) {
-            withJavaScriptDisabled(browser) { page, navigator ->
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CREATED)
-                val checkAnswersPage = navigator.goToPropertyRegistrationCheckAnswersPageWithPayments()
-                checkAnswersPage.confirm()
-                val paymentReturnPage = submitPaymentSummary(page)
-                val payment = getCreatedPayment()
-                jdbcTemplate.update(
-                    "UPDATE payment SET quote_date = ? WHERE payment_id = ?",
-                    payment.quoteDate.minusDays(1),
-                    payment.paymentId,
-                )
-                stubGovUkPayPaymentStatus(GovUkPayPaymentStatus.CAPTURABLE)
-
-                paymentReturnPage.checkPaymentStatusButton.clickAndWait()
-
-                assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
-                assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
-                verify(govUkPayClient).cancelPayment(payment.paymentId)
-                verify(govUkPayClient, never()).capturePayment(any())
-            }
-        }
-
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `user can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
-            page: Page,
-        ) {
-            // Start page (not a journey step, but it is how the user accesses the journey)
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            assertThat(registerPropertyStartPage.heading).containsText("Register a property")
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // Task list page (part of the journey to support redirects)
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-
-            // Address lookup - render page
-            assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
-            assertThat(addressLookupPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
-            val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
-
-            // Select address - render page
-            assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
-            assertThat(selectAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
-            val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
-
-            // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
-
-            // Property type selection - render page
-            assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
-            assertThat(propertyTypePage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
-            val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
-
-            // Number of bedrooms - render page
-            assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
-            assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            bedroomsPage.submitNumOfBedrooms(3)
-            val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
-
-            // Has Joint Landlords - render page
-            assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
-
-            // fill in and submit
-            hasJointLandlordsPage.submitHasJointLandlords()
-            val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
-
-            // Invite joint landlord - render page
-            assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
-            assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
-
-            // fill in and submit
-            inviteJointLandlordPage.submitEmail("email@address.com")
-            var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(checkJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
-            assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
-
-            // Check joint landlords - render page
-            checkJointLandlordsPage
-                .form
-                .addAnotherButton
-                .clickAndWait()
-
-            // Invite another joint landlord - render page
-            val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
-            assertThat(addAnotherPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
-            addAnotherPage.submitEmail("email2@address.com")
-
-            checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            checkJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
-
-            // Remove Joint Landlord - render page
-            val removeJointLandlordsPage =
-                assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            removeJointLandlordsPage.submitWantsToProceed()
-
-            checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            checkJointLandlordsPage.form.submit()
-
-            val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
-            ownsPropertyPage.submitOwnsProperty(true)
-            val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
-            ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
-            freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
-            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submitNo()
-
-            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submitAccountEmail()
-
-            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
-            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
-
-            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
-            correspondenceSelectPage.selectAddressAndSubmit("2 Fake Way")
-
-            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
-
-            // Occupancy - render page
-            assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
-            assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
-            occupancyPage.submitIsOccupied()
-            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
-            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
-            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-
-            // Licensing type - render page
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
-            assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
-            licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
-            val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
-
-            // Selective licence - render page
-            assertThat(selectiveLicencePage.form.fieldsetHeading).containsText("What is your selective licence number?")
-            assertThat(selectiveLicencePage.form.sectionHeader).containsText(licenseSectionHeader)
-            selectiveLicencePage.submitLicenseNumber("licence number")
-
-            val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
-
-            // Has Gas Supply - render page
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert - render page
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
-            hasGasCertPage.submitHasCertificate()
-            val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-            // Gas Cert Issue Date - render page
-            assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
-            gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
-            var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
-
-            // Upload Gas Cert - render page
-            assertThat(uploadGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-
-            // Check Gas Cert Uploads - render page
-            assertThat(checkGasCertUploadsPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
-            assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
-            checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
-            uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
-
-            uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-
-            assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
-            assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(2, checkGasCertUploadsPage.table.rows.count())
-
-            checkGasCertUploadsPage.table
-                .getClickableCell(0, 2)
-                .link
-                .clickAndWait()
-
-            val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
-
-            removeGasCertUploadPage.form.radios.selectValue("true")
-            removeGasCertUploadPage.form.submit()
-
-            checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-            assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-
-            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
-            checkGasCertUploadsPage.form.submit()
-
-            // Remove Gas Cert Upload - render page
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // See the later task-level tests for the EICR equivalent of these electrical safety steps
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
-            hasElectricalCertPage.submitHasEic()
-            val eicIssueDatePage =
-                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
-
-            // EIC Issue Date - render page
-            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(
-                eicIssueDatePage.heading,
-            ).containsText("What’s the issue date on the Electrical Installation Certificate (EIC)?")
-            eicIssueDatePage.submitDate(validEicIssueDate)
-            var uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
-
-            // Upload Electrical Cert - render page
-            assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Certificate (EIC)")
-            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            var checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
-
-            // Check Electrical Cert Uploads - render page
-            assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
-            checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
-            uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
-
-            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
-            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
-
-            checkElectricalCertUploadsPage.table
-                .getClickableCell(0, 2)
-                .link
-                .clickAndWait()
-
-            val removeElectricalCertUploadPage =
-                assertPageIs(page, RemoveEicUploadFormPagePropertyRegistration::class)
-
-            removeElectricalCertUploadPage.form.radios.selectValue("true")
-            removeElectricalCertUploadPage.form.submit()
-
-            checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
-            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-
-            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
-            checkElectricalCertUploadsPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress))
-                .thenReturn(
-                    MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                        expiryDate = validExpiryDate,
-                    ),
-                )
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val confirmUprnMatchedEpcDetailsPage =
-                assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
-
-            // Confirm UPRN matched EPC - submit No (don't use this EPC)
-            assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
-            confirmUprnMatchedEpcDetailsPage.submitNo()
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitHasEpc()
-            val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
-
-            // EPC Search - render page
-            assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
-                .thenReturn(
-                    MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                        certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
-                        latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
-                        expiryDate = validExpiryDate,
-                    ),
-                )
-            findYourEpcPage.submitCurrentEpcNumber()
-            val confirmEpcDetailsPage =
-                assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
-
-            // Check Matched EPC - render page
-            assertThat(confirmEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
-            val expectedExpiryDate =
-                validExpiryDate
-                    .toJavaLocalDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(
-                expectedExpiryDate,
-            )
-            assertThat(
-                confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value,
-            ).containsText(CURRENT_EPC_CERTIFICATE_NUMBER)
-            confirmEpcDetailsPage.submitYes()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            taskListPageAfterEpc.clickRentedOutTaskWithName("Tenancy details")
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(2)
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-            rentIncludesBillsPage.submitIsIncluded()
-            val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
-            billsIncludedPage.selectGasElectricityWater()
-            billsIncludedPage.selectSomethingElseCheckbox()
-            billsIncludedPage.fillCustomBills("Dog Grooming")
-            billsIncludedPage.form.submit()
-            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
-            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
-            rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
-            rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
-            rentFrequencyPage.form.submit()
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.submitRentAmount("400")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            // Check answers - render page
-            assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-            assertThat(checkAnswersPage.rentedOutHeading).isVisible()
-            assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
-            assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
-            assertThat(checkAnswersPage.epcHeading).isVisible()
-            // submit
-            checkAnswersPage.confirm()
-            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
-
-            // Confirmation - render page
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            val expectedPropertyRegNum =
-                RegistrationNumberDataModel.fromRegistrationNumber(
-                    propertyOwnershipCaptor.value.registrationNumber,
-                )
-            assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-            assertTrue(propertyOwnershipCaptor.value.isOccupied)
-            assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
-            // The looked-up correspondence address should reuse the existing "2 Fake Way" address row
-            assertEquals(2L, propertyOwnershipCaptor.value.correspondenceAddress.id)
-            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-            assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
-            assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
-            assertTrue(confirmationPage.surveyLink.locator.isVisible)
-            assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
-            assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
-
-            // Check confirmation email
-            verifyConfirmationEmailSent(
-                expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "1 Fictional Road\nFA1 1AA",
-                expectedIsOccupied = true,
-                expectedJointLandlordEmails = listOf("email2@address.com"),
-            )
-
-            // Go to dashboard
-            confirmationPage.goToDashboardLink.clickAndWait()
-            assertPageIs(page, LandlordDashboardPage::class)
-        }
-
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `user can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
-            page: Page,
-        ) {
-            // Start page (not a journey step, but it is how the user accesses the journey)
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            assertThat(registerPropertyStartPage.heading).containsText("Register a property")
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // Task list page (part of the journey to support redirects)
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-
-            // Address lookup - render page
-            assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
-            assertThat(addressLookupPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
-            val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
-
-            // Select address - render page
-            assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
-            assertThat(selectAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
-            val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
-
-            // Manual address - render page
-            assertThat(manualAddressPage.form.fieldsetHeading).containsText("What is the property address?")
-            assertThat(manualAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            manualAddressPage.submitAddress(
-                addressLineOne = "Test address line 1",
-                townOrCity = "Testville",
-                postcode = "EG1 2AB",
-            )
-            val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
-
-            // Select local council - render page
-            assertThat(selectLocalCouncilPage.form.fieldsetHeading).containsText("What local council area is your property in?")
-            assertThat(selectLocalCouncilPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            selectLocalCouncilPage.submitLocalCouncil(
-                "BATH AND NORTH EAST SOMERSET COUNCIL",
-                "BATH AND NORTH EAST SOMERSET COUNCIL",
-            )
-            val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
-
-            // Property type selection - render page
-            assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
-            assertThat(propertyTypePage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            // fill in and submit
-            propertyTypePage.submitCustomPropertyType("End terrace house")
-            val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
-
-            // Number of bedrooms - render page
-            assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
-            assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
-            bedroomsPage.submitNumOfBedrooms(3)
-            val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
-
-            // Has Joint Landlords - render page
-            assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-            assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
-
-            // fill in and submit
-            hasJointLandlordsPage.submitHasNoJointLandlords()
-
-            val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
-            ownsPropertyPage.submitOwnsProperty(true)
-            val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
-            ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
-            val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
-            freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
-            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
-            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
-            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
-            freeholdersListPage.submit()
-            assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
-            val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
-            propertyManagerPage.submitYes()
-            assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
-                .submitDetails("Pat Manager", "pat.manager@example.com")
-            assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).form.submit()
-
-            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
-            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
-
-            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
-            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
-            correspondenceSelectPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
-            val correspondenceManualAddressPage = assertPageIs(page, CorrespondenceManualAddressFormPagePropertyRegistration::class)
-
-            // Correspondence manual address - render page
-            assertThat(correspondenceManualAddressPage.form.fieldsetHeading).containsText("Enter a postal address")
-            assertThat(correspondenceManualAddressPage.form.submitButton).containsText("Confirm and continue")
-            correspondenceManualAddressPage.submitAddress(
-                addressLineOne = "1 Fictional Road",
-                townOrCity = "Fictional Town",
-                postcode = "FA1 1AA",
-            )
-
-            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
-
-            // Occupancy - render page
-            assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
-            assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
-            // fill in and submit
-            occupancyPage.submitIsVacant()
-            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-
-            // Licensing type - render page
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
-            assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
-            // fill in and submit
-            licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
-            val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
-
-            // Has Gas Supply - render page
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert - render page
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
-            hasGasCertPage.submitHasNoCertificate()
-            val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
-
-            // Gas Cert Missing - render page
-            assertThat(gasCertMissingPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertMissingPage.heading).containsText("You must get a gas safety certificate before a tenant moves in")
-            assertThat(gasCertMissingPage.warning).isHidden()
-            assertThat(gasCertMissingPage.submitButton).containsText("Continue")
-            gasCertMissingPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
-            hasElectricalCertPage.submitHasNoCert()
-            val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
-
-            // Electrical Cert Missing - render page
-            assertThat(electricalCertMissingPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(
-                electricalCertMissingPage.heading,
-            ).containsText("You must get an electrical safety certificate before a tenant moves in")
-            assertThat(electricalCertMissingPage.warning).isHidden()
-            assertThat(electricalCertMissingPage.submitButton).containsText("Continue")
-            electricalCertMissingPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // We use a manual address, uprn will be null.
-            // The internal EpcLookupByUprnStep at the start of the EpcTask will not find an EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitHasNoEpc()
-            val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
-
-            // Is EPC required - render page
-            assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
-            assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
-            isEpcRequiredPage.submitEpcRequired()
-            val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
-
-            // EPC Missing - render page
-            assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
-            assertThat(epcMissingPage.continueButton).containsText("Continue")
-            assertThat(epcMissingPage.warning).isHidden()
-            epcMissingPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            // Check answers - render page
-            assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-            // submit
-            checkAnswersPage.confirm()
-            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
-
-            // Confirmation - render page
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            val expectedPropertyRegNum =
-                RegistrationNumberDataModel.fromRegistrationNumber(
-                    propertyOwnershipCaptor.value.registrationNumber,
-                )
-            assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-            assertFalse(propertyOwnershipCaptor.value.isOccupied)
-            assertEquals("differentemail@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
-            assertEquals(
-                "1 Fictional Road, Fictional Town, FA1 1AA",
-                propertyOwnershipCaptor.value.correspondenceAddress.singleLineAddress,
-            )
-            assertNull(propertyOwnershipCaptor.value.correspondenceAddress.uprn)
-            assertEquals(OwnershipType.SHARE_OF_JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
-            assertEquals("Pat Manager", propertyOwnershipCaptor.value.propertyManager?.name)
-            assertEquals("pat.manager@example.com", propertyOwnershipCaptor.value.propertyManager?.email)
-            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-            assertTrue(confirmationPage.surveyLink.locator.isVisible)
-            assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
-            assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
-
-            // Check confirmation email
-            verifyConfirmationEmailSent(
-                expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
-                expectedIsOccupied = false,
-                expectedJointLandlordEmails = null,
-            )
-
-            // Go to dashboard
-            confirmationPage.goToDashboardLink.clickAndWait()
-            assertPageIs(page, LandlordDashboardPage::class)
-        }
-
-        @Test
-        fun `user can choose to provide compliance certificates later if their property is occupied`(page: Page) {
-            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitProvideThisLater()
-            val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
-
-            // Provide Gas Cert Later - render page
-            assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(provideGasCertLaterPage.insetText).hasText(
-                "To keep the property registered, we need to know about its gas safety within 28 days.",
-            )
-            provideGasCertLaterPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            hasElectricalCertPage.submitProvideThisLater()
-            val provideElectricalCertLaterPage =
-                assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
-
-            // Provide Electrical Cert Later - render page
-            assertThat(provideElectricalCertLaterPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(
-                provideElectricalCertLaterPage.insetText,
-            ).containsText("You must upload your electrical safety certificate within 28 days.")
-            provideElectricalCertLaterPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitProvideThisLater()
-            val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
-
-            // Provide EPC Later - render page
-            assertThat(provideEpcLaterPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
-            assertThat(provideEpcLaterPage.insetText).containsText(
-                "To keep the property registered, we need all its compliance certificates within 28 days.",
-            )
-            provideEpcLaterPage.form.submit()
-
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `user can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
-            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitProvideThisLater()
-            val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
-
-            // Provide Gas Cert Later - render page
-            assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(provideGasCertLaterPage.insetText).isHidden()
-            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
-                "If your property has a gas supply or any gas appliances, " +
-                    "you must get a gas safety certificate before a tenant moves in.",
-            )
-            provideGasCertLaterPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            hasElectricalCertPage.submitProvideThisLater()
-            val provideElectricalCertLaterPage =
-                assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
-
-            // Provide Electrical Cert Later - render page (unoccupied variant)
-            assertThat(provideElectricalCertLaterPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
-            assertThat(provideElectricalCertLaterPage.insetText).isHidden()
-            assertTrue(
-                provideElectricalCertLaterPage.page
-                    .content()
-                    .contains("You must get an electrical safety certificate before a tenant moves in."),
-            )
-            provideElectricalCertLaterPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitProvideThisLater()
-            val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
-
-            // Provide EPC Later - render page
-            assertThat(provideEpcLaterPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
-            assertThat(provideEpcLaterPage.insetText).isHidden()
-            provideEpcLaterPage.form.submit()
-
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `user can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
-            // Gas supply page
-            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert page
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            hasGasCertPage.submitHasNoCertificate()
-            val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
-
-            // Gas Cert Missing - render page
-            assertThat(gasCertMissingPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
-            assertThat(gasCertMissingPage.submitButton).containsText("Continue without a valid gas safety certificate")
-            assertThat(gasCertMissingPage.warning)
-                .containsText("You could face prosecution if you have tenants in a property without a gas safety certificate")
-            gasCertMissingPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
-            hasElectricalCertPage.submitHasNoCert()
-            val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
-
-            assertThat(electricalCertMissingPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(
-                electricalCertMissingPage.heading,
-            ).containsText("You must get a valid electrical safety certificate for this property")
-            assertThat(electricalCertMissingPage.warning)
-                .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
-            assertThat(electricalCertMissingPage.submitButton).containsText("Continue without a valid electrical safety certificate")
-            electricalCertMissingPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitHasNoEpc()
-            val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
-
-            // Is EPC required - render page
-            assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
-            assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
-            isEpcRequiredPage.submitEpcRequired()
-            val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
-
-            // EPC Missing - render page
-            assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
-            assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
-            assertThat(
-                epcMissingPage.warning,
-            ).containsText("You can be fined for letting a property that does not meet energy efficiency requirements.")
-            epcMissingPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-
-            // Check Answers - submit to reach Confirm Missing Compliance page
-            checkAnswersPage.form.submit()
-            val confirmMissingCompliancePage =
-                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-
-            // Confirm Missing Compliance - render page
-            assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
-            assertThat(confirmMissingCompliancePage.warning).isVisible()
-            assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
-
-            // Confirm Missing Compliance - submit
-            confirmMissingCompliancePage.form.radios.selectValue("true")
-            confirmMissingCompliancePage.form.submit()
-            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
-
-            // Confirmation - verify record saved
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            val expectedPropertyRegNum =
-                RegistrationNumberDataModel.fromRegistrationNumber(
-                    propertyOwnershipCaptor.value.registrationNumber,
-                )
-            assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
-            assertTrue(confirmationPage.surveyLink.locator.isVisible)
-            assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
-            assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
-        }
-
-        @Test
-        fun `user can complete the journey with expired compliance certificates for an occupied property (epc found by uprn)`(page: Page) {
-            // Gas supply page
-            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert page
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            hasGasCertPage.submitHasCertificate()
-            var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-            // Gas Cert Issue Date - render page
-            assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
-            gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
-            var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-            // Gas Cert Expired - render page then navigate to edit issue date
-            assertThat(gasCertExpiredPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
-            assertThat(gasCertExpiredPage.sectionHeading).containsText("You must get a valid gas safety certificate for this property")
-            assertThat(gasCertExpiredPage.warning)
-                .containsText("You could face prosecution if you have tenants in a property without a gas safety certificate.")
-            assertThat(gasCertExpiredPage.submitButton).containsText("Continue without a valid gas safety certificate")
-            gasCertExpiredPage.changeIssueDateLink.clickAndWait()
-            gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-            // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
-            assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
-            assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
-            assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
-            gasCertIssueDatePage.form.submit()
-            gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-            // Back on Gas Cert Expired page - submit
-            gasCertExpiredPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // See the later task-level tests for the EICR equivalent of these electrical safety steps
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
-            hasElectricalCertPage.submitHasEic()
-            var eicIssueDatePage =
-                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
-
-            // EIC Issue Date - render page
-            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            eicIssueDatePage.submitDate(expiredEicIssueDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expired - render page then check change issue date link
-            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
-            assertThat(electricalCertExpiredPage.warning)
-                .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
-            assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
-            electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            eicIssueDatePage =
-                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
-
-            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
-            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
-            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
-            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
-            eicIssueDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
-
-            // Back on Electrical Cert Expired page - submit
-            electricalCertExpiredPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress))
-                .thenReturn(
-                    MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                        expiryDate = expiredExpiryDate,
-                    ),
-                )
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPCe
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val confirmUprnMatchedEpcDetailsPage =
-                assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
-
-            // Check UPRN matched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
-            assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
-            confirmUprnMatchedEpcDetailsPage.submitYes()
-            val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
-
-            assertThat(epcExpiryCheckPage.form.sectionHeader).containsText(epcSectionHeader)
-            epcExpiryCheckPage.submitEpcExpired()
-            val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
-
-            // EPC Expired - occupied variant: warning visible, "Continue anyway" button
-            assertThat(epcExpiredPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
-            assertThat(epcExpiredPage.warning).isVisible()
-            assertThat(epcExpiredPage.submitButton).containsText("Continue anyway")
-            epcExpiredPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-        }
-
-        @Test
-        fun `user can complete the journey with expired compliance certificates for an unoccupied property (epc not found by uprn)`(
-            page: Page,
-        ) {
-            // Gas supply page
-            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
-            assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert page
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            hasGasCertPage.submitHasCertificate()
-            var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-            // Gas Cert Issue Date - render page
-            assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
-            gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
-            var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-            // Gas Cert Expired - render page then navigate to edit issue date
-            assertThat(gasCertExpiredPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
-            assertThat(gasCertExpiredPage.sectionHeading).containsText("What to do next")
-            assertThat(gasCertExpiredPage.warning).isHidden()
-            assertThat(gasCertExpiredPage.submitButton).containsText("Save and continue")
-            gasCertExpiredPage.changeIssueDateLink.clickAndWait()
-            gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-            // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
-            assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
-            assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
-            assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
-            gasCertIssueDatePage.form.submit()
-            gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-            // Back on Gas Cert Expired page - submit
-            gasCertExpiredPage.form.submit()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Check Gas Safety Answers - render page
-            assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
-
-            checkGasSafetyAnswersPage.form.submit()
-            val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-            // See the later task-level tests for the EICR equivalent of these electrical safety steps
-
-            // Has Electrical Cert - render page
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
-            hasElectricalCertPage.submitHasEic()
-            var eicIssueDatePage =
-                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
-
-            // EIC Issue Date - render page
-            assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            eicIssueDatePage.submitDate(expiredEicIssueDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expired - render page then check change issue date link
-            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
-            assertThat(electricalCertExpiredPage.warning).isHidden()
-            assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
-            electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
-            eicIssueDatePage =
-                assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
-
-            // EIC Issue Date again - render page, prepopulated with previous value, then submit again
-            assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
-            assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
-            assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
-            eicIssueDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
-
-            // Back on Electrical Cert Expired page - submit
-            electricalCertExpiredPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-            // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-            // Check Electrical Safety Answers - render page
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-            checkElectricalSafetyAnswersPage.form.submit()
-            val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
-            taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-
-            // Has EPC - render page
-            assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            hasEpcPage.submitHasEpc()
-            val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
-
-            // EPC Search - render page
-            assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
-                .thenReturn(
-                    MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                        certificateNumber = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
-                        expiryDate = expiredExpiryDate,
-                        latestCertificateNumberForThisProperty = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
-                    ),
-                )
-            findYourEpcPage.submitCurrentEpcNumberWhichIsExpired()
-            val confirmEpcDetailsPage =
-                assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
-
-            // Check Matched EPC - render page
-            assertThat(confirmEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
-            val expectedExpiryDate =
-                expiredExpiryDate
-                    .toJavaLocalDate()
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
-            assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(
-                expectedExpiryDate,
-            )
-            assertThat(
-                confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value,
-            ).containsText(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER)
-            confirmEpcDetailsPage.submitYes()
-            val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
-
-            // EPC Expired - unoccupied variant: no warning, "Continue" button
-            assertThat(epcExpiredPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
-            assertThat(epcExpiredPage.warning).isHidden()
-            assertThat(epcExpiredPage.submitButton).containsText("Continue")
-            epcExpiredPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-        }
-
-        // EICR equivalent of the EIC steps in the whole journey tests above
-        @Test
-        fun `the Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
-            // Skip to Has Electrical Cert page and submit "Yes"
-            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
-            assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            hasElectricalCertPage.submitHasEicr()
-            val electricalCertExpiryDatePage =
-                assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expiry Date - render page
-            assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(
-                electricalCertExpiryDatePage.heading,
-            ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
-            electricalCertExpiryDatePage.submitDate(validExpiryDate)
-            var uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
-
-            // Upload Electrical Cert - render page
-            assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
-            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            var checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
-
-            // Check Electrical Cert Uploads - render page
-            assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
-            checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
-            uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
-
-            uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
-            checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
-            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
-
-            checkElectricalCertUploadsPage.table
-                .getClickableCell(0, 2)
-                .link
-                .clickAndWait()
-
-            // Remove Electrical Cert Upload - render page
-            val removeElectricalCertUploadPage =
-                assertPageIs(page, RemoveEicrUploadFormPagePropertyRegistration::class)
-            removeElectricalCertUploadPage.form.radios.selectValue("true")
-            removeElectricalCertUploadPage.form.submit()
-
-            checkElectricalCertUploadsPage =
-                assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
-            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
-            checkElectricalCertUploadsPage.form.submit()
-
-            // Check Electrical Safety Answers - render page
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-            assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
-        }
-
-        // EICR equivalent of the EIC steps in the whole journey tests above
-        @Test
-        fun `the Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
-            // Skip to Has Electrical Cert page and submit EICR
-            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
-            hasElectricalCertPage.submitHasEicr()
-            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expiry Date - submit an expired date
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expired - render page then check change expiry date link
-            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(electricalCertExpiredPage.warning)
-                .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
-            assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
-            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
-            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
-
-            // Back on Electrical Cert Expired page - submit
-            electricalCertExpiredPage.form.submit()
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `user can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
+        page: Page,
+    ) {
+        // Start page (not a journey step, but it is how the user accesses the journey)
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // Task list page (part of the journey to support redirects)
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+
+        // Address lookup - render page
+        assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
+        assertThat(addressLookupPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
+
+        // Select address - render page
+        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
+        assertThat(selectAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+        val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+
+        // Verify incomplete property is created at this point
+        verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperty>(any())
+
+        // Property type selection - render page
+        assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
+        assertThat(propertyTypePage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
+
+        // Number of bedrooms - render page
+        assertThat(bedroomsPage.header).containsText("Number of bedrooms")
+        assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        bedroomsPage.submitNumOfBedrooms(3)
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
+
+        // fill in and submit
+        hasJointLandlordsPage.submitHasJointLandlords()
+        val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
+
+        // Invite joint landlord - render page
+        assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
+        assertThat(inviteJointLandlordPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
+
+        // fill in and submit
+        inviteJointLandlordPage.submitEmail("email@address.com")
+        var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
+
+        // Check joint landlords - render page
+        checkJointLandlordsPage
+            .form
+            .addAnotherButton
+            .clickAndWait()
+
+        // Invite another joint landlord - render page
+        val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+        assertThat(addAnotherPage.form.sectionHeader).containsText(peopleResponsibleSectionHeader)
+        addAnotherPage.submitEmail("email2@address.com")
+
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+        // Remove Joint Landlord - render page
+        val removeJointLandlordsPage =
+            assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+        removeJointLandlordsPage.submitWantsToProceed()
+
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.form.submit()
+
+        val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+        ownsPropertyPage.submitOwnsProperty(true)
+        val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+        ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+        val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+        freeholdTypePage.submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+        val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        propertyManagerPage.submitNo()
+
+        val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        correspondenceEmailPage.submitAccountEmail()
+
+        val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+        correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
+
+        val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
+        correspondenceSelectPage.selectAddressAndSubmit("2 Fake Way")
+
+        val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+
+        // Occupancy - render page
+        assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
+        assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
+        occupancyPage.submitIsOccupied()
+        val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+        whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+
+        // Licensing type - render page
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
+        assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
+        licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
+        val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
+
+        // Selective licence - render page
+        assertThat(selectiveLicencePage.form.fieldsetHeading).containsText("What is your selective licence number?")
+        assertThat(selectiveLicencePage.form.sectionHeader).containsText(licenseSectionHeader)
+        selectiveLicencePage.submitLicenseNumber("licence number")
+
+        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+
+        // Has Gas Supply - render page
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert - render page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
+        hasGasCertPage.submitHasCertificate()
+        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
+        gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
+        var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+
+        // Upload Gas Cert - render page
+        assertThat(uploadGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+        // Check Gas Cert Uploads - render page
+        assertThat(checkGasCertUploadsPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertEquals(1, checkGasCertUploadsPage.table.rows.count())
+        checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
+        uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
+        assertEquals(2, checkGasCertUploadsPage.table.rows.count())
+
+        checkGasCertUploadsPage.table
+            .getClickableCell(0, 2)
+            .link
+            .clickAndWait()
+
+        val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
+
+        removeGasCertUploadPage.form.radios.selectValue("true")
+        removeGasCertUploadPage.form.submit()
+
+        checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+
+        assertEquals(1, checkGasCertUploadsPage.table.rows.count())
+        checkGasCertUploadsPage.form.submit()
+
+        // Remove Gas Cert Upload - render page
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasEic()
+        val eicIssueDatePage =
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+
+        // EIC Issue Date - render page
+        assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(
+            eicIssueDatePage.heading,
+        ).containsText("What’s the issue date on the Electrical Installation Certificate (EIC)?")
+        eicIssueDatePage.submitDate(validEicIssueDate)
+        var uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
+
+        // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Certificate (EIC)")
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        var checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
+
+        // Check Electrical Cert Uploads - render page
+        assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+        checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
+        uploadElectricalCertPage = assertPageIs(page, UploadEicFormPagePropertyRegistration::class)
+
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
+        assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
+
+        checkElectricalCertUploadsPage.table
+            .getClickableCell(0, 2)
+            .link
+            .clickAndWait()
+
+        val removeElectricalCertUploadPage =
+            assertPageIs(page, RemoveEicUploadFormPagePropertyRegistration::class)
+
+        removeElectricalCertUploadPage.form.radios.selectValue("true")
+        removeElectricalCertUploadPage.form.submit()
+
+        checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+
+        assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+        checkElectricalCertUploadsPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
             assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-        }
 
-        // EICR equivalent of the EIC steps in the whole journey tests above
-        @Test
-        fun `the Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
-            // Skip to Has Electrical Cert page and submit EICR
-            val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied = false)
-            hasElectricalCertPage.submitHasEicr()
-            var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expiry Date - submit an expired date
-            electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
-            var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expired - render page then check change expiry date link
-            assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
-            assertThat(electricalCertExpiredPage.warning).isHidden()
-            assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
-            electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
-            electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
-
-            // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
-            assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
-            assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
-            assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
-            electricalCertExpiryDatePage.form.submit()
-            electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
-
-            // Back on Electrical Cert Expired page - submit
-            electricalCertExpiredPage.form.submit()
-            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `the EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
-            // Skip to Find Your EPC page and submit "Superseded EPC Found"
-            val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
-            assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
+        // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress))
+            .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
-                    certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
-                    expiryDate = MockEpcData.expiryDateInThePast,
-                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    expiryDate = validExpiryDate,
                 ),
             )
-            whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val confirmUprnMatchedEpcDetailsPage =
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+
+        // Confirm UPRN matched EPC - submit No (don't use this EPC)
+        assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
+        confirmUprnMatchedEpcDetailsPage.submitNo()
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitHasEpc()
+        val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+
+        // EPC Search - render page
+        assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    expiryDate = validExpiryDate,
                 ),
             )
-            findYourEpcPage.submitSupersededEpcNumber()
-            val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
+        findYourEpcPage.submitCurrentEpcNumber()
+        val confirmEpcDetailsPage =
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
-            // Check details of superseded and latest epc - render page
-            assertThat(epcSupersededPage.sectionHeader).containsText(epcSectionHeader)
-            epcSupersededPage.submitContinueWithLatest()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        // Check Matched EPC - render page
+        assertThat(confirmEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
+        val expectedExpiryDate =
+            validExpiryDate
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(
+            expectedExpiryDate,
+        )
+        assertThat(
+            confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value,
+        ).containsText(CURRENT_EPC_CERTIFICATE_NUMBER)
+        confirmEpcDetailsPage.submitYes()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
-        }
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
-        @Test
-        fun `the EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
-            // Skip to Find Your EPC page and submit "No EPC Found"
-            val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
-            assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
-            whenever(
-                epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
-            ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-            findYourEpcPage.submitNonexistentEpcNumber()
-            val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickRentedOutTaskWithName("Tenancy details")
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(2)
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        rentIncludesBillsPage.submitIsIncluded()
+        val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
+        billsIncludedPage.selectGasElectricityWater()
+        billsIncludedPage.selectSomethingElseCheckbox()
+        billsIncludedPage.fillCustomBills("Dog Grooming")
+        billsIncludedPage.form.submit()
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
+        rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
+        rentFrequencyPage.form.submit()
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+        rentAmountPage.submitRentAmount("400")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            // EPC not found - render page
-            assertThat(epcNotFoundPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcNotFoundPage.heading).containsText("We could not find your EPC")
-            assertThat(epcNotFoundPage.certificateNumberText).containsText(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
-            assertThat(epcNotFoundPage.searchAgainLink).isVisible()
+        // Check answers - render page
+        assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+        assertThat(checkAnswersPage.rentedOutHeading).isVisible()
+        assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.epcHeading).isVisible()
+        // submit
+        checkAnswersPage.confirm()
+        val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
 
-            // Click 'search again' to return to Find Your EPC and re-submit not found
-            epcNotFoundPage.searchAgainLink.click()
-            val findYourEpcPageAgain = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
-            assertThat(findYourEpcPageAgain.form.sectionHeader).containsText(epcSectionHeader)
-            whenever(
-                epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
-            ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-            findYourEpcPageAgain.submitNonexistentEpcNumber()
-            assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class).form.submit()
+        // Confirmation - render page
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.registrationNumber,
+            )
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(propertyOwnershipCaptor.value.isOccupied)
+        assertEquals("alex.surname@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+        // The looked-up correspondence address should reuse the existing "2 Fake Way" address row
+        assertEquals(2L, propertyOwnershipCaptor.value.correspondenceAddress.id)
+        assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
+        assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
-            val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
+        // Check confirmation email
+        verifyConfirmationEmailSent(
+            expectedPrn = expectedPropertyRegNum.toString(),
+            expectedAddress = "1 Fictional Road\nFA1 1AA",
+            expectedIsOccupied = true,
+            expectedJointLandlordEmails = listOf("email2@address.com"),
+        )
 
-            // Is EPC required - render page
-            assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
-            assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
-            isEpcRequiredPage.submitEpcRequired()
-            val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
+        // Go to dashboard
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
 
-            // EPC Missing - render page
-            assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
-            assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
-            assertThat(
-                epcMissingPage.warning,
-            ).containsText("You can be fined for letting a property that does not meet energy efficiency requirements.")
-            epcMissingPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `user can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
+        page: Page,
+    ) {
+        // Start page (not a journey step, but it is how the user accesses the journey)
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-            checkEpcAnswersPage.form.submit()
-            assertPageIs(page, TaskListPagePropertyRegistration::class)
-        }
+        // Task list page (part of the journey to support redirects)
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
 
-        @Test
-        fun `user can navigate the MEES flow when they have a MEES exemption`(page: Page) {
-            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+        // Address lookup - render page
+        assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
+        assertThat(addressLookupPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
-            // Has MEES Exemption - render page
-            assertThat(hasMeesExemptionPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(hasMeesExemptionPage.heading).containsText("You need a registered energy efficiency exemption to let this property")
-            hasMeesExemptionPage.submitHasMeesExemption()
-            val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+        // Select address - render page
+        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
+        assertThat(selectAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+        val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
 
-            // MEES Exemption - select exemption reason
-            assertThat(meesExemptionPage.form.sectionHeader).containsText(epcSectionHeader)
-            meesExemptionPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        // Manual address - render page
+        assertThat(manualAddressPage.form.fieldsetHeading).containsText("What is the property address?")
+        assertThat(manualAddressPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        manualAddressPage.submitAddress(
+            addressLineOne = "Test address line 1",
+            townOrCity = "Testville",
+            postcode = "EG1 2AB",
+        )
+        val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
 
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-        }
+        // Select local council - render page
+        assertThat(selectLocalCouncilPage.form.fieldsetHeading).containsText("What local council area is this property in?")
+        assertThat(selectLocalCouncilPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        selectLocalCouncilPage.submitLocalCouncil(
+            "BATH AND NORTH EAST SOMERSET COUNCIL",
+            "BATH AND NORTH EAST SOMERSET COUNCIL",
+        )
+        val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
-        @Test
-        fun `user can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
-            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+        // Property type selection - render page
+        assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
+        assertThat(propertyTypePage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        // fill in and submit
+        propertyTypePage.submitCustomPropertyType("End terrace house")
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
 
-            // Has MEES Exemption - submit no exemption
-            assertThat(hasMeesExemptionPage.sectionHeader).containsText(epcSectionHeader)
-            hasMeesExemptionPage.submitHasNoMeesExemption()
-            val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
+        // Number of bedrooms - render page
+        assertThat(bedroomsPage.header).containsText("Number of bedrooms")
+        assertThat(bedroomsPage.form.sectionHeader).containsText(propertyDetailsSectionHeader)
+        bedroomsPage.submitNumOfBedrooms(3)
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
-            // Low Energy Rating - render page
-            assertThat(lowEnergyRatingPage.sectionHeader).containsText(epcSectionHeader)
-            assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
-            lowEnergyRatingPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        // Has Joint Landlords - render page
+        assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText(peopleResponsibleSectionHeader)
 
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-        }
+        // fill in and submit
+        hasJointLandlordsPage.submitHasNoJointLandlords()
 
-        @Test
-        fun `user can navigate the EPC exemption flow`(page: Page) {
-            val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
+        val ownsPropertyPage = assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class)
+        ownsPropertyPage.submitOwnsProperty(true)
+        val ownershipKindPage = assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class)
+        ownershipKindPage.submitOwnershipKind(OwnershipKind.FREEHOLD_AND_LEASEHOLD)
+        val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
+        freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
+        assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+        freeholdersListPage.submit()
+        assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
+        val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        propertyManagerPage.submitYes()
+        assertPageIs(page, PropertyManagerDetailsFormPagePropertyRegistration::class)
+            .submitDetails("Pat Manager", "pat.manager@example.com")
+        assertPageIs(page, CheckPropertyManagerFormPagePropertyRegistration::class).form.submit()
 
-            // EPC Exemption - select exemption reason
-            assertThat(epcExemptionPage.form.sectionHeader).containsText(epcSectionHeader)
-            epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
+        val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
 
-            // Check EPC Answers - render page
-            assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
-        }
+        correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+        val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
+        correspondenceSelectPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+        val correspondenceManualAddressPage = assertPageIs(page, CorrespondenceManualAddressFormPagePropertyRegistration::class)
 
-        @Test
-        fun `task list back link navigates to start page after entering from start page`(page: Page) {
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // Correspondence manual address - render page
+        assertThat(correspondenceManualAddressPage.form.fieldsetHeading).containsText("Enter a postal address")
+        assertThat(correspondenceManualAddressPage.form.submitButton).containsText("Confirm and continue")
+        correspondenceManualAddressPage.submitAddress(
+            addressLineOne = "1 Fictional Road",
+            townOrCity = "Fictional Town",
+            postcode = "FA1 1AA",
+        )
 
-            taskListPage.backLink.clickAndWait()
-            assertPageIs(page, RegisterPropertyStartPage::class)
-        }
+        val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
-        @Test
-        fun `task list back link navigates to start page after entering from start page and returning from a task`(page: Page) {
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // Occupancy - render page
+        assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
+        assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
+        // fill in and submit
+        occupancyPage.submitIsVacant()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        // Licensing type - render page
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
+        assertThat(licensingTypePage.form.sectionHeader).containsText(licenseSectionHeader)
+        // fill in and submit
+        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
+        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
-            val backLink = BackLink.default(page)
-            backLink.clickAndWait()
-            taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // Has Gas Supply - render page
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
-            taskListPage.backLink.clickAndWait()
-            assertPageIs(page, RegisterPropertyStartPage::class)
-        }
+        // Has Gas Cert - render page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
+        hasGasCertPage.submitHasNoCertificate()
+        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
-        @Test
-        fun `task list shows three sections with expected task order`(page: Page) {
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // Gas Cert Missing - render page
+        assertThat(gasCertMissingPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertMissingPage.heading).containsText("You must get a gas safety certificate before a tenant moves in")
+        assertThat(gasCertMissingPage.warning).isHidden()
+        assertThat(gasCertMissingPage.submitButton).containsText("Continue")
+        gasCertMissingPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
-            assertEquals(3, taskListPage.getSectionCount())
-            assertThat(taskListPage.getSectionHeading(0)).hasText("About your property")
-            assertThat(taskListPage.getSectionHeading(1)).hasText("How your property is rented out")
-            assertThat(taskListPage.getSectionHeading(2)).hasText("Submit your registration")
-            assertEquals(
-                listOf(
-                    "Property details",
-                    "People responsible for this property",
-                    "Who the council should contact",
-                    "Tell us if this property is occupied",
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasNoCert()
+        val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
+
+        // Electrical Cert Missing - render page
+        assertThat(electricalCertMissingPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(
+            electricalCertMissingPage.heading,
+        ).containsText("You must get an electrical safety certificate before a tenant moves in")
+        assertThat(electricalCertMissingPage.warning).isHidden()
+        assertThat(electricalCertMissingPage.submitButton).containsText("Continue")
+        electricalCertMissingPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // We use a manual address, uprn will be null.
+        // The internal EpcLookupByUprnStep at the start of the EpcTask will not find an EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitHasNoEpc()
+        val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
+
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
+        isEpcRequiredPage.submitEpcRequired()
+        val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
+
+        // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueButton).containsText("Continue")
+        assertThat(epcMissingPage.warning).isHidden()
+        epcMissingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        // Check answers - render page
+        assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+        // submit
+        checkAnswersPage.confirm()
+        val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
+
+        // Confirmation - render page
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.registrationNumber,
+            )
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertFalse(propertyOwnershipCaptor.value.isOccupied)
+        assertEquals("differentemail@example.com", propertyOwnershipCaptor.value.correspondenceEmail)
+        assertEquals(
+            "1 Fictional Road, Fictional Town, FA1 1AA",
+            propertyOwnershipCaptor.value.correspondenceAddress.singleLineAddress,
+        )
+        assertNull(propertyOwnershipCaptor.value.correspondenceAddress.uprn)
+        assertEquals(OwnershipType.SHARE_OF_JOINT_TENANTS, propertyOwnershipCaptor.value.ownershipType)
+        assertEquals("Pat Manager", propertyOwnershipCaptor.value.propertyManager?.name)
+        assertEquals("pat.manager@example.com", propertyOwnershipCaptor.value.propertyManager?.email)
+        assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
+
+        // Check confirmation email
+        verifyConfirmationEmailSent(
+            expectedPrn = expectedPropertyRegNum.toString(),
+            expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
+            expectedIsOccupied = false,
+            expectedJointLandlordEmails = null,
+        )
+
+        // Go to dashboard
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `user can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        hasGasSupplyPage.submitProvideThisLater()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Gas Cert Later - render page
+        assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(provideGasCertLaterPage.insetText).hasText(
+            "To keep the property registered, we need to know about its gas safety within 28 days.",
+        )
+        provideGasCertLaterPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        hasElectricalCertPage.submitProvideThisLater()
+        val provideElectricalCertLaterPage =
+            assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Electrical Cert Later - render page
+        assertThat(provideElectricalCertLaterPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(
+            provideElectricalCertLaterPage.insetText,
+        ).containsText("You must upload your electrical safety certificate within 28 days.")
+        provideElectricalCertLaterPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitProvideThisLater()
+        val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+
+        // Provide EPC Later - render page
+        assertThat(provideEpcLaterPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).containsText(
+            "To keep the property registered, we need all its compliance certificates within 28 days.",
+        )
+        provideEpcLaterPage.form.submit()
+
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `user can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        hasGasSupplyPage.submitProvideThisLater()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Gas Cert Later - render page
+        assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(provideGasCertLaterPage.insetText).isHidden()
+        assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
+            "If your property has a gas supply or any gas appliances, " +
+                "you must get a gas safety certificate before a tenant moves in.",
+        )
+        provideGasCertLaterPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        hasElectricalCertPage.submitProvideThisLater()
+        val provideElectricalCertLaterPage =
+            assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Electrical Cert Later - render page (unoccupied variant)
+        assertThat(provideElectricalCertLaterPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
+        assertThat(provideElectricalCertLaterPage.insetText).isHidden()
+        assertTrue(
+            provideElectricalCertLaterPage.page
+                .content()
+                .contains("You must get an electrical safety certificate before a tenant moves in."),
+        )
+        provideElectricalCertLaterPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitProvideThisLater()
+        val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+
+        // Provide EPC Later - render page
+        assertThat(provideEpcLaterPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).isHidden()
+        provideEpcLaterPage.form.submit()
+
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `user can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        hasGasCertPage.submitHasNoCertificate()
+        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
+
+        // Gas Cert Missing - render page
+        assertThat(gasCertMissingPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
+        assertThat(gasCertMissingPage.submitButton).containsText("Continue without a valid gas safety certificate")
+        assertThat(gasCertMissingPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without a gas safety certificate")
+        gasCertMissingPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasNoCert()
+        val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
+
+        assertThat(electricalCertMissingPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(
+            electricalCertMissingPage.heading,
+        ).containsText("You must get a valid electrical safety certificate for this property")
+        assertThat(electricalCertMissingPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+        assertThat(electricalCertMissingPage.submitButton).containsText("Continue without a valid electrical safety certificate")
+        electricalCertMissingPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitHasNoEpc()
+        val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
+
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
+        isEpcRequiredPage.submitEpcRequired()
+        val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
+
+        // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
+        assertThat(
+            epcMissingPage.warning,
+        ).containsText("You can be fined for letting a property that does not meet energy efficiency requirements.")
+        epcMissingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+
+        // Check Answers - submit to reach Confirm Missing Compliance page
+        checkAnswersPage.form.submit()
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+
+        // Confirm Missing Compliance - render page
+        assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
+        assertThat(confirmMissingCompliancePage.warning).isVisible()
+        assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
+
+        // Confirm Missing Compliance - submit
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+        val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
+
+        // Confirmation - verify record saved
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.registrationNumber,
+            )
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
+    }
+
+    @Test
+    fun `user can complete the journey with expired compliance certificates for an occupied property (epc found by uprn)`(page: Page) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        hasGasCertPage.submitHasCertificate()
+        var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
+        gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
+        var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
+        assertThat(gasCertExpiredPage.sectionHeading).containsText("You must get a valid gas safety certificate for this property")
+        assertThat(gasCertExpiredPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without a gas safety certificate.")
+        assertThat(gasCertExpiredPage.submitButton).containsText("Continue without a valid gas safety certificate")
+        gasCertExpiredPage.changeIssueDateLink.clickAndWait()
+        gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
+        assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
+        assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
+        assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
+        gasCertIssueDatePage.form.submit()
+        gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Back on Gas Cert Expired page - submit
+        gasCertExpiredPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasEic()
+        var eicIssueDatePage =
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+
+        // EIC Issue Date - render page
+        assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+        eicIssueDatePage.submitDate(expiredEicIssueDate)
+        var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page then check change issue date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
+        assertThat(electricalCertExpiredPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+        assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
+        electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
+        eicIssueDatePage =
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+
+        // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+        assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+        assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+        assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+        eicIssueDatePage.form.submit()
+        electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+
+        // Back on Electrical Cert Expired page - submit
+        electricalCertExpiredPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    expiryDate = expiredExpiryDate,
                 ),
-                taskListPage.getAboutYourPropertyTaskNames(),
             )
-            assertEquals(
-                listOf(
-                    "Who will provide these details",
-                    "Tell us if your property needs a licence",
-                    "Gas safety certificate",
-                    "Electrical safety certificate",
-                    "Energy performance certificate (EPC)",
-                    "Tenancy details",
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPCe
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val confirmUprnMatchedEpcDetailsPage =
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+
+        // Check UPRN matched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
+        assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
+        confirmUprnMatchedEpcDetailsPage.submitYes()
+        val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
+
+        assertThat(epcExpiryCheckPage.form.sectionHeader).containsText(epcSectionHeader)
+        epcExpiryCheckPage.submitEpcExpired()
+        val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
+
+        // EPC Expired - occupied variant: warning visible, "Continue anyway" button
+        assertThat(epcExpiredPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+        assertThat(epcExpiredPage.warning).isVisible()
+        assertThat(epcExpiredPage.submitButton).containsText("Continue anyway")
+        epcExpiredPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+    }
+
+    @Test
+    fun `user can complete the journey with expired compliance certificates for an unoccupied property (epc not found by uprn)`(
+        page: Page,
+    ) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
+        hasGasCertPage.submitHasCertificate()
+        var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertIssueDatePage.heading).containsText("When was this certificate issued?")
+        gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
+        var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.sectionHeader).containsText(gasSafetyHeader)
+        assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
+        assertThat(gasCertExpiredPage.sectionHeading).containsText("What to do next")
+        assertThat(gasCertExpiredPage.warning).isHidden()
+        assertThat(gasCertExpiredPage.submitButton).containsText("Save and continue")
+        gasCertExpiredPage.changeIssueDateLink.clickAndWait()
+        gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
+        assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
+        assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
+        assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
+        gasCertIssueDatePage.form.submit()
+        gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Back on Gas Cert Expired page - submit
+        gasCertExpiredPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
+
+        checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // See the later task-level tests for the EICR equivalent of these electrical safety steps
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasEic()
+        var eicIssueDatePage =
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+
+        // EIC Issue Date - render page
+        assertThat(eicIssueDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+        eicIssueDatePage.submitDate(expiredEicIssueDate)
+        var electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page then check change issue date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(electricalCertExpiredPage.heading).containsText("You need a different electrical safety certificate")
+        assertThat(electricalCertExpiredPage.warning).isHidden()
+        assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
+        electricalCertExpiredPage.changeIssueDateLink.clickAndWait()
+        eicIssueDatePage =
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+
+        // EIC Issue Date again - render page, prepopulated with previous value, then submit again
+        assertThat(eicIssueDatePage.form.dayInput).hasValue(expiredEicIssueDate.dayOfMonth.toString())
+        assertThat(eicIssueDatePage.form.monthInput).hasValue(expiredEicIssueDate.monthNumber.toString())
+        assertThat(eicIssueDatePage.form.yearInput).hasValue(expiredEicIssueDate.year.toString())
+        eicIssueDatePage.form.submit()
+        electricalCertExpiredPage = assertPageIs(page, EicExpiredFormPagePropertyRegistration::class)
+
+        // Back on Electrical Cert Expired page - submit
+        electricalCertExpiredPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+        // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+
+        // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        hasEpcPage.submitHasEpc()
+        val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+
+        // EPC Search - render page
+        assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    certificateNumber = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
+                    expiryDate = expiredExpiryDate,
+                    latestCertificateNumberForThisProperty = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
                 ),
-                taskListPage.getRentedOutTaskNames(),
             )
-            assertEquals(
-                listOf("Submit and pay"),
-                taskListPage.getSubmitYourRegistrationTaskNames(),
+        findYourEpcPage.submitCurrentEpcNumberWhichIsExpired()
+        val confirmEpcDetailsPage =
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
+
+        // Check Matched EPC - render page
+        assertThat(confirmEpcDetailsPage.sectionHeader).containsText(epcSectionHeader)
+        val expectedExpiryDate =
+            expiredExpiryDate
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(
+            expectedExpiryDate,
+        )
+        assertThat(
+            confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value,
+        ).containsText(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER)
+        confirmEpcDetailsPage.submitYes()
+        val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
+
+        // EPC Expired - unoccupied variant: no warning, "Continue" button
+        assertThat(epcExpiredPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+        assertThat(epcExpiredPage.warning).isHidden()
+        assertThat(epcExpiredPage.submitButton).containsText("Continue")
+        epcExpiredPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+    }
+
+    // EICR equivalent of the EIC steps in the whole journey tests above
+    @Test
+    fun `the Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
+        // Skip to Has Electrical Cert page and submit "Yes"
+        val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        hasElectricalCertPage.submitHasEicr()
+        val electricalCertExpiryDatePage =
+            assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(
+            electricalCertExpiryDatePage.heading,
+        ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
+        electricalCertExpiryDatePage.submitDate(validExpiryDate)
+        var uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+
+        // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.form.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        var checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+
+        // Check Electrical Cert Uploads - render page
+        assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+        checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
+        uploadElectricalCertPage = assertPageIs(page, UploadEicrFormPagePropertyRegistration::class)
+
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+        assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
+
+        checkElectricalCertUploadsPage.table
+            .getClickableCell(0, 2)
+            .link
+            .clickAndWait()
+
+        // Remove Electrical Cert Upload - render page
+        val removeElectricalCertUploadPage =
+            assertPageIs(page, RemoveEicrUploadFormPagePropertyRegistration::class)
+        removeElectricalCertUploadPage.form.radios.selectValue("true")
+        removeElectricalCertUploadPage.form.submit()
+
+        checkElectricalCertUploadsPage =
+            assertPageIs(page, CheckEicrUploadsFormPagePropertyRegistration::class)
+        assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
+        checkElectricalCertUploadsPage.form.submit()
+
+        // Check Electrical Safety Answers - render page
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
+    }
+
+    // EICR equivalent of the EIC steps in the whole journey tests above
+    @Test
+    fun `the Electrical Safety task can be completed with an expired EICR for an occupied property`(page: Page) {
+        // Skip to Has Electrical Cert page and submit EICR
+        val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+        hasElectricalCertPage.submitHasEicr()
+        var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date - submit an expired date
+        electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+        var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page then check change expiry date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(electricalCertExpiredPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+        assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
+        electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+        electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+        assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+        assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+        assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+        electricalCertExpiryDatePage.form.submit()
+        electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+        // Back on Electrical Cert Expired page - submit
+        electricalCertExpiredPage.form.submit()
+        assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+    }
+
+    // EICR equivalent of the EIC steps in the whole journey tests above
+    @Test
+    fun `the Electrical Safety task can be completed with an expired EICR for an unoccupied property`(page: Page) {
+        // Skip to Has Electrical Cert page and submit EICR
+        val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage(propertyIsOccupied = false)
+        hasElectricalCertPage.submitHasEicr()
+        var electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date - submit an expired date
+        electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
+        var electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page then check change expiry date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText(electricalSafetyHeader)
+        assertThat(electricalCertExpiredPage.warning).isHidden()
+        assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
+        electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
+        electricalCertExpiryDatePage = assertPageIs(page, EicrExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date again - render page, prepopulated with previous value, then submit again
+        assertThat(electricalCertExpiryDatePage.form.dayInput).hasValue(expiredExpiryDate.dayOfMonth.toString())
+        assertThat(electricalCertExpiryDatePage.form.monthInput).hasValue(expiredExpiryDate.monthNumber.toString())
+        assertThat(electricalCertExpiryDatePage.form.yearInput).hasValue(expiredExpiryDate.year.toString())
+        electricalCertExpiryDatePage.form.submit()
+        electricalCertExpiredPage = assertPageIs(page, EicrExpiredFormPagePropertyRegistration::class)
+
+        // Back on Electrical Cert Expired page - submit
+        electricalCertExpiredPage.form.submit()
+        assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `the EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
+        // Skip to Find Your EPC page and submit "Superseded EPC Found"
+        val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+        assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                expiryDate = MockEpcData.expiryDateInThePast,
+                latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
+        findYourEpcPage.submitSupersededEpcNumber()
+        val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
+
+        // Check details of superseded and latest epc - render page
+        assertThat(epcSupersededPage.sectionHeader).containsText(epcSectionHeader)
+        epcSupersededPage.submitContinueWithLatest()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `the EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
+        // Skip to Find Your EPC page and submit "No EPC Found"
+        val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+        assertThat(findYourEpcPage.form.sectionHeader).containsText(epcSectionHeader)
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        findYourEpcPage.submitNonexistentEpcNumber()
+        val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
+
+        // EPC not found - render page
+        assertThat(epcNotFoundPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcNotFoundPage.heading).containsText("We could not find your EPC")
+        assertThat(epcNotFoundPage.certificateNumberText).containsText(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
+        assertThat(epcNotFoundPage.searchAgainLink).isVisible()
+
+        // Click 'search again' to return to Find Your EPC and re-submit not found
+        epcNotFoundPage.searchAgainLink.click()
+        val findYourEpcPageAgain = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+        assertThat(findYourEpcPageAgain.form.sectionHeader).containsText(epcSectionHeader)
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        findYourEpcPageAgain.submitNonexistentEpcNumber()
+        assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class).form.submit()
+
+        val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
+
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText(epcSectionHeader)
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
+        isEpcRequiredPage.submitEpcRequired()
+        val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
+
+        // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
+        assertThat(
+            epcMissingPage.warning,
+        ).containsText("You can be fined for letting a property that does not meet energy efficiency requirements.")
+        epcMissingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `user can navigate the MEES flow when they have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - render page
+        assertThat(hasMeesExemptionPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(hasMeesExemptionPage.heading).containsText("You need a registered energy efficiency exemption to let this property")
+        hasMeesExemptionPage.submitHasMeesExemption()
+        val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+
+        // MEES Exemption - select exemption reason
+        assertThat(meesExemptionPage.form.sectionHeader).containsText(epcSectionHeader)
+        meesExemptionPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+    }
+
+    @Test
+    fun `user can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - submit no exemption
+        assertThat(hasMeesExemptionPage.sectionHeader).containsText(epcSectionHeader)
+        hasMeesExemptionPage.submitHasNoMeesExemption()
+        val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
+
+        // Low Energy Rating - render page
+        assertThat(lowEnergyRatingPage.sectionHeader).containsText(epcSectionHeader)
+        assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
+        lowEnergyRatingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+    }
+
+    @Test
+    fun `user can navigate the EPC exemption flow`(page: Page) {
+        val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
+
+        // EPC Exemption - select exemption reason
+        assertThat(epcExemptionPage.form.sectionHeader).containsText(epcSectionHeader)
+        epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+    }
+
+    @Test
+    fun `task list back link navigates to start page after entering from start page`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.backLink.clickAndWait()
+        assertPageIs(page, RegisterPropertyStartPage::class)
+    }
+
+    @Test
+    fun `task list back link navigates to start page after entering from start page and returning from a task`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+
+        val backLink = BackLink.default(page)
+        backLink.clickAndWait()
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.backLink.clickAndWait()
+        assertPageIs(page, RegisterPropertyStartPage::class)
+    }
+
+    @Test
+    fun `task list shows three sections with expected task order`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        assertEquals(3, taskListPage.getSectionCount())
+        assertThat(taskListPage.getSectionHeading(0)).hasText("About your property")
+        assertThat(taskListPage.getSectionHeading(1)).hasText("How your property is rented out")
+        assertThat(taskListPage.getSectionHeading(2)).hasText("Submit your registration")
+        assertEquals(
+            listOf(
+                "Property details",
+                "People responsible for this property",
+                "Who the council should contact",
+                "Tell us if this property is occupied",
+            ),
+            taskListPage.getAboutYourPropertyTaskNames(),
+        )
+        assertEquals(
+            listOf(
+                "Who will provide these details",
+                "Tell us if this property needs a licence",
+                "Gas safety certificate",
+                "Electrical safety certificate",
+                "Energy performance certificate (EPC)",
+                "Tenancy details",
+            ),
+            taskListPage.getRentedOutTaskNames(),
+        )
+        assertEquals(
+            listOf("Submit and pay"),
+            taskListPage.getSubmitYourRegistrationTaskNames(),
+        )
+
+        assertTrue(taskListPage.getAboutYourPropertyTask("Property details").hasLink)
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `cya shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
+        val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.tenancyHeading).isVisible()
+        assertThat(checkAnswersPage.tenancyUnoccupiedBodyText).isVisible()
+        assertEquals(emptyList<String>(), checkAnswersPage.tenancyRowHeadings())
+    }
+
+    @Test
+    fun `cya shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+
+        assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
+        assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
+    }
+
+    @Test
+    fun `cya shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
+        val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
+        assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
+    }
+
+    @Test
+    fun `the occupancy question change link on the CYA navigates to the occupancy page`(page: Page) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswers()
+                    .withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+        val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
+        bedroomsPage.submitNumOfBedrooms(3)
+
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+        hasJointLandlordsPage.submitHasNoJointLandlords()
+
+        assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
+        assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+        assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
+        assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitNo()
+
+        val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        correspondenceEmailPage.submitAccountEmail()
+        val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+
+        correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+        val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+        assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
+        correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
+        val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+        assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
+        occupancyPage.submitIsOccupied()
+        val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+        whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
+        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
+        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasNoGasSupply()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
+        checkGasSafetyAnswersPage.form.submit()
+
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPage.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        hasElectricalCertPage.submitProvideThisLater()
+        val provideElectricalCertLaterPage =
+            assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
+        provideElectricalCertLaterPage.form.submit()
+        val checkElectricalSafetyAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
+
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        checkElectricalSafetyAnswersPage.form.submit()
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPage.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+        hasEpcPage.submitProvideThisLater()
+        val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+        provideEpcLaterPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
+        checkEpcAnswersPage.form.submit()
+
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        assertTrue(taskListPage.getRentedOutTask("Tenancy details").hasLink)
+        taskListPage.clickRentedOutTaskWithName("Tenancy details")
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(2)
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        rentIncludesBillsPage.submitIsNotIncluded()
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+        rentFrequencyPage.form.submit()
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+        rentAmountPage.submitRentAmount("400")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
+    }
+
+    @Test
+    fun `user can choose to provide tenancy details later if their property is occupied`(page: Page) {
+        navigator.skipToTenancyDetailsHouseholdsPage()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        assertThat(householdsPage.provideThisLaterButton).isVisible()
+
+        householdsPage.submitProvideThisLater()
+        val provideTenancyDetailsLaterPage =
+            assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
+
+        // Provide Tenancy Details Later - render page
+        assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
+        assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
+        assertThat(provideTenancyDetailsLaterPage.saveAndContinueButton).containsText("Save and continue")
+    }
+
+    @Test
+    fun `occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
+        assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
+        provideTenancyDetailsLaterPage.form.submit()
+
+        // Check Your Answers - render page
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.heading).containsText("Check your answers")
+        assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
+        assertEquals(listOf("Tenancy details"), checkAnswersPage.tenancyRowHeadings())
+        assertThat(checkAnswersPage.summaryList.tenancyDetailsRow.value).containsText("Provide this later")
+    }
+
+    @Test
+    fun `task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+
+        val taskListPage = navigator.goToPropertyRegistrationTaskList()
+
+        assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+
+        val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
+        assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
+        assertTrue(checkAndSubmitTask.hasLink)
+    }
+
+    @Test
+    fun `cya hides tenancy details section after landlord has chosen to provide tenancy details later`(page: Page) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
+
+        checkAnswersPage.summaryList.tenancyDetailsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `changing tenancy details from CYA and selecting provide this later returns to CYA`(page: Page) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.summaryList.tenancyDetailsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitProvideThisLater()
+
+        val provideTenancyDetailsLaterPageAgain =
+            assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
+        provideTenancyDetailsLaterPageAgain.form.submit()
+
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `abandoning tenancy details mid journey shows tenancy details as Completed on task list`(page: Page) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.summaryList.tenancyDetailsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(1)
+
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+
+        assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+
+        val taskListPage = navigator.goToPropertyRegistrationTaskList()
+        assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+    }
+
+    @Test
+    fun `changing from provide tenancy details later to providing households and people routes through whole tenancy journey to CYA`(
+        page: Page,
+    ) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.summaryList.tenancyDetailsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(1)
+
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        rentIncludesBillsPage.submitIsNotIncluded()
+
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+        rentFrequencyPage.form.submit()
+
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+        rentAmountPage.submitRentAmount("400")
+
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(page: Page) {
+        val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+        provideTenancyDetailsLaterPage.form.submit()
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.summaryList.tenancyDetailsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(1)
+
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        rentIncludesBillsPage.submitIsNotIncluded()
+
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+        rentFrequencyPage.form.submit()
+
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+        rentAmountPage.submitRentAmount("400")
+
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        val taskListPage = navigator.goToPropertyRegistrationTaskList()
+        assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+    }
+
+    @Test
+    fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
+        assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
+        assertTrue(propertyDetailsTask.hasLink)
+
+        val ownershipTask = taskListPage.getAboutYourPropertyTask("People responsible for this property")
+        assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
+        assertFalse(ownershipTask.hasLink)
+
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
+        )
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getRentedOutTask("Tell us if this property needs a licence").statusText.trim(),
+        )
+        assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+        assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
+        )
+    }
+
+    @Test
+    fun `task list shows a grouping task as in progress when it is partially completed`() {
+        // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
+        // grouping task (which now contains all three) is partway through.
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType(),
             )
 
-            assertTrue(taskListPage.getAboutYourPropertyTask("Property details").hasLink)
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-        }
+        assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
+        )
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
+        )
+        assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+        assertEquals(
+            "Cannot\u00A0start\u00A0yet",
+            taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
+        )
+    }
 
-        @Test
-        fun `cya shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+    @Test
+    fun `task list shows grouping tasks as complete when their answers are provided`() {
+        navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+        val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.tenancyHeading).isVisible()
-            assertThat(checkAnswersPage.tenancyUnoccupiedBodyText).isVisible()
-            assertEquals(emptyList<String>(), checkAnswersPage.tenancyRowHeadings())
-        }
+        assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
+        assertEquals(
+            "Completed",
+            taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
+        )
+        assertEquals(
+            "Completed",
+            taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
+        )
+        assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
-        @Test
-        fun `cya shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+        val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
+        assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
+        assertTrue(checkAndSubmitTask.hasLink)
+    }
 
-            assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
-            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
-        }
+    @Test
+    fun `occupied journey completes full flow and shows answers on check answers`(page: Page) {
+        navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
 
-        @Test
-        fun `cya shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+    @Test
+    fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
+        val checkAnswersPage =
+            navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
+                households = 2,
+                people = 4,
+                bedrooms = 3,
+                rentAmount = "0000000.1",
+            )
 
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
-            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
-        }
+        assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£0.1")
+        assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
+        assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
+        assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
+    }
 
-        @Test
-        fun `the occupancy question change link on the CYA navigates to the occupancy page`(page: Page) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswers()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    @Test
+    fun `cya does not show Which bills are included row when rent does not include bills`() {
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
-            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
-        }
+        assertFalse(checkAnswersPage.tenancyRowHeadings().contains("Which bills are included"))
+    }
 
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+    @Test
+    fun `changing number of households from CYA only goes through households and people then returns to CYA`(page: Page) {
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
-            val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
-            selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
-            val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
-            propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
-            val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
-            bedroomsPage.submitNumOfBedrooms(3)
+        checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+            .getActionLink("Change")
+            .clickAndWait()
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(3)
 
-            val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
-            hasJointLandlordsPage.submitHasNoJointLandlords()
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(5)
 
-            assertPageIs(page, OwnsPropertyFormPagePropertyRegistration::class).submitOwnsProperty(true)
-            assertPageIs(page, OwnershipKindFormPagePropertyRegistration::class).submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
-            assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class).submitFreeholdType(FreeholdType.SOLE_OWNERSHIP)
-            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class).submitNo()
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
 
-            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submitAccountEmail()
-            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+    @Test
+    fun `cya joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswersOccupied()
+                    .withCheckedJointLandlords(mutableListOf("email@address.com")),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
-            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
-            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
-            assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
-            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
-
-            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
-            assertThat(occupancyPage.form.fieldsetHeading).containsText("Is this property occupied by tenants?")
-            occupancyPage.submitIsOccupied()
-            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
-            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
-            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-            assertThat(licensingTypePage.form.fieldsetHeading).containsText("Which licence does this property have?")
-            licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
-            val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
-            assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
-            hasGasSupplyPage.submitHasNoGasSupply()
-            val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-            assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
-            checkGasSafetyAnswersPage.form.submit()
-
-            taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPage.clickRentedOutTaskWithName("Electrical safety certificate")
-            val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-            hasElectricalCertPage.submitProvideThisLater()
-            val provideElectricalCertLaterPage =
-                assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
-            provideElectricalCertLaterPage.form.submit()
-            val checkElectricalSafetyAnswersPage =
-                assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-            assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
-
-            whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-            checkElectricalSafetyAnswersPage.form.submit()
-            taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            taskListPage.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
-            val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-            hasEpcPage.submitProvideThisLater()
-            val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
-            provideEpcLaterPage.form.submit()
-            val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-            assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
-            checkEpcAnswersPage.form.submit()
-
-            taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-            assertTrue(taskListPage.getRentedOutTask("Tenancy details").hasLink)
-            taskListPage.clickRentedOutTaskWithName("Tenancy details")
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(2)
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-            rentIncludesBillsPage.submitIsNotIncluded()
-            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
-            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
-            rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
-            rentFrequencyPage.form.submit()
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.submitRentAmount("400")
-
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
-        }
-
-        @Test
-        fun `user can choose to provide tenancy details later if their property is occupied`(page: Page) {
-            navigator.skipToTenancyDetailsHouseholdsPage()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            assertThat(householdsPage.provideThisLaterButton).isVisible()
-
-            householdsPage.submitProvideThisLater()
-            val provideTenancyDetailsLaterPage =
-                assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
-
-            // Provide Tenancy Details Later - render page
-            assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
-            assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
-            assertThat(provideTenancyDetailsLaterPage.saveAndContinueButton).containsText("Save and continue")
-        }
-
-        @Test
-        fun `occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
-            assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
-            provideTenancyDetailsLaterPage.form.submit()
-
-            // Check Your Answers - render page
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.heading).containsText("Check your answers")
-            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
-            assertEquals(listOf("Tenancy details"), checkAnswersPage.tenancyRowHeadings())
-            assertThat(checkAnswersPage.summaryList.tenancyDetailsRow.value).containsText("Provide this later")
-        }
-
-        @Test
-        fun `task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-
-            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
-
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
-            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
-            assertTrue(checkAndSubmitTask.hasLink)
-        }
-
-        @Test
-        fun `cya hides tenancy details section after landlord has chosen to provide tenancy details later`(page: Page) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
-
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+        val changeLink =
+            checkAnswersPage.summaryList.invitationsRow.actions
                 .getActionLink("Change")
-                .clickAndWait()
-            assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-        }
+        assertThat(changeLink).isVisible()
 
-        @Test
-        fun `changing tenancy details from CYA and selecting provide this later returns to CYA`(page: Page) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        changeLink.clickAndWait()
+        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
+    }
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+    @Test
+    fun `cya joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+            .containsText("No, I am the only landlord for this property")
+        assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
+
+        val changeLink =
+            checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
                 .getActionLink("Change")
-                .clickAndWait()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitProvideThisLater()
-
-            val provideTenancyDetailsLaterPageAgain =
-                assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
-            provideTenancyDetailsLaterPageAgain.form.submit()
-
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `abandoning tenancy details mid journey shows tenancy details as Completed on task list`(page: Page) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(1)
-
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-
-            assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
-        }
-
-        @Test
-        fun `changing from provide tenancy details later to providing households and people routes through whole tenancy journey to CYA`(
-            page: Page,
-        ) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(1)
-
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-
-            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-            rentIncludesBillsPage.submitIsNotIncluded()
-
-            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
-            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-
-            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
-            rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
-            rentFrequencyPage.form.submit()
-
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.submitRentAmount("400")
-
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `completing tenancy details after changing from provide later marks tenancy details task as completed on task list`(
-            page: Page,
-        ) {
-            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
-            provideTenancyDetailsLaterPage.form.submit()
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(1)
-
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-
-            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-            rentIncludesBillsPage.submitIsNotIncluded()
-
-            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
-            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-
-            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
-            rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
-            rentFrequencyPage.form.submit()
-
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.submitRentAmount("400")
-
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
-        }
-
-        @Test
-        fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
-            assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
-            assertTrue(propertyDetailsTask.hasLink)
-
-            val ownershipTask = taskListPage.getAboutYourPropertyTask("People responsible for this property")
-            assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
-            assertFalse(ownershipTask.hasLink)
-
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
-            )
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
-            )
-            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
-            )
-        }
-
-        @Test
-        fun `task list shows a grouping task as in progress when it is partially completed`() {
-            // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
-            // grouping task (which now contains all three) is partway through.
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType(),
-                )
-
-            assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
-            )
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
-            )
-            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals(
-                "Cannot\u00A0start\u00A0yet",
-                taskListPage.getSubmitYourRegistrationTask("Submit and pay").statusText.trim(),
-            )
-        }
-
-        @Test
-        fun `task list shows grouping tasks as complete when their answers are provided`() {
-            navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-
-            assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
-            assertEquals(
-                "Completed",
-                taskListPage.getAboutYourPropertyTask("People responsible for this property").statusText.trim(),
-            )
-            assertEquals(
-                "Completed",
-                taskListPage.getAboutYourPropertyTask("Tell us if this property is occupied").statusText.trim(),
-            )
-            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
-
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Submit and pay")
-            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
-            assertTrue(checkAndSubmitTask.hasLink)
-        }
-
-        @Test
-        fun `occupied journey completes full flow and shows answers on check answers`(page: Page) {
-            navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
-            val checkAnswersPage =
-                navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
-                    households = 2,
-                    people = 4,
-                    bedrooms = 3,
-                    rentAmount = "0000000.1",
-                )
-
-            assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£0.1")
-            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
-            assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
-            assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
-        }
-
-        @Test
-        fun `cya does not show Which bills are included row when rent does not include bills`() {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
-
-            assertFalse(checkAnswersPage.tenancyRowHeadings().contains("Which bills are included"))
-        }
-
-        @Test
-        fun `changing number of households from CYA only goes through households and people then returns to CYA`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-
-            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-            householdsPage.submitNumberOfHouseholds(3)
-
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(5)
-
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `cya joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withCheckedJointLandlords(mutableListOf("email@address.com")),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
-
-            val changeLink =
-                checkAnswersPage.summaryList.invitationsRow.actions
-                    .getActionLink("Change")
-            assertThat(changeLink).isVisible()
-
-            changeLink.clickAndWait()
-            val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
-        }
-
-        @Test
-        fun `cya joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
-                .containsText("No, I am the only landlord for this property")
-            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
-
-            val changeLink =
-                checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
-                    .getActionLink("Change")
-            assertThat(changeLink).isVisible()
-
-            changeLink.clickAndWait()
-            assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `a landlord cannot invite themselves as a joint landlord`(page: Page) {
-            val inviteJointLandlordPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
-
-            inviteJointLandlordPage.submitEmail("alex.surname@example.com")
-
-            val inviteJointLandlordPageWithError =
-                assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
-            assertThat(inviteJointLandlordPageWithError.form.getErrorMessage())
-                .containsText("You cannot invite yourself as a joint landlord")
-
-            inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
-            assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationOccupancy()
-                        .withOccupancyStatus(true)
-                        .withBedrooms()
-                        .withHasNoJointLandlords(),
-                )
-
-            taskListPage.clickRentedOutTaskWithName("Who will provide these details")
-            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
-
-            whoProvidesRentalDetailsPage.submitLettingAgentProvidesDetails()
-
-            val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
-            lettingAgentEmailPage.submitEmail("agent@example.com")
-
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.submitButton).containsText("Submit and pay")
-            assertThat(checkAnswersPage.warning).isVisible()
-            checkAnswersPage.confirm()
-
-            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
-            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
-            assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
-        }
-
-        @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `submitting the CYA page when the landlord provides details and a certificate is missing shows the confirm missing compliance page before reaching confirmation`(
-            page: Page,
-        ) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
-
-            checkAnswersPage.confirm()
-
-            val confirmMissingCompliancePage =
-                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-            assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
-
-            confirmMissingCompliancePage.form.radios.selectValue("true")
-            confirmMissingCompliancePage.form.submit()
-
-            completePropertyRegistrationPaymentSuccessfully(page)
-        }
-
-        @Test
-        fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            checkAnswersPage.confirm()
-
-            val confirmMissingCompliancePage =
-                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-            confirmMissingCompliancePage.form.radios.selectValue("true")
-            confirmMissingCompliancePage.form.submit()
-
-            completePropertyRegistrationPaymentSuccessfully(page)
-
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            val savedPropertyOwnership =
-                propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
-                    ?: error("Property ownership was not saved")
-
-            val anniversary =
-                jdbcTemplate.queryForMap(
-                    "SELECT l.anniversary_day, l.anniversary_month FROM landlord l" +
-                        " JOIN ownership_link ol ON ol.landlord_id = l.id" +
-                        " WHERE ol.landlordship_id = ?",
-                    savedPropertyOwnership.id,
-                )
-            val registrationDate = DateTimeHelper().getCurrentDateInUK()
-            assertEquals(registrationDate.dayOfMonth, anniversary["anniversary_day"])
-            assertEquals(registrationDate.monthNumber, anniversary["anniversary_month"])
-        }
-
-        @Test
-        fun `registering a property does not update the registering landlord's anniversary when it is already set`(page: Page) {
-            val existingAnniversary = MonthDay.of(1, 1)
-            val today = LocalDate.now(DateTimeHelper.UK_ZONE)
-            val chargeableQuote =
-                PropertyRegistrationPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
-            doReturn(chargeableQuote).whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
-            jdbcTemplate.update(
-                "UPDATE landlord SET anniversary_day = ?, anniversary_month = ?" +
-                    " WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:UVWXY'",
-                existingAnniversary.dayOfMonth,
-                existingAnniversary.monthValue,
+        assertThat(changeLink).isVisible()
+
+        changeLink.clickAndWait()
+        assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `a landlord cannot invite themselves as a joint landlord`(page: Page) {
+        val inviteJointLandlordPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+
+        inviteJointLandlordPage.submitEmail("alex.surname@example.com")
+
+        val inviteJointLandlordPageWithError =
+            assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
+        assertThat(inviteJointLandlordPageWithError.form.getErrorMessage())
+            .containsText("You cannot invite yourself as a joint landlord")
+
+        inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
+        assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationOccupancy()
+                    .withOccupancyStatus(true)
+                    .withBedrooms()
+                    .withHasNoJointLandlords(),
             )
 
-            val taskListPage =
-                navigator.goToPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            checkAnswersPage.confirm()
+        taskListPage.clickRentedOutTaskWithName("Who will provide these details")
+        val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
 
-            val confirmMissingCompliancePage =
-                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-            confirmMissingCompliancePage.form.radios.selectValue("true")
-            confirmMissingCompliancePage.form.submit()
+        whoProvidesRentalDetailsPage.submitLettingAgentProvidesDetails()
 
-            completePropertyRegistrationPaymentSuccessfully(page)
+        val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+        lettingAgentEmailPage.submitEmail("agent@example.com")
 
-            val propertyOwnershipCaptor = captor<PropertyOwnership>()
-            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-            val savedPropertyOwnership =
-                propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
-                    ?: error("Property ownership was not saved")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.submitButton).containsText("Submit and pay")
+        assertThat(checkAnswersPage.warning).isVisible()
+        checkAnswersPage.confirm()
 
-            val anniversary =
-                jdbcTemplate.queryForMap(
-                    "SELECT l.anniversary_day, l.anniversary_month FROM landlord l" +
-                        " JOIN ownership_link ol ON ol.landlord_id = l.id" +
-                        " WHERE ol.landlordship_id = ?",
-                    savedPropertyOwnership.id,
-                )
-            assertEquals(existingAnniversary.dayOfMonth, anniversary["anniversary_day"])
-            assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
-        }
+        val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
+        assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+        assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
+    }
 
-        // TODO: PDJB-1926: Remove this nested class
-        @Nested
-        inner class Gas14MonthExpiryDisabled {
-            @BeforeEach
-            fun disableGas14MonthExpiryFlag() {
-                featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
-            }
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `submitting the CYA page when the landlord provides details and a certificate is missing shows the confirm missing compliance page before reaching confirmation`(
+        page: Page,
+    ) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswersOccupied()
+                    .withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
 
-            @Test
-            fun `a gas safety certificate issued 12 months and 1 day ago is expired`(page: Page) {
-                val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
-                gasCertIssueDatePage.submitDate(
-                    DateTimeHelper()
-                        .getCurrentDateInUK()
-                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY, days = 1)),
-                )
+        checkAnswersPage.confirm()
 
-                assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-            }
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+        assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
 
-            @Test
-            fun `a gas safety certificate issued 12 months ago is valid`(page: Page) {
-                val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
-                gasCertIssueDatePage.submitDate(
-                    DateTimeHelper()
-                        .getCurrentDateInUK()
-                        .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY)),
-                )
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
 
-                assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
-            }
+        completePropertyRegistrationPaymentSuccessfully(page)
+    }
 
-            private fun skipToGasCertIssueDatePage(page: Page): GasCertIssueDateFormPagePropertyRegistration {
-                val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
-                hasGasSupplyPage.submitHasGasSupply()
-                val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-                hasGasCertPage.submitHasCertificate()
-                return assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-            }
+    @Test
+    fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswersOccupied()
+                    .withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        checkAnswersPage.confirm()
+
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+
+        completePropertyRegistrationPaymentSuccessfully(page)
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val savedPropertyOwnership =
+            propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
+                ?: error("Property ownership was not saved")
+
+        val anniversary =
+            jdbcTemplate.queryForMap(
+                "SELECT l.anniversary_day, l.anniversary_month FROM landlord l" +
+                    " JOIN ownership_link ol ON ol.landlord_id = l.id" +
+                    " WHERE ol.landlordship_id = ?",
+                savedPropertyOwnership.id,
+            )
+        val registrationDate = DateTimeHelper().getCurrentDateInUK()
+        assertEquals(registrationDate.dayOfMonth, anniversary["anniversary_day"])
+        assertEquals(registrationDate.monthNumber, anniversary["anniversary_month"])
+    }
+
+    @Test
+    fun `registering a property does not update the registering landlord's anniversary when it is already set`(page: Page) {
+        val existingAnniversary = MonthDay.of(1, 1)
+        val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+        val chargeableQuote =
+            PropertyRegistrationPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
+        doReturn(chargeableQuote).whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
+        jdbcTemplate.update(
+            "UPDATE landlord SET anniversary_day = ?, anniversary_month = ?" +
+                " WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:UVWXY'",
+            existingAnniversary.dayOfMonth,
+            existingAnniversary.monthValue,
+        )
+
+        val taskListPage =
+            navigator.goToPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswersOccupied()
+                    .withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        checkAnswersPage.confirm()
+
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+
+        completePropertyRegistrationPaymentSuccessfully(page)
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val savedPropertyOwnership =
+            propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
+                ?: error("Property ownership was not saved")
+
+        val anniversary =
+            jdbcTemplate.queryForMap(
+                "SELECT l.anniversary_day, l.anniversary_month FROM landlord l" +
+                    " JOIN ownership_link ol ON ol.landlord_id = l.id" +
+                    " WHERE ol.landlordship_id = ?",
+                savedPropertyOwnership.id,
+            )
+        assertEquals(existingAnniversary.dayOfMonth, anniversary["anniversary_day"])
+        assertEquals(existingAnniversary.monthValue, anniversary["anniversary_month"])
+    }
+
+    // TODO: PDJB-1926: Remove this nested class
+    @Nested
+    inner class Gas14MonthExpiryDisabled {
+        @BeforeEach
+        fun disableGas14MonthExpiryFlag() {
+            featureFlagManager.disableFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
         }
 
         @Test
-        fun `manual address selection is cached when an address search returns no results`(page: Page) {
-            val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
-
-            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-            registerPropertyStartPage.startButton.clickAndWait()
-            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
-
-            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
-            val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA9 9ZZ", "999")
-
-            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
-            noAddressFoundPage.form.submit()
-
-            val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
-            manualAddressPage.submitAddress(
-                addressLineOne = "999 Test Road",
-                townOrCity = "Testville",
-                postcode = "FA9 9ZZ",
+        fun `a gas safety certificate issued 12 months and 1 day ago is expired`(page: Page) {
+            val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
+            gasCertIssueDatePage.submitDate(
+                DateTimeHelper()
+                    .getCurrentDateInUK()
+                    .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY, days = 1)),
             )
 
-            val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
-            selectLocalCouncilPage.submitLocalCouncil(
-                "BATH AND NORTH EAST SOMERSET COUNCIL",
-                "BATH AND NORTH EAST SOMERSET COUNCIL",
-            )
-            assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
-
-            val savedState =
-                landlordIncompletePropertiesRepository
-                    .findAll()
-                    .single { it.id !in existingIncompletePropertyIds }
-                    .savedJourneyState.serializedState
-            assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
+            assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
         }
+
+        @Test
+        fun `a gas safety certificate issued 12 months ago is valid`(page: Page) {
+            val gasCertIssueDatePage = skipToGasCertIssueDatePage(page)
+            gasCertIssueDatePage.submitDate(
+                DateTimeHelper()
+                    .getCurrentDateInUK()
+                    .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS_BEFORE_14_MONTHS_EXPIRY)),
+            )
+
+            assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+        }
+
+        private fun skipToGasCertIssueDatePage(page: Page): GasCertIssueDateFormPagePropertyRegistration {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+            hasGasSupplyPage.submitHasGasSupply()
+            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+            hasGasCertPage.submitHasCertificate()
+            return assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Test
+    fun `manual address selection is cached when an address search returns no results`(page: Page) {
+        val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
+
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA9 9ZZ", "999")
+
+        val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+        noAddressFoundPage.form.submit()
+
+        val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+        manualAddressPage.submitAddress(
+            addressLineOne = "999 Test Road",
+            townOrCity = "Testville",
+            postcode = "FA9 9ZZ",
+        )
+
+        val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
+        selectLocalCouncilPage.submitLocalCouncil(
+            "BATH AND NORTH EAST SOMERSET COUNCIL",
+            "BATH AND NORTH EAST SOMERSET COUNCIL",
+        )
+        assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+
+        val savedState =
+            landlordIncompletePropertiesRepository
+                .findAll()
+                .single { it.id !in existingIncompletePropertyIds }
+                .savedJourneyState.serializedState
+        assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
     }
 
     @Nested
@@ -3101,7 +3101,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Not\u00A0started",
-                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
+                updatedTaskListPage.getRentedOutTask("Tell us if this property needs a licence").statusText.trim(),
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
@@ -3220,6 +3220,223 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkAnswersPage.confirm()
 
             completePropertyRegistrationPaymentSuccessfully(page)
+        }
+    }
+
+    @Nested
+    inner class FreeholdersOnPropertyRecord {
+        @ParameterizedTest
+        @CsvSource(
+            "false, , , NONE",
+            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+            "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS",
+            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON",
+            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON",
+        )
+        fun `registered freeholders appear on the property record`(
+            ownsProperty: Boolean,
+            ownershipKind: OwnershipKind?,
+            freeholdType: FreeholdType?,
+            expectedOwnershipType: OwnershipType,
+            page: Page,
+        ) {
+            val freeholders =
+                mapOf(
+                    1 to FreeholderDataModel(detailsKnown = true, name = "First Freeholder", email = "FirstFreeholder@example.com"),
+                    2 to
+                        FreeholderDataModel(
+                            detailsKnown = true,
+                            name = "Second Freeholder",
+                            address =
+                                AddressDataModel.fromManualAddressData(
+                                    addressLineOne = "1 Example Street",
+                                    addressLineTwo = "Example Court",
+                                    townOrCity = "Example City",
+                                    county = "Exampleshire",
+                                    postcode = "EX1 1AB",
+                                ),
+                        ),
+                    3 to FreeholderDataModel(detailsKnown = false),
+                )
+            val builder =
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswers()
+                    .withBedrooms()
+                    .withOwnsProperty(ownsProperty)
+                    .withFreeholders(freeholders)
+                    .withFreeholdersInfoComplete()
+                    .withFreeholdersListComplete()
+            if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
+            if (freeholdType != null) builder.withFreeholdType(freeholdType)
+            if (ownershipKind != OwnershipKind.FREEHOLD_ONLY) builder.withAnyoneInOwnershipChain(false)
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.freeholderSection.locator("h3"))
+                .hasText(if (expectedOwnershipType.isJointFreeholder()) "Joint freeholders" else "Freeholders")
+            assertThat(detailsPage.freeholderUpdateLink.locator)
+                .hasText(
+                    if (expectedOwnershipType.isJointFreeholder()) {
+                        "Add, change or remove joint freeholders"
+                    } else {
+                        "Add, change or remove freeholders"
+                    },
+                )
+            assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
+                "href",
+                "/landlord/property-details/${propertyOwnershipCaptor.value.id}/update-freeholders/start",
+            )
+            assertEquals(3, detailsPage.freeholderCards.size)
+            val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
+            assertEquals(setOf("First Freeholder", "Second Freeholder", "Unknown freeholder"), cards.keys)
+            assertThat(cards.getValue("First Freeholder").summaryList).containsText("Email address")
+            assertThat(cards.getValue("First Freeholder").summaryList).containsText("FirstFreeholder@example.com")
+            assertEquals(0, cards.getValue("First Freeholder").bodyText.count())
+            assertThat(cards.getValue("Second Freeholder").summaryList).hasCount(0)
+            assertThat(cards.getValue("Second Freeholder").bodyText).hasText(
+                "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(cards.getValue("Second Freeholder").bodyText.locator("strong")).hasText("postal address")
+            assertThat(cards.getValue("Unknown freeholder").bodyText).hasText(
+                "You told us there was another freeholder, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
+            assertEquals(
+                0,
+                cards
+                    .getValue("Unknown freeholder")
+                    .bodyText
+                    .locator("strong")
+                    .count(),
+            )
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+        }
+
+        @ParameterizedTest
+        @CsvSource(
+            "FREEHOLD_ONLY, SOLE_OWNERSHIP, SOLE_FREEHOLD",
+            "FREEHOLD_ONLY, COMMONHOLD, COMMONHOLD",
+            "FREEHOLD_AND_LEASEHOLD, SOLE_OWNERSHIP, SHARE_OF_SOLE_FREEHOLD",
+            "FREEHOLD_AND_LEASEHOLD, COMMONHOLD, SHARE_OF_COMMONHOLD",
+        )
+        fun `registered sole and commonhold owners do not see freeholders on the property record`(
+            ownershipKind: OwnershipKind,
+            freeholdType: FreeholdType,
+            expectedOwnershipType: OwnershipType,
+            page: Page,
+        ) {
+            val builder =
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswers()
+                    .withBedrooms()
+                    .withOwnsProperty()
+                    .withOwnershipKind(ownershipKind)
+                    .withFreeholdType(freeholdType)
+            if (ownershipKind == OwnershipKind.FREEHOLD_AND_LEASEHOLD) builder.withAnyoneInOwnershipChain(false)
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+            detailsPage.tabs.goToPeopleResponsible()
+            assertThat(detailsPage.freeholderSection).hasCount(0)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordsOnPropertyRecord {
+        @ParameterizedTest
+        @CsvSource(
+            "false, , , NONE",
+            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+            "true, FREEHOLD_AND_LEASEHOLD, SOLE_OWNERSHIP, SHARE_OF_SOLE_FREEHOLD",
+            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+            "true, FREEHOLD_AND_LEASEHOLD, COMMONHOLD, SHARE_OF_COMMONHOLD",
+        )
+        fun `registered superior landlords appear on the property record`(
+            ownsProperty: Boolean,
+            ownershipKind: OwnershipKind?,
+            freeholdType: FreeholdType?,
+            expectedOwnershipType: OwnershipType,
+            page: Page,
+        ) {
+            val superiorLandlords =
+                mapOf(
+                    1 to SuperiorLandlordDataModel(detailsKnown = true, name = "First Superior", email = "FirstSuperior@example.com"),
+                    2 to
+                        SuperiorLandlordDataModel(
+                            detailsKnown = true,
+                            name = "Second Superior",
+                            address =
+                                AddressDataModel.fromManualAddressData(
+                                    addressLineOne = "1 Example Street",
+                                    addressLineTwo = "Example Court",
+                                    townOrCity = "Example City",
+                                    county = "Exampleshire",
+                                    postcode = "EX1 1AB",
+                                ),
+                        ),
+                    3 to SuperiorLandlordDataModel(detailsKnown = false),
+                )
+            val builder =
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswers()
+                    .withBedrooms()
+                    .withOwnsProperty(ownsProperty)
+                    .withAnyoneInOwnershipChain(true)
+                    .withSuperiorLandlords(superiorLandlords)
+                    .withSuperiorLandlordsListComplete()
+            if (ownershipKind != null) builder.withOwnershipKind(ownershipKind)
+            if (freeholdType != null) builder.withFreeholdType(freeholdType)
+            if (expectedOwnershipType.requiresFreeholderRecords()) {
+                builder
+                    .withFreeholders(mapOf(1 to FreeholderDataModel(detailsKnown = false)))
+                    .withFreeholdersInfoComplete()
+                    .withFreeholdersListComplete()
+            }
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList(builder)
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class).confirm()
+            completePropertyRegistrationPaymentSuccessfully(page)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            assertEquals(expectedOwnershipType, propertyOwnershipCaptor.value.ownershipType)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipCaptor.value.id)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection.locator("h3")).hasText("Other people in the property’s ownership chain")
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("First Superior", "Second Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("First Superior").summaryList).containsText("FirstSuperior@example.com")
+            assertEquals(0, cards.getValue("First Superior").bodyText.count())
+            assertThat(cards.getValue("Second Superior").summaryList).hasCount(0)
+            assertThat(cards.getValue("Second Superior").bodyText).hasText(
+                "A postal address was provided for this person in the ownership chain. " +
+                    "We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
     }
 

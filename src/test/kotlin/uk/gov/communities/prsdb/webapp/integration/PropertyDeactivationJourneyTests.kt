@@ -61,8 +61,11 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertNull(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId))
         verify(confirmationEmailSender).sendEmail(any(), argThat { !landlordDeactivated })
         verify(lettingAgentDeactivatedEmailSender).sendEmail(eq("letting.agent.one@example.com"), any())
-        // TODO PDJB-2035: Assert landing on PropertyDetailsPageLandlordView with the "Property deactivated." banner
-        //  once inactive property records render
+
+        val deactivatedDetailsPage =
+            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
+        assertThat(deactivatedDetailsPage.deactivationSuccessBanner).containsText("Property deactivated.")
+        assertThat(deactivatedDetailsPage.caption).hasText("Deactivated property")
     }
 
     @Test

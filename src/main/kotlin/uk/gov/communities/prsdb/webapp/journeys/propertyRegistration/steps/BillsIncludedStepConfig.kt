@@ -65,7 +65,7 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
                     ),
                     CheckboxButtonViewModel(
                         value = BillsIncluded.SOMETHING_ELSE,
-                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.somethingElse",
+                        labelMsgKey = "tenancyDetails.billsIncluded.checkbox.other",
                         conditionalFragment = "customBillsIncludedInput",
                     ),
                 ),

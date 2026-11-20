@@ -52,8 +52,8 @@ The summary list contains 19 rows, in display order:
 ## Transaction counts
 
 Completed transactions — registrations, deregistrations, updates, switch-to-individual, accepting a
-joint landlord invitation, and leaving a property as a joint landlord — are counted from a dedicated
-Plausible `Transaction` custom event. The event
+joint landlord invitation, leaving a property as a joint landlord, and reactivating a property — are
+counted from a dedicated Plausible `Transaction` custom event. The event
 is fired by a button press on each journey's final commit step: the commit button is rendered from a
 fragment tagged `data-plausible-event="Transaction"` (`transactionSubmitButton` / `transactionWarningButton`).
 For reporting periods before the configured cutover date (`plausible.transaction-event-start-date`) the
