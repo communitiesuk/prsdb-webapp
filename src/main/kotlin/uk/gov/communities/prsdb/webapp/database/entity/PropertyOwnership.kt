@@ -98,6 +98,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
     var propertyManager: PropertyManager? = null
 
+    // Property manager updates edit the property manager row in place, which has its own timestamp.
+    fun getPropertyManagerMostRecentlyUpdated(): Instant =
+        listOfNotNull(getMostRecentlyUpdated(), propertyManager?.getMostRecentlyUpdated()).max()
+
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
 

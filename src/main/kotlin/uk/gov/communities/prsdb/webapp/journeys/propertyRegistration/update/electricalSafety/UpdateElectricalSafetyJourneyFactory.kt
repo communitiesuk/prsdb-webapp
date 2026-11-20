@@ -18,10 +18,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -77,7 +77,6 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
-            useCertDateBackStepsFromCheckUploads(journey.electricalSafetyDetailsTask)
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -111,35 +110,32 @@ class UpdateElectricalSafetyJourneyFactory(
             when (state.checkingAnswersFor) {
                 // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyDetailsTask.eicExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyDetailsTask.eicExpiryDateStep,
+                    )
                 }
 
                 EicIssueDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyDetailsTask.eicIssueDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyDetailsTask.eicIssueDateStep,
+                    )
                 }
 
                 EicrExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyDetailsTask.eicrExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyDetailsTask.eicrExpiryDateStep,
+                    )
                 }
 
                 else -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
-            }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                backDestination { journey.returnToCyaPageDestination }
-            }
-            configureStep(journey.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                backDestination { journey.returnToCyaPageDestination }
             }
 
             step(journey.finishCyaStep) {
