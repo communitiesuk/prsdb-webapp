@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -65,31 +64,8 @@ class CompletePropertyManagerUpdateStepConfigTests {
         }
 
         @Test
-        fun `afterStepIsReached does not update the record or send emails when the property manager is unchanged`() {
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
-            givenUsingPropertyManager("Agent Ltd", "agent@example.com")
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verifyNoInteractions(mockPropertyOwnershipService)
-            verifyNoInteractions(mockPropertyUpdateEmailService)
-        }
-
-        @Test
-        fun `afterStepIsReached does not update the record or send emails when there was and still is no property manager`() {
-            givenOriginalPropertyManager(null)
-            whenever(mockPropertyManagerStep.outcome).thenReturn(YesOrNo.NO)
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verifyNoInteractions(mockPropertyOwnershipService)
-            verifyNoInteractions(mockPropertyUpdateEmailService)
-        }
-
-        @Test
-        fun `afterStepIsReached saves a new property manager when one is added`() {
+        fun `afterStepIsReached updates the property manager and sends the update email when the answer is yes`() {
             givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(null)
             givenUsingPropertyManager("New Agent", "new@example.com")
 
             stepConfig.afterStepIsReached(mockState)
@@ -99,43 +75,26 @@ class CompletePropertyManagerUpdateStepConfigTests {
                 eq(PropertyManagerDataModel("New Agent", "new@example.com")),
                 any(),
             )
-            // TODO PDJB-1991: Assert the new property manager email is sent once it has been implemented
+            // TODO PDJB-1991: Assert the new property manager email is sent only when the property manager changed
             verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
         }
 
         @Test
-        fun `afterStepIsReached saves the replacement when the property manager details change`() {
+        fun `afterStepIsReached removes the property manager and sends the update email when the answer is no`() {
             givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
-            givenUsingPropertyManager("Agent Ltd", "new@example.com")
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockPropertyOwnershipService).updatePropertyManager(
-                eq(propertyId),
-                eq(PropertyManagerDataModel("Agent Ltd", "new@example.com")),
-                any(),
-            )
-        }
-
-        @Test
-        fun `afterStepIsReached removes the property manager when the answer is changed to no`() {
-            givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
             whenever(mockPropertyManagerStep.outcome).thenReturn(YesOrNo.NO)
 
             stepConfig.afterStepIsReached(mockState)
 
             verify(mockPropertyOwnershipService).removePropertyManager(eq(propertyId), any())
             verify(mockPropertyOwnershipService, never()).updatePropertyManager(any(), any(), any())
-            // TODO PDJB-2171: Assert the removed property manager email is sent once it has been implemented
+            // TODO PDJB-2171: Assert the removed property manager email is sent only when there was a property manager
             verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
         }
 
         @Test
         fun `afterStepIsReached deletes the journey and rethrows when updating the property manager conflicts`() {
             givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(null)
             givenUsingPropertyManager("New Agent", "new@example.com")
             whenever(mockPropertyOwnershipService.updatePropertyManager(any(), any(), any()))
                 .thenThrow(UpdateConflictException::class.java)
@@ -149,7 +108,6 @@ class CompletePropertyManagerUpdateStepConfigTests {
         @Test
         fun `afterStepIsReached deletes the journey and rethrows when removing the property manager conflicts`() {
             givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
             whenever(mockPropertyManagerStep.outcome).thenReturn(YesOrNo.NO)
             whenever(mockPropertyOwnershipService.removePropertyManager(any(), any()))
                 .thenThrow(UpdateConflictException::class.java)
@@ -169,10 +127,6 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
         assertSame(defaultDestination, result)
         verify(mockState).deleteJourney()
-    }
-
-    private fun givenOriginalPropertyManager(propertyManager: PropertyManagerDataModel?) {
-        whenever(mockState.originalPropertyManager).thenReturn(propertyManager)
     }
 
     private fun givenTheRecordWillBeUpdated() {
