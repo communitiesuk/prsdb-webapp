@@ -26,6 +26,7 @@ data class DataPackageProgress(
     val dataPackageVersionId: String,
     val rowOffset: Int,
     val isComplete: Boolean = true,
+    val fileName: String = NgdAddressLoader.DATA_PACKAGE_FILE_NAMES.first(),
 )
 
 @PrsdbTaskService
@@ -60,8 +61,11 @@ class NgdAddressLoader(
             var currentVersionId: String
 
             if (storedProgress != null && !storedProgress.isComplete) {
-                log("Resuming in-progress version ${storedProgress.dataPackageVersionId} from row offset ${storedProgress.rowOffset}")
-                loadDataPackageVersion(session, storedProgress.dataPackageVersionId, storedProgress.rowOffset)
+                log(
+                    "Resuming in-progress version ${storedProgress.dataPackageVersionId} " +
+                        "from file ${storedProgress.fileName} at row offset ${storedProgress.rowOffset}",
+                )
+                loadDataPackageVersion(session, storedProgress.dataPackageVersionId, storedProgress)
                 currentVersionId = storedProgress.dataPackageVersionId
             } else {
                 currentVersionId = storedProgress?.dataPackageVersionId ?: loadInitialDataPackageVersion(session)
@@ -91,12 +95,12 @@ class NgdAddressLoader(
     private fun loadDataPackageVersion(
         session: StatelessSession,
         dataPackageVersionId: String,
-        initialRowOffset: Int = 0,
+        resumeFrom: DataPackageProgress? = null,
     ) {
-        if (initialRowOffset == 0) {
+        if (resumeFrom == null) {
             val markerTransaction = session.beginTransaction()
             try {
-                saveProgress(DataPackageProgress(dataPackageVersionId, 0, isComplete = false))
+                saveProgress(DataPackageProgress(dataPackageVersionId, 0, isComplete = false, fileName = DATA_PACKAGE_FILE_NAMES.first()))
                 markerTransaction.commit()
             } catch (exception: Exception) {
                 markerTransaction.rollback()
@@ -104,19 +108,43 @@ class NgdAddressLoader(
             }
         }
 
+        val startFileIndex = DATA_PACKAGE_FILE_NAMES.indexOf(resumeFrom?.fileName ?: DATA_PACKAGE_FILE_NAMES.first())
+        require(startFileIndex >= 0) { "Unknown data package file '${resumeFrom?.fileName}'" }
+
+        for (fileIndex in startFileIndex until DATA_PACKAGE_FILE_NAMES.size) {
+            val initialRowOffset = if (fileIndex == startFileIndex) resumeFrom?.rowOffset ?: 0 else 0
+            loadDataPackageFile(
+                session,
+                dataPackageVersionId,
+                DATA_PACKAGE_FILE_NAMES[fileIndex],
+                DATA_PACKAGE_FILE_NAMES.getOrNull(fileIndex + 1),
+                initialRowOffset,
+            )
+        }
+
+        log("Data package version $dataPackageVersionId loaded")
+    }
+
+    private fun loadDataPackageFile(
+        session: StatelessSession,
+        dataPackageVersionId: String,
+        fileName: String,
+        nextFileName: String?,
+        initialRowOffset: Int,
+    ) {
         var rowOffset = initialRowOffset
         var retriesRemaining = MAX_STREAM_RETRIES
 
         while (true) {
             try {
-                log("Starting to load data package version $dataPackageVersionId from row offset $rowOffset")
+                log("Starting to load file $fileName of data package version $dataPackageVersionId from row offset $rowOffset")
 
                 val inputStream =
-                    osDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, dataPackageVersionId, "$DATA_PACKAGE_FILE_NAME.zip")
+                    osDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, dataPackageVersionId, "$fileName.zip")
                 val zipInputStream = ZipInputStream(inputStream)
 
                 zipInputStream.use { zip ->
-                    zip.goToEntry("$DATA_PACKAGE_FILE_NAME.csv")
+                    zip.goToEntry("$fileName.csv")
                     val entryReader = zip.bufferedReader()
 
                     entryReader.use { fileReader ->
@@ -129,31 +157,34 @@ class NgdAddressLoader(
                                     if (iterator.hasNext()) iterator.next()
                                 }
                             }
-                            loadCsvRecords(session, dataPackageVersionId, parser, rowOffset)
+                            loadCsvRecords(session, dataPackageVersionId, fileName, nextFileName, parser, rowOffset)
                         }
                     }
                 }
 
-                log("Data package version $dataPackageVersionId loaded")
+                log("File $fileName of data package version $dataPackageVersionId loaded")
                 return
             } catch (exception: Exception) {
                 if (!isRetryableStreamException(exception)) {
-                    log("Error while loading data package version $dataPackageVersionId:")
+                    log("Error while loading file $fileName of data package version $dataPackageVersionId:")
                     throw exception
                 }
                 val progress = getStoredProgress()
-                if (progress?.isComplete == true && progress.dataPackageVersionId == dataPackageVersionId) {
-                    log("Data package version $dataPackageVersionId completed before stream error, skipping retry")
+                val hasFileCompleted =
+                    progress?.dataPackageVersionId == dataPackageVersionId &&
+                        (progress.isComplete || progress.fileName != fileName)
+                if (hasFileCompleted) {
+                    log("File $fileName of data package version $dataPackageVersionId completed before stream error, skipping retry")
                     return
                 }
                 rowOffset = progress?.rowOffset ?: rowOffset
                 if (retriesRemaining <= 0) {
-                    log("Error while loading data package version $dataPackageVersionId (retries exhausted):")
+                    log("Error while loading file $fileName of data package version $dataPackageVersionId (retries exhausted):")
                     throw exception
                 }
                 retriesRemaining--
                 log(
-                    "Stream error while loading data package version $dataPackageVersionId " +
+                    "Stream error while loading file $fileName of data package version $dataPackageVersionId " +
                         "at row offset $rowOffset. Retries remaining: $retriesRemaining. Reopening stream.",
                 )
             }
@@ -200,6 +231,8 @@ class NgdAddressLoader(
     private fun loadCsvRecords(
         session: StatelessSession,
         dataPackageVersionId: String,
+        fileName: String,
+        nextFileName: String?,
         csvParser: CSVParser,
         startRowOffset: Int = 0,
     ) {
@@ -213,12 +246,10 @@ class NgdAddressLoader(
                     val upsertedAddressUprns = mutableSetOf<Long>()
 
                     csvParser.forEachIndexed { index, record ->
-                        val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
-                        if (hasRecordBeenAdded) {
-                            batchRecordCount++
-                            val uprn = record.get("uprn").toLong()
-                            upsertedAddressUprns.add(uprn)
-                        }
+                        addCsvRecordToBatch(preparedStatement, record)
+                        batchRecordCount++
+                        val uprn = record.get("uprn").toLong()
+                        upsertedAddressUprns.add(uprn)
 
                         if (batchRecordCount >= BATCH_SIZE) {
                             preparedStatement.executeBatch()
@@ -235,7 +266,9 @@ class NgdAddressLoader(
                             upsertedAddressUprns.clear()
                             // Row offset saved within the same transaction as the data, ensuring atomic progress tracking
                             val committedRowOffset = startRowOffset + index + 1
-                            saveProgress(DataPackageProgress(dataPackageVersionId, committedRowOffset, isComplete = false))
+                            saveProgress(
+                                DataPackageProgress(dataPackageVersionId, committedRowOffset, isComplete = false, fileName = fileName),
+                            )
                             transaction.commit()
                             transaction = session.beginTransaction()
                         }
@@ -246,7 +279,13 @@ class NgdAddressLoader(
                     if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderDao.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                 }
             }
-            saveProgress(DataPackageProgress(dataPackageVersionId, 0, isComplete = true))
+            val finalProgress =
+                if (nextFileName != null) {
+                    DataPackageProgress(dataPackageVersionId, 0, isComplete = false, fileName = nextFileName)
+                } else {
+                    DataPackageProgress(dataPackageVersionId, 0, isComplete = true)
+                }
+            saveProgress(finalProgress)
             transaction.commit()
         } catch (exception: Exception) {
             transaction.rollback()
@@ -257,7 +296,7 @@ class NgdAddressLoader(
     private fun addCsvRecordToBatch(
         preparedStatement: PreparedStatement,
         csvRecord: CSVRecord,
-    ): Boolean {
+    ) {
         val changeType = csvRecord.get("changetype")
         val country = csvRecord.get("country")
         val isAddressActive =
@@ -265,9 +304,6 @@ class NgdAddressLoader(
                 false
             } else if (changeType in upsertChangeTypes) {
                 true
-            } else if (changeType in noChangeTypes) {
-                // Skip record
-                return false
             } else {
                 throw IllegalArgumentException("Unknown change type '$changeType'")
             }
@@ -296,9 +332,10 @@ class NgdAddressLoader(
         preparedStatement.setString(10, csvRecord.get("postcode"))
         preparedStatement.setIntOrNull(11, localCouncilId)
         preparedStatement.setBoolean(12, isAddressActive)
+        preparedStatement.setString(13, country)
+        preparedStatement.setStringOrNull(14, csvRecord.get("lowertierlocalauthoritygsscode"))
 
         preparedStatement.addBatch()
-        return true
     }
 
     private fun deleteUnusedInactiveAddresses(session: StatelessSession) {
@@ -323,8 +360,8 @@ class NgdAddressLoader(
     companion object {
         const val DATA_PACKAGE_VERSION_COMMENT_PREFIX = "dataPackageVersionId="
 
-        const val DATA_PACKAGE_ID = "15298"
-        const val DATA_PACKAGE_FILE_NAME = "add_gb_builtaddress"
+        const val DATA_PACKAGE_ID = "25924"
+        val DATA_PACKAGE_FILE_NAMES = listOf("add_gb_builtaddress", "add_isl_builtaddress")
 
         const val BATCH_SIZE = 5000
         const val UPRN_BATCH_SIZE = 20000
@@ -333,24 +370,33 @@ class NgdAddressLoader(
         private val deleteChangeTypes =
             listOf("End Of Life", "Moved To A Different Feature Type")
         private val upsertChangeTypes =
-            listOf("New", "Moved From A Different Feature Type", "Modified Attributes", "Modified Geometry And Attributes")
-        private val noChangeTypes = listOf("Modified Geometry")
+            listOf(
+                "New",
+                "Moved From A Different Feature Type",
+                "Modified Attributes",
+                "Modified Geometry",
+                "Modified Geometry And Attributes",
+            )
 
-        private val validCountries = listOf("England", "Wales", "Unassigned")
+        private val validCountries = listOf("England", "Wales", "Scotland", "Northern Ireland", "Unassigned")
 
         fun parseDataPackageProgress(comment: String?): DataPackageProgress? {
             if (comment == null) return null
             val versionId = comment.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX).substringBefore(";")
             if (versionId.isEmpty()) return null
             val rowOffsetMatch = Regex("""rowOffset=(\d+)""").find(comment)
+            val fileNameMatch = Regex("""fileName=([^;]+)""").find(comment)
+            // An in-progress comment must record both the file and the row offset within it
+            if ((rowOffsetMatch == null) != (fileNameMatch == null)) return null
             val rowOffset = rowOffsetMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
             val isComplete = rowOffsetMatch == null
-            return DataPackageProgress(versionId, rowOffset, isComplete)
+            val fileName = fileNameMatch?.groupValues?.get(1) ?: DATA_PACKAGE_FILE_NAMES.first()
+            return DataPackageProgress(versionId, rowOffset, isComplete, fileName)
         }
 
         fun formatProgressComment(progress: DataPackageProgress): String {
             val base = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX${progress.dataPackageVersionId}"
-            return if (progress.isComplete) base else "$base;rowOffset=${progress.rowOffset}"
+            return if (progress.isComplete) base else "$base;fileName=${progress.fileName};rowOffset=${progress.rowOffset}"
         }
 
         fun isRetryableStreamException(exception: Exception): Boolean =
