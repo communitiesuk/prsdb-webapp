@@ -23,10 +23,10 @@ acceptOrReject:
   mustAccept: You must accept this invitation if you act as a landlord for this property.
   details:
     summary: Who counts as a landlord
-    paragraph:
-      one: A landlord is anyone who operates an assured or regulated tenancy.
-      two: "If you’re unsure, a legal adviser can help."
-    link: Find legal advice and information (opens in new tab)
+    paragraph: "Landlords include anyone who’s entitled to possession of the property, even if they’re not named on the tenancy agreement as a landlord."
+    beforeLink: "If you’re unsure, you may need to"
+    link: find a legal adviser
+    afterLink: .
   ifYes:
     heading: "If you select ‘Yes’"
     paragraph:
