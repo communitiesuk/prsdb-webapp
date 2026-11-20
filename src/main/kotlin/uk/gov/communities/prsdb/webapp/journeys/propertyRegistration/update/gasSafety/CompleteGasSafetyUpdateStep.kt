@@ -27,9 +27,7 @@ class CompleteGasSafetyUpdateStepConfig(
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                hasGasSupply = gasSafety.hasGasSupply,
-                gasSafetyCertIssueDate = gasSafety.issueDate,
-                gasSafetyCertUploadIds = gasSafety.uploadIds,
+                gasSafety = gasSafety,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

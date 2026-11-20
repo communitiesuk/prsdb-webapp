@@ -794,9 +794,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L, 20L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L, 20L),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -819,7 +822,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = false,
+                gasSafety = MockPropertyComplianceData.createGasSafetyDetailsDataModel(hasGasSupply = false),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -828,7 +831,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `resets gasSafetyCertProvideLater to null when gas safety is updated`() {
+        fun `clears gasSafetyCertProvideLater when gas safety is updated`() {
             setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.gasSafetyCertProvideLater = true
@@ -841,13 +844,16 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = LocalDate.of(2025, 6, 15),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertNull(captor.value.gasSafetyCertProvideLater)
+            assertEquals(false, captor.value.gasSafetyCertProvideLater)
         }
 
         @Test
@@ -865,9 +871,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15),
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = LocalDate.of(2025, 6, 15),
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockVirusScanCallbackService).updateCallbacksToOwner(
@@ -892,9 +901,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15),
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = LocalDate.of(2025, 6, 15),
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
@@ -915,7 +927,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateGasSafety(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    hasGasSupply = true,
+                    gasSafety = MockPropertyComplianceData.createGasSafetyDetailsDataModel(hasGasSupply = true),
                 )
             }
 
@@ -931,7 +943,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateGasSafety(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    hasGasSupply = true,
+                    gasSafety = MockPropertyComplianceData.createGasSafetyDetailsDataModel(hasGasSupply = true),
                 )
             }
         }
@@ -948,7 +960,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = false,
+                gasSafety = MockPropertyComplianceData.createGasSafetyDetailsDataModel(hasGasSupply = false),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
@@ -970,9 +982,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1018,9 +1033,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1067,9 +1085,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmailToLandlord(
@@ -1118,9 +1139,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
@@ -1163,9 +1187,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = expiredIssueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = expiredIssueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
@@ -1220,9 +1247,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.now(),
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = LocalDate.now(),
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(eq(mockLoggedInLandlord), any())
@@ -1256,9 +1286,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmailToLandlord(
@@ -1295,9 +1328,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1337,9 +1373,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = listOf(10L),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1381,9 +1420,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = emptyList(),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = emptyList(),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1421,9 +1463,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate,
-                gasSafetyCertUploadIds = emptyList(),
+                gasSafety =
+                    MockPropertyComplianceData.createGasSafetyDetailsDataModel(
+                        hasGasSupply = true,
+                        issueDate = issueDate,
+                        uploadIds = emptyList(),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1463,7 +1508,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = false,
+                gasSafety = MockPropertyComplianceData.createGasSafetyDetailsDataModel(hasGasSupply = false),
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
@@ -1491,9 +1536,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = listOf(10L, 20L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = listOf(10L, 20L),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1515,8 +1563,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicIssueDate = LocalDate.of(2024, 3, 20),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicIssueDate = LocalDate.of(2024, 3, 20),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1538,8 +1589,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicExpiryDate = LocalDate.of(2030, 3, 20),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1559,8 +1613,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1585,8 +1642,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicIssueDate = issueDate,
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicIssueDate = issueDate,
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1634,8 +1694,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicIssueDate = issueDate,
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicIssueDate = issueDate,
+                    ),
             )
 
             fun expectedEmail(
@@ -1684,8 +1747,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicIssueDate = issueDate,
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicIssueDate = issueDate,
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
@@ -1719,8 +1785,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eic,
-                eicIssueDate = LocalDate.now().minusYears(6),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eic,
+                        eicIssueDate = LocalDate.now().minusYears(6),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1755,16 +1824,19 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = LocalDate.of(2030, 3, 20),
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.Eicr)
         }
 
         @Test
-        fun `resets electricalSafetyCertProvideLater to null when electrical safety is updated`() {
+        fun `clears electricalSafetyCertProvideLater when electrical safety is updated`() {
             setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.electricalSafetyCertProvideLater = true
@@ -1777,13 +1849,16 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertNull(captor.value.electricalSafetyCertProvideLater)
+            assertEquals(false, captor.value.electricalSafetyCertProvideLater)
         }
 
         @Test
@@ -1801,9 +1876,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = LocalDate.of(2030, 3, 20),
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
@@ -1824,7 +1902,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateElectricalSafety(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    electricalCertType = CertificateType.Eicr,
+                    electricalSafety = MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(certType = CertificateType.Eicr),
                 )
             }
 
@@ -1840,7 +1918,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateElectricalSafety(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    electricalCertType = CertificateType.Eicr,
+                    electricalSafety = MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(certType = CertificateType.Eicr),
                 )
             }
         }
@@ -1858,8 +1936,11 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = LocalDate.of(2030, 3, 20),
+                    ),
             )
 
             verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
@@ -1878,6 +1959,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                electricalSafety = MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1905,9 +1987,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -1949,9 +2034,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
@@ -1989,9 +2077,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2031,9 +2122,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = listOf(10L),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = listOf(10L),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2075,9 +2169,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = emptyList(),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = emptyList(),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2115,9 +2212,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                eicrExpiryDate = expiryDate,
-                electricalSafetyCertUploadIds = emptyList(),
+                electricalSafety =
+                    MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(
+                        certType = CertificateType.Eicr,
+                        eicrExpiryDate = expiryDate,
+                        uploadIds = emptyList(),
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2157,6 +2257,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                electricalSafety = MockPropertyComplianceData.createElectricalSafetyDetailsDataModel(),
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
@@ -2182,11 +2283,14 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = epcUrl,
-                epcExpiryDate = expiryDate,
-                epcEnergyRating = energyRating,
-                tenancyStartedBeforeEpcExpiry = true,
-                epcMeesExemptionReason = MeesExemptionReason.HIGH_COST,
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = epcUrl,
+                        expiryDate = expiryDate,
+                        energyRating = energyRating,
+                        tenancyStartedBeforeExpiry = true,
+                        meesExemptionReason = MeesExemptionReason.HIGH_COST,
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -2212,7 +2316,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+                epc = MockPropertyComplianceData.createEpcDetailsDataModel(exemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -2238,6 +2342,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                epc = MockPropertyComplianceData.createEpcDetailsDataModel(),
             )
 
             val captor = captor<PropertyCompliance>()
@@ -2252,7 +2357,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `resets epcProvideLater to null when EPC is updated`() {
+        fun `clears epcProvideLater when EPC is updated`() {
             setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.epcProvideLater = true
@@ -2265,14 +2370,17 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = LocalDate.now().plusYears(5),
-                epcEnergyRating = "C",
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                        expiryDate = LocalDate.now().plusYears(5),
+                        energyRating = "C",
+                    ),
             )
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertNull(captor.value.epcProvideLater)
+            assertEquals(false, captor.value.epcProvideLater)
         }
 
         @Test
@@ -2286,7 +2394,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateEpc(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    epcCertificateUrl = "https://example.com/epc/1234",
+                    epc = MockPropertyComplianceData.createEpcDetailsDataModel(certificateUrl = "https://example.com/epc/1234"),
                 )
             }
 
@@ -2302,7 +2410,7 @@ class PropertyComplianceServiceTests {
                 propertyComplianceService.updateEpc(
                     propertyOwnershipId = propertyOwnershipId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    epcCertificateUrl = "https://example.com/epc/1234",
+                    epc = MockPropertyComplianceData.createEpcDetailsDataModel(certificateUrl = "https://example.com/epc/1234"),
                 )
             }
         }
@@ -2325,9 +2433,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = expiryDate,
-                epcEnergyRating = "C",
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                        expiryDate = expiryDate,
+                        energyRating = "C",
+                    ),
             )
 
             verify(mockLettingAgentComplianceUpdateSender).sendEmailToLandlord(
@@ -2363,9 +2474,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = expiryDate,
-                epcEnergyRating = "C",
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                        expiryDate = expiryDate,
+                        energyRating = "C",
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2400,9 +2514,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = expiryDate,
-                epcEnergyRating = "C",
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                        expiryDate = expiryDate,
+                        energyRating = "C",
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2440,9 +2557,12 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = expiryDate,
-                epcEnergyRating = "C",
+                epc =
+                    MockPropertyComplianceData.createEpcDetailsDataModel(
+                        certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                        expiryDate = expiryDate,
+                        energyRating = "C",
+                    ),
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
@@ -2477,6 +2597,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                epc = MockPropertyComplianceData.createEpcDetailsDataModel(),
             )
 
             verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
