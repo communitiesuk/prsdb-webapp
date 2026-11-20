@@ -332,7 +332,7 @@ class NftDataSeederDao(
                 SELECT a.* FROM address a
                 WHERE a.id > :afterId
                   AND a.local_council_id IS NOT NULL AND a.is_active AND a.uprn IS NOT NULL
-                  AND a.id NOT BETWEEN 9100000001 AND 9100000005
+                  AND a.id NOT BETWEEN $FIRST_RESERVED_ADDRESS_ID AND $LAST_RESERVED_ADDRESS_ID
                   AND NOT EXISTS (SELECT 1 FROM property_ownership p WHERE p.is_active AND p.address_id = a.id)
                   AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id)
                 ORDER BY a.id
@@ -372,7 +372,7 @@ class NftDataSeederDao(
             WHERE a.local_council_id IS NOT NULL
             AND (
                 NOT ?
-                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN 9100000001 AND 9100000005
+                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN $FIRST_RESERVED_ADDRESS_ID AND $LAST_RESERVED_ADDRESS_ID
                     AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id))
             )
             AND (
@@ -418,6 +418,9 @@ class NftDataSeederDao(
     }
 
     private companion object {
+        const val FIRST_RESERVED_ADDRESS_ID = 9100000001L
+        const val LAST_RESERVED_ADDRESS_ID = 9100000005L
+
         val EXPLICIT_ID_TABLES =
             listOf(
                 "registration_number",
