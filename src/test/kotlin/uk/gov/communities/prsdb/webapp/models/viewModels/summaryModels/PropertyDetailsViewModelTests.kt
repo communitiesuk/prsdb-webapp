@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -409,9 +410,11 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `the people responsible tab shows a not-used property manager row when there is no property manager`() {
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
         val viewModel =
             PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(),
+                propertyOwnership,
                 viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
@@ -421,12 +424,11 @@ class PropertyDetailsViewModelTests {
         val row = viewModel.propertyManagerNotUsedRows.single()
         assertEquals("registerProperty.propertyManager.usingPropertyManager.fieldSetHeading", row.fieldHeading)
         assertEquals("registerProperty.propertyManager.usingPropertyManager.radios.no", row.fieldValue)
-        // TODO PDJB-1995: assert the real update route once the property manager update journey exists
-        assertEquals("#", row.actions.single().url)
+        assertEquals(UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(propertyOwnership.id), row.actions.single().url)
     }
 
     @Test
-    fun `there is no not-used property manager row and a placeholder update link when there is a property manager`() {
+    fun `there is no not-used property manager row and an update link when there is a property manager`() {
         val propertyOwnership = createOccupiedPropertyOwnership().apply { propertyManager = createPropertyManager() }
 
         val viewModel =
@@ -440,8 +442,10 @@ class PropertyDetailsViewModelTests {
         assertTrue(viewModel.hasPropertyManager)
         assertTrue(viewModel.showPropertyManagerUpdateLink)
         assertTrue(viewModel.propertyManagerNotUsedRows.isEmpty())
-        // TODO PDJB-1995: assert the real update route once the property manager update journey exists
-        assertEquals("#", viewModel.propertyManagerUpdateUrl)
+        assertEquals(
+            UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(propertyOwnership.id),
+            viewModel.propertyManagerUpdateUrl,
+        )
     }
 
     @Test

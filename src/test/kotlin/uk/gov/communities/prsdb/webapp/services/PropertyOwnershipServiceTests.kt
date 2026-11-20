@@ -74,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -113,6 +114,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockSuperiorLandlordService: SuperiorLandlordService
+
+    @Mock
+    private lateinit var mockPropertyManagerService: PropertyManagerService
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
@@ -1886,20 +1890,6 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
-    fun `removePropertyManager clears the property manager and saves the property ownership`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-        propertyOwnership.propertyManager = PropertyManager("Agent Ltd", "agent@example.com")
-
-        // Act
-        propertyOwnershipService.removePropertyManager(propertyOwnership)
-
-        // Assert
-        assertNull(propertyOwnership.propertyManager)
-        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
-    }
-
-    @Test
     fun `updateOwnershipType does nothing to the freeholders when neither type requires any`() {
         // Arrange
         val propertyOwnership =
@@ -1950,6 +1940,140 @@ class PropertyOwnershipServiceTests {
             "The property ownership record has been updated since this update session started.",
             exception.message,
         )
+    }
+
+    @Nested
+    inner class UpdateAndRemovePropertyManager {
+        private lateinit var propertyOwnership: PropertyOwnership
+
+        @BeforeEach
+        fun setUp() {
+            propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+        }
+
+        private fun addExistingPropertyManager(lastModifiedDate: Instant? = null): PropertyManager {
+            val existingPropertyManager =
+                MockLandlordData.createPropertyManager(
+                    name = "Old Agent",
+                    email = "old@example.com",
+                    createdDate = propertyOwnership.createdDate,
+                    lastModifiedDate = lastModifiedDate,
+                )
+            propertyOwnership.propertyManager = existingPropertyManager
+            return existingPropertyManager
+        }
+
+        @Test
+        fun `updatePropertyManager links a newly created property manager when one is provided`() {
+            // Arrange
+            val newPropertyManager = PropertyManager("New Agent", "new@example.com")
+            whenever(mockPropertyManagerService.createPropertyManager("New Agent", "new@example.com")).thenReturn(newPropertyManager)
+
+            // Act
+            propertyOwnershipService.updatePropertyManager(
+                propertyOwnership.id,
+                PropertyManagerDataModel("New Agent", "new@example.com"),
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertSame(newPropertyManager, propertyOwnership.propertyManager)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `updatePropertyManager edits the existing property manager in place`() {
+            // Arrange
+            val existingPropertyManager = addExistingPropertyManager()
+
+            // Act
+            propertyOwnershipService.updatePropertyManager(
+                propertyOwnership.id,
+                PropertyManagerDataModel("New Agent", "new@example.com"),
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            verify(mockPropertyManagerService).updatePropertyManager(existingPropertyManager, "New Agent", "new@example.com")
+            verify(mockPropertyManagerService, never()).createPropertyManager(any(), any())
+            assertSame(existingPropertyManager, propertyOwnership.propertyManager)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `removePropertyManager clears the property manager and saves the property ownership`() {
+            // Arrange
+            addExistingPropertyManager()
+
+            // Act
+            propertyOwnershipService.removePropertyManager(propertyOwnership.id, propertyOwnership.getMostRecentlyUpdated())
+
+            // Assert
+            assertNull(propertyOwnership.propertyManager)
+            verifyNoInteractions(mockPropertyManagerService)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        fun `removePropertyManager throws UpdateConflictException if modified dates conflict`() {
+            // Arrange
+            addExistingPropertyManager()
+
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.removePropertyManager(
+                    propertyOwnership.id,
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `removePropertyManager throws UpdateConflictException if the property manager was modified after the journey started`() {
+            // Arrange
+            val journeyLastModifiedDate = propertyOwnership.getMostRecentlyUpdated()
+            addExistingPropertyManager(lastModifiedDate = journeyLastModifiedDate.plus(1, ChronoUnit.MINUTES))
+
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.removePropertyManager(propertyOwnership.id, journeyLastModifiedDate)
+            }
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updatePropertyManager throws UpdateConflictException if the property manager was modified after the journey started`() {
+            // Arrange
+            val journeyLastModifiedDate = propertyOwnership.getMostRecentlyUpdated()
+            addExistingPropertyManager(lastModifiedDate = journeyLastModifiedDate.plus(1, ChronoUnit.MINUTES))
+
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updatePropertyManager(
+                    propertyOwnership.id,
+                    PropertyManagerDataModel("New Agent", "new@example.com"),
+                    journeyLastModifiedDate,
+                )
+            }
+            verifyNoInteractions(mockPropertyManagerService)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updatePropertyManager throws UpdateConflictException if modified dates conflict`() {
+            // Act & Assert
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updatePropertyManager(
+                    propertyOwnership.id,
+                    PropertyManagerDataModel("New Agent", "new@example.com"),
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+            verifyNoInteractions(mockPropertyManagerService)
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
     }
 
     @Nested

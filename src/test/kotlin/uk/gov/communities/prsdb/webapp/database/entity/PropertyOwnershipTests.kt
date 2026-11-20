@@ -85,6 +85,29 @@ class PropertyOwnershipTests {
     }
 
     @Test
+    fun `getPropertyManagerMostRecentlyUpdated returns the property manager date when it is the latest`() {
+        val property = MockLandlordData.createPropertyOwnership(createdDate = Instant.parse("2025-01-01T00:00:00Z"))
+        property.propertyManager = MockLandlordData.createPropertyManager(createdDate = Instant.parse("2025-02-01T00:00:00Z"))
+
+        assertEquals(Instant.parse("2025-02-01T00:00:00Z"), property.getPropertyManagerMostRecentlyUpdated())
+    }
+
+    @Test
+    fun `getPropertyManagerMostRecentlyUpdated returns the ownership date when it is later than the property manager date`() {
+        val property = MockLandlordData.createPropertyOwnership(createdDate = Instant.parse("2025-03-01T00:00:00Z"))
+        property.propertyManager = MockLandlordData.createPropertyManager(createdDate = Instant.parse("2025-02-01T00:00:00Z"))
+
+        assertEquals(Instant.parse("2025-03-01T00:00:00Z"), property.getPropertyManagerMostRecentlyUpdated())
+    }
+
+    @Test
+    fun `getPropertyManagerMostRecentlyUpdated returns the ownership date when there is no property manager`() {
+        val property = MockLandlordData.createPropertyOwnership(createdDate = Instant.parse("2025-01-01T00:00:00Z"))
+
+        assertEquals(Instant.parse("2025-01-01T00:00:00Z"), property.getPropertyManagerMostRecentlyUpdated())
+    }
+
+    @Test
     fun `removeLandlord removes the given landlord and keeps the remaining owners`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         val coLandlord = MockLandlordData.createIndividualLandlord(name = "coLandlord")

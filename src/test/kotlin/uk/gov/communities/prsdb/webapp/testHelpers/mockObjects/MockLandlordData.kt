@@ -310,7 +310,14 @@ class MockLandlordData {
         fun createPropertyManager(
             name: String = "Property Manager",
             email: String = "manager@example.com",
-        ) = PropertyManager(name, email)
+            createdDate: Instant = Instant.now(),
+            lastModifiedDate: Instant? = null,
+        ): PropertyManager {
+            val propertyManager = PropertyManager(name, email)
+            ReflectionTestUtils.setField(propertyManager, "createdDate", createdDate)
+            ReflectionTestUtils.setField(propertyManager, "lastModifiedDate", lastModifiedDate)
+            return propertyManager
+        }
 
         fun createOccupiedPropertyOwnership(
             ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955 = OwnershipTypeBeforePdjb955.FREEHOLD,
