@@ -314,7 +314,7 @@ epcTask:
       link: When you do not need an EPC (opens in new tab)
   confirmEpcDetailsFromUprn:
     error:
-      missing: Select if you want to use the EPC we found for your property
+      missing: Select if you want to use the EPC we found for this property
     heading: Check this EPC
     paragraph: 'We found this EPC for this property:'
     summaryCard:
