@@ -26,9 +26,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationElectricalSafetyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationEpcDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -217,57 +214,6 @@ class PropertyComplianceService(
             gasSafetyCertUploadIds = gasSafetyFileUploadIds,
             electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
             electricalCertType = electricalCertType,
-        )
-    }
-
-    @Transactional
-    fun saveReactivationComplianceData(
-        propertyOwnershipId: Long,
-        gasSafety: ReactivationGasSafetyDataModel?,
-        electricalSafety: ReactivationElectricalSafetyDataModel?,
-        epc: ReactivationEpcDataModel?,
-    ) {
-        val record = getComplianceForProperty(propertyOwnershipId)
-        gasSafety?.let {
-            populateGasSafetyFields(
-                record = record,
-                hasGasSupply = it.hasGasSupply,
-                gasSafetyCertIssueDate = it.issueDate,
-                gasSafetyFileUploadIds = it.uploadIds,
-                gasSafetyCertProvideLater = false,
-            )
-        }
-        electricalSafety?.let {
-            populateElectricalSafetyFields(
-                record = record,
-                electricalSafetyFileUploadIds = it.uploadIds,
-                eicrExpiryDate = it.eicrExpiryDate,
-                eicIssueDate = it.eicIssueDate,
-                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
-                eicExpiryDate = it.eicExpiryDate,
-                electricalCertType = it.certType,
-                electricalSafetyCertProvideLater = false,
-            )
-        }
-        epc?.let {
-            populateEpcFields(
-                record = record,
-                epcCertificateUrl = it.certificateUrl,
-                epcExpiryDate = it.expiryDate,
-                epcEnergyRating = it.energyRating,
-                tenancyStartedBeforeEpcExpiry = it.tenancyStartedBeforeExpiry,
-                epcExemptionReason = it.exemptionReason,
-                epcMeesExemptionReason = it.meesExemptionReason,
-                epcProvideLater = false,
-            )
-        }
-        propertyComplianceRepository.save(record)
-
-        updateFileUploadVirusScanningCallbacks(
-            propertyOwnershipId = propertyOwnershipId,
-            gasSafetyCertUploadIds = gasSafety?.uploadIds ?: emptyList(),
-            electricalSafetyCertUploadIds = electricalSafety?.uploadIds ?: emptyList(),
-            electricalCertType = electricalSafety?.certType,
         )
     }
 

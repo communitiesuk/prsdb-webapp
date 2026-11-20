@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationLicensingDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationTenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
@@ -58,7 +57,6 @@ class PropertyReactivationServicePersistenceTests : IntegrationTestWithMutableDa
         val reactivationData =
             PropertyReactivationDataModel(
                 licensing = ReactivationLicensingDataModel(LicensingType.NO_LICENSING, null),
-                gasSafety = ReactivationGasSafetyDataModel(hasGasSupply = false, issueDate = null, uploadIds = emptyList()),
                 tenancyDetails =
                     ReactivationTenancyDetailsDataModel(
                         numberOfHouseholds = 1,
@@ -87,14 +85,6 @@ class PropertyReactivationServicePersistenceTests : IntegrationTestWithMutableDa
         assertEquals(true, propertyOwnership["license_provide_later"])
         assertEquals(true, propertyOwnership["tenancy_provide_later"])
         assertEquals(0, BigDecimal("123.12").compareTo(propertyOwnership["rent_amount"] as BigDecimal))
-        assertEquals(
-            true,
-            jdbcTemplate.queryForObject(
-                "SELECT gas_safety_cert_provide_later FROM property_compliance WHERE property_ownership_id = ?",
-                Boolean::class.java,
-                INACTIVE_PROPERTY_ID,
-            ),
-        )
         assertNull(session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID))
     }
 

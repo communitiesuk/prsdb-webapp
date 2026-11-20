@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -52,9 +51,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationElectricalSafetyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationEpcDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -689,88 +685,6 @@ class PropertyComplianceServiceTests {
             verify(mockPropertyComplianceRepository).save(captor.capture())
             assertEquals(listOf(gasUpload1, gasUpload2), captor.value.gasSafetyFileUploads)
             assertEquals(listOf(electricalUpload1), captor.value.electricalSafetyFileUploads)
-        }
-    }
-
-    @Nested
-    inner class SaveReactivationComplianceData {
-        private val compliance =
-            MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership).apply {
-                gasSafetyCertProvideLater = true
-                electricalSafetyCertProvideLater = true
-                epcProvideLater = true
-            }
-
-        @Test
-        fun `only updates the gas safety details when only they are provided, without sending any emails`() {
-            // Arrange
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
-            whenever(fileUploadRepository.getReferenceById(10L))
-                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId"))
-            val issueDate = LocalDate.of(2025, 1, 2)
-
-            // Act
-            propertyComplianceService.saveReactivationComplianceData(
-                propertyOwnershipId = propertyOwnershipId,
-                gasSafety = ReactivationGasSafetyDataModel(hasGasSupply = true, issueDate = issueDate, uploadIds = listOf(10L)),
-                electricalSafety = null,
-                epc = null,
-            )
-
-            // Assert
-            verify(mockPropertyComplianceRepository).save(compliance)
-            assertEquals(true, compliance.hasGasSupply)
-            assertEquals(issueDate, compliance.gasSafetyCertIssueDate)
-            assertEquals(false, compliance.gasSafetyCertProvideLater)
-            assertEquals(true, compliance.electricalSafetyCertProvideLater)
-            assertEquals(true, compliance.epcProvideLater)
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.GasSafetyCert)
-            verifyNoInteractions(mockComplianceUpdateConfirmationSender, mockLettingAgentComplianceUpdateSender)
-        }
-
-        @Test
-        fun `updates the electrical safety and EPC details when they are provided`() {
-            // Arrange
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
-            whenever(fileUploadRepository.getReferenceById(20L))
-                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"))
-            val eicrExpiryDate = LocalDate.of(2030, 5, 6)
-            val epcExpiryDate = LocalDate.of(2031, 7, 8)
-
-            // Act
-            propertyComplianceService.saveReactivationComplianceData(
-                propertyOwnershipId = propertyOwnershipId,
-                gasSafety = null,
-                electricalSafety =
-                    ReactivationElectricalSafetyDataModel(
-                        certType = CertificateType.Eicr,
-                        eicrExpiryDate = eicrExpiryDate,
-                        eicIssueDate = null,
-                        eicExpiryDate = null,
-                        uploadIds = listOf(20L),
-                    ),
-                epc =
-                    ReactivationEpcDataModel(
-                        certificateUrl = "https://epc.example/cert",
-                        expiryDate = epcExpiryDate,
-                        energyRating = "B",
-                        tenancyStartedBeforeExpiry = null,
-                        exemptionReason = null,
-                        meesExemptionReason = null,
-                    ),
-            )
-
-            // Assert
-            verify(mockPropertyComplianceRepository).save(compliance)
-            assertEquals(CertificateType.Eicr, compliance.electricalCertType)
-            assertEquals(eicrExpiryDate, compliance.eicrExpiryDate)
-            assertEquals(false, compliance.electricalSafetyCertProvideLater)
-            assertEquals("https://epc.example/cert", compliance.epcUrl)
-            assertEquals(epcExpiryDate, compliance.epcExpiryDate)
-            assertEquals("B", compliance.epcEnergyRating)
-            assertEquals(false, compliance.epcProvideLater)
-            assertEquals(true, compliance.gasSafetyCertProvideLater)
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(20L, propertyOwnershipId, CertificateType.Eicr)
         }
     }
 
