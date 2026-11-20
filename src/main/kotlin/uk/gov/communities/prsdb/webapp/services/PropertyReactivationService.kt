@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDat
 @PrsdbWebService
 class PropertyReactivationService(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyComplianceService: PropertyComplianceService,
     private val activeInactiveService: ActiveInactiveService,
     private val addressAvailabilityService: AddressAvailabilityService,
     private val session: HttpSession,
@@ -42,5 +43,14 @@ class PropertyReactivationService(
         val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
         reactivationData.licensing?.let { propertyOwnershipService.saveReactivationLicensing(propertyOwnership, it) }
         reactivationData.tenancyDetails?.let { propertyOwnershipService.saveReactivationTenancyDetails(propertyOwnership, it) }
+
+        if (reactivationData.gasSafety != null || reactivationData.electricalSafety != null || reactivationData.epc != null) {
+            propertyComplianceService.saveReactivationComplianceData(
+                propertyOwnershipId,
+                reactivationData.gasSafety,
+                reactivationData.electricalSafety,
+                reactivationData.epc,
+            )
+        }
     }
 }
