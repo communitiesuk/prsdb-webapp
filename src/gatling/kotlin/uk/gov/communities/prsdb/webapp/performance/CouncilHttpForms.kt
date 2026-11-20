@@ -14,9 +14,10 @@ object CouncilHttpForms {
         location: String,
         config: BasicRunConfig,
         expectedPath: String,
-        relativeTo: String = config.baseUrl + expectedPath,
+        relativeTo: String? = null,
+        baseUrl: String = config.baseUrl,
     ): String {
-        val resolved = HttpDestination.resolve(location, config.baseUrl, relativeTo)
+        val resolved = HttpDestination.resolve(location, baseUrl, relativeTo ?: baseUrl + expectedPath)
         require(URI.create(resolved).path == expectedPath) { "Unexpected council/operator destination path" }
         return resolved
     }
@@ -27,6 +28,7 @@ object CouncilHttpForms {
         url: String,
         expectedPath: String,
         identity: String? = null,
+        baseUrl: String = config.baseUrl,
     ): ChainBuilder {
         var request =
             http(label).get(url).queryParam("perfCacheBuster") { UUID.randomUUID().toString() }
@@ -36,7 +38,7 @@ object CouncilHttpForms {
                     css("form[method=post], form[method=POST]", "action")
                         .find().transformWithSession { action, session ->
                             val current = if (url.startsWith("#{")) session.getString(url.substring(2, url.length - 1))!! else url
-                            destination(action, config, expectedPath, HttpDestination.resolve(current, config.baseUrl))
+                            destination(action, config, expectedPath, HttpDestination.resolve(current, baseUrl), baseUrl)
                         }.saveAs("councilFormAction"),
                 )
                 .check(css("form input[type=hidden]", "name").findAll().saveAs("councilHiddenNames"))
@@ -53,6 +55,7 @@ object CouncilHttpForms {
         label: String,
         fields: Map<String, String>,
         expectedRedirectPath: String,
+        baseUrl: String = config.baseUrl,
     ): ChainBuilder =
         exec(
             http(label).post("#{councilFormAction}").disableFollowRedirect()
@@ -65,7 +68,13 @@ object CouncilHttpForms {
                 .check(status().`is`(302))
                 .check(
                     header("Location").find().transformWithSession { location, session ->
-                        destination(location, config, expectedRedirectPath, session.getString("councilFormAction")!!)
+                        destination(
+                            location,
+                            config,
+                            expectedRedirectPath,
+                            session.getString("councilFormAction")!!,
+                            baseUrl,
+                        )
                     }
                         .saveAs("councilNextUrl"),
                 ),

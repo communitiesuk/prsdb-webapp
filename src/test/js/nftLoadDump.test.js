@@ -5,6 +5,7 @@ import {test} from 'node:test';
 import {fileURLToPath} from 'node:url';
 import * as loader from '../../../scripts/performance-tests/nft-load-dump.mjs';
 import {loadSeededDataset, migrateAndVerifySeededDataset, restoreDatabase, verifyDatabase, verifyQaFixtures} from '../../../scripts/performance-tests/nft-load-dump.mjs';
+import {journeyFixtures, uuidFor} from './nftJourneyFixtures.js';
 
 const config = {
   target: 'nft',
@@ -41,6 +42,12 @@ const savedFixtures = Array.from({length: 92}, (_, i) => ({
 const propertyFixtures = Array.from({length: 109}, (_, i) => ({
   subject: `owner-${i}`, propertyOwnershipId: i + 100, address: `${i} Fixture Road`,
   files: [],
+}));
+
+const sharedCertificate = {objectKey: 'seeding/certificate_template.png', extension: 'png', versionId: 'fixture-version-1'};
+const sharedCertificateFixtures = propertyFixtures.map((row, i) => ({
+  ...row,
+  files: i < 2 ? [{...sharedCertificate}] : [],
 }));
 
 const organisationFixtures = Array.from({length: 92}, (_, i) => ({
@@ -132,6 +139,56 @@ test('exports completed-property fixtures read-only through guarded NFT tunnel',
   assert.equal(commands[0][2].env.PGOPTIONS, '-c default_transaction_read_only=on');
   assert.match(commands[0][1].at(-1), /LIMIT 121/);
   assert.doesNotMatch(commands[0][1].at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+});
+
+test('completed-property export accepts repeated references to one versioned shared certificate', async () => {
+  const deps = dependencies();
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async () => ({stdout: JSON.stringify(sharedCertificateFixtures)}),
+    save: async (...args) => { written = args; },
+  });
+  const exported = JSON.parse(written[1]);
+  assert.deepEqual(exported[0].files, [sharedCertificate]);
+  assert.deepEqual(exported[1].files, [sharedCertificate]);
+});
+
+for (const [description, mutate] of [
+  ['missing version', rows => { delete rows[0].files[0].versionId; }],
+  ['blank version', rows => { rows[0].files[0].versionId = '  '; }],
+  ['mixed versions', rows => { rows[1].files[0].versionId = 'another-version'; }],
+  ['unsupported extension', rows => { rows[0].files[0].extension = 'pdf'; }],
+  ['arbitrary shared key', rows => { rows[0].files[0].objectKey = 'seeding/other.png'; }],
+]) {
+  test(`completed-property export rejects shared certificate with ${description} before writing`, async () => {
+    const fixtures = structuredClone(sharedCertificateFixtures);
+    mutate(fixtures);
+    const deps = dependencies();
+    let written = false;
+    await assert.rejects(loader.exportCompletedPropertyFixtures('properties.json', {
+      aws: deps.aws, env: deps.env, log: deps.log,
+      executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+      save: async () => { written = true; },
+    }), /certificate|file/i);
+    assert.equal(written, false);
+  });
+}
+
+test('completed-property export preserves unique generated per-property certificate keys', async () => {
+  const fixtures = structuredClone(propertyFixtures);
+  fixtures[0].files.push({
+    objectKey: 'certificateUpload.seed-100.gas-safety-certificate-file-upload.member-120',
+    extension: 'png',
+  });
+  const deps = dependencies();
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1])[0].files, fixtures[0].files);
 });
 
 for (const [description, fixtures] of [
@@ -360,6 +417,26 @@ test('restores with four workers after clearing the schema and preserves fail-fa
   assert.equal(calls[1][1].includes(environment.PGPASSWORD), false);
 });
 
+test('public restore progress excludes object metadata while retaining the private pinned result', async () => {
+  const logs = [];
+  const version = 'private-version-canary';
+  const etag = '"private-etag-canary"';
+  const deps = dependencies({
+    aws: async service => service === 'sts'
+      ? {Account: config.account}
+      : {ContentLength: 1024, ETag: etag, VersionId: version},
+    log: message => logs.push(message),
+  });
+
+  const result = await loadSeededDataset(config, deps);
+
+  assert.equal(result.object.versionId, version);
+  assert.equal(result.object.etag, etag);
+  for (const value of [version, etag, config.bucket, config.key, deps.env.FLYWAY_PASSWORD]) {
+    assert.ok(logs.every(message => !message.includes(value)), 'Public restore progress exposed private metadata');
+  }
+});
+
 test('reports timed phases and a heartbeat without exposing restore error details', async t => {
   t.mock.timers.enable({apis: ['Date', 'setInterval'], now: 0});
   const logs = [];
@@ -391,6 +468,8 @@ test('reports timed phases and a heartbeat without exposing restore error detail
   assert.ok(logs.some(message => /Z Restore database \(4 workers\): still running \(60\.0s elapsed\)$/.test(message)));
   assert.ok(logs.some(message => /Z Restore database \(4 workers\): failed after 60\.0s$/.test(message)));
   assert.equal(logs.some(message => message.includes('sensitive restore details')), false);
+  assert.ok(logs.every(message => !message.includes('baseline-version') && !message.includes('dump-etag')),
+    'Failed restore progress exposed private object metadata');
   const logCount = logs.length;
   t.mock.timers.tick(60000);
   assert.equal(logs.length, logCount);
@@ -593,19 +672,7 @@ test('does not report success when migration fails', async () => {
   assert.equal(deps.calls.some(([kind]) => kind === 'verify'), false);
 });
 
-const uuidFor = i => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`;
-const journeyFixtures = (family, count = family.startsWith('organisation-team') ? 17 : 28) => Array.from({length: count}, (_, i) => {
-  const row = {ownerSubject: `owner-${i}`, propertyOwnershipId: i + 1, address: `${i} Fixture Road`, files: []};
-  if (family === 'joint' || family === 'joint-accept') Object.assign(row, {inviteeSubject: `invitee-${i}`, invitedEmail: `joint-${i}@example.test`});
-  if (family === 'joint-accept') Object.assign(row, {token: uuidFor(i), invitationId: i + 1});
-  if (family === 'agent-access') Object.assign(row, {token: uuidFor(i), invitedEmail: `agent-${i}@example.test`, hasPassword: false});
-  if (family === 'offboarding') Object.assign(row, {subject: `owner-${i}`, action: 'deregister-property'});
-  if (family === 'organisation-team-ramp-preparation' || family === 'organisation-team-preparation') return {subject: `admin-${i}`, name: `Organisation ${i}`, organisationId: i + 1, registrationNumber: i + 100};
-  if (family.startsWith('organisation-team')) return {subject: `admin-${i}`, name: `Organisation ${i}`, organisationId: i + 1, registrationNumber: i + 100, invitationToken: uuidFor(i), invitedEmail: `team-${i}@example.test`};
-  if (family === 'operator') return {subject: `operator-${i}`, councilName: 'Council', councilId: 1, targetId: i + 1, targetName: `Target ${i}`, targetEmail: `target-${i}@example.test`, targetSubject: `target-${i}`, targetManager: false};
-  return row;
-});
-for (const family of ['organisation-team', 'organisation-team-preparation', 'organisation-team-ramp-preparation', 'organisation-team-ramp', 'joint', 'joint-accept', 'agent', 'agent-access', 'operator', 'offboarding']) {
+for (const family of ['paid-registration', 'council-read', 'organisation-team', 'organisation-team-preparation', 'organisation-team-ramp-preparation', 'organisation-team-ramp', 'joint', 'joint-accept', 'agent', 'agent-access', 'operator', 'offboarding']) {
   test(`journey export ${family} reads guarded fixtures and writes privately`, async () => {
     const fixtures = journeyFixtures(family);
     const deps = dependencies();
@@ -614,7 +681,7 @@ for (const family of ['organisation-team', 'organisation-team-preparation', 'org
       aws: deps.aws, env: deps.env, log: deps.log,
       executeCommand: async (_command, args, options) => {
         assert.equal(options.env.PGOPTIONS, '-c default_transaction_read_only=on');
-        assert.doesNotMatch(args.at(-1), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
+        assert.doesNotMatch(args.at(-1).replace(/^--.*$/gm, ''), /\b(INSERT|UPDATE|DELETE|TRUNCATE|ALTER|DROP)\b/i);
         return {stdout: JSON.stringify(fixtures)};
       },
       save: async (...args) => { written = args; },
@@ -624,6 +691,14 @@ for (const family of ['organisation-team', 'organisation-team-preparation', 'org
   });
 }
 for (const [family, mutate] of [
+  ['paid-registration', rows => { rows.splice(0, 2); }],
+  ['paid-registration', rows => { rows[0].uprn = rows[1].uprn; }],
+  ['paid-registration', rows => { rows[0].localCouncilId = 0; }],
+  ['paid-registration', rows => { rows[0].address = ` ${rows[1].address.toUpperCase()} `; }],
+  ['council-read', rows => { rows.pop(); }],
+  ['council-read', rows => { rows[0].subject = rows[1].subject; }],
+  ['council-read', rows => { rows[0].propertyId = rows[1].propertyId; }],
+  ['council-read', rows => { rows[0].licenseType = -1; }],
   ['agent', rows => { rows.splice(0, 1); }],
   ['agent-access', rows => { rows[0].hasPassword = true; }],
   ['agent-access', rows => { rows[0].token = 'invalid'; }],
@@ -657,24 +732,33 @@ test('concurrent team fixture allocation is disjoint from profile and sequential
   assert.match(sql, /json_strip_nulls/);
 });
 
-test('concurrent preparation precedes ramp and correctness journeys use fresh exports', async () => {
-  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
-  const position = name => {
-    const found = workflow.indexOf(`id: ${name}\n`);
-    assert.notEqual(found, -1, name);
-    return found;
-  };
-  for (const id of ['exportRampTeam', 'exportRampAgentAccess', 'exportRampJointAcceptance', 'exportRampOffboarding']) {
-    assert.ok(position(id) < position('rampedJourneys'));
-    assert.ok(workflow.includes(`steps.${id}.outcome == 'success'`));
+test('certificate fixture SQL exports exact object versions and recognizes only the shared seed key', async () => {
+  const fileFixtureSql = [
+    'data-nft-agent-fixtures.sql',
+    'data-nft-agent-access-fixtures.sql',
+    'data-nft-completed-property-fixtures.sql',
+    'data-nft-joint-invite-fixtures.sql',
+    'data-nft-joint-accept-fixtures.sql',
+    'data-nft-joint-offboarding-deregister-property-fixtures.sql',
+  ];
+  for (const file of fileFixtureSql) {
+    const sql = await readFile(new URL(`../../main/resources/${file}`, import.meta.url), 'utf8');
+    assert.equal((sql.match(/\b(?:upload|f)\.version_id AS "versionId"/g) ?? []).length, 2, file);
+    if (file === 'data-nft-completed-property-fixtures.sql') {
+      assert.match(sql, /SELECT "objectKey", extension, "versionId" FROM fixture_files/, file);
+    } else {
+      assert.match(sql, /'versionId', "versionId"/, file);
+    }
   }
-  for (const id of ['exportAgentFixtures', 'exportJointFixtures', 'exportOffboardingFixtures']) {
-    assert.ok(position('rampedJourneys') < position(id));
+  for (const file of [
+    'data-nft-agent-fixtures.sql',
+    'data-nft-joint-invite-fixtures.sql',
+    'data-nft-joint-offboarding-deregister-property-fixtures.sql',
+  ]) {
+    const sql = await readFile(new URL(`../../main/resources/${file}`, import.meta.url), 'utf8');
+    assert.equal((sql.match(/upload\.object_key <> 'seeding\/certificate_template\.png'/g) ?? []).length, 2, file);
   }
-  assert.match(workflow, /gatling\.ramp\.operatorFixtureOffset=11/);
-  assert.match(workflow, /gatling\.ramp\.additionalPerMinute=1/);
 });
-
 
 test('prepared token SQL is restricted to the reserved actor pools and recent invitations', async () => {
   const sqlFor = name => readFile(new URL(`../../main/resources/data-nft-${name}-fixtures.sql`, import.meta.url), 'utf8');
@@ -686,94 +770,4 @@ test('prepared token SQL is restricted to the reserved actor pools and recent in
   assert.match(joint, /OFFSET 2200 LIMIT 200/);
   assert.match(joint, /OFFSET 2400 LIMIT 200/);
   assert.match(joint, /invitation\.created_date >= current_timestamp - interval '1 day'/);
-});
-
-// Run the actual workflow heredocs with an in-memory filesystem: no AWS, runner files or real invitations.
-test('workflow token matchers select current prepared invitations and reject mismatches', async () => {
-  const {runInNewContext} = await import('node:vm');
-  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
-  const scripts = [...workflow.matchAll(/node --input-type=module -[^\n]*<<'NODE'\n([\s\S]*?)\n          NODE/g)]
-    .map(match => match[1].replace(/^ {10}/gm, '').replace(/^import .*;\n/gm, ''));
-  assert.equal(scripts.length, 8);
-  const team = journeyFixtures('organisation-team-ramp');
-  const teamPrepared = team.map(({invitationToken, invitedEmail, ...row}) => row);
-  const teamCurrent = team.map(row => ({...row, invitedEmail: `org-team-123-2-${row.organisationId}-kept@example.com`}));
-  const agent = journeyFixtures('agent');
-  const agentCurrent = agent.map(row => ({...row, token: uuidFor(row.propertyOwnershipId),
-    invitedEmail: `agent-access-${row.propertyOwnershipId}@example.test`, hasPassword: false}));
-  const joint = journeyFixtures('joint');
-  const jointCurrent = joint.map(row => ({...row, token: uuidFor(row.propertyOwnershipId), invitationId: row.propertyOwnershipId}));
-  const organisation = journeyFixtures('organisation', 39).map((_, i) => ({
-    subject: `admin-${i}`, organisationId: i + 1, registrationNumber: i + 100, name: `Organisation ${i}`,
-  }));
-  const sequentialTeam = organisation.slice(22).map(row => ({...row, invitationToken: uuidFor(row.organisationId),
-    invitedEmail: `org-team-123-2-${row.organisationId}-kept@example.com`}));
-  const makeFiles = () => ({
-    '/runner/nft-organisation-team-ramp-preparation-fixtures.json': teamPrepared,
-    '/runner/nft-organisation-team-ramp-fixtures.json': teamCurrent,
-    '/runner/nft-agent-fixtures.json': agent,
-    '/runner/nft-agent-access-fixtures.json': agentCurrent,
-    '/runner/nft-joint-fixtures.json': joint,
-    '/runner/nft-joint-accept-fixtures.json': jointCurrent,
-    '/runner/nft-offboarding-fixtures.json': journeyFixtures('offboarding'),
-    '/runner/nft-organisation-fixtures.json': organisation,
-    '/runner/nft-organisation-team-preparation-fixtures.json': organisation.slice(22),
-    '/runner/nft-organisation-team-fixtures.json': sequentialTeam,
-  });
-  const execute = (index, files, ...paths) => {
-    const writes = {};
-    runInNewContext(scripts[index], {
-      process: {argv: ['node', '-', ...paths], env: {RUNNER_TEMP: '/runner', GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '2'}},
-      readFileSync: path => JSON.stringify(files[path]),
-      writeFileSync: (path, data, options) => { assert.equal(options.mode, 0o600); writes[path] = JSON.parse(data); },
-      join: (...parts) => parts.join('/'),
-    });
-    return writes;
-  };
-  const files = makeFiles();
-  files['/runner/nft-agent-access-fixtures.json'] = [...agentCurrent].reverse();
-  const writes = execute(0, files);
-  assert.deepEqual(writes['/runner/nft-ramp-agent.json'], agentCurrent);
-  assert.deepEqual(writes['/runner/nft-ramp-team.json'], teamCurrent);
-  assert.deepEqual(writes['/runner/nft-ramp-joint.json'], jointCurrent);
-  assert.deepEqual(execute(2, files, '/runner/nft-organisation-team-preparation-fixtures.json', '/runner/nft-organisation-team-fixtures.json')
-    ['/runner/nft-organisation-team-fixtures.json'], sequentialTeam);
-  assert.deepEqual(execute(4, files, '/runner/nft-agent-fixtures.json', '/runner/nft-agent-access-fixtures.json')
-    ['/runner/nft-agent-access-fixtures.json'], agentCurrent);
-  assert.deepEqual(execute(6, files, '/runner/nft-joint-fixtures.json', '/runner/nft-joint-accept-fixtures.json')
-    ['/runner/nft-joint-accept-fixtures.json'], jointCurrent);
-  const newTeam = teamPrepared.map(row => ({...row, subject: `fresh-${row.subject}`, organisationId: row.organisationId + 1000}));
-  const teamPaths = ['/runner/team-preparation.json', '/runner/profiles.json', '/runner/team-ramp.json'];
-  const teamInputs = {[teamPaths[0]]: newTeam, [teamPaths[1]]: organisation, [teamPaths[2]]: teamCurrent};
-  execute(1, teamInputs, ...teamPaths);
-  const overlap = structuredClone(teamInputs);
-  overlap[teamPaths[0]][0].subject = teamCurrent[0].subject;
-  assert.throws(() => execute(1, overlap, ...teamPaths), /actors overlap/);
-  for (const [index, family, count, field] of [
-    [3, 'agent', 28, 'ownerSubject'],
-    [5, 'joint', 28, 'inviteeSubject'],
-    [7, 'offboarding', 17, 'subject'],
-  ]) {
-    const candidates = journeyFixtures(family, count + 28);
-    const ramp = candidates.slice(0, count);
-    const paths = [`/runner/nft-${family}-fixtures.json`, `/runner/nft-ramp-${family}.json`];
-    const input = {[paths[0]]: candidates, [paths[1]]: ramp};
-    const selected = execute(index, input, ...paths)[paths[0]];
-    assert.deepEqual(selected, candidates.slice(count));
-    assert.ok(selected.every(row => !ramp.some(used => used[field] === row[field])));
-    const insufficient = {[paths[0]]: candidates.slice(0, -1), [paths[1]]: ramp};
-    assert.throws(() => execute(index, insufficient, ...paths), /Insufficient correctness actors/);
-  }
-  for (const [index, path, mutate, args] of [
-    [0, '/runner/nft-organisation-team-ramp-fixtures.json', rows => { rows[0].invitedEmail = 'old-run@example.com'; }, []],
-    [0, '/runner/nft-agent-access-fixtures.json', rows => rows.pop(), []],
-    [0, '/runner/nft-joint-accept-fixtures.json', rows => { rows[0].invitedEmail = 'wrong@example.com'; }, []],
-    [2, '/runner/nft-organisation-team-fixtures.json', rows => { rows[0].subject = 'wrong'; }, ['/runner/nft-organisation-team-preparation-fixtures.json', '/runner/nft-organisation-team-fixtures.json']],
-    [4, '/runner/nft-agent-access-fixtures.json', rows => { rows[0].invitedEmail = 'wrong@example.com'; }, ['/runner/nft-agent-fixtures.json', '/runner/nft-agent-access-fixtures.json']],
-    [6, '/runner/nft-joint-accept-fixtures.json', rows => rows.pop(), ['/runner/nft-joint-fixtures.json', '/runner/nft-joint-accept-fixtures.json']],
-  ]) {
-    const broken = structuredClone(makeFiles());
-    mutate(broken[path]);
-    assert.throws(() => execute(index, broken, ...args), /invitations? .*match/i);
-  }
 });
