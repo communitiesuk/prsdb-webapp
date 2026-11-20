@@ -254,7 +254,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     fun `a postal address can be provided for a freeholder during an update`(page: Page) {
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
-        originalFreeholder.email = null
+        originalFreeholder.email = "existing@example.com"
         freeholderRepository.save(originalFreeholder)
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -285,13 +285,14 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertNull(savedFreeholder.email)
     }
 
     @Test
     fun `a freeholder can be given a manual postal address during an update`(page: Page) {
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
-        originalFreeholder.email = null
+        originalFreeholder.email = "existing@example.com"
         freeholderRepository.save(originalFreeholder)
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -330,6 +331,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertNull(savedFreeholder.email)
     }
 
     @Test
