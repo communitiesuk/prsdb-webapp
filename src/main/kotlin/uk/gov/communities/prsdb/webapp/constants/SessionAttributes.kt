@@ -14,6 +14,8 @@ const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
 const val REACTIVATED_PROPERTY_OWNERSHIP_ID = "reactivatedPropertyOwnershipId"
 
+const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION = "landlordReactivatedByLastPropertyReactivation"
+
 const val PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION = "propertiesDelegatedToLettingAgentThisSession"
 
 const val LETTING_AGENT_AUTHORISED_ACCESS_TOKENS = "lettingAgentAuthorisedAccessTokens"

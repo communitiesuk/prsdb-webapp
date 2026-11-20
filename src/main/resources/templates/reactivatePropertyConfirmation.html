@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{reactivateProperty.confirmation.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+        <div th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{reactivateProperty.confirmation.heading}, null)}"></div>
+
+        <p class="govuk-body"
+           th:text="#{reactivateProperty.confirmation.youHaveReactivated}">
+            reactivateProperty.confirmation.youHaveReactivated
+        </p>
+        <p class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+        </p>
+
+        <div class="govuk-inset-text"
+             th:text="#{reactivateProperty.confirmation.prn(${prn})}">
+            reactivateProperty.confirmation.prn
+        </div>
+
+        <p class="govuk-body"
+           th:text="#{reactivateProperty.confirmation.emailSent}">
+            reactivateProperty.confirmation.emailSent
+        </p>
+
+        <!--/* TODO PDJB-2076: Also show this section, with a payment summary, when a payment was made in the reactivation journey */-->
+        <th:block th:if="${hasJointLandlords or landlordReactivated}">
+            <h2 class="govuk-heading-m"
+                th:text="#{reactivateProperty.confirmation.reactivationDetails.heading}">
+                reactivateProperty.confirmation.reactivationDetails.heading
+            </h2>
+
+            <th:block th:if="${hasJointLandlords}">
+                <h3 class="govuk-heading-s"
+                    th:text="#{reactivateProperty.confirmation.reactivationDetails.jointLandlords.heading}">
+                    reactivateProperty.confirmation.reactivationDetails.jointLandlords.heading
+                </h3>
+                <p class="govuk-body"
+                   th:text="#{reactivateProperty.confirmation.reactivationDetails.jointLandlords.paragraph}">
+                    reactivateProperty.confirmation.reactivationDetails.jointLandlords.paragraph
+                </p>
+            </th:block>
+
+            <th:block th:if="${landlordReactivated}">
+                <h3 class="govuk-heading-s"
+                    th:text="#{reactivateProperty.confirmation.reactivationDetails.landlordAccount.heading}">
+                    reactivateProperty.confirmation.reactivationDetails.landlordAccount.heading
+                </h3>
+                <p class="govuk-body"
+                   th:text="${isOrganisationLandlord} ? #{reactivateProperty.confirmation.reactivationDetails.landlordAccount.organisation} : #{reactivateProperty.confirmation.reactivationDetails.landlordAccount.individual}">
+                    reactivateProperty.confirmation.reactivationDetails.landlordAccount.individual
+                </p>
+                <p class="govuk-body">
+                    <a class="govuk-link"
+                       th:href="@{${landlordDashboardUrl}}"
+                       th:text="#{common.confirmationPage.goToDashboard}">common.confirmationPage.goToDashboard</a>
+                </p>
+            </th:block>
+        </th:block>
+
+        <h2 class="govuk-heading-m"
+            th:text="#{reactivateProperty.confirmation.whatToDoNext.heading}">
+            reactivateProperty.confirmation.whatToDoNext.heading
+        </h2>
+        <p class="govuk-body"
+           th:text="#{reactivateProperty.confirmation.whatToDoNext.paragraph}">
+            reactivateProperty.confirmation.whatToDoNext.paragraph
+        </p>
+        <p class="govuk-body">
+            <a class="govuk-link"
+               th:href="@{${propertyDetailsUrl}}"
+               th:text="#{reactivateProperty.confirmation.whatToDoNext.goToPropertyRecord}">reactivateProperty.confirmation.whatToDoNext.goToPropertyRecord</a>
+        </p>
+
+    </div>
+</main>
+</html>
