@@ -34,6 +34,6 @@ class FreeholdersDetailsDependencies(
     // freeholders list through this, so the list can live in the enclosing outer task or journey.
     val listState: FreeholdersListState,
     val isJointFreeholder: () -> Boolean,
-    // TOOD: PDJB-1993: Set this to false on the update journey
+    // Registration permits removing the last member; update journeys disable this.
     val allowRemovingLastMember: Boolean = true,
 )

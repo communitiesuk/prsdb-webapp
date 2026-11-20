@@ -120,7 +120,7 @@ class GasSafetyDetailsTask(
                 nextStep { exitStep }
                 backDestination {
                     val cyaState = dependencies as? CheckYourAnswersJourneyState
-                    if (cyaState?.isCheckingAnswers == true) {
+                    if (cyaState?.checkingAnswersFor == CheckGasCertUploadsStep.ROUTE_SEGMENT) {
                         cyaState.returnToCyaPageDestination
                     } else {
                         Destination(journey.gasCertIssueDateStep)

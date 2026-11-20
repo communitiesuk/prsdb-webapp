@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
@@ -58,10 +59,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
-            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
-                "#",
+                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/start",
             )
         }
 
@@ -406,8 +406,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
-                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
-                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasAttribute("href", "#")
+                assertThat(detailsPage.propertyManagerUpdateLink.locator)
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(37))
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
             }
 
@@ -419,9 +419,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
                     .containsText("No, I manage this property (or another joint landlord does)")
-                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
-                    .hasAttribute("href", "#")
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(1))
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).not().isVisible()
             }
 

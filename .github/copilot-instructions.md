@@ -197,7 +197,7 @@ Uses GOV.UK Frontend 5.11.0 + Ministry of Justice Frontend 3.3.1. See `frontend.
 Tests use Playwright (`@UsePlaywright`) with page object pattern and 35+ reusable components. See `integration-tests.instructions.md` for base classes, Navigator, and naming conventions.
 
 ### Email Templates
-Email templates are markdown files in `src/main/resources/emails/`. Template IDs for Notify service are configured in `emailTemplates.json`.
+Email templates are markdown files in `src/main/resources/emails/`. Template IDs for Notify service are configured in `emailTemplates.json`. Template files must not end with a trailing newline or blank lines.
 
 ### Spring Profiles
 - `local` - Local development with Docker Compose dependencies
