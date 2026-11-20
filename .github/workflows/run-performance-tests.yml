@@ -410,6 +410,18 @@ jobs:
         uses: ./.github/actions/verify-nft-database
         with:
           mode: operator-fixtures
+      - name: Export paid registration fixtures
+        id: exportPaidRegistrationFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: paid-registration-fixtures
+      - name: Export basic council read fixtures
+        id: exportCouncilReadFixtures
+        continue-on-error: true
+        uses: ./.github/actions/verify-nft-database
+        with:
+          mode: council-read-fixtures
       - name: Refresh credentials before concurrent ramp
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -435,7 +447,9 @@ jobs:
           steps.prepareRampJoint.outcome == 'success' &&
           steps.exportRampJointAcceptance.outcome == 'success' &&
           steps.exportRampOffboarding.outcome == 'success' &&
-          steps.exportOperatorFixtures.outcome == 'success'
+          steps.exportOperatorFixtures.outcome == 'success' &&
+          steps.exportPaidRegistrationFixtures.outcome == 'success' &&
+          steps.exportCouncilReadFixtures.outcome == 'success'
         run: |
           node --input-type=module - <<'NODE'
           import {readFileSync, writeFileSync} from 'node:fs';
@@ -483,6 +497,12 @@ jobs:
             -Dgatling.agent.password="$agent_password" \
             -Dgatling.operator.fixturePath="$RUNNER_TEMP/nft-operator-fixtures.json" \
             -Dgatling.offboarding.fixturePath="$RUNNER_TEMP/nft-ramp-offboarding.json" \
+            -Dgatling.registration.fixturePath="$RUNNER_TEMP/nft-paid-registration-fixtures.json" \
+            -Dgatling.registration.paymentBaseUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/gov-uk-pay \
+            -Dgatling.registration.fixtureOffset=1 \
+            -Dgatling.council.fixturePath="$RUNNER_TEMP/nft-council-read-fixtures.json" \
+            -Dgatling.council.simulatorUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/internal-access \
+            -Dgatling.council.fixtureOffset=1 \
             -Dgatling.council.emailDeliveryStub=true \
             -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf" \
             -Dgatling.certificate.downloadOrigin=https://prsdb-uploaded-files-nft.s3.eu-west-2.amazonaws.com \
@@ -492,6 +512,8 @@ jobs:
             -Dgatling.ramp.holdMinutes=15 \
             -Dgatling.ramp.registrationsPerMinute=26 \
             -Dgatling.ramp.updatesPerMinute=4 \
+            -Dgatling.ramp.paidRegistrationsPerMinute=26 \
+            -Dgatling.ramp.councilReadsPerMinute=1 \
             -Dgatling.ramp.fixtureOffset=22
       - name: Refresh credentials for post-ramp correctness stages
         id: refreshPostRampCredentials
@@ -797,6 +819,8 @@ jobs:
           ORGANISATION_PROFILE: ${{ steps.organisationProfileUpdates.outcome }}
           CERTIFICATE_UPLOADS: ${{ steps.certificateUploads.outcome }}
           RAMPED_JOURNEYS: ${{ steps.rampedJourneys.outcome }}
+          EXPORT_PAID_REGISTRATION: ${{ steps.exportPaidRegistrationFixtures.outcome }}
+          EXPORT_COUNCIL_READ: ${{ steps.exportCouncilReadFixtures.outcome }}
           RAMP_PREP_0: ${{ steps.exportRampTeamPreparation.outcome }}
           RAMP_PREP_1: ${{ steps.prepareRampTeam.outcome }}
           RAMP_PREP_2: ${{ steps.exportRampTeam.outcome }}
@@ -837,6 +861,8 @@ jobs:
             "Export organisation fixtures:$EXPORT_ORGANISATION" \
             "Organisation profile updates:$ORGANISATION_PROFILE" \
             "Certificate uploads:$CERTIFICATE_UPLOADS" \
+            "Export paid registration fixtures:$EXPORT_PAID_REGISTRATION" \
+            "Export council read fixtures:$EXPORT_COUNCIL_READ" \
             "Export concurrent organisation team administrators:$RAMP_PREP_0" \
             "Prepare concurrent organisation team invitations:$RAMP_PREP_1" \
             "Export concurrent organisation team tokens:$RAMP_PREP_2" \

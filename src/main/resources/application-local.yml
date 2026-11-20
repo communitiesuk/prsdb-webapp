@@ -300,6 +300,8 @@ spring:
 # environment uses the full-scale defaults from application.yml.
 # Addresses are generated locally because the real NGD address data requires an OS API key and a large download.
 nft-seed:
+  # LocalFileDownloader reads by object key and does not use this metadata as an S3 version.
+  certificate-version-id: local-file-uploader
   system-operators: ${NFT_SEED_SYSTEM_OPERATORS:5}
   local-council-users: ${NFT_SEED_LOCAL_COUNCIL_USERS:10}
   landlords: ${NFT_SEED_LANDLORDS:30}

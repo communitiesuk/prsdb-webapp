@@ -1,0 +1,52 @@
+spring:
+  config:
+    activate:
+      on-profile: "performance-test & (local | nft) & !production"
+
+gov-uk-pay:
+  base-url: http://localhost:${server.port:8080}/local/gov-uk-pay
+  api-key: performance-test
+  mock-base-url: ${GOV_UK_PAY_MOCK_BASE_URL}
+  mock-card-entry-delay-seconds: 0
+  mock-failing-calls-from-capture: 0
+  mock-failing-capture-takes-payment: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "performance-test & nft & !production"
+  security:
+    oauth2:
+      client:
+        registration:
+          epc-register:
+            client-id: performance-test
+            client-secret: performance-test
+          internal-access:
+            provider: internal-access-performance-test
+            client-id: 902e8a06-4086-423d-8e67-3838c4e52d7f
+            client-secret: ${performance-test.internal-access.client-secret}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: ${performance-test.internal-access.public-origin}/local-council/login/oauth2/code/internal-access
+        provider:
+          epc-register:
+            token-uri: http://localhost:${server.port:8080}/local/epc/auth/oauth/token
+          # A distinct provider avoids discovering any inherited government issuer during startup.
+          internal-access-performance-test:
+            authorization-uri: ${performance-test.internal-access.public-origin}/local/internal-access/authorize
+            token-uri: http://localhost:${server.port:8080}/local/internal-access/token
+            jwk-set-uri: http://localhost:${server.port:8080}/local/internal-access/.well-known/jwks.json
+            user-info-uri: http://localhost:${server.port:8080}/local/internal-access/userinfo
+            user-name-attribute: sub
+
+performance-test:
+  internal-access:
+    public-origin: ${PERFORMANCE_TEST_INTERNAL_ACCESS_PUBLIC_ORIGIN:http://localhost:${server.port:8080}}
+    client-secret: performance-test
+
+epc:
+  base-url: http://localhost:${server.port:8080}/local/epc
+  certificate-base-url: http://localhost:${server.port:8080}/local/epc/energy-certificate

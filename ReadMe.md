@@ -155,6 +155,11 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
 | `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 1000             | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+| `nft-seed.certificate-version-id` | `NFT_SEED_CERTIFICATE_VERSION_ID` | `local-file-uploader` | Exact immutable S3 `VersionId` for the seeded certificate object in deployed environments. |
+
+The local `local-file-uploader` value is only stored as local file metadata: `LocalFileDownloader` resolves files by
+object key and does not use an S3 version. Deployed seeding must set `NFT_SEED_CERTIFICATE_VERSION_ID` to the exact S3
+`VersionId` for `seeding/certificate_template.png`; the deployed default is blank and `NftDataSeeder` fails closed.
 
 NGD addresses are loaded in supplier CSV order. The seeder reads eligible property addresses in ID order and shuffles
 within each batch; this does not guarantee a geographically representative sample for council-search performance tests.

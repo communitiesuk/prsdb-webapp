@@ -8,6 +8,7 @@ import io.gatling.javaapi.http.HttpDsl.header
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import java.net.URI
@@ -18,6 +19,16 @@ object JointLandlordJourney {
             "invitation start", "validate invitation token", "accept or reject invitation", "submit invitation decision",
             "check user role", "confirm landlord status", "submit acceptance", "acceptance confirmation", "joined property",
         ).map { "Joint invitation: $it" }
+
+    val rejectionRequestNames =
+        listOf(
+            "invitation start",
+            "validate invitation token",
+            "accept or reject invitation",
+            "submit invitation rejection",
+            "rejection confirmation",
+            "rejected property remains unjoined",
+        ).map { "Joint invitation rejection: $it" }
 
     val requestNames =
         listOf(
@@ -129,12 +140,14 @@ object JointLandlordJourney {
         config: BasicRunConfig,
         fixture: JointLandlordFixture,
         prefix: String = "",
+        accept: Boolean = true,
     ): ChainBuilder {
         requireNotNull(fixture.token) { "A joint invitation token is required for an invitation decision" }
         requireNotNull(fixture.inviteeSubject) { "An invitee subject is required for an invitation decision" }
-        val names = decisionRequestNames.map { prefix + it }.iterator()
+        val names = (if (accept) decisionRequestNames else rejectionRequestNames).map { prefix + it }.iterator()
         val invitationRoute = AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
         val confirmationRoute = AcceptOrRejectJointLandlordInvitationController.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+        val rejectionConfirmationRoute = JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
         var chain =
             exec(
                 http(names.next())
@@ -176,61 +189,77 @@ object JointLandlordJourney {
                         names.next(),
                         invitationRoute,
                         "jointDecisionNext",
-                        mapOf("isInviteAccepted" to "true"),
-                        "check-user-role",
+                        mapOf("isInviteAccepted" to accept.toString()),
+                        if (accept) "check-user-role" else rejectionConfirmationRoute.substringAfterLast('/'),
                     ),
                 )
-        chain =
-            chain.exec(
-                http(names.next())
-                    .get("#{jointDecisionNext}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(302))
-                    .check(
-                        header("Location")
-                            .transform { scoped(it, config, invitationRoute, "confirm-landlord-for-property") }
-                            .saveAs("jointDecisionNext"),
-                    ),
-            ).exitHereIfFailed().exec(
-                http(names.next())
-                    .get("#{jointDecisionNext}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true))
-                    .check(css("form[method=post]", "action").saveAs("jointDecisionAction"))
-                    .check(css("form input[name=_csrf]", "value").exists())
-                    .check(css("form input[type=hidden]", "name").findAll().saveAs("jointDecisionHiddenNames"))
-                    .check(css("form input[type=hidden]", "value").findAll().saveAs("jointDecisionHiddenValues")),
-            ).exitHereIfFailed()
-                .exec(
-                    postDecisionForm(
-                        config,
-                        names.next(),
-                        invitationRoute,
-                        "jointDecisionNext",
-                        emptyMap(),
-                        confirmationRoute.substringAfterLast('/'),
-                    ),
-                )
-        chain =
-            chain.exec(
-                http(names.next())
-                    .get("#{jointDecisionNext}")
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true)),
-            ).exitHereIfFailed()
         val details =
             PropertyDetailsController.LANDLORD_PROPERTY_DETAILS_ROUTE
                 .replace("{propertyOwnershipId}", fixture.propertyOwnershipId.toString())
-        chain =
-            chain.exec(
-                http(names.next())
-                    .get { HttpDestination.withCacheBuster(config.baseUrl + details) }
-                    .disableFollowRedirect()
-                    .check(status().`is`(200))
-                    .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true)),
-            ).exitHereIfFailed()
+        if (accept) {
+            chain =
+                chain.exec(
+                    http(names.next())
+                        .get("#{jointDecisionNext}")
+                        .disableFollowRedirect()
+                        .check(status().`is`(302))
+                        .check(
+                            header("Location")
+                                .transform { scoped(it, config, invitationRoute, "confirm-landlord-for-property") }
+                                .saveAs("jointDecisionNext"),
+                        ),
+                ).exitHereIfFailed().exec(
+                    http(names.next())
+                        .get("#{jointDecisionNext}")
+                        .disableFollowRedirect()
+                        .check(status().`is`(200))
+                        .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true))
+                        .check(css("form[method=post]", "action").saveAs("jointDecisionAction"))
+                        .check(css("form input[name=_csrf]", "value").exists())
+                        .check(css("form input[type=hidden]", "name").findAll().saveAs("jointDecisionHiddenNames"))
+                        .check(css("form input[type=hidden]", "value").findAll().saveAs("jointDecisionHiddenValues")),
+                ).exitHereIfFailed()
+                    .exec(
+                        postDecisionForm(
+                            config,
+                            names.next(),
+                            invitationRoute,
+                            "jointDecisionNext",
+                            emptyMap(),
+                            confirmationRoute.substringAfterLast('/'),
+                        ),
+                    )
+                    .exec(
+                        http(names.next())
+                            .get("#{jointDecisionNext}")
+                            .disableFollowRedirect()
+                            .check(status().`is`(200))
+                            .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true)),
+                    ).exitHereIfFailed()
+                    .exec(
+                        http(names.next())
+                            .get { HttpDestination.withCacheBuster(config.baseUrl + details) }
+                            .disableFollowRedirect()
+                            .check(status().`is`(200))
+                            .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true)),
+                    ).exitHereIfFailed()
+        } else {
+            chain =
+                chain.exec(
+                    http(names.next())
+                        .get("#{jointDecisionNext}")
+                        .disableFollowRedirect()
+                        .check(status().`is`(200))
+                        .check(bodyString().transform { it.contains("Invite rejected") }.`is`(true))
+                        .check(bodyString().transform { containsAddress(it, fixture.address) }.`is`(true)),
+                ).exitHereIfFailed()
+                    .exec(
+                        http(names.next())
+                            .get { HttpDestination.withCacheBuster(config.baseUrl + details) }
+                            .disableFollowRedirect()
+                            .check(status().`is`(404)),
+                    ).exitHereIfFailed()
+        }
         return chain
     }
 
