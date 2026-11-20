@@ -115,6 +115,7 @@ In production, tasks are triggered by **EventBridge Scheduler** which spins up e
 | `NgdAddressUpdateTaskApplicationRunner` | `@PrsdbScheduledTask` | Load NGD address data updates |
 | `IncompletePropertiesReminderTaskApplicationRunner` | `@PrsdbScheduledTask` | Send reminder emails for incomplete properties |
 | `DeleteIncompletePropertiesTaskApplicationRunner` | `@PrsdbScheduledTask` | Clean up properties older than 28 days |
+| `DeactivateInactiveLandlordsTaskApplicationRunner` | `@PrsdbScheduledTask` | Deactivate landlords with no property registered within 3 months, or with no active properties (when `ACTIVE_INACTIVE` is on) |
 | `NftDataSeedingTaskApplicationRunner` | `@PrsdbTask` | Seed test data for NFT environment |
 | `DefaultScheduledTaskApplicationRunner` | `@PrsdbScheduledTask` | Fallback — exits with message if no task configured |
 
