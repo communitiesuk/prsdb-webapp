@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.SuperiorLandlordAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
@@ -62,6 +63,14 @@ class AssociatedPartyNotificationServiceTests {
             propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
             freeholderAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
+            privacyNoticeUrl = "example.test/landlord/privacy-notice",
+        )
+    private val expectedSuperiorLandlordAddedToPropertyLetter =
+        SuperiorLandlordAddedToPropertyLetter(
+            superiorLandlordName = "Daniel Roberts",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            landlords = listOf("Jamie Jameson (jamie@example.com)"),
+            superiorLandlordAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
             privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val postalAddress = AddressDataModel(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
@@ -173,7 +182,7 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
-    // TODO PDJB-1987: Update this test to expect an email once the freeholder-added email is implemented.
+    // TODO PDJB-1987: Update this test to expect to throw in this case, you should not have two contact methods
     @Test
     fun `freeholder with both contact methods receives no notification while email implementation is pending`() {
         // Arrange
@@ -211,15 +220,131 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `creation notification for a superior landlord fails explicitly until implemented`() {
+    fun `buildSuperiorLandlordAddedToPropertyLetter includes property and superior landlord details with landlords sorted by name`() {
         // Arrange
-        val superiorLandlord = createSuperiorLandlordModel()
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords =
+                    mutableSetOf(
+                        createOrgLandlord(name = "Zebra Homes", email = "contact@zebra.example", registrantEmail = "admin@zebra.example"),
+                        createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
+                    ),
+            )
+        val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", address = postalAddress)
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+            .thenReturn("example.test/landlord/privacy-notice")
+
+        // Act
+        val result = associatedPartyNotificationService.buildSuperiorLandlordAddedToPropertyLetter(superiorLandlord, propertyOwnership)
+
+        // Assert
+        assertEquals(
+            expectedSuperiorLandlordAddedToPropertyLetter.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)", "Zebra Homes (contact@zebra.example)"),
+            ),
+            result,
+        )
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `superior landlord added to property notification is sent as a letter built from journey details when the address is known`() {
+        // Arrange
+        val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", address = postalAddress)
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+            .thenReturn("example.test/landlord/privacy-notice")
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                superiorLandlord,
+                propertyOwnership,
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            expectedSuperiorLandlordAddedToPropertyLetter,
+        )
+        verifyNoInteractions(emailNotificationService)
+    }
+
+    @Test
+    fun `superior landlord with no name does not receive a notification`() {
+        // Arrange
+        val superiorLandlord = createSuperiorLandlordModel(address = postalAddress)
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                superiorLandlord,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `superior landlord added to property notification sends nothing yet to a superior landlord with only an email address`() {
+        // Arrange
+        val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", email = "daniel.roberts@example.com")
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                superiorLandlord,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertNull(outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    // TODO PDJB-1989: Update this test to expect to throw in this case, you should not have two contact methods
+    @Test
+    fun `superior landlord with both contact methods receives no notification while email implementation is pending`() {
+        // Arrange
+        val superiorLandlord =
+            createSuperiorLandlordModel(
+                name = "Daniel Roberts",
+                email = "daniel.roberts@example.com",
+                address = postalAddress,
+            )
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                superiorLandlord,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertNull(outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `superior landlord added to property notification throws when a named superior landlord has no contact method`() {
+        // Arrange
+        val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts")
 
         // Act & Assert
-        assertThrows(NotImplementedError::class.java) {
-            associatedPartyNotificationService.sendCreationNotificationForSuperiorLandlord(superiorLandlord)
+        assertThrows(PrsdbWebException::class.java) {
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                superiorLandlord,
+                createPropertyOwnership(),
+            )
         }
-
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 

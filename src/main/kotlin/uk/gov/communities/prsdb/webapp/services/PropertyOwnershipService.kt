@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -59,6 +60,7 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val freeholderService: FreeholderService,
     private val superiorLandlordService: SuperiorLandlordService,
+    private val propertyManagerService: PropertyManagerService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
@@ -202,6 +204,9 @@ class PropertyOwnershipService(
             )
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
+
+    fun getLastModifiedDateIncludingPropertyManager(propertyOwnershipId: Long): Instant =
+        getPropertyOwnership(propertyOwnershipId).getPropertyManagerMostRecentlyUpdated()
 
     fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
@@ -377,10 +382,8 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO PDJB-1992: when ASSOCIATED_PARTIES is on, this should take the landlord's freeholder and
-    //  superior landlord answers (including the yes/no superior landlord question) so that changing the
-    //  ownership type leaves the property in a valid state. The flag-off journey never asks, so it keeps
-    //  falling back on a placeholder freeholder until PDJB-2016 removes the flag.
+    // TODO PDJB-2016: delete this with the flag-off journey, which never asks who the freeholders are and so falls
+    //  back on a placeholder freeholder.
     @Transactional
     fun updateOwnershipType(
         id: Long,
@@ -403,11 +406,94 @@ class PropertyOwnershipService(
         }
     }
 
+    @Transactional
+    fun updateOwnershipStructure(
+        id: Long,
+        ownershipType: OwnershipType,
+        freeholders: List<FreeholderDataModel>,
+        superiorLandlords: List<SuperiorLandlordDataModel>,
+        initialLastModifiedDate: Instant,
+    ): Pair<List<FreeholderDataModel>, List<SuperiorLandlordDataModel>> {
+        val propertyOwnership = getPropertyOwnership(id)
+        if (propertyOwnership.getOwnershipStructureMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+        propertyOwnership.ownershipType = ownershipType
+        // TODO PDJB-2019: delete this line with the legacy column.
+        propertyOwnership.ownershipTypeBeforePdjb955 = OwnershipTypeConverter.convertToBeforePdjb955(ownershipType)
+        propertyOwnershipRepository.save(propertyOwnership)
+
+        val addedFreeholders =
+            if (ownershipType.requiresFreeholderRecords()) {
+                require(freeholders.isNotEmpty()) { "Ownership type $ownershipType requires at least one freeholder" }
+                freeholderService.updateFreeholders(propertyOwnership, freeholders)
+            } else {
+                freeholderService.clearFreeholders(propertyOwnership)
+                emptyList()
+            }
+
+        val addedSuperiorLandlords =
+            if (ownershipType.requiresSuperiorLandlordInfo() && superiorLandlords.isNotEmpty()) {
+                superiorLandlordService.updateSuperiorLandlords(propertyOwnership, superiorLandlords)
+            } else {
+                superiorLandlordService.clearSuperiorLandlords(propertyOwnership)
+                emptyList()
+            }
+
+        return Pair(addedFreeholders, addedSuperiorLandlords)
+    }
+
+    @Transactional
+    fun updateFreeholders(
+        id: Long,
+        freeholders: List<FreeholderDataModel>,
+        initialLastModifiedDate: Instant,
+    ): List<FreeholderDataModel> {
+        val propertyOwnership = getPropertyOwnership(id)
+        if (propertyOwnership.getOwnershipStructureMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+        require(propertyOwnership.ownershipType.requiresFreeholderRecords()) {
+            "Ownership type ${propertyOwnership.ownershipType} does not require freeholders"
+        }
+        require(freeholders.isNotEmpty()) { "Ownership type ${propertyOwnership.ownershipType} requires at least one freeholder" }
+
+        return freeholderService.updateFreeholders(propertyOwnership, freeholders)
+    }
+
     // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
     @Transactional
-    fun removePropertyManager(propertyOwnership: PropertyOwnership) {
+    fun removePropertyManager(
+        id: Long,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfPropertyManagerLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.propertyManager = null
         propertyOwnershipRepository.save(propertyOwnership)
+        // TODO PDJB-2171: Email the property manager when they are removed
+    }
+
+    @Transactional
+    fun updatePropertyManager(
+        id: Long,
+        propertyManager: PropertyManagerDataModel,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfPropertyManagerLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val existingPropertyManager = propertyOwnership.propertyManager
+        if (existingPropertyManager != null) {
+            propertyManagerService.updatePropertyManager(existingPropertyManager, propertyManager.name, propertyManager.email)
+        } else {
+            propertyOwnership.propertyManager = propertyManagerService.createPropertyManager(propertyManager.name, propertyManager.email)
+        }
+        propertyOwnershipRepository.save(propertyOwnership)
+        // TODO PDJB-1991: Email the property manager when they are added or their details change
     }
 
     @Transactional
@@ -672,6 +758,17 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlord.id)
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
+
+    private fun throwErrorIfPropertyManagerLastModifiedDatesConflict(
+        propertyOwnership: PropertyOwnership,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyOwnership.getPropertyManagerMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership or property manager record has been updated since this update session started.",
+            )
+        }
+    }
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

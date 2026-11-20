@@ -23,6 +23,9 @@ class PropertyDetailsPageLocalCouncilView(
     val freeholderSection: Locator
         get() = page.locator("#freeholder-section")
 
+    val superiorLandlordSection: Locator
+        get() = page.locator("#superior-landlord-section")
+
     val pendingInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
 

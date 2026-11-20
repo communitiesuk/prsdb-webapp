@@ -32,7 +32,7 @@ class ConfirmRemoveFreeholderStepConfig(
             "optionalFieldSetHeadingParam" to freeholderName.orEmpty(),
             "fieldSetHint" to "registerProperty.freeholders.remove.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            "submitButtonTextKey" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
             "showSectionHeader" to true,
         )
     }

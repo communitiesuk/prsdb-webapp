@@ -1,0 +1,26 @@
+<th:block th:fragment="epcRequirementsDetails(meesExemptionGuideUrl, epcGuideUrl)">
+    <details id="epc-requirements-details" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.epcRequirementsDetails.summary}, ~{::#epc-requirements-details/content()})}">
+        <div class="govuk-details__text">
+            <section>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.one}">propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.one</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.two}">propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.two</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.three}">propertyCompliance.epcTask.epcRequirementsDetails.intro.paragraph.three</p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.lowRating.heading}">propertyCompliance.epcTask.epcRequirementsDetails.lowRating.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.lowRating.paragraph.one}">propertyCompliance.epcTask.epcRequirementsDetails.lowRating.paragraph.one</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.lowRating.paragraph.two}">propertyCompliance.epcTask.epcRequirementsDetails.lowRating.paragraph.two</p>
+                <p class="govuk-body">
+                    <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.lowRating.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.epcRequirementsDetails.lowRating.link</a>
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.notRequired.heading}">propertyCompliance.epcTask.epcRequirementsDetails.notRequired.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.notRequired.paragraph}">propertyCompliance.epcTask.epcRequirementsDetails.notRequired.paragraph</p>
+                <p class="govuk-body">
+                    <a class="govuk-link" th:href="${epcGuideUrl}" th:text="#{propertyCompliance.epcTask.epcRequirementsDetails.notRequired.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.epcRequirementsDetails.notRequired.link</a>
+                </p>
+            </section>
+        </div>
+    </details>
+</th:block>

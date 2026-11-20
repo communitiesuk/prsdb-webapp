@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -56,10 +59,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
-            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
-                "#",
+                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/start",
             )
         }
 
@@ -82,6 +84,70 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             val freeholderCard = detailsPage.freeholderCards.single { it.title.getText() == "Jordan Joint" }
             assertThat(freeholderCard).containsText("joint.freeholder@example.com")
+        }
+
+        @Test
+        fun `the people responsible tab shows saved superior landlords as read only cards`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).containsText("Other people in the property’s ownership chain")
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow).isHidden()
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+        }
+
+        @Test
+        fun `the people responsible tab shows a superior landlord update link`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasAttribute("href", "#")
+        }
+
+        @Test
+        fun `the people responsible tab shows the postal address note on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Robin Superior" }
+            assertThat(superiorLandlordCard.bodyText).hasText(
+                "A postal address was provided for this person in the ownership chain. " +
+                    "We’ve used this to tell them that they’re named on this registration.",
+            )
+            assertThat(superiorLandlordCard.bodyText.locator("strong")).hasText("postal address")
+        }
+
+        @Test
+        fun `the people responsible tab shows the email address on a saved superior landlord card`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val superiorLandlordCard = detailsPage.superiorLandlordCards.single { it.title.getText() == "Sam Superior" }
+            assertThat(superiorLandlordCard).containsText("superior.landlord@example.com")
+        }
+
+        @Test
+        fun `the people responsible tab shows a no row when there are no superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow.value).hasText("No")
+            assertEquals(0, detailsPage.superiorLandlordCards.size)
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasCount(0)
+        }
+
+        @Test
+        fun `the people responsible tab shows a change link on the no superior landlords row`() {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val row = detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow
+            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
+            assertThat(row.actions.firstActionLink.locator).hasAttribute("href", "#")
         }
 
         @Test
@@ -311,9 +377,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow).not().isVisible()
-                // TODO PDJB-1992: assert the real update route once the ownership update journey exists.
                 assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.actions.firstActionLink.locator)
-                    .hasAttribute("href", "#")
+                    .hasAttribute(
+                        "href",
+                        UpdateOwnershipController.getUpdateOwnershipRoute(1) + "/${InitialiseOwnershipUpdateStep.ROUTE_SEGMENT}",
+                    )
             }
 
             @Test
@@ -338,8 +406,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
-                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
-                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasAttribute("href", "#")
+                assertThat(detailsPage.propertyManagerUpdateLink.locator)
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(37))
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
             }
 
@@ -351,9 +419,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
                     .containsText("No, I manage this property (or another joint landlord does)")
-                // TODO PDJB-1995: assert the real update route once the property manager update journey exists
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
-                    .hasAttribute("href", "#")
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(1))
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).not().isVisible()
             }
 
@@ -493,6 +560,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection).hasCount(0)
+        }
+
+        // TODO PDJB-1999: remove this test when superior landlords are shown in the local council view
+        @Test
+        fun `the people responsible tab does not show saved superior landlords`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.superiorLandlordSection).hasCount(0)
         }
 
         @Test
@@ -1104,6 +1180,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     companion object {
         private const val PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID = 1L
         private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
+        private const val PROPERTY_WITH_SUPERIOR_LANDLORDS_ID = 57L
+        private const val PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID = 1L
     }
 }
 

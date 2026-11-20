@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration.CheckUploadsForm
@@ -19,5 +20,6 @@ class CheckGasCertUploadsFormPagePropertyReactivation(
         get() = table.rows.count().let { "You’ve uploaded $it gas safety certificate file${if (it == 1) "" else "s"}" }
 
     val table = Table(page)
+    val backLink = BackLink.default(page)
     val form = CheckUploadsForm(page)
 }

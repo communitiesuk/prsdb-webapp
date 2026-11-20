@@ -36,6 +36,5 @@ class SuperiorLandlord() : ModifiableAuditableEntity() {
         this.email = email
     }
 
-    // TODO PDJB-1997: use this on the property record
     fun detailsKnown(): Boolean = name != null
 }

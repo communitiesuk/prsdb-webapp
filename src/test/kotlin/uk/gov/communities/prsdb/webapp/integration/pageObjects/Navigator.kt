@@ -65,6 +65,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
@@ -344,6 +345,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.propertyManager.StartPropertyManagerUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
@@ -1653,6 +1655,13 @@ class Navigator(
         )
     }
 
+    fun navigateToUpdatePropertyManagerJourney(
+        propertyOwnershipId: Long,
+        stepRouteSegment: String = StartPropertyManagerUpdateStep.ROUTE_SEGMENT,
+    ) {
+        navigate("${UpdatePropertyManagerController.getUpdatePropertyManagerRoute(propertyOwnershipId)}/$stepRouteSegment")
+    }
+
     fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
         storeLettingAgentAccessInSession(token)
         navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
@@ -1749,8 +1758,11 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyReactivationCheckAnswersPage(propertyOwnershipId: Long): CheckAnswersPagePropertyReactivation {
-        setJourneyStateInSession(PropertyReactivationStateSessionBuilder.beforeCheckAnswers().build())
+    fun skipToPropertyReactivationCheckAnswersPage(
+        propertyOwnershipId: Long,
+        stateBuilder: PropertyReactivationStateSessionBuilder = PropertyReactivationStateSessionBuilder.beforeCheckAnswers(),
+    ): CheckAnswersPagePropertyReactivation {
+        setJourneyStateInSession(stateBuilder.build())
         navigate(
             ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
                 "/${ReactivationCheckAnswersStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",

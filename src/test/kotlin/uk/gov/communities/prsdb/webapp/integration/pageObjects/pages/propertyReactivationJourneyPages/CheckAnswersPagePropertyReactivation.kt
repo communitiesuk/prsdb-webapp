@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckElectricalSafetyAnswersSummaryList
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 
 class CheckAnswersPagePropertyReactivation(
@@ -49,6 +51,22 @@ class CheckAnswersPagePropertyReactivation(
         page: Page,
     ) : SummaryList(page) {
         val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
+        val validGasCertRow = getRow("Do you have a valid gas safety certificate for this property?")
+        val gasCertIssueDateRow = getRow("Issue date")
+        val gasCertUploadRow = getRow("Your certificate")
+        val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
+        val electricalCertUploadRow = getRow("Your certificate")
+        val epcTenancyCheckRow = getRow("Was the EPC still in date when the current tenancy began?")
+        val isEpcRequiredRow = getRow("Is an EPC required to let this property?")
+        val epcExemptionRow = getRow("Why does this property not need an EPC?")
+        val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
+        val meesExemptionRow = getRow("Registered exemption")
+
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        val eicExpiryDateRow = getRow("Expiry date")
+
+        fun electricalCertDateRow(certificateType: CertificateType) =
+            getRow(CheckElectricalSafetyAnswersSummaryList.certificateDateKey(certificateType))
     }
 
     class TenancySummaryList(
@@ -56,6 +74,10 @@ class CheckAnswersPagePropertyReactivation(
     ) : SummaryList(page) {
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
         val rentAmountRow = getRow("Rent amount")
     }
 }

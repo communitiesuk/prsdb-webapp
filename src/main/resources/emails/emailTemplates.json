@@ -240,8 +240,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
   },
   {
-    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
-    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "test_id": "227a40c5-f571-4869-a3cf-61a9a0cfd68e",
+    "prod_id": "72c37078-c575-4c83-8685-1951fe447b90",
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’re now a registered landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
@@ -455,5 +455,12 @@
     "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
     "subject": "A property registration payment needs checking",
     "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
+  },
+  {
+    "test_id": "df60db12-0141-4927-aa6a-a4fd1e28ad60",
+    "prod_id": "a59546df-b789-4dab-9883-a60c9d834c08",
+    "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
+    "subject": "Landlord account deactivated",
+    "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
   }
 ]

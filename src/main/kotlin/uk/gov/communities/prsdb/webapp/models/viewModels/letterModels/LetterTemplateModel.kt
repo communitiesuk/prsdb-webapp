@@ -8,4 +8,5 @@ interface LetterTemplateModel {
 
 enum class LetterTemplate {
     FREEHOLDER_ADDED_TO_PROPERTY_LETTER,
+    SUPERIOR_LANDLORD_ADDED_TO_PROPERTY_LETTER,
 }

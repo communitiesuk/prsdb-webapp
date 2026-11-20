@@ -91,7 +91,7 @@ class ConfirmRemoveFreeholderStepConfigTests {
         assertEquals("First freeholder", content["optionalFieldSetHeadingParam"])
         assertEquals("registerProperty.freeholders.remove.fieldSetHint", content["fieldSetHint"])
         assertEquals(RadiosViewModel.yesOrNoRadios(), content["radioOptions"])
-        assertEquals("forms.buttons.saveAndContinue", content["submitButtonTextKey"])
+        assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
         assertEquals(true, content["showSectionHeader"])
     }
 
