@@ -62,7 +62,7 @@ class PropertyOwnershipService(
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
@@ -225,7 +225,7 @@ class PropertyOwnershipService(
         if (isCurrentUserLandlord(propertyOwnershipId)) return true
 
         val lettingAgentAccess = getLettingAgentAccess(propertyOwnershipId) ?: return false
-        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
+        return lettingAgentSessionService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
     }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
