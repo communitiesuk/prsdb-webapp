@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
@@ -55,6 +56,9 @@ class ReactivatePropertyControllerTests(
 
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
+
+    @MockitoBean
+    private lateinit var propertyReactivationService: PropertyReactivationService
 
     private val propertyOwnershipId = 1L
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
@@ -241,7 +245,9 @@ class ReactivatePropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getConfirmation returns the placeholder confirmation page for a landlord of the inactive property`() {
+    fun `getConfirmation returns the placeholder confirmation page when the property was reactivated this session`() {
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+
         mvc.get("${getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isOk() }
             view { name("forms/todoConfirmation") }
@@ -251,8 +257,8 @@ class ReactivatePropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getConfirmation returns 404 when the property cannot be reactivated by the current user`() {
-        mockPropertyCannotBeReactivated()
+    fun `getConfirmation returns 404 when the property was not the last one reactivated this session`() {
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId + 1)
 
         mvc.get("${getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isNotFound() }

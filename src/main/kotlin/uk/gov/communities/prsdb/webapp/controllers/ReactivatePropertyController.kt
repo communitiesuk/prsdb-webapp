@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.fileupload2.core.FileItemInputIterator
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.CookieValue
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
@@ -34,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.React
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 
 @AllowIfLandlord
 @PrsdbController
@@ -42,6 +45,7 @@ class ReactivatePropertyController(
     private val propertyReactivationJourneyFactory: PropertyReactivationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
+    private val propertyReactivationService: PropertyReactivationService,
 ) {
     // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
@@ -112,10 +116,15 @@ class ReactivatePropertyController(
         model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
-        throwIfPropertyCannotBeReactivated(propertyOwnershipId)
+        if (propertyOwnershipId != propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "PropertyOwnershipId $propertyOwnershipId was not the last property reactivated in the session",
+            )
+        }
 
-        // TODO PDJB-2044: Save the reactivation and show the confirmation page
-        model.addAttribute("todoComment", "TODO (PDJB-2044): Save the reactivation and show the confirmation page")
+        // TODO PDJB-2044: Show the confirmation page
+        model.addAttribute("todoComment", "TODO (PDJB-2044): Show the confirmation page")
         return "forms/todoConfirmation"
     }
 
