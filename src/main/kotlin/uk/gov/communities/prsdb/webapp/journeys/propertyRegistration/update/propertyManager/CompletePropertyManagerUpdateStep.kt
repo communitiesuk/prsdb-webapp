@@ -24,7 +24,6 @@ class CompletePropertyManagerUpdateStepConfig(
 
     override fun afterStepIsReached(state: UpdatePropertyManagerJourneyState) {
         val updatedPropertyManager = getUpdatedPropertyManager(state)
-        if (updatedPropertyManager == state.originalPropertyManager) return
 
         try {
             val lastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant()
@@ -38,9 +37,10 @@ class CompletePropertyManagerUpdateStepConfig(
             throw ex
         }
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The property manager responsible for the property"))
-        // TODO PDJB-1991: when updatedPropertyManager is not null, send the new property manager email using
-        //  AssociatedPartyNotificationService.sendCreationNotificationForPropertyManager once it is implemented
-        // TODO PDJB-2171: when the original property manager is not null, send the removed property manager email
+        // TODO PDJB-1991: when updatedPropertyManager is not null and differs from state.originalPropertyManager, send the new
+        //  property manager email using AssociatedPartyNotificationService.sendCreationNotificationForPropertyManager once it is implemented
+        // TODO PDJB-2171: when state.originalPropertyManager is not null and differs from updatedPropertyManager, send the removed
+        //  property manager email
     }
 
     // The details form can still hold answers after the landlord has answered "No", so the yes or no answer decides
