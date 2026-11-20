@@ -300,7 +300,7 @@ class ActiveInactiveServiceTests {
             invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus())
         }.whenever(transactionTemplate).executeWithoutResult(any())
 
-        val failureCount = activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()
+        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
 
         assertEquals(1, failureCount)
         verify(propertyOwnershipRepository).findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff())
@@ -316,7 +316,7 @@ class ActiveInactiveServiceTests {
         whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
             .thenReturn(emptyList())
 
-        val failureCount = activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()
+        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
 
         assertEquals(0, failureCount)
         verifyNoInteractions(transactionTemplate)

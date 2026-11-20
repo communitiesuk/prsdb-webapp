@@ -21,21 +21,21 @@ class DeactivateMissingDetailPropertiesTaskApplicationRunnerTests {
 
     @Test
     fun `returns the service failure count`() {
-        whenever(activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()).thenReturn(2)
+        whenever(activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()).thenReturn(2)
 
         val failureCount = taskLogic.deactivateMissingDetailPropertiesReturningFailureCount()
 
         assertEquals(2, failureCount)
-        verify(activeInactiveService).deactivatePropertiesWithOverdueTasksReturningFailureCount()
+        verify(activeInactiveService).deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
     }
 
     @Test
     fun `returns zero when the service reports no failed deactivations`() {
-        whenever(activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()).thenReturn(0)
+        whenever(activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()).thenReturn(0)
 
         val failureCount = taskLogic.deactivateMissingDetailPropertiesReturningFailureCount()
 
         assertEquals(0, failureCount)
-        verify(activeInactiveService).deactivatePropertiesWithOverdueTasksReturningFailureCount()
+        verify(activeInactiveService).deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
     }
 }

@@ -33,7 +33,7 @@ class DeactivateMissingDetailPropertiesTaskLogic(
     private val activeInactiveService: ActiveInactiveService,
 ) {
     fun deactivateMissingDetailPropertiesReturningFailureCount(): Int {
-        val failureCount = activeInactiveService.deactivatePropertiesWithOverdueTasksReturningFailureCount()
+        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
 
         println("Missing detail property deactivation task complete. There were $failureCount failures.")
         return failureCount

@@ -48,7 +48,7 @@ class ActiveInactiveService(
             .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
 
-    fun deactivatePropertiesWithOverdueTasksReturningFailureCount(): Int {
+    fun deactivateMissingDetailPropertiesPastDueDateReturningFailureCount(): Int {
         val cutoff =
             LocalDate
                 .now(DateTimeHelper.UK_ZONE)

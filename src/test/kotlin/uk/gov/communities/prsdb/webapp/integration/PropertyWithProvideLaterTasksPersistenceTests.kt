@@ -25,11 +25,9 @@ class PropertyWithProvideLaterTasksPersistenceTests :
 
     @Test
     fun `does not return properties created exactly at the cutoff`() {
-        val cutoffThirtyDaysAgo = cutoff(30)
-
         assertEquals(
             emptyList<Long>(),
-            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoffThirtyDaysAgo),
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff(OLDEST_PROPERTY_AGE_IN_DAYS)),
         )
     }
 
@@ -42,5 +40,6 @@ class PropertyWithProvideLaterTasksPersistenceTests :
 
     companion object {
         private val ELIGIBLE_PROPERTY_IDS = (1L..5L).toList()
+        private const val OLDEST_PROPERTY_AGE_IN_DAYS = 30L
     }
 }
