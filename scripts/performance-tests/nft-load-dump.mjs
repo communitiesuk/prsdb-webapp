@@ -229,9 +229,7 @@ export async function loadSeededDataset(config, {
     const archive = await fileStat(archivePath);
     requireCondition(archive.size === size, 'Downloaded NFT seed dump size does not match S3 metadata');
     await timedStage('Inspect PostgreSQL archive', () => inspect(archivePath), log);
-    log(
-      `Validated NFT seed dump: s3://${bucket}/${key}, version ${versionId ?? 'unversioned'}, ETag ${etag}, size ${size} bytes.`,
-    );
+    log(`Validated NFT seed dump archive: ${size} bytes.`);
 
     await timedStage('Restore database (4 workers)', () => restore(archivePath, environment), log);
     await timedStage('Apply Flyway migrations', () => migrate(env), log);
@@ -327,8 +325,15 @@ export async function exportCompletedPropertyFixtures(outputPath, {
 
 function requireOwnedCertificateFiles(fixtures) {
   const keys = new Set();
+  let sharedVersionId;
   requireCondition(fixtures.every(row => Array.isArray(row.files) && row.files.length <= 20 &&
     row.files.every(file => {
+      if (file?.objectKey === 'seeding/certificate_template.png') {
+        if (file.extension !== 'png' || typeof file.versionId !== 'string' || !file.versionId.trim() ||
+            (sharedVersionId !== undefined && sharedVersionId !== file.versionId)) return false;
+        sharedVersionId = file.versionId;
+        return true;
+      }
       const match = typeof file?.objectKey === 'string' &&
         /^certificateUpload\.seed-([0-9]+)\.[a-z-]+\.member-[0-9]+$/.exec(file.objectKey);
       if (!match || match[1] !== String(row.propertyOwnershipId) ||
@@ -342,6 +347,19 @@ export async function exportJourneyFixtures(family, outputPath, {
   aws = awsCommand, env = process.env, executeCommand = run, save = writeFile, log = console.log,
 } = {}) {
   const schemas = {
+    'paid-registration': {
+      strings: ['subject', 'address', 'postcode', 'building'],
+      integers: ['localCouncilId', 'uprn'],
+      unique: ['subject', 'uprn'],
+      minimum: 455,
+      maximum: 456,
+    },
+    'council-read': {
+      strings: ['subject', 'actorName', 'councilName', 'targetName', 'targetEmail', 'targetSubject', 'address', 'uprn', 'landlordName'],
+      integers: ['councilId', 'targetId', 'propertyId', 'propertyRegistrationNumber', 'landlordId', 'landlordRegistrationNumber'],
+      unique: ['subject', 'councilId', 'targetId', 'propertyId'],
+      minimum: 17,
+    },
     operator: {
       strings: ['subject', 'councilName', 'targetName', 'targetEmail', 'targetSubject'],
       integers: ['councilId', 'targetId'],
@@ -423,7 +441,7 @@ export async function exportJourneyFixtures(family, outputPath, {
     'utf8',
   );
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
-  requireCondition(Array.isArray(fixtures) && fixtures.length >= schema.minimum && fixtures.length <= 101,
+  requireCondition(Array.isArray(fixtures) && fixtures.length >= schema.minimum && fixtures.length <= (schema.maximum ?? 101),
     `Journey fixtures need ${schema.minimum} to 101 distinct actors`);
   requireCondition(fixtures.every(row =>
     schema.strings.every(field => typeof row?.[field] === 'string' && row[field].trim()) &&
@@ -455,7 +473,16 @@ export async function exportJourneyFixtures(family, outputPath, {
     requireCondition(fixtures.every(row => !row.invitationToken && !row.invitedEmail),
       'Organisation preparation requires uninvited actors');
   }
-  if (family === 'operator') {
+  if (family === 'paid-registration') {
+    const addresses = fixtures.map(row => row.address.trim().replace(/\s+/g, ' ').toLowerCase());
+    requireCondition(new Set(addresses).size === fixtures.length, 'Paid registration fixtures must have exclusive addresses');
+  }
+  if (family === 'council-read') {
+    requireCondition(fixtures.every(row => typeof row.targetManager === 'boolean' &&
+      (row.licenseType == null || Number.isSafeInteger(row.licenseType) && row.licenseType >= 0)),
+    'Council read fixtures have invalid user or licensing fields');
+  }
+  if (family === 'operator' || family === 'council-read') {
     const subjects = new Set(fixtures.map(row => row.subject));
     requireCondition(fixtures.every(row => typeof row.targetManager === 'boolean' && !subjects.has(row.targetSubject)),
       'Journey fixtures contain unsafe removal targets');

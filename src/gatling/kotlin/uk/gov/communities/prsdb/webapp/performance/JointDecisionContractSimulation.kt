@@ -29,14 +29,28 @@ class JointDecisionContractSimulation : Simulation() {
                 "invitee-measured",
                 "invitee-102@example.test",
             )
+        val rejected =
+            JointLandlordFixture(
+                "owner-rejected",
+                103,
+                "3 Fixture Road",
+                203,
+                "00000000-0000-0000-0000-000000000203",
+                "invitee-rejected",
+                "invitee-103@example.test",
+            )
         setUp(
             scenario("Joint invitation decision HTTP contract")
                 .exec(JointLandlordJourney.decisionChain(config, warmUp, "Warm-up: "))
                 .exec(JointLandlordJourney.decisionChain(config, measured))
+                .exec(JointLandlordJourney.decisionChain(config, rejected, accept = false))
                 .injectOpen(atOnceUsers(1)),
         ).protocols(http.baseUrl(config.baseUrl).acceptHeader("text/html").userAgentHeader("PRSDB-Gatling-Performance-Tests"))
             .assertions(
-                BasicPerformanceAssertions.forRequests(config, JointLandlordJourney.decisionRequestNames),
+                BasicPerformanceAssertions.forRequests(
+                    config,
+                    JointLandlordJourney.decisionRequestNames + JointLandlordJourney.rejectionRequestNames,
+                ),
             )
     }
 }
