@@ -10,6 +10,9 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import org.hibernate.envers.Audited
+import org.hibernate.envers.NotAudited
+import org.hibernate.envers.RelationTargetAuditMode
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -24,6 +27,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 @Entity
+@Audited
 class PropertyOwnership() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +55,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "registration_number_id", nullable = false, unique = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     lateinit var registrationNumber: RegistrationNumber
         private set
 
@@ -66,6 +71,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     lateinit var address: Address
         private set
 
@@ -74,6 +80,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "correspondence_address_id", nullable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     lateinit var correspondenceAddress: Address
 
     @OneToOne(optional = true, orphanRemoval = true)
@@ -103,14 +110,17 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         listOfNotNull(getMostRecentlyUpdated(), propertyManager?.getMostRecentlyUpdated()).max()
 
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
+    @NotAudited
     private lateinit var singleLineAddress: String
 
     @Column(insertable = false, updatable = false)
+    @NotAudited
     private val localCouncilId: Int? = null
 
     // We use this generated duplicate of isActive to influence the query planner into using the GIST index (as opposed to the GIN index)
     // for searches where it's likely to be more efficient
     @Column(nullable = false, insertable = false, updatable = false)
+    @NotAudited
     private val isActiveDuplicateForGistIndex: Boolean = false
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
@@ -119,7 +129,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
 
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
+    private val lettingAgentAccesses: MutableSet<LettingAgentAccess> = mutableSetOf()
+
     @OneToMany(mappedBy = "associatedProperty", orphanRemoval = true)
+    @NotAudited
     val payments: MutableSet<Payment> = mutableSetOf()
 
     var numBedrooms: Int? = null

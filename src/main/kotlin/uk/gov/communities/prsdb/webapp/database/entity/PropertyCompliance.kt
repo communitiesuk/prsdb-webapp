@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import org.hibernate.envers.Audited
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import java.time.LocalDate
 
 @Entity
+@Audited
 class PropertyCompliance() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
