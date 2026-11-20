@@ -128,7 +128,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
-    private lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+    private lateinit var mockLettingAgentSessionService: LettingAgentSessionService
 
     @Mock
     private lateinit var mockLettingAgentAccessRepository: LettingAgentAccessRepository
@@ -1094,7 +1094,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
-            whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
+            whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
@@ -1109,7 +1109,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
-            whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
+            whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 

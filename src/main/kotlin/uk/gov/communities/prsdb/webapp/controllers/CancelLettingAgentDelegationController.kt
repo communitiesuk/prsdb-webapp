@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @AllowIfLandlord
@@ -32,7 +32,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class CancelLettingAgentDelegationController(
     private val cancelLettingAgentDelegationJourneyFactory: CancelLettingAgentDelegationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
@@ -76,7 +76,7 @@ class CancelLettingAgentDelegationController(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         model.addAttribute(
             "lettingAgentEmail",
-            lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(propertyOwnershipId),
+            lettingAgentSessionService.getRemovedLettingAgentEmailFromSession(propertyOwnershipId),
         )
         model.addAttribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
         model.addAttribute("continueUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
@@ -84,7 +84,7 @@ class CancelLettingAgentDelegationController(
     }
 
     private fun throwIfLettingAgentNotRemovedInThisSession(propertyOwnershipId: Long) {
-        if (!lettingAgentAccessService.wasLettingAgentRemovedInThisSession(propertyOwnershipId)) {
+        if (!lettingAgentSessionService.wasLettingAgentRemovedInThisSession(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "No letting agent was removed for property ownership $propertyOwnershipId in this session",
