@@ -1,10 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit.Companion.DAY
-import kotlinx.datetime.minus
 import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,21 +13,13 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.CompleteEpcUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyState
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class CompleteEpcUpdateStepConfigTests {
@@ -38,7 +27,7 @@ class CompleteEpcUpdateStepConfigTests {
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Mock
-    private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
+    private lateinit var mockComplianceDetailsDataModelFactory: ComplianceDetailsDataModelFactory
 
     @Mock
     private lateinit var mockState: UpdateEpcJourneyState
@@ -46,85 +35,27 @@ class CompleteEpcUpdateStepConfigTests {
     @Mock
     private lateinit var mockEpcDetailsTask: EpcDetailsTask
 
-    @Mock
-    private lateinit var mockEpcExemptionStep: EpcExemptionStep
-
-    @Mock
-    private lateinit var mockMeesExemptionStep: MeesExemptionStep
-
-    @Mock
-    private lateinit var mockEpcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep
-
     private lateinit var stepConfig: CompleteEpcUpdateStepConfig
 
     private val propertyId = 123L
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
+    private val epc =
+        EpcDetailsDataModel(
+            certificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+            expiryDate = LocalDate.of(2030, 1, 2),
+            energyRating = "F",
+            tenancyStartedBeforeExpiry = false,
+            exemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+            meesExemptionReason = MeesExemptionReason.WALL_INSULATION,
+        )
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteEpcUpdateStepConfig(mockPropertyComplianceService, mockEpcCertificateUrlProvider)
+        stepConfig = CompleteEpcUpdateStepConfig(mockPropertyComplianceService, mockComplianceDetailsDataModelFactory)
     }
 
     @Test
-    fun `afterStepIsReached calls updateEpc with EPC data, mees exemption and tenancy check when present`() {
-        // Arrange
-        val expiryDate = DateTimeHelper().getCurrentDateInUK().minus(5, DAY)
-        val certificateNumber = "1234-5678-9012-3456-7890"
-        val epcUrl = "https://example.com/epc/$certificateNumber"
-        val epcEnergyRating = "F"
-        val acceptedEpc =
-            MockEpcData.createEpcDataModel(
-                certificateNumber = certificateNumber,
-                energyRating = epcEnergyRating,
-                expiryDate = expiryDate,
-            )
-
-        setupMockState(
-            acceptedEpc = acceptedEpc,
-            tenancyStartedBeforeEpcExpiry = false,
-            meesExemptionReason = MeesExemptionReason.WALL_INSULATION,
-        )
-        whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)).thenReturn(epcUrl)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyComplianceService).updateEpc(
-            propertyOwnershipId = propertyId,
-            initialLastModifiedDate = initialLastModifiedDate,
-            epcCertificateUrl = epcUrl,
-            epcExpiryDate = expiryDate.toJavaLocalDate(),
-            epcEnergyRating = epcEnergyRating,
-            tenancyStartedBeforeEpcExpiry = false,
-            epcExemptionReason = null,
-            epcMeesExemptionReason = MeesExemptionReason.WALL_INSULATION,
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached calls updateEpc with an Epc exemption reason`() {
-        // Arrange
-        setupMockState(epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyComplianceService).updateEpc(
-            propertyOwnershipId = propertyId,
-            initialLastModifiedDate = initialLastModifiedDate,
-            epcCertificateUrl = null,
-            epcExpiryDate = null,
-            epcEnergyRating = null,
-            tenancyStartedBeforeEpcExpiry = null,
-            epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
-            epcMeesExemptionReason = null,
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached calls updateEpc with null EPC data when no EPC accepted`() {
+    fun `afterStepIsReached calls updateEpc with the EPC details from the journey`() {
         // Arrange
         setupMockState()
 
@@ -135,12 +66,12 @@ class CompleteEpcUpdateStepConfigTests {
         verify(mockPropertyComplianceService).updateEpc(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
-            epcCertificateUrl = null,
-            epcExpiryDate = null,
-            epcEnergyRating = null,
-            tenancyStartedBeforeEpcExpiry = null,
-            epcExemptionReason = null,
-            epcMeesExemptionReason = null,
+            epcCertificateUrl = epc.certificateUrl,
+            epcExpiryDate = epc.expiryDate,
+            epcEnergyRating = epc.energyRating,
+            tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
+            epcExemptionReason = epc.exemptionReason,
+            epcMeesExemptionReason = epc.meesExemptionReason,
         )
     }
 
@@ -152,6 +83,12 @@ class CompleteEpcUpdateStepConfigTests {
             mockPropertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                epcCertificateUrl = epc.certificateUrl,
+                epcExpiryDate = epc.expiryDate,
+                epcEnergyRating = epc.energyRating,
+                tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
+                epcExemptionReason = epc.exemptionReason,
+                epcMeesExemptionReason = epc.meesExemptionReason,
             ),
         ).thenThrow(UpdateConflictException::class.java)
 
@@ -170,28 +107,10 @@ class CompleteEpcUpdateStepConfigTests {
         assert(result == defaultDestination)
     }
 
-    private fun setupMockState(
-        acceptedEpc: EpcDataModel? = null,
-        tenancyStartedBeforeEpcExpiry: Boolean? = null,
-        epcExemptionReason: EpcExemptionReason? = null,
-        meesExemptionReason: MeesExemptionReason? = null,
-    ) {
-        val epcExemptionFormModel = epcExemptionReason?.let { EpcExemptionFormModel().apply { exemptionReason = it } }
-        val meesExemptionFormModel = meesExemptionReason?.let { MeesExemptionReasonFormModel().apply { exemptionReason = it } }
-        val tenancyFormModel =
-            tenancyStartedBeforeEpcExpiry?.let {
-                EpcInDateAtStartOfTenancyCheckFormModel().apply { tenancyStartedBeforeExpiry = it }
-            }
-
+    private fun setupMockState() {
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
-        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
-        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(epcExemptionFormModel)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(meesExemptionFormModel)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(tenancyFormModel)
+        whenever(mockComplianceDetailsDataModelFactory.fromEpcDetailState(mockEpcDetailsTask)).thenReturn(epc)
     }
 }

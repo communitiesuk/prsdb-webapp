@@ -19,11 +19,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationElectricalSafetyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationEpcDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.math.BigDecimal
@@ -58,10 +58,10 @@ class PropertyReactivationServiceTests {
     fun `reactivatePropertyIfAddressAvailable saves the details provided and then reactivates the property`() {
         // Arrange
         val licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null)
-        val gasSafety = ReactivationGasSafetyDataModel(hasGasSupply = false, issueDate = null, uploadIds = emptyList())
+        val gasSafety = GasSafetyDetailsDataModel(hasGasSupply = false, issueDate = null, uploadIds = emptyList())
         val electricalSafety =
-            ReactivationElectricalSafetyDataModel(CertificateType.Eicr, LocalDate.of(2030, 1, 1), null, null, listOf(2L))
-        val epc = ReactivationEpcDataModel("https://epc.example/cert", LocalDate.of(2031, 1, 1), "C", null, null, null)
+            ElectricalSafetyDetailsDataModel(CertificateType.Eicr, LocalDate.of(2030, 1, 1), null, null, listOf(2L))
+        val epc = EpcDetailsDataModel("https://epc.example/cert", LocalDate.of(2031, 1, 1), "C", null, null, null)
         val tenancyDetails =
             TenancyDetailsDataModel(
                 1,

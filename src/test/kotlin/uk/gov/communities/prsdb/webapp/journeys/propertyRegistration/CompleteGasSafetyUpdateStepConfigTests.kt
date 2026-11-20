@@ -11,17 +11,14 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.CompleteGasSafetyUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyState
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
@@ -34,6 +31,9 @@ class CompleteGasSafetyUpdateStepConfigTests {
     private lateinit var mockState: UpdateGasSafetyJourneyState
 
     @Mock
+    private lateinit var mockComplianceDetailsDataModelFactory: ComplianceDetailsDataModelFactory
+
+    @Mock
     private lateinit var mockUploadService: UploadService
 
     private lateinit var stepConfig: CompleteGasSafetyUpdateStepConfig
@@ -43,7 +43,8 @@ class CompleteGasSafetyUpdateStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteGasSafetyUpdateStepConfig(mockPropertyComplianceService, mockUploadService)
+        stepConfig =
+            CompleteGasSafetyUpdateStepConfig(mockPropertyComplianceService, mockComplianceDetailsDataModelFactory, mockUploadService)
     }
 
     @Nested
@@ -51,83 +52,42 @@ class CompleteGasSafetyUpdateStepConfigTests {
         @Mock
         private lateinit var mockDetailTask: GasSafetyDetailsTask
 
-        private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
-
-        private fun stubGasSupplyOutcome(mode: HasGasSupplyMode?) {
-            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(mode)
-        }
+        private val gasSafety =
+            GasSafetyDetailsDataModel(hasGasSupply = true, issueDate = LocalDate(2025, 6, 15).toJavaLocalDate(), uploadIds = listOf(1L, 2L))
 
         @BeforeEach
         fun setUp() {
             whenever(mockState.propertyId).thenReturn(propertyId)
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockState.gasSafetyDetailsTask).thenReturn(mockDetailTask)
+            whenever(mockComplianceDetailsDataModelFactory.fromGasSafetyDetailState(mockDetailTask)).thenReturn(gasSafety)
         }
 
         @Test
-        fun `calls updateGasSafety with gas supply, issue date and upload ids`() {
-            val issueDate = LocalDate(2025, 6, 15)
-            val uploadIds = listOf(1L, 2L)
-
+        fun `calls updateGasSafety with the gas safety details from the journey`() {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
-            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            stubGasSupplyOutcome(HasGasSupplyMode.HAS_SUPPLY)
-            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(issueDate)
-            whenever(mockDetailTask.gasUploadIds).thenReturn(uploadIds)
 
             stepConfig.afterStepIsReached(mockState)
 
             verify(mockPropertyComplianceService).updateGasSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = true,
-                gasSafetyCertIssueDate = issueDate.toJavaLocalDate(),
-                gasSafetyCertUploadIds = uploadIds,
+                hasGasSupply = gasSafety.hasGasSupply,
+                gasSafetyCertIssueDate = gasSafety.issueDate,
+                gasSafetyCertUploadIds = gasSafety.uploadIds,
             )
-        }
-
-        @Test
-        fun `calls updateGasSafety with no gas supply and null issue date`() {
-            whenever(mockState.previousUploadIds).thenReturn(emptyList())
-            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            stubGasSupplyOutcome(HasGasSupplyMode.NO_SUPPLY)
-            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockPropertyComplianceService).updateGasSafety(
-                propertyOwnershipId = propertyId,
-                initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = false,
-                gasSafetyCertIssueDate = null,
-                gasSafetyCertUploadIds = emptyList(),
-            )
-        }
-
-        @Test
-        fun `throws NotNullFormModelValueIsNullException when hasGasSupply is null`() {
-            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            stubGasSupplyOutcome(null)
-
-            assertThrows<NotNullFormModelValueIsNullException> {
-                stepConfig.afterStepIsReached(mockState)
-            }
         }
 
         @Test
         fun `deletes the journey then rethrows when it gets an UpdateConflictException`() {
             // Arrange
-            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            stubGasSupplyOutcome(HasGasSupplyMode.NO_SUPPLY)
-
             whenever(
                 mockPropertyComplianceService.updateGasSafety(
                     propertyOwnershipId = propertyId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    hasGasSupply = false,
-                    gasSafetyCertIssueDate = null,
-                    gasSafetyCertUploadIds = emptyList(),
+                    hasGasSupply = gasSafety.hasGasSupply,
+                    gasSafetyCertIssueDate = gasSafety.issueDate,
+                    gasSafetyCertUploadIds = gasSafety.uploadIds,
                 ),
             ).thenThrow(UpdateConflictException::class.java)
 
@@ -140,11 +100,6 @@ class CompleteGasSafetyUpdateStepConfigTests {
         @Test
         fun `deletes each previous file upload`() {
             whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
-
-            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            stubGasSupplyOutcome(HasGasSupplyMode.NO_SUPPLY)
-            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 
