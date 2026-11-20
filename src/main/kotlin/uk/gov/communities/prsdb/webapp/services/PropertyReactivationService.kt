@@ -46,7 +46,7 @@ class PropertyReactivationService(
 
         if (reactivationData.gasSafety != null || reactivationData.electricalSafety != null || reactivationData.epc != null) {
             propertyComplianceService.saveReactivationComplianceData(
-                propertyOwnershipId,
+                propertyOwnership,
                 reactivationData.gasSafety,
                 reactivationData.electricalSafety,
                 reactivationData.epc,

@@ -88,7 +88,7 @@ class PropertyReactivationServiceTests {
         inOrder(mockPropertyOwnershipService, mockPropertyComplianceService, mockActiveInactiveService) {
             verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
             verify(mockPropertyOwnershipService).saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
-            verify(mockPropertyComplianceService).saveReactivationComplianceData(propertyOwnershipId, gasSafety, electricalSafety, epc)
+            verify(mockPropertyComplianceService).saveReactivationComplianceData(propertyOwnership, gasSafety, electricalSafety, epc)
             verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
         }
     }
