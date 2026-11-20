@@ -45,6 +45,7 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
         generatePassphrasePage.smsForm.submit()
 
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertThat(generatePassphrasePage.heading).containsText("Passphrase sent")
         assertEquals(passphrase, generatePassphrasePage.passphrase)
         assertThat(generatePassphrasePage.successBanner.content).hasText("The text message has been submitted to 07400123456.")
         assertThat(generatePassphrasePage.readBackGuidance).isVisible()
