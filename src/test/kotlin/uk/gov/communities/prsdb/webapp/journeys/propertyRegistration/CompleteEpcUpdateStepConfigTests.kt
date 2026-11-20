@@ -66,12 +66,7 @@ class CompleteEpcUpdateStepConfigTests {
         verify(mockPropertyComplianceService).updateEpc(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
-            epcCertificateUrl = epc.certificateUrl,
-            epcExpiryDate = epc.expiryDate,
-            epcEnergyRating = epc.energyRating,
-            tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
-            epcExemptionReason = epc.exemptionReason,
-            epcMeesExemptionReason = epc.meesExemptionReason,
+            epc = epc,
         )
     }
 
@@ -83,12 +78,7 @@ class CompleteEpcUpdateStepConfigTests {
             mockPropertyComplianceService.updateEpc(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                epcCertificateUrl = epc.certificateUrl,
-                epcExpiryDate = epc.expiryDate,
-                epcEnergyRating = epc.energyRating,
-                tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
-                epcExemptionReason = epc.exemptionReason,
-                epcMeesExemptionReason = epc.meesExemptionReason,
+                epc = epc,
             ),
         ).thenThrow(UpdateConflictException::class.java)
 

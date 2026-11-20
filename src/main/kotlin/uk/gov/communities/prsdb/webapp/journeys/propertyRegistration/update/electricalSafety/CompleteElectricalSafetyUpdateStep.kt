@@ -27,12 +27,7 @@ class CompleteElectricalSafetyUpdateStepConfig(
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                electricalCertType = electricalSafety.certType,
-                eicrExpiryDate = electricalSafety.eicrExpiryDate,
-                electricalSafetyCertUploadIds = electricalSafety.uploadIds,
-                eicIssueDate = electricalSafety.eicIssueDate,
-                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
-                eicExpiryDate = electricalSafety.eicExpiryDate,
+                electricalSafety = electricalSafety,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

@@ -72,9 +72,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
             verify(mockPropertyComplianceService).updateGasSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                hasGasSupply = gasSafety.hasGasSupply,
-                gasSafetyCertIssueDate = gasSafety.issueDate,
-                gasSafetyCertUploadIds = gasSafety.uploadIds,
+                gasSafety = gasSafety,
             )
         }
 
@@ -85,9 +83,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
                 mockPropertyComplianceService.updateGasSafety(
                     propertyOwnershipId = propertyId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    hasGasSupply = gasSafety.hasGasSupply,
-                    gasSafetyCertIssueDate = gasSafety.issueDate,
-                    gasSafetyCertUploadIds = gasSafety.uploadIds,
+                    gasSafety = gasSafety,
                 ),
             ).thenThrow(UpdateConflictException::class.java)
 

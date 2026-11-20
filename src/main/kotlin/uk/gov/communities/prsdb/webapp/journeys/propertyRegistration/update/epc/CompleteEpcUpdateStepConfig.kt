@@ -25,12 +25,7 @@ class CompleteEpcUpdateStepConfig(
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                epcCertificateUrl = epc.certificateUrl,
-                epcExpiryDate = epc.expiryDate,
-                epcEnergyRating = epc.energyRating,
-                tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
-                epcExemptionReason = epc.exemptionReason,
-                epcMeesExemptionReason = epc.meesExemptionReason,
+                epc = epc,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

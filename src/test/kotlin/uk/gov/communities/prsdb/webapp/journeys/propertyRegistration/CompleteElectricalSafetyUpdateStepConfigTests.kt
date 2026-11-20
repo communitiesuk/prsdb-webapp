@@ -84,11 +84,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             verify(mockPropertyComplianceService).updateElectricalSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = electricalSafety.certType,
-                eicrExpiryDate = electricalSafety.eicrExpiryDate,
-                electricalSafetyCertUploadIds = electricalSafety.uploadIds,
-                eicIssueDate = electricalSafety.eicIssueDate,
-                eicExpiryDate = electricalSafety.eicExpiryDate,
+                electricalSafety = electricalSafety,
             )
         }
 
@@ -99,11 +95,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
                 mockPropertyComplianceService.updateElectricalSafety(
                     propertyOwnershipId = propertyId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    electricalCertType = electricalSafety.certType,
-                    eicrExpiryDate = electricalSafety.eicrExpiryDate,
-                    electricalSafetyCertUploadIds = electricalSafety.uploadIds,
-                    eicIssueDate = electricalSafety.eicIssueDate,
-                    eicExpiryDate = electricalSafety.eicExpiryDate,
+                    electricalSafety = electricalSafety,
                 ),
             ).thenThrow(UpdateConflictException::class.java)
 
