@@ -407,7 +407,7 @@ update:
   ownershipType:
     fieldSetHeading: Update the ownership type for your property
   freeholders:
-    notificationInset: We’ll notify anyone you add or remove.
+    notificationInset: We’ll notify anyone you add.
   occupancy:
     lettingAgentInterruption:
       heading: Are you sure you want to change this?
