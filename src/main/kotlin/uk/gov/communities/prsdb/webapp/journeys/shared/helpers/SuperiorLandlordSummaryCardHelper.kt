@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -25,8 +26,7 @@ class SuperiorLandlordSummaryCardHelper {
                                 ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
                         summaryList = contactRows,
                         actions = actions,
-                        // A named superior landlord with no contact rows was contacted by post, but their address was not stored
-                        bodyTextKey = if (contactRows.isEmpty()) POSTAL_ADDRESS_NOTE_KEY else null,
+                        bodyTextKey = if (superiorLandlord.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -37,6 +37,14 @@ class SuperiorLandlordSummaryCardHelper {
                     )
                 }
             }
+
+    fun getSummaryCards(superiorLandlords: Collection<SuperiorLandlord>): List<SummaryCardViewModel> =
+        getSummaryCards(
+            superiorLandlords
+                .sortedBy { it.id }
+                .withIndex()
+                .associate { (index, superiorLandlord) -> index to SuperiorLandlordDataModel.fromSuperiorLandlord(superiorLandlord) },
+        )
 
     private fun getContactRows(superiorLandlord: SuperiorLandlordDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(

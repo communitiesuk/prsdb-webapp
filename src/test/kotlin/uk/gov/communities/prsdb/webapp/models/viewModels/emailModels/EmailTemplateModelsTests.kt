@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -56,9 +57,27 @@ class EmailTemplateModelsTests {
                     LocalCouncilAdminInvitationEmail(MockLocalCouncilData.createLocalCouncil(), URI("invitationUri")),
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
+                // TODO PDJB-2149: Remove this entry when the ACTIVE_INACTIVE flag is removed
                 EmailTemplateTestData(
                     LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
+                    "/emails/LandlordRegistrationConfirmationBefore844.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl", scheduledDeactivationDate = LocalDate.of(2027, 2, 17)),
                     "/emails/LandlordRegistrationConfirmation.md",
+                ),
+                // TODO PDJB-2149: Remove this entry when the ACTIVE_INACTIVE flag is removed
+                EmailTemplateTestData(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
+                        registrantName = "Jill Jones",
+                        organisationName = "Test Organisation Name",
+                        lrn = "L-CCCC-CCCC",
+                        prsdURL = "prsdUrl",
+                        // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
+                        isMultiUserOrganisationsEnabled = true,
+                    ),
+                    "/emails/OrganisationalLandlordRegistrationConfirmationBefore844.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     OrganisationalLandlordRegistrationConfirmationEmail(
@@ -68,6 +87,7 @@ class EmailTemplateModelsTests {
                         prsdURL = "prsdUrl",
                         // TODO: PDJB-1828: Remove when the MULTI_USER_ORGANISATIONS flag is removed
                         isMultiUserOrganisationsEnabled = true,
+                        scheduledDeactivationDate = LocalDate.of(2027, 2, 17),
                     ),
                     "/emails/OrganisationalLandlordRegistrationConfirmation.md",
                     allowExtraKeys = true,
@@ -358,8 +378,10 @@ class EmailTemplateModelsTests {
                         propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
                         propertyRecordUrl = "https://example.com/property",
                         propertyRegistrationNumber = "P-GD47-39FX",
+                        landlordReactivated = true,
                     ),
                     "/emails/JointLandlordInvitationAccepted.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
@@ -441,6 +463,15 @@ class EmailTemplateModelsTests {
                         dashboardUrl = "https://example.com/landlord/dashboard",
                     ),
                     "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordDeactivatedEmail(
+                        recipientName = "Alice",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123456L).toString(),
+                        reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/LandlordDeactivatedNoPropertiesRegistered.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
@@ -634,6 +665,29 @@ class EmailTemplateModelsTests {
     }
 
     @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `joint landlord invitation accepted email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        // Arrange
+        val email =
+            JointLandlordInvitationAcceptedEmail(
+                recipientName = "Jill",
+                propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
+                propertyRecordUrl = "https://example.com/property",
+                propertyRegistrationNumber = "P-GD47-39FX",
+                landlordReactivated = landlordReactivated,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedPersonalisation, hashMap["landlordReactivated"])
+    }
+
+    @ParameterizedTest
     @CsvSource(
         "true, false, true, yes",
         "false, false, true, no",
@@ -667,6 +721,29 @@ class EmailTemplateModelsTests {
         } else {
             Assertions.assertEquals("", hashMap["missingDetailsList"])
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `property registration email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        // Arrange
+        val email =
+            PropertyRegistrationConfirmationEmail(
+                prn = "P-XXX-YYY",
+                multiLineAddress = "1 Street Name\nAB1 2CD",
+                prsdUrl = "prsdUrl",
+                isOccupied = true,
+                landlordReactivated = landlordReactivated,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedPersonalisation, hashMap["landlordReactivated"])
     }
 
     @ParameterizedTest
@@ -735,6 +812,53 @@ class EmailTemplateModelsTests {
 
         Assertions.assertEquals(EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION, email.template)
         Assertions.assertFalse(hashMap.keys.any { it in listOf("payment amount", "payment date", "renewal date") })
+    }
+
+    @Test
+    fun `landlord registration email uses the template with the scheduled deactivation date and formats it when it is given`() {
+        val email = LandlordRegistrationConfirmationEmail("L-CCCC-CCCC", "prsdUrl", scheduledDeactivationDate = LocalDate.of(2027, 2, 7))
+
+        Assertions.assertEquals(EmailTemplate.LANDLORD_REGISTRATION_CONFIRMATION_EMAIL, email.template)
+        Assertions.assertEquals("7 February 2027", email.toHashMap()["deactivation date"])
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `landlord registration email uses the template without the scheduled deactivation date when it is not given`() {
+        val email = LandlordRegistrationConfirmationEmail("L-CCCC-CCCC", "prsdUrl")
+
+        Assertions.assertEquals(EmailTemplate.LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844, email.template)
+        Assertions.assertFalse(email.toHashMap().containsKey("deactivation date"))
+    }
+
+    @Test
+    fun `organisation registration email uses the template with the scheduled deactivation date and formats it when it is given`() {
+        val email =
+            OrganisationalLandlordRegistrationConfirmationEmail(
+                registrantName = "Jill Jones",
+                organisationName = "Test Organisation Name",
+                lrn = "L-CCCC-CCCC",
+                prsdURL = "prsdUrl",
+                scheduledDeactivationDate = LocalDate.of(2027, 2, 7),
+            )
+
+        Assertions.assertEquals(EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL, email.template)
+        Assertions.assertEquals("7 February 2027", email.toHashMap()["deactivation date"])
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `organisation registration email uses the template without the scheduled deactivation date when it is not given`() {
+        val email =
+            OrganisationalLandlordRegistrationConfirmationEmail(
+                registrantName = "Jill Jones",
+                organisationName = "Test Organisation Name",
+                lrn = "L-CCCC-CCCC",
+                prsdURL = "prsdUrl",
+            )
+
+        Assertions.assertEquals(EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844, email.template)
+        Assertions.assertFalse(email.toHashMap().containsKey("deactivation date"))
     }
 
     private fun isOptionalContentParameter(parameter: String): Boolean = extractOptionalContentParameter(parameter).isNotEmpty()

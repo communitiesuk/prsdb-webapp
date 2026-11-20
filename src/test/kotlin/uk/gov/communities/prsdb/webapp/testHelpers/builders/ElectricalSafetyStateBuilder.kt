@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEicrUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrExpiryDateStep
@@ -101,6 +102,10 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
 
     fun withEicrExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
         withElectricalCertExpiryDate(EicrExpiryDateStep.ROUTE_SEGMENT, expiryDate)
+
+    // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+    fun withEicExpiryDate(expiryDate: LocalDate = LocalDate(2030, 1, 1)): SelfType =
+        withElectricalCertExpiryDate(EicExpiryDateStep.ROUTE_SEGMENT, expiryDate)
 
     fun withEicUploads(uploads: Map<Int, CertificateUpload> = defaultElectricalCertUploads): SelfType {
         additionalDataMap["eicUploadMap"] = Json.encodeToString(serializer(), uploads)

@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -101,7 +100,6 @@ class UpdateTenancyDetailsJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
                 }
             }
-            replaceHeadings(state)
             useContinueButtons(journey)
         }
 
@@ -154,37 +152,12 @@ class UpdateTenancyDetailsJourneyFactory(
                     throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
                 }
             }
-            replaceHeadings(state)
             useContinueButtons(journey)
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
         }
-
-    private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
-        configureStep(journey.householdsAndTenantsTask.households) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading" }
-        }
-        configureStep(journey.householdsAndTenantsTask.tenants) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading" }
-        }
-        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading" }
-        }
-        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading" }
-        }
-        configureStep(journey.furnishedStatus) {
-            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading" }
-        }
-        configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-            withAdditionalContentProperty { "heading" to "forms.update.rentFrequency.heading" }
-        }
-        configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-            withAdditionalContentProperty { "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading() }
-        }
-    }
 }
 
 @JourneyFrameworkComponent

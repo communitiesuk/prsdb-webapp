@@ -84,4 +84,34 @@ abstract class BaseIndividualLandlordUpdateControllerTests(
                 status { isOk() }
             }
     }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    fun `getUpdateStep returns 403 for an inactive landlord`() {
+        stubCreateJourneySteps()
+        whenever(stepLifecycleOrchestrator.getStepModelAndView())
+            .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+        whenever(landlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
+
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
+    fun `postUpdateStep returns 403 for an inactive landlord`() {
+        stubCreateJourneySteps()
+        whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+        whenever(landlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
+
+        mvc
+            .post(updateStepRoute) {
+                param("formData", "")
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
 }

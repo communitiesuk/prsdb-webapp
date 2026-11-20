@@ -4,8 +4,10 @@ import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -14,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
@@ -37,6 +39,7 @@ class PropertyRegistrationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val associatedPartyNotificationService: AssociatedPartyNotificationService,
     private val propertyComplianceService: PropertyComplianceService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
@@ -59,6 +62,7 @@ class PropertyRegistrationService(
                     renewalDate ?: RenewalDateHelper.getRenewalDate(anniversary),
                 )
 
+            val landlordReactivated = !landlord.isActive
             activationService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
@@ -97,7 +101,15 @@ class PropertyRegistrationService(
 
             runAfterTransactionCommits {
                 confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
-                sendRegistrationEmails(registrationData, landlord, propertyOwnership, lettingAgentInvitation, jointLandlordInvitations)
+                confirmationService.setLandlordReactivatedByLastRegistration(landlordReactivated)
+                sendRegistrationNotifications(
+                    registrationData,
+                    landlord,
+                    propertyOwnership,
+                    lettingAgentInvitation,
+                    jointLandlordInvitations,
+                    landlordReactivated,
+                )
             }
 
             propertyOwnership
@@ -156,31 +168,42 @@ class PropertyRegistrationService(
             )
         }
 
-    private fun sendRegistrationEmails(
+    private fun sendRegistrationNotifications(
         registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
         lettingAgentInvitation: LettingAgentAccess?,
         jointLandlordInvitations: List<JointLandlordInvitation>,
+        landlordReactivated: Boolean,
     ) {
-        sendEmailAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
-            sendConfirmationEmail(registrationData, landlord, propertyOwnership)
+        sendNotificationAndLogFailures("the property registration confirmation email for property ownership ${propertyOwnership.id}") {
+            sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
+        }
+
+        sendAddedToPropertyNotifications("freeholder", registrationData.freeholders.orEmpty(), propertyOwnership) { freeholder ->
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
+        }
+
+        sendAddedToPropertyNotifications("superior landlord", registrationData.superiorLandlords, propertyOwnership) { superiorLandlord ->
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
         }
 
         lettingAgentInvitation?.let { invitation ->
-            sendEmailAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)
             }
         }
 
         jointLandlordInvitations.forEach { invitation ->
-            sendEmailAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures("the joint landlord invitation email for property ownership ${propertyOwnership.id}") {
                 jointLandlordInvitationService.sendInvitationEmail(invitation)
             }
         }
 
         if (jointLandlordInvitations.isNotEmpty()) {
-            sendEmailAndLogFailures("the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}") {
+            sendNotificationAndLogFailures(
+                "the joint landlord invitation confirmation emails for property ownership ${propertyOwnership.id}",
+            ) {
                 jointLandlordInvitationService.sendInvitationConfirmationEmails(
                     jointLandlordInvitations.map { it.invitedEmail },
                     propertyOwnership,
@@ -190,10 +213,33 @@ class PropertyRegistrationService(
         }
     }
 
+    private fun <T> sendAddedToPropertyNotifications(
+        partyDescription: String,
+        parties: List<T>,
+        propertyOwnership: PropertyOwnership,
+        sendNotification: (T) -> AssociatedPartyNotificationOutcome?,
+    ) {
+        parties.forEachIndexed { index, party ->
+            val partyLabel = "$partyDescription ${index + 1}"
+            sendNotificationAndLogFailures(
+                "the $partyLabel added-to-property notification for property ownership ${propertyOwnership.id}",
+            ) {
+                if (sendNotification(party) == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
+                    println(
+                        "Not sending $partyLabel added-to-property notification " +
+                            "for property ownership ${propertyOwnership.id}: " +
+                            "details are fully redacted",
+                    )
+                }
+            }
+        }
+    }
+
     private fun sendConfirmationEmail(
         registrationData: PropertyRegistrationDataModel,
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
+        landlordReactivated: Boolean,
     ) = with(registrationData) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -212,6 +258,8 @@ class PropertyRegistrationService(
                 electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 epcProvideLater = epcProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
+                // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+                landlordReactivated = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && landlordReactivated,
                 // TODO PDJB-1734: Always get the payment details when the PAYMENTS flag is removed
                 paymentDetails = if (featureFlagManager.checkFeature(PAYMENTS)) getPaymentDetails(propertyOwnership) else null,
             ),

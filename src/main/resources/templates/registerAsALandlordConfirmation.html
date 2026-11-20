@@ -42,13 +42,13 @@
             registerAsALandlord.confirmation.whatYouNeedToDo.paragraph.one
         </p>
         <p class="govuk-body"
-           th:if="${deactivationDate != null}"
+           th:if="${scheduledDeactivationDate != null}"
            data-testid="deactivation-paragraph"
-           th:text="${isOrganisation} ? #{registerAsALandlord.confirmation.whatYouNeedToDo.deactivation.organisation(${{deactivationDate}})} : #{registerAsALandlord.confirmation.whatYouNeedToDo.deactivation.individual(${{deactivationDate}})}">
+           th:text="${isOrganisation} ? #{registerAsALandlord.confirmation.whatYouNeedToDo.deactivation.organisation(${{scheduledDeactivationDate}})} : #{registerAsALandlord.confirmation.whatYouNeedToDo.deactivation.individual(${{scheduledDeactivationDate}})}">
             registerAsALandlord.confirmation.whatYouNeedToDo.deactivation
         </p>
         <p class="govuk-body"
-           th:unless="${deactivationDate != null}"
+           th:unless="${scheduledDeactivationDate != null}"
            th:text="#{registerAsALandlord.confirmation.whatYouNeedToDo.paragraph.two}">
             registerAsALandlord.confirmation.whatYouNeedToDo.paragraph.two
         </p>

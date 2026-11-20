@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 
 @Entity
@@ -85,9 +86,21 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
+    // Ownership structure updates also edit freeholder and superior landlord rows, which have their own timestamps.
+    fun getOwnershipStructureMostRecentlyUpdated(): Instant =
+        (
+            listOf(getMostRecentlyUpdated()) +
+                freeholders.map { it.getMostRecentlyUpdated() } +
+                superiorLandlords.map { it.getMostRecentlyUpdated() }
+        ).max()
+
     @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
     var propertyManager: PropertyManager? = null
+
+    // Property manager updates edit the property manager row in place, which has its own timestamp.
+    fun getPropertyManagerMostRecentlyUpdated(): Instant =
+        listOfNotNull(getMostRecentlyUpdated(), propertyManager?.getMostRecentlyUpdated()).max()
 
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String

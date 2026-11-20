@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -1515,6 +1518,44 @@ class JointLandlordInvitationServiceTests {
             whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
             assertNull(invitationService.getLastAcceptedPropertyFromSession())
+        }
+    }
+
+    @Nested
+    inner class LandlordReactivatedByLastAcceptance {
+        @ParameterizedTest
+        @ValueSource(booleans = [true, false])
+        fun `setLandlordReactivatedByLastAcceptance stores the value in session`(landlordReactivated: Boolean) {
+            invitationService.setLandlordReactivatedByLastAcceptance(landlordReactivated)
+
+            verify(mockHttpSession).setAttribute(
+                LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE,
+                landlordReactivated,
+            )
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns true when the session value is true`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(true)
+
+            assertTrue(invitationService.wasLandlordReactivatedByLastAcceptance())
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns false when the session value is false`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(false)
+
+            assertFalse(invitationService.wasLandlordReactivatedByLastAcceptance())
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns false when not present`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(null)
+
+            assertFalse(invitationService.wasLandlordReactivatedByLastAcceptance())
         }
     }
 

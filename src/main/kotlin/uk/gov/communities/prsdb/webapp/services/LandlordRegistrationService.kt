@@ -1,14 +1,18 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.MULTI_USER_ORGANISATIONS
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.helpers.LandlordScheduledDeactivationDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -144,6 +148,7 @@ class LandlordRegistrationService(
             LandlordRegistrationConfirmationEmail(
                 RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                scheduledDeactivationDate = getScheduledDeactivationDateIfActiveInactiveEnabled(landlord),
             ),
         )
     }
@@ -159,7 +164,16 @@ class LandlordRegistrationService(
                 prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 // TODO: PDJB-1828: Remove check when the MULTI_USER_ORGANISATIONS flag is removed
                 isMultiUserOrganisationsEnabled = featureFlagManager.checkFeature(MULTI_USER_ORGANISATIONS),
+                scheduledDeactivationDate = getScheduledDeactivationDateIfActiveInactiveEnabled(landlord),
             ),
         )
     }
+
+    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check and always return the scheduled deactivation date
+    private fun getScheduledDeactivationDateIfActiveInactiveEnabled(landlord: Landlord): LocalDate? =
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            LandlordScheduledDeactivationDateHelper.getScheduledDeactivationDateFromCreatedDate(landlord.createdDate).toJavaLocalDate()
+        } else {
+            null
+        }
 }

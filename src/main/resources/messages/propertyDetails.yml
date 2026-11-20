@@ -1,4 +1,10 @@
 heading: Property record
+deactivated:
+  caption: Deactivated property
+  panel:
+    heading: Your property has been deactivated
+    body: Deactivated properties remain visible to the local council for 5 years. You can reactivate the property by confirming the details and adding any missing information.
+    button: Reactivate this property
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied
@@ -35,8 +41,7 @@ peopleResponsible:
   freeholder:
     postalAddressNote: A <strong>postal address</strong> was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.
   superiorLandlord:
-    # TODO PDJB-1997 / PDJB-1994: Confirm the wording of postalAddressNote for superior landlords
-    postalAddressNote: A <strong>postal address</strong> was provided for this superior landlord. We’ve used this to tell them that they’re named on this registration.
+    postalAddressNote: A <strong>postal address</strong> was provided for this person in the ownership chain. We’ve used this to tell them that they’re named on this registration.
 landlordDetails:
   heading: Landlords
   registeredLandlords:

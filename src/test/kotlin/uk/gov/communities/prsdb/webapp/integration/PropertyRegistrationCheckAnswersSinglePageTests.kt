@@ -310,7 +310,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val headings = checkAnswersPage.sectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
-            val licensingIndex = headings.indexOf("Tell us if the property needs a license")
+            val licensingIndex = headings.indexOf("Tell us if the property needs a licence")
 
             assertTrue(occupancyIndex >= 0 && rentedOutIndex >= 0 && licensingIndex >= 0)
             assertTrue(rentedOutIndex > occupancyIndex, "Rented-out section should appear after occupied section")
@@ -659,6 +659,23 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `later gas pages reached by changing an answer from the CYA page link back to the previous page`(page: Page) {
+            var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
+
+            checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class).submitHasGasSupply()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+                .submitDate(PropertyRegistrationJourneyTests.validGasSafetyCertIssueDate)
+            assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+        }
+
+        @Test
         fun `the back link on the EICR expiry date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eicr)
 
@@ -705,6 +722,26 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 }
             electricalCertUploadsPage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `later electrical pages reached by changing an answer from the CYA page link back to the previous page`(page: Page) {
+            var checkAnswersPage = skipToCheckAnswersPageWithElectricalCertUploaded(CertificateType.Eic)
+
+            checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class).submitHasEic()
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+                .submitDate(PropertyRegistrationJourneyTests.validEicIssueDate)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class).backLink.clickAndWait()
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.complianceSummaryList.electricalCertDateRow(CertificateType.Eic).clickFirstActionLinkAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
+                .submitDate(PropertyRegistrationJourneyTests.validEicIssueDate)
+            assertPageIs(page, CheckEicUploadsFormPagePropertyRegistration::class).backLink.clickAndWait()
+            assertPageIs(page, EicIssueDateFormPagePropertyRegistration::class)
         }
 
         private fun skipToCheckAnswersPageWithElectricalCertUploaded(certificateType: CertificateType) =

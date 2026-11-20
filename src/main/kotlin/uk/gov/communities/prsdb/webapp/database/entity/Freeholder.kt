@@ -36,6 +36,5 @@ class Freeholder() : ModifiableAuditableEntity() {
         this.email = email
     }
 
-    // TODO PDJB-960: use this on the property record
     fun detailsKnown(): Boolean = name != null
 }

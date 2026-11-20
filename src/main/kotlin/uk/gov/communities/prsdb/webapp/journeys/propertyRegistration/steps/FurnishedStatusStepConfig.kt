@@ -32,7 +32,6 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
                     RadiosButtonViewModel(
                         value = FurnishedStatus.UNFURNISHED,
                         labelMsgKey = "tenancyDetails.furnishedStatus.radios.options.unfurnished.label",
-                        hintMsgKey = "tenancyDetails.furnishedStatus.radios.options.unfurnished.hint",
                     ),
                 ),
             "submitButtonText" to "forms.buttons.saveAndContinue",

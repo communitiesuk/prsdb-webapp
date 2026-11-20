@@ -1,4 +1,4 @@
-sectionHeading: Tell us if your property needs a licence
+sectionHeading: Tell us if this property needs a licence
 licensingType:
   fieldSetHeading: Which licence does this property have?
   fieldSetHint: Select one
@@ -58,7 +58,7 @@ provideLicensingLater:
   occupied:
     heading: Provide details about property licensing later
     paragraph:
-      one: You can continue and submit your registration now, but you’ll need to return later and provide details about this property’s license.
+      one: You can continue and submit your registration now, but you’ll need to return later and provide details about this property’s licence.
     whenToAdd:
       heading: When you must do this by
       insetText: To keep your property registered, you must provide its licensing details within 28 days.
@@ -66,7 +66,7 @@ provideLicensingLater:
   unoccupied:
     heading: Provide details about property licensing later
     paragraph:
-      one: If you’re unsure, check with the local council if your property needs a license to be rented out.
+      one: If you’re unsure, check with the local council if your property needs a licence to be rented out.
     whenToAdd:
       heading: When you’ll need to provide these property licensing details
       paragraph:
@@ -75,12 +75,10 @@ provideLicensingLater:
   weWillNeedToKnow:
     intro: 'We’ll need to know:'
     bullet:
-      one: if your property needs a license or not
-      two: details about the license (if your property needs one)
+      one: if your property needs a licence or not
+      two: details about the licence (if your property needs one)
 checkAnswers:
-  heading: Tell us if the property needs a license
-  licensingType: Licensing type
-  noLicensing: None
-  noLicensingRequired: This property does not need a licence
+  heading: Tell us if the property needs a licence
+  noLicensing: This property does not need a licence
   licensingProvideLater: Provide this later
   licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)

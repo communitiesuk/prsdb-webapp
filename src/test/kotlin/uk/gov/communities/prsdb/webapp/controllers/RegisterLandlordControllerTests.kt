@@ -263,7 +263,7 @@ class RegisterLandlordControllerTests(
     // TODO PDJB-2149: Remove the feature flag checks from these tests and remove mention of the flag in the test names
     @Test
     @WithMockUser
-    fun `getConfirmation includes deactivation date 3 months after landlord creation when active inactive enabled`() {
+    fun `getConfirmation includes scheduled deactivation date 3 months after landlord creation`() {
         val landlord = MockLandlordData.createIndividualLandlord(createdDate = Instant.parse("2026-08-31T12:00:00Z"))
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
@@ -273,14 +273,14 @@ class RegisterLandlordControllerTests(
             .andExpect {
                 status { isOk() }
                 model {
-                    attribute("deactivationDate", LocalDate.of(2026, 11, 30))
+                    attribute("scheduledDeactivationDate", LocalDate.of(2026, 11, 30))
                 }
             }
     }
 
     @Test
     @WithMockUser
-    fun `getConfirmation does not include deactivation date when active inactive disabled`() {
+    fun `getConfirmation does not include scheduled deactivation date when active inactive disabled`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
@@ -290,7 +290,7 @@ class RegisterLandlordControllerTests(
             .andExpect {
                 status { isOk() }
                 model {
-                    attributeDoesNotExist("deactivationDate")
+                    attributeDoesNotExist("scheduledDeactivationDate")
                 }
             }
     }
