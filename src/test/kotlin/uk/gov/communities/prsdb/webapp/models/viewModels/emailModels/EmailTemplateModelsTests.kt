@@ -475,7 +475,7 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyReactivationConfirmationEmail(
-                        recipientName = "Alice",
+                        recipientName = "Alice Smith",
                         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
                         dashboardUrl = "https://example.com/landlord/dashboard",
@@ -487,7 +487,7 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyReactivationConfirmationEmail(
-                        recipientName = "Alice",
+                        recipientName = "Alice Smith",
                         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
                         dashboardUrl = "https://example.com/landlord/dashboard",
@@ -948,7 +948,7 @@ class EmailTemplateModelsTests {
         landlordReactivated: Boolean = false,
         paymentDetails: PropertyRegistrationConfirmationEmail.PaymentDetails? = null,
     ) = PropertyReactivationConfirmationEmail(
-        recipientName = "Alice",
+        recipientName = "Alice Smith",
         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
         registrationNumber = "P-XXXX-YYYY",
         dashboardUrl = "https://example.com/landlord/dashboard",
