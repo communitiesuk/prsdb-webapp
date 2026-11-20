@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.InitialiseFreeholdersUpdateStep
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -61,8 +60,7 @@ class PropertyDetailsViewModel(
     val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 
     val freeholderSectionUpdateUrl: String =
-        UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnership.id) +
-            "/${InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT}"
+        UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
 
     val showSuperiorLandlordSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()

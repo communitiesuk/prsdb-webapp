@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController.C
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.InitialiseFreeholdersUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.UpdateFreeholdersJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -79,5 +80,8 @@ class UpdateFreeholdersController(
 
         fun getUpdateFreeholdersRoute(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_FREEHOLDERS_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getUpdateFreeholdersFirstStepRoute(propertyOwnershipId: Long): String =
+            getUpdateFreeholdersRoute(propertyOwnershipId) + "/${InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT}"
     }
 }

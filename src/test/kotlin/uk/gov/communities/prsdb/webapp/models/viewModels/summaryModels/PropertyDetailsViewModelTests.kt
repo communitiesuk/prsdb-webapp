@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.InitialiseFreeholdersUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
@@ -275,8 +274,7 @@ class PropertyDetailsViewModelTests {
             assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
             assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
             assertEquals(
-                UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnership.id) +
-                    "/${InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT}",
+                UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id),
                 viewModel.freeholderSectionUpdateUrl,
             )
         }
