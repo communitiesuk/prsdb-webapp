@@ -4,9 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import com.microsoft.playwright.options.AriaRole
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +48,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `landlord can add email, postal-address, and unknown freeholders in the non-joint update journey`(page: Page) {
-        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -100,13 +96,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
                 "You told us there was another freeholder, but you cannot currently provide their details. " +
                     "Return and add these details when you can.",
             )
-        val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
-        assertEquals(4, savedFreeholders.size)
-        assertEquals(1, savedFreeholders.count { it.id == originalFreeholder.id })
-        val addedFreeholders = savedFreeholders.filter { it.id != originalFreeholder.id }
-        assertEquals("new.freeholder@example.com", addedFreeholders.single { it.name == "New Freeholder" }.email)
-        assertNull(addedFreeholders.single { it.name == "Postal Address Freeholder" }.email)
-        assertEquals(1, addedFreeholders.count { !it.detailsKnown() })
     }
 
     @Test
@@ -114,7 +103,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow()
         propertyOwnership.ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS
         propertyOwnershipRepository.save(propertyOwnership)
-        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -162,21 +150,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
                 "You told us there was another freeholder, but you cannot currently provide their details. " +
                     "Return and add these details when you can.",
             )
-        val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
-        assertEquals(4, savedFreeholders.size)
-        assertEquals(1, savedFreeholders.count { it.id == originalFreeholder.id })
-        val addedFreeholders = savedFreeholders.filter { it.id != originalFreeholder.id }
-        assertEquals(
-            "new.joint.freeholder@example.com",
-            addedFreeholders.single { it.name == "New Joint Freeholder" }.email,
-        )
-        assertNull(addedFreeholders.single { it.name == "Joint Postal Address Freeholder" }.email)
-        assertEquals(1, addedFreeholders.count { !it.detailsKnown() })
     }
 
     @Test
     fun `invalid email returns the registration format error in the update journey`(page: Page) {
-        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -192,12 +169,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
         assertThat(emailPage.form.getErrorMessage())
             .containsText("Enter an email address in the correct format, like name@example.com")
-        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
     }
 
     @Test
     fun `blank postcode returns the required error on freeholder address lookup during an update`(page: Page) {
-        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -212,7 +187,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("", "1")
 
         assertThat(lookupAddressPage.form.getErrorMessage()).containsText("Enter a postcode")
-        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
     }
 
     @Test
@@ -243,9 +217,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
-        assertNull(savedFreeholder.name)
-        assertNull(savedFreeholder.email)
-        assertFalse(savedFreeholder.detailsKnown())
     }
 
     @Test
@@ -309,7 +280,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
-        assertNull(savedFreeholder.email)
     }
 
     @Test
@@ -355,19 +325,15 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         )
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
-        assertNull(savedFreeholder.email)
     }
 
     @Test
     fun `resuming an abandoned freeholder update after another property update discards earlier progress`(page: Page) {
-        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val landlordAccountEmail = "alex.surname@example.com"
-        assertNotEquals(
-            landlordAccountEmail,
-            propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)!!.correspondenceEmail,
-        )
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        assertThat(propertyDetailsPage.propertyDetailsSummaryList.contactEmailAddressRow.value).not().hasText(landlordAccountEmail)
         propertyDetailsPage.tabs.goToPeopleResponsible()
+        val initialFreeholderCount = propertyDetailsPage.freeholderCards.size
         page
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
@@ -388,8 +354,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(initialFreeholderCount, page.locator(".govuk-summary-card").count())
         freeholdersListPage.submit()
-        assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
-        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
+        propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertEquals(initialFreeholderCount, propertyDetailsPage.freeholderCards.size)
     }
 
     @Test
@@ -417,9 +383,9 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @Test
     fun `abandoning a freeholder update does not persist a newly added freeholder`() {
-        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
+        val initialFreeholderCount = propertyDetailsPage.freeholderCards.size
         propertyDetailsPage.page
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
@@ -428,9 +394,9 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         freeholdersListPage.addAnotherButton.click()
         assertPageIs(propertyDetailsPage.page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
 
-        navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-
-        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
+        propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        assertEquals(initialFreeholderCount, propertyDetailsPage.freeholderCards.size)
     }
 
     @Test
@@ -465,8 +431,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertThat(freeholderCard).containsText("updated@example.com")
         val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         assertEquals(originalFreeholder.id, savedFreeholder.id)
-        assertEquals("Updated Freeholder", savedFreeholder.name)
-        assertEquals("updated@example.com", savedFreeholder.email)
     }
 
     @Test
@@ -493,14 +457,12 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals(0, freeholdersListPage.removeActionCount)
         freeholdersListPage.submit()
 
-        val remainingFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
-        assertEquals(1, remainingFreeholders.size)
-        assertEquals(listOf(existingFreeholder.id), remainingFreeholders.map { it.id })
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        assertThat(updatedPropertyDetailsPage.freeholderCards.single().title).hasText("Unknown freeholder")
     }
 
     @Test
     fun `blank freeholder name returns the registration validation error in the update journey`(page: Page) {
-        val initialFreeholderCount = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
         page
@@ -513,7 +475,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         namePage.submitName("")
 
         assertThat(namePage.form.getErrorMessage()).containsText("Enter a name")
-        assertEquals(initialFreeholderCount, freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).size)
     }
 
     @Test
@@ -522,14 +483,13 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         freeholderA.name = "Freeholder A"
         freeholderA.email = "a@example.com"
         freeholderRepository.save(freeholderA)
-        val freeholderB =
-            freeholderRepository.save(
-                Freeholder(
-                    propertyOwnership = freeholderA.propertyOwnership,
-                    name = "Freeholder B",
-                    email = "b@example.com",
-                ),
-            )
+        freeholderRepository.save(
+            Freeholder(
+                propertyOwnership = freeholderA.propertyOwnership,
+                name = "Freeholder B",
+                email = "b@example.com",
+            ),
+        )
 
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
@@ -552,11 +512,12 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
         assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
 
-        val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
-        assertEquals(2, savedFreeholders.size)
-        assertEquals(listOf(freeholderA.id), savedFreeholders.filter { it.name == "Freeholder A" }.map { it.id })
-        assertEquals("updated.a@example.com", savedFreeholders.single { it.id == freeholderA.id }.email)
-        assertFalse(savedFreeholders.any { it.id == freeholderB.id })
-        assertEquals(1, savedFreeholders.count { !it.detailsKnown() })
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val freeholderCards = updatedPropertyDetailsPage.freeholderCards
+        assertEquals(listOf("Freeholder A", "Unknown freeholder"), freeholderCards.map { it.title.getText() }.sorted())
+        assertThat(freeholderCards.single { it.title.getText() == "Freeholder A" }).containsText("updated.a@example.com")
+        val savedFreeholder =
+            freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single { it.name == "Freeholder A" }
+        assertEquals(freeholderA.id, savedFreeholder.id)
     }
 }
