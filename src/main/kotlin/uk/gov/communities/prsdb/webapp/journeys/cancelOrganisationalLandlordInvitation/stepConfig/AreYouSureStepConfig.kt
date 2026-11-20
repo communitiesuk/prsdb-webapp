@@ -25,7 +25,7 @@ class AreYouSureStepConfig :
                 ),
             "fieldSetHeading" to "cancelOrganisationalLandlordInvitation.areYouSure.fieldSetHeading",
             "optionalFieldSetHeadingParam" to state.invitedEmail,
-            "submitButtonTextKey" to "forms.buttons.confirm",
+            "submitButtonText" to "forms.buttons.confirm",
         )
 
     override fun chooseTemplate(state: CancelOrganisationalLandlordInvitationJourneyState) = "forms/areYouSureForm"

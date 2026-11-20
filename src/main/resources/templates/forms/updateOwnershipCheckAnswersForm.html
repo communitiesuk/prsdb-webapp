@@ -1,0 +1,56 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="ownershipRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="freeholdersHeadingKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersChangeLinkKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersChangeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="freeholdersCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="superiorLandlordsRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="superiorLandlordsChangeUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="superiorLandlordsCards" type="java.util.List<uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel>"*/-->
+<!--/*@thymesVar id="insetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="answersLastChangedAt" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="warningTextKey" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{forms.update.checkOwnership.pageTitle}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>
+        <p class="govuk-body" th:text="#{forms.update.checkOwnership.subheading}">forms.update.checkOwnership.subheading</p>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${ownershipRows})}"></dl>
+        <th:block th:if="${freeholdersCards != null}">
+            <h2 class="govuk-heading-m" th:text="#{${freeholdersHeadingKey}}">freeholdersHeadingKey</h2>
+            <div class="govuk-inset-text" th:text="#{${insetTextKey}}">insetTextKey</div>
+            <p th:if="${freeholdersChangeUrl != null}" class="govuk-body">
+                <a class="govuk-link" th:href="@{${freeholdersChangeUrl}}"
+                   th:text="#{${freeholdersChangeLinkKey}}">freeholdersChangeLinkKey</a>
+            </p>
+            <th:block th:each="card : ${freeholdersCards}">
+                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h3', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
+            </th:block>
+        </th:block>
+        <th:block th:if="${superiorLandlordsRows != null or superiorLandlordsCards != null}">
+            <h2 class="govuk-heading-m"
+                th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h2>
+            <th:block th:if="${superiorLandlordsRows != null}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${superiorLandlordsRows})}"></dl>
+            </th:block>
+            <th:block th:if="${superiorLandlordsCards != null}">
+                <div class="govuk-inset-text" th:text="#{${insetTextKey}}">insetTextKey</div>
+                <p th:if="${superiorLandlordsChangeUrl != null}" class="govuk-body">
+                    <a class="govuk-link" th:href="@{${superiorLandlordsChangeUrl}}"
+                       th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
+                </p>
+                <th:block th:each="card : ${superiorLandlordsCards}">
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h3', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
+                </th:block>
+            </th:block>
+        </th:block>
+        <div th:replace="~{fragments/warningText :: warningText(#{${warningTextKey}})}">forms.warning</div>
+    </th:block>
+    <th:block id="form-content">
+        <input type="hidden" name="answersLastChangedAt" th:value="${answersLastChangedAt}"/>
+        <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>

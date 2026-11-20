@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideFreeholderDetailsStep
 
@@ -14,4 +15,6 @@ class FreeholderProvideDetailsFormPagePropertyDetailsUpdate(
             "{propertyOwnershipId}",
             urlArguments["propertyOwnershipId"]!!,
         )}/${ProvideFreeholderDetailsStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    val backLink = BackLink.default(page)
+}

@@ -54,6 +54,7 @@ import kotlin.test.assertNotEquals
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     // TODO PDJB-1992: test the property record after updating to each ownership type.
+    // TODO PDJB-1993: test freeholder cards after updates for email, postal address and unknown details.
     @Autowired
     lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 

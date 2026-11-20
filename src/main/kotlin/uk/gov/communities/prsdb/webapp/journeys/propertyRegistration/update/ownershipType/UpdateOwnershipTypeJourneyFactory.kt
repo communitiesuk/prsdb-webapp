@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
+// TODO PDJB-2016: delete with the ASSOCIATED_PARTIES flag; UpdateOwnershipJourneyFactory replaces it.
 @PrsdbWebService
 class UpdateOwnershipTypeJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOwnershipTypeJourney>,
