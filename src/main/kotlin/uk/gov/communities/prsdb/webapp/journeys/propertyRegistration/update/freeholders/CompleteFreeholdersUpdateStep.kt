@@ -41,7 +41,7 @@ class CompleteFreeholdersUpdateStepConfig(
         sendAddedFreeholderNotifications(state.propertyId, addedFreeholders)
     }
 
-    // The added freeholders come from journey state, as postal addresses aren't stored (PDJB-2226).
+    // Use the submitted details for notifications: postal addresses aren't saved and can't be retrieved from the database.
     private fun sendAddedFreeholderNotifications(
         propertyId: Long,
         addedFreeholders: List<FreeholderDataModel>,
