@@ -462,5 +462,12 @@
     "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
     "subject": "Landlord account deactivated",
     "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
+  },
+  {
+    "test_id": "c756832d-a680-4167-af65-dc4a3cc8e903",
+    "prod_id": "20bef3a0-ce93-4eca-b22c-158ab5b94333",
+    "enumName": "FREEHOLDER_ADDED_TO_PROPERTY_EMAIL",
+    "subject": "You’ve been listed as a freeholder of a rental property",
+    "bodyLocation": "/emails/FreeholderAddedToPropertyEmail.md"
   }
 ]

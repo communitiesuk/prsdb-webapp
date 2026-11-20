@@ -130,6 +130,10 @@ base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-council: ${LOCAL_COUNCIL_BASE_URL}
 
+gds:
+  # TODO PDJB-2252: Set GDS_START_PAGE_URL to the real environment-specific start page during go-live readiness.
+  start-page-url: "${GDS_START_PAGE_URL:#}"
+
 plausible:
   site-id: ${PLAUSIBLE_SITE_ID}
   domain-id: ${PLAUSIBLE_DOMAIN_ID}

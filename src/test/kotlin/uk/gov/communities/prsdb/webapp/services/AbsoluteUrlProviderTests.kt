@@ -11,6 +11,18 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import java.util.UUID
 
 class AbsoluteUrlProviderTests {
+    @Test
+    fun `buildGdsStartPageUrl returns the configured start page URL`() {
+        val provider =
+            AbsoluteUrlProvider(
+                "https://example.test/landlord",
+                "https://example.test/local-council",
+                "https://example.test/gds-start-page",
+            )
+
+        assertThat(provider.buildGdsStartPageUrl()).isEqualTo("https://example.test/gds-start-page")
+    }
+
     @ParameterizedTest
     @ValueSource(strings = ["https://example.test", "https://example.test/landlord"])
     fun `buildLandlordPrivacyNoticeUri uses the landlord host and public landlord privacy notice route`(landlordBaseUrl: String) {
@@ -138,5 +150,6 @@ class AbsoluteUrlProviderTests {
     private fun createProvider(
         landlordBaseUrl: String = "https://example.test/landlord",
         localCouncilBaseUrl: String = "https://example.test/local-council",
-    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl)
+        gdsStartPageUrl: String = "https://example.test/gds-start-page",
+    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl, gdsStartPageUrl)
 }
