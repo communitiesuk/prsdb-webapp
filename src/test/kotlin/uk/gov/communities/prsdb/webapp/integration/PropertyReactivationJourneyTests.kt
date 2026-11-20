@@ -468,7 +468,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(typePage.form.submitButton).hasCount(1)
         assertThat(typePage.form.submitButton).hasText("Continue")
         assertThat(typePage.provideThisLaterButton).isHidden()
-        assertThat(typePage.form.sectionHeader).containsText("Tell us if your property needs a licence")
+        assertThat(typePage.form.sectionHeader).containsText("Tell us if this property needs a licence")
         typePage.submitLicensingType(type)
 
         var numberPage = assertLicenceNumberPage(page, type)
