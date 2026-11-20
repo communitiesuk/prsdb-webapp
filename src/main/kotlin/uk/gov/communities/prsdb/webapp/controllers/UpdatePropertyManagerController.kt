@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerControll
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.propertyManager.StartPropertyManagerUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.propertyManager.UpdatePropertyManagerJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -77,5 +78,8 @@ class UpdatePropertyManagerController(
 
         fun getUpdatePropertyManagerRoute(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_PROPERTY_MANAGER_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getUpdatePropertyManagerFirstStepRoute(propertyOwnershipId: Long): String =
+            getUpdatePropertyManagerRoute(propertyOwnershipId) + "/${StartPropertyManagerUpdateStep.ROUTE_SEGMENT}"
     }
 }

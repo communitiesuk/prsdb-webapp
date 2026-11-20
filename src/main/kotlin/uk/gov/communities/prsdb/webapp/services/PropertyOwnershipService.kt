@@ -205,9 +205,8 @@ class PropertyOwnershipService(
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
 
-    // The property manager is edited in place in its own row, which does not change the property ownership's last modified date
     fun getLastModifiedDateIncludingPropertyManager(propertyOwnershipId: Long): Instant =
-        getLastModifiedDateIncludingPropertyManager(getPropertyOwnership(propertyOwnershipId))
+        getPropertyOwnership(propertyOwnershipId).getPropertyManagerMostRecentlyUpdated()
 
     fun getPropertyRenewalDate(propertyOwnershipId: Long): LocalDate = getPropertyOwnership(propertyOwnershipId).renewalDate
 
@@ -740,17 +739,11 @@ class PropertyOwnershipService(
 
     fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 
-    private fun getLastModifiedDateIncludingPropertyManager(propertyOwnership: PropertyOwnership): Instant =
-        listOfNotNull(
-            propertyOwnership.getMostRecentlyUpdated(),
-            propertyOwnership.propertyManager?.getMostRecentlyUpdated(),
-        ).max()
-
     private fun throwErrorIfPropertyManagerLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,
         initialLastModifiedDate: Instant,
     ) {
-        if (getLastModifiedDateIncludingPropertyManager(propertyOwnership) != initialLastModifiedDate) {
+        if (propertyOwnership.getPropertyManagerMostRecentlyUpdated() != initialLastModifiedDate) {
             throw UpdateConflictException(
                 "The property ownership or property manager record has been updated since this update session started.",
             )

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
+import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -88,8 +89,7 @@ class PropertyDetailsViewModel(
 
     val hasPropertyManager: Boolean = propertyOwnership.propertyManager != null
 
-    // TODO PDJB-1995: Replace this placeholder URL with the property manager update journey route.
-    val propertyManagerUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+    val propertyManagerUpdateUrl: String = UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(propertyOwnership.id)
 
     val showPropertyManagerUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 

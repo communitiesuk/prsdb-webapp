@@ -58,7 +58,6 @@ import java.util.UUID
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     // TODO PDJB-1992: test the property record after updating to each ownership type.
@@ -1226,11 +1225,11 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             assertThat(checkPage.form.submitButton).hasText("Confirm and submit update")
             checkPage.confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
-            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
-            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithoutPropertyManagerId)!!.propertyManager
-            assertEquals("New Agent", propertyManager?.name)
-            assertEquals("new.agent@example.com", propertyManager?.email)
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals("New Agent", propertyDetailsPage.propertyManagerCard.title.getText())
+            assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("new.agent@example.com")
         }
 
         @Test
@@ -1262,12 +1261,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             assertPageIs(page, CheckPropertyManagerPagePropertyDetailsUpdate::class, propertyWithPropertyManagerUrlArguments).confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
-            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
-            val propertyManager = propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager
-            assertEquals("Changed Agent", propertyManager?.name)
-            assertEquals("changed.agent@example.com", propertyManager?.email)
-            assertEquals(originalPropertyManager.id, propertyManager?.id)
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals("Changed Agent", propertyDetailsPage.propertyManagerCard.title.getText())
+            assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("changed.agent@example.com")
+            assertEquals(
+                originalPropertyManager.id,
+                propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager?.id,
+            )
         }
 
         @Test
@@ -1316,9 +1318,11 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             assertThat(checkYourAnswersPage.form.submitButton).hasText("Confirm and submit update")
             checkYourAnswersPage.confirm()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
-            // TODO PDJB-1998: Check the property manager on the property record instead of querying the database
-            assertNull(propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyWithPropertyManagerId)!!.propertyManager)
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertThat(propertyDetailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
+                .containsText("No, I manage this property")
             assertEquals(propertyManagerCount - 1, propertyManagerRepository.count())
         }
 

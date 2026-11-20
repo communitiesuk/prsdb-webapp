@@ -1965,28 +1965,6 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `getLastModifiedDateIncludingPropertyManager returns the property manager's date when it was modified more recently`() {
-            // Arrange
-            val propertyManagerLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().plus(1, ChronoUnit.MINUTES)
-            addExistingPropertyManager(lastModifiedDate = propertyManagerLastModifiedDate)
-
-            // Act
-            val lastModifiedDate = propertyOwnershipService.getLastModifiedDateIncludingPropertyManager(propertyOwnership.id)
-
-            // Assert
-            assertEquals(propertyManagerLastModifiedDate, lastModifiedDate)
-        }
-
-        @Test
-        fun `getLastModifiedDateIncludingPropertyManager returns the property ownership's date when there is no property manager`() {
-            // Act
-            val lastModifiedDate = propertyOwnershipService.getLastModifiedDateIncludingPropertyManager(propertyOwnership.id)
-
-            // Assert
-            assertEquals(propertyOwnership.getMostRecentlyUpdated(), lastModifiedDate)
-        }
-
-        @Test
         fun `updatePropertyManager links a newly created property manager when one is provided`() {
             // Arrange
             val newPropertyManager = PropertyManager("New Agent", "new@example.com")
