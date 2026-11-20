@@ -57,7 +57,7 @@ class ReactivationCheckAnswersStepConfig(
         ) + licensingContent + gasSafetyContent + electricalSafetyContent + epcContent + tenancyContent
     }
 
-    // The complete reactivation step still needs the journey state, so it deletes the journey instead
+    // override this as the next step will handle deleting the journey
     override fun resolveNextDestination(
         state: PropertyReactivationJourneyState,
         defaultDestination: Destination,
