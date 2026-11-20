@@ -3240,6 +3240,34 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
+        fun `addLandlordToPropertyOwnership sets the landlord's anniversary to today when it is not set`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            assertEquals(MonthDay.now(DateTimeHelper.UK_ZONE), newLandlord.anniversary)
+            verify(mockLandlordRepository).save(newLandlord)
+        }
+
+        @Test
+        fun `addLandlordToPropertyOwnership does not change the landlord's existing anniversary`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val existingAnniversary = MonthDay.of(3, 15)
+            val newLandlord = MockLandlordData.createIndividualLandlord().apply { setAnniversaryIfAbsent(existingAnniversary) }
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            assertEquals(existingAnniversary, newLandlord.anniversary)
+        }
+
+        @Test
         fun `addLandlordToPropertyOwnership reactivates the landlord via the active inactive service if they are inactive`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)

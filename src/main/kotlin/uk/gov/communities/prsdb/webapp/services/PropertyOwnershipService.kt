@@ -676,6 +676,7 @@ class PropertyOwnershipService(
         propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
         landlord.markAsHavingRegisteredProperty()
+        landlord.setAnniversaryIfAbsent(MonthDay.now(DateTimeHelper.UK_ZONE))
         landlordRepository.save(landlord)
         activeInactiveService.reactivateLandlordIfInactive(landlord)
     }
