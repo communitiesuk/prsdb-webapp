@@ -63,13 +63,13 @@ import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
 @Import(TestcontainersConfiguration::class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("web-server-deactivated", "local")
 // These environment variables are required for the expected beans to be created - values aren't needed
 @TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "OS_API_KEY"])
 class PrsdbTaskApplicationTests {
     @Autowired
-    private var context: ConfigurableApplicationContext? = null
+    private lateinit var context: ConfigurableApplicationContext
 
     @MockitoBean
     lateinit var s3: S3TransferManager
@@ -133,7 +133,7 @@ class PrsdbTaskApplicationTests {
                 ReconcilePaymentsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
-        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
+        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context)
 
         assertEquals(expectedBeansByName, beanNames) { buildHelpfulErrorMessage(expectedBeansByName, beanNames) }
     }
