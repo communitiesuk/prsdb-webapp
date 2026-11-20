@@ -947,7 +947,7 @@ class PropertyOwnershipServiceTests {
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
-            assertEquals(result, propertyOwnership)
+            assertEquals(propertyOwnership, result)
         }
 
         @Test
@@ -966,7 +966,7 @@ class PropertyOwnershipServiceTests {
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
-            assertEquals(result, propertyOwnership)
+            assertEquals(propertyOwnership, result)
         }
 
         @Test
@@ -989,7 +989,7 @@ class PropertyOwnershipServiceTests {
             val result =
                 propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
-            assertEquals(result, propertyOwnership)
+            assertEquals(propertyOwnership, result)
         }
     }
 
@@ -1667,7 +1667,7 @@ class PropertyOwnershipServiceTests {
         // Arrange
         arrangeCreatePropertyOwnership()
 
-        // Act, Assert
+        // Act & Assert
         assertThrows<IllegalArgumentException> {
             createPropertyOwnershipWithType(OwnershipType.LEASEHOLD_ONLY, freeholders = emptyList())
         }
@@ -2105,16 +2105,10 @@ class PropertyOwnershipServiceTests {
         private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.JOINT_TENANTS)
         private val freeholder = FreeholderDataModel(databaseId = 2, detailsKnown = true, name = "Freeholder")
 
-        @BeforeEach
-        fun setUp() {
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
-        }
-
         @Test
         fun `updateFreeholders updates the freeholders and returns the added ones`() {
             // Arrange
+            stubPropertyOwnership(propertyOwnership)
             val newFreeholder = FreeholderDataModel(detailsKnown = true, name = "New freeholder")
             whenever(mockFreeholderService.updateFreeholders(propertyOwnership, listOf(freeholder, newFreeholder)))
                 .thenReturn(listOf(newFreeholder))
@@ -2132,7 +2126,33 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
+        fun `updateFreeholders throws when ownership type does not require freeholder records`() {
+            // Arrange
+            val propertyOwnershipWithoutFreeholderRecords =
+                MockLandlordData.createPropertyOwnership(
+                    id = 2,
+                    ownershipType = OwnershipType.SOLE_FREEHOLD,
+                )
+            whenever(
+                mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipWithoutFreeholderRecords.id),
+            ).thenReturn(propertyOwnershipWithoutFreeholderRecords)
+
+            // Act & Assert
+            assertThrows<IllegalArgumentException> {
+                propertyOwnershipService.updateFreeholders(
+                    propertyOwnershipWithoutFreeholderRecords.id,
+                    listOf(freeholder),
+                    propertyOwnershipWithoutFreeholderRecords.getOwnershipStructureMostRecentlyUpdated(),
+                )
+            }
+            verifyNoInteractions(mockFreeholderService)
+        }
+
+        @Test
         fun `updateFreeholders throws when no freeholders are given`() {
+            // Arrange
+            stubPropertyOwnership(propertyOwnership)
+
             // Act & Assert
             assertThrows<IllegalArgumentException> {
                 propertyOwnershipService.updateFreeholders(
@@ -2147,6 +2167,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `updateFreeholders throws UpdateConflictException when a freeholder changed since the journey started`() {
             // Arrange
+            stubPropertyOwnership(propertyOwnership)
             val journeyStartDate = Instant.parse("2025-01-01T00:00:00Z")
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", journeyStartDate)
             propertyOwnership.freeholders.add(
@@ -2164,6 +2185,11 @@ class PropertyOwnershipServiceTests {
                 exception.message,
             )
             verifyNoInteractions(mockFreeholderService)
+        }
+
+        private fun stubPropertyOwnership(propertyOwnership: PropertyOwnership) {
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
+                .thenReturn(propertyOwnership)
         }
     }
 
