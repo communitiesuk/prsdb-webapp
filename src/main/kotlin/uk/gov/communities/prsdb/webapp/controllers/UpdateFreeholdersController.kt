@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -46,7 +45,6 @@ class UpdateFreeholdersController(
     @AvailableWhenFeatureEnabled(ASSOCIATED_PARTIES)
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
-        model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable stepPath: String,
