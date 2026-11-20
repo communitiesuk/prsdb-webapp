@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
@@ -104,8 +105,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasText("Add, change or remove people in the ownership chain")
-            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
-            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasAttribute("href", "#")
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasAttribute(
+                "href",
+                UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID),
+            )
         }
 
         @Test
@@ -146,8 +149,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.tabs.goToPeopleResponsible()
 
             val row = detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow
-            // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
-            assertThat(row.actions.firstActionLink.locator).hasAttribute("href", "#")
+            assertThat(row.actions.firstActionLink.locator).hasAttribute(
+                "href",
+                UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID),
+            )
         }
 
         @Test
