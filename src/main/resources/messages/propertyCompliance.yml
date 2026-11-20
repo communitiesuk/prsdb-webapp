@@ -435,19 +435,18 @@ epcTask:
   findYourEpc:
     error:
       missing: Enter a certificate number
-    fieldSetHeading: Find your EPC
+    fieldSetHeading: What is your EPC’s certificate number?
     certificateNumber:
-      label: Certificate number
       hint: For example, 9002-3775-9101-5482-3149
     searchButton:
       text: Search
     explanation:
-      heading: How to find your EPC’s certificate number
+      heading: Find your EPC’s certificate number
       paragraph:
-        one: You can find this number on your digital EPC.
+        one: You can find this on your digital EPC.
         two:
           beforeLink: Go to
-          link: Find an energy certificate (opens in a new tab)
+          link: Find an energy certificate (opens in new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
   confirmEpcDetailsFromCertificateNumber:
     error:
