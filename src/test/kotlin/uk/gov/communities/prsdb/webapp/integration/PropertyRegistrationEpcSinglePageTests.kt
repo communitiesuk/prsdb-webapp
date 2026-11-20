@@ -64,7 +64,7 @@ class PropertyRegistrationEpcSinglePageTests : IntegrationTestWithImmutableData(
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select if you want to use the EPC we found for your property")
+                .containsText("Select if you want to use the EPC we found for this property")
         }
     }
 
