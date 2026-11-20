@@ -68,14 +68,18 @@ class EmailTemplateModelsTests {
     }
 
     @Test
-    fun `freeholder email privacy notice paragraph is not a markdown blockquote`() {
+    fun `freeholder email privacy notice uses Notify inset syntax`() {
+        // Arrange
         val markdown =
             requireNotNull(javaClass.getResource("/emails/FreeholderAddedToPropertyEmail.md"))
                 .readText()
+
+        // Act
         val privacyNoticeParagraph =
             markdown.lineSequence().single { it.contains("These details are not displayed publicly") }
 
-        Assertions.assertFalse(privacyNoticeParagraph.startsWith("> "))
+        // Assert
+        Assertions.assertTrue(privacyNoticeParagraph.startsWith("^ "))
     }
 
     companion object {
