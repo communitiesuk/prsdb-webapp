@@ -131,6 +131,8 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             LocalDate.now(DateTimeHelper.UK_ZONE),
         )
         jdbcTemplate.update("UPDATE property_ownership SET created_date = now() WHERE id = ?", PROPERTY_OWNERSHIP_ID)
+        // The rollback tests check that registration's write of the landlord's first anniversary is undone
+        jdbcTemplate.update("UPDATE landlord SET anniversary_day = NULL, anniversary_month = NULL WHERE id = ?", LANDLORD_ID)
         originalPeriodEnd = paymentRepository.findById(CREATED_PAYMENT_ID).get().forPeriodEnding
     }
 

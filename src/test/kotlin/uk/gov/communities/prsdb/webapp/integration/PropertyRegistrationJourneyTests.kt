@@ -2798,6 +2798,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
+        jdbcTemplate.update(
+            "UPDATE landlord SET anniversary_day = NULL, anniversary_month = NULL" +
+                " WHERE individual_subject_identifier = 'urn:fdc:gov.uk:2022:UVWXY'",
+        )
+
         val taskListPage =
             navigator.goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder
