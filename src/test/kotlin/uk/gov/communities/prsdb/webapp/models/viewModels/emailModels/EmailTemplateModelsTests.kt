@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -462,6 +463,15 @@ class EmailTemplateModelsTests {
                         dashboardUrl = "https://example.com/landlord/dashboard",
                     ),
                     "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordDeactivatedEmail(
+                        recipientName = "Alice",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123456L).toString(),
+                        reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/LandlordDeactivatedNoPropertiesRegistered.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
