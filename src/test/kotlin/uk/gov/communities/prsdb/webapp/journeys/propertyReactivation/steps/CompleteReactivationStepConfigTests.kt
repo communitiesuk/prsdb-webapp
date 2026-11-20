@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps
 
+import jakarta.persistence.EntityExistsException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -14,15 +14,11 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
-import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import kotlin.test.assertIs
 
 @ExtendWith(MockitoExtension::class)
 class CompleteReactivationStepConfigTests {
-    @Mock
-    private lateinit var mockAddressAvailabilityService: AddressAvailabilityService
-
     @Mock
     private lateinit var mockPropertyReactivationService: PropertyReactivationService
 
@@ -37,54 +33,36 @@ class CompleteReactivationStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig =
-            CompleteReactivationStepConfig(
-                addressAvailabilityService = mockAddressAvailabilityService,
-                propertyReactivationService = mockPropertyReactivationService,
-            )
+        stepConfig = CompleteReactivationStepConfig(propertyReactivationService = mockPropertyReactivationService)
     }
 
     @Test
-    fun `afterStepIsReached reactivates the property when its address has not been registered by anyone else`() {
+    fun `afterStepIsReached reactivates the property`() {
         // Arrange
-        whenever(mockState.uprn).thenReturn(uprn)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockState.uprn).thenReturn(uprn)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPropertyReactivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockPropertyReactivationService).reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn)
         verify(mockState, never()).isPropertyAlreadyRegistered = any()
     }
 
     @Test
-    fun `afterStepIsReached marks the property as already registered and does not reactivate it when its address has been registered`() {
+    fun `afterStepIsReached marks the property as already registered when reactivation throws an EntityExistsException`() {
         // Arrange
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockState.uprn).thenReturn(uprn)
-        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(true)
+        whenever(mockPropertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn))
+            .thenThrow(EntityExistsException("Address already registered"))
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
         verify(mockState).isPropertyAlreadyRegistered = true
-        verifyNoInteractions(mockPropertyReactivationService)
-    }
-
-    @Test
-    fun `afterStepIsReached reactivates the property without checking its address when it has no UPRN`() {
-        // Arrange
-        whenever(mockState.uprn).thenReturn(null)
-        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyReactivationService).reactivateProperty(propertyOwnershipId)
-        verifyNoInteractions(mockAddressAvailabilityService)
     }
 
     @Test
