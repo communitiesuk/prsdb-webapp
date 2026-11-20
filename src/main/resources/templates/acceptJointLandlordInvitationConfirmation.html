@@ -24,6 +24,15 @@
             acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two
         </p>
 
+        <th:block th:if="${landlordReactivated}">
+            <h2 class="govuk-heading-m"
+                th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.landlordAccount.heading}">acceptOrRejectJointLandlordInvitation.confirmation.landlordAccount.heading</h2>
+            <p class="govuk-body"
+               th:text="${isOrganisationLandlord} ? #{acceptOrRejectJointLandlordInvitation.confirmation.landlordAccount.organisation} : #{acceptOrRejectJointLandlordInvitation.confirmation.landlordAccount.individual}">
+                acceptOrRejectJointLandlordInvitation.confirmation.landlordAccount.individual
+            </p>
+        </th:block>
+
         <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
             #{common.confirmationPage.feedback.heading},
             #{acceptOrRejectJointLandlordInvitation.confirmation.feedback.body},
