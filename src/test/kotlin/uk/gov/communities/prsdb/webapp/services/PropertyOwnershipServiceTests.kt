@@ -73,12 +73,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationLicensingDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationTenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -1483,8 +1483,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1515,8 +1514,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1542,8 +1540,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateLicensing(
                     propertyOwnership.id,
-                    LicensingType.HMO_MANDATORY_LICENCE,
-                    "newLicenceNumber",
+                    LicensingDetailsDataModel(LicensingType.HMO_MANDATORY_LICENCE, "newLicenceNumber"),
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
@@ -1564,7 +1561,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.saveReactivationLicensing(
             propertyOwnership,
-            ReactivationLicensingDataModel(LicensingType.SELECTIVE_LICENCE, "SL-123"),
+            LicensingDetailsDataModel(LicensingType.SELECTIVE_LICENCE, "SL-123"),
         )
 
         // Assert
@@ -1578,7 +1575,7 @@ class PropertyOwnershipServiceTests {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, tenancyProvideLater = true)
         val tenancyDetails =
-            ReactivationTenancyDetailsDataModel(
+            TenancyDetailsDataModel(
                 numberOfHouseholds = 2,
                 numberOfPeople = 4,
                 billsIncludedList = "GAS",

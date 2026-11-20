@@ -39,12 +39,12 @@ import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAf
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationLicensingDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationTenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -367,31 +367,30 @@ class PropertyOwnershipService(
     @Transactional
     fun updateLicensing(
         id: Long,
-        licensingType: LicensingType,
-        licenceNumber: String?,
+        licensing: LicensingDetailsDataModel,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        setLicensing(propertyOwnership, licensingType, licenceNumber)
+        setLicensing(propertyOwnership, licensing)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional
     fun saveReactivationLicensing(
         propertyOwnership: PropertyOwnership,
-        licensing: ReactivationLicensingDataModel,
+        licensing: LicensingDetailsDataModel,
     ) {
-        setLicensing(propertyOwnership, licensing.licensingType, licensing.licenceNumber)
+        setLicensing(propertyOwnership, licensing)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
     private fun setLicensing(
         propertyOwnership: PropertyOwnership,
-        licensingType: LicensingType,
-        licenceNumber: String?,
+        licensing: LicensingDetailsDataModel,
     ) {
-        propertyOwnership.license = licenseService.updateLicence(propertyOwnership.license, licensingType, licenceNumber)
+        propertyOwnership.license =
+            licenseService.updateLicence(propertyOwnership.license, licensing.licensingType, licensing.licenceNumber)
         propertyOwnership.licenseProvideLater = false
     }
 
@@ -533,70 +532,36 @@ class PropertyOwnershipService(
     @Transactional
     fun updateTenancyDetails(
         id: Long,
-        numberOfHouseholds: Int,
-        numberOfPeople: Int,
-        billsIncludedList: String?,
-        customBillsIncluded: String?,
-        furnishedStatus: FurnishedStatus,
-        rentFrequency: RentFrequency,
-        customRentFrequency: String?,
-        rentAmount: BigDecimal,
+        tenancyDetails: TenancyDetailsDataModel,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        setTenancyDetails(
-            propertyOwnership,
-            numberOfHouseholds,
-            numberOfPeople,
-            billsIncludedList,
-            customBillsIncluded,
-            furnishedStatus,
-            rentFrequency,
-            customRentFrequency,
-            rentAmount,
-        )
+        setTenancyDetails(propertyOwnership, tenancyDetails)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional
     fun saveReactivationTenancyDetails(
         propertyOwnership: PropertyOwnership,
-        tenancyDetails: ReactivationTenancyDetailsDataModel,
+        tenancyDetails: TenancyDetailsDataModel,
     ) {
-        setTenancyDetails(
-            propertyOwnership,
-            tenancyDetails.numberOfHouseholds,
-            tenancyDetails.numberOfPeople,
-            tenancyDetails.billsIncludedList,
-            tenancyDetails.customBillsIncluded,
-            tenancyDetails.furnishedStatus,
-            tenancyDetails.rentFrequency,
-            tenancyDetails.customRentFrequency,
-            tenancyDetails.rentAmount,
-        )
+        setTenancyDetails(propertyOwnership, tenancyDetails)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
     private fun setTenancyDetails(
         propertyOwnership: PropertyOwnership,
-        numberOfHouseholds: Int,
-        numberOfPeople: Int,
-        billsIncludedList: String?,
-        customBillsIncluded: String?,
-        furnishedStatus: FurnishedStatus,
-        rentFrequency: RentFrequency,
-        customRentFrequency: String?,
-        rentAmount: BigDecimal,
+        tenancyDetails: TenancyDetailsDataModel,
     ) {
-        propertyOwnership.currentNumHouseholds = numberOfHouseholds
-        propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnership.billsIncludedList = billsIncludedList
-        propertyOwnership.customBillsIncluded = customBillsIncluded
-        propertyOwnership.furnishedStatus = furnishedStatus
-        propertyOwnership.rentFrequency = rentFrequency
-        propertyOwnership.customRentFrequency = customRentFrequency
-        propertyOwnership.rentAmount = rentAmount
+        propertyOwnership.currentNumHouseholds = tenancyDetails.numberOfHouseholds
+        propertyOwnership.currentNumTenants = tenancyDetails.numberOfPeople
+        propertyOwnership.billsIncludedList = tenancyDetails.billsIncludedList
+        propertyOwnership.customBillsIncluded = tenancyDetails.customBillsIncluded
+        propertyOwnership.furnishedStatus = tenancyDetails.furnishedStatus
+        propertyOwnership.rentFrequency = tenancyDetails.rentFrequency
+        propertyOwnership.customRentFrequency = tenancyDetails.customRentFrequency
+        propertyOwnership.rentAmount = tenancyDetails.rentAmount
         // The tenancy details are now provided, so the property record no longer needs to prompt for them.
         propertyOwnership.tenancyProvideLater = false
     }

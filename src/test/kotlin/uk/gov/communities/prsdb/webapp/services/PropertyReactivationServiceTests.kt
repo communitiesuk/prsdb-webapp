@@ -18,9 +18,9 @@ import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationLicensingDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationTenancyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.math.BigDecimal
 
@@ -49,9 +49,9 @@ class PropertyReactivationServiceTests {
     @Test
     fun `reactivatePropertyIfAddressAvailable saves the details provided and then reactivates the property`() {
         // Arrange
-        val licensing = ReactivationLicensingDataModel(LicensingType.NO_LICENSING, null)
+        val licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null)
         val tenancyDetails =
-            ReactivationTenancyDetailsDataModel(
+            TenancyDetailsDataModel(
                 1,
                 2,
                 null,
