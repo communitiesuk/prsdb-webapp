@@ -23,32 +23,18 @@
                   th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'matchedEpcIsCorrect', #{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.question}, null)}">
             <details id="epc-requirements-details" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.heading}, ~{::#epc-requirements-details/content()})}">
                 <div class="govuk-inset-text">
-                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.heading}">
-                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.heading
-                    </h2>
-                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.paragraph}">
-                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.paragraph
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.one}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.one
                     </p>
-                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading}">
-                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading
-                    </h2>
-                    <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph}">
-                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.two}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.two
                     </p>
-                    <ul class="govuk-list govuk-list--bullet">
-                        <li th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.one}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.one
-                        </li>
-                        <li th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.two}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.two
-                        </li>
-                    </ul>
-                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.expiryParagraph}">
-                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.expiryParagraph
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.three}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.intro.paragraphs.three
                     </p>
-                    <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.heading}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.heading}">
                         propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.heading
-                    </h3>
+                    </h2>
                     <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.one}">
                         propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.one
                     </p>
