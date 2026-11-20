@@ -225,7 +225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private val propertyDetailsSectionHeader = "Property details"
     private val peopleResponsibleSectionHeader = "People responsible for this property"
     private val occupiedSectionHeader = "Tell us if this property is occupied"
-    private val licenseSectionHeader = "Tell us if your property needs a licence"
+    private val licenseSectionHeader = "Tell us if this property needs a licence"
     private val gasSafetyHeader = "Gas safety certificate"
     private val electricalSafetyHeader = "Electrical safety certificate"
     private val epcSectionHeader = "Energy performance certificate (EPC)"
@@ -2238,7 +2238,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertEquals(
             listOf(
                 "Who will provide these details",
-                "Tell us if your property needs a licence",
+                "Tell us if this property needs a licence",
                 "Gas safety certificate",
                 "Electrical safety certificate",
                 "Energy performance certificate (EPC)",
@@ -2579,7 +2579,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
         assertEquals(
             "Cannot\u00A0start\u00A0yet",
-            taskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
+            taskListPage.getRentedOutTask("Tell us if this property needs a licence").statusText.trim(),
         )
         assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
         assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
@@ -3101,7 +3101,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 "Not\u00A0started",
-                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a licence").statusText.trim(),
+                updatedTaskListPage.getRentedOutTask("Tell us if this property needs a licence").statusText.trim(),
             )
             assertEquals(
                 "Cannot\u00A0start\u00A0yet",
