@@ -47,7 +47,7 @@ class PropertyReactivationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState only populates the licensing section when only licensing was required`() {
+    fun `fromJourneyState populates the licensing section and leaves the others empty when only licensing was required`() {
         // Arrange
         whenever(mockState.requiredTaskTypes).thenReturn(listOf(ReactivationTaskType.LICENSING))
         val licensingTask = mock<LicensingTask>()
@@ -63,7 +63,7 @@ class PropertyReactivationDataModelFactoryTests {
     }
 
     @Test
-    fun `fromJourneyState only populates the tenancy details section when only tenancy details were required`() {
+    fun `fromJourneyState populates the tenancy details section and leaves the others empty when only tenancy details were required`() {
         // Arrange
         whenever(mockState.requiredTaskTypes).thenReturn(listOf(ReactivationTaskType.TENANCY_DETAILS))
         val tenancyDetailsTask = mock<TenancyDetailsTask>()
