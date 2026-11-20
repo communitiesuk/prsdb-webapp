@@ -717,7 +717,8 @@ INSERT INTO superior_landlord (name, email, property_ownership_id)
 SELECT v.name, v.email, v.property_ownership_id
 FROM (VALUES ('Sam Superior', 'superior.landlord@example.com', 57),
              ('Robin Superior', NULL, 57),
-             (NULL, NULL, 57)) AS v(name, email, property_ownership_id)
+             (NULL, NULL, 57),
+             ('Sam Superior', 'superior.landlord@example.com', 55)) AS v(name, email, property_ownership_id)
 WHERE NOT EXISTS (SELECT 1 FROM superior_landlord s WHERE s.property_ownership_id = v.property_ownership_id);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));

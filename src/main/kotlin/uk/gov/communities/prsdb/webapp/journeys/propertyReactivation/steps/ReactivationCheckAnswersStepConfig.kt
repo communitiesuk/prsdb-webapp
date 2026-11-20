@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
@@ -55,6 +56,12 @@ class ReactivationCheckAnswersStepConfig(
             "showTenancyDetails" to showTenancyDetails,
         ) + licensingContent + gasSafetyContent + electricalSafetyContent + epcContent + tenancyContent
     }
+
+    // override this as the next step will handle deleting the journey
+    override fun resolveNextDestination(
+        state: PropertyReactivationJourneyState,
+        defaultDestination: Destination,
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent

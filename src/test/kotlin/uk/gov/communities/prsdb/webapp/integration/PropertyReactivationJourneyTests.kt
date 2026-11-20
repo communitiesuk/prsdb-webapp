@@ -98,7 +98,10 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord can walk through every provide later step to the confirmation page`(page: Page) {
+    fun `a landlord can walk through every provide later step to the confirmation page`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         assertThat(infoPage.heading).containsText("Reactivate your property")
         infoPage.submit()
@@ -138,6 +141,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkAnswersPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
     }
 
     @Test
@@ -293,13 +297,17 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord goes straight to the confirmation page when there are no details to provide`(page: Page) {
+    fun `a landlord goes straight to the confirmation page when there are no details to provide`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
         val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
     }
 
     @Test
@@ -399,6 +407,25 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         alreadyRegisteredPage.backLink.clickAndWait()
 
         assertPageIs(page, InfoFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord is shown the already registered page if the address is registered by someone else before they confirm their answers`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
+        // Simulate someone else registering the address after the landlord started the journey
+        jdbcTemplate.update(
+            "UPDATE property_ownership SET address_id = (SELECT address_id FROM property_ownership WHERE id = ?) WHERE id = ?",
+            INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            ACTIVE_PROPERTY,
+        )
+
+        checkAnswersPage.submit()
+
+        assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
+        assertEquals(false, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
     }
 
     @Test
@@ -656,4 +683,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyReactivation::class, urlArguments)
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
+
+    private fun isPropertyActive(
+        jdbcTemplate: JdbcTemplate,
+        propertyOwnershipId: Long,
+    ) = jdbcTemplate.queryForObject(
+        "SELECT is_active FROM property_ownership WHERE id = ?",
+        Boolean::class.java,
+        propertyOwnershipId,
+    )
 }

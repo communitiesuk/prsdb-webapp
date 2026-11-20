@@ -11,6 +11,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
@@ -104,6 +105,20 @@ class ReactivationCheckAnswersStepConfigTests {
         assertEquals(tenancyRows, content["tenancyRows"])
         verify(mockComplianceDetailsHelper, never()).getElectricalSafetyCyaContent(any(), any())
         verify(mockComplianceDetailsHelper, never()).getEpcCyaContent(any(), any())
+    }
+
+    @Test
+    fun `resolveNextDestination returns the default destination without deleting the journey`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val defaultDestination = Destination.ExternalUrl("redirect")
+
+        // Act
+        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+        // Assert
+        assertEquals(defaultDestination, result)
+        verify(mockState, never()).deleteJourney()
     }
 
     private fun mockInactiveProperty() {

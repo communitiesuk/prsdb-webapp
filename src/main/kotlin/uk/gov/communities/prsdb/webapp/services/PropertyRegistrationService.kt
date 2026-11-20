@@ -180,23 +180,12 @@ class PropertyRegistrationService(
             sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
         }
 
-        registrationData.freeholders.orEmpty().forEachIndexed { index, freeholder ->
-            sendNotificationAndLogFailures(
-                "the freeholder ${index + 1} added-to-property notification for property ownership ${propertyOwnership.id}",
-            ) {
-                val outcome =
-                    associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
-                        freeholder,
-                        propertyOwnership,
-                    )
-                if (outcome == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
-                    println(
-                        "Not sending freeholder ${index + 1} added-to-property notification " +
-                            "for property ownership ${propertyOwnership.id}: " +
-                            "details are fully redacted",
-                    )
-                }
-            }
+        sendAddedToPropertyNotifications("freeholder", registrationData.freeholders.orEmpty(), propertyOwnership) { freeholder ->
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
+        }
+
+        sendAddedToPropertyNotifications("superior landlord", registrationData.superiorLandlords, propertyOwnership) { superiorLandlord ->
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
         }
 
         lettingAgentInvitation?.let { invitation ->
@@ -220,6 +209,28 @@ class PropertyRegistrationService(
                     propertyOwnership,
                     landlord,
                 )
+            }
+        }
+    }
+
+    private fun <T> sendAddedToPropertyNotifications(
+        partyDescription: String,
+        parties: List<T>,
+        propertyOwnership: PropertyOwnership,
+        sendNotification: (T) -> AssociatedPartyNotificationOutcome?,
+    ) {
+        parties.forEachIndexed { index, party ->
+            val partyLabel = "$partyDescription ${index + 1}"
+            sendNotificationAndLogFailures(
+                "the $partyLabel added-to-property notification for property ownership ${propertyOwnership.id}",
+            ) {
+                if (sendNotification(party) == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
+                    println(
+                        "Not sending $partyLabel added-to-property notification " +
+                            "for property ownership ${propertyOwnership.id}: " +
+                            "details are fully redacted",
+                    )
+                }
             }
         }
     }

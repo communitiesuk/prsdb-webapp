@@ -17,9 +17,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
@@ -196,9 +198,29 @@ class PropertyDetailsViewModelTests {
             ),
             viewModel.peopleResponsibleOwnershipSection.map { it.fieldHeading },
         )
-        // TODO PDJB-1992: update this assertion when the ownership update journey replaces the placeholder links
-        assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.single().url == "#" }) {
-            "The ownership answer rows show placeholder change links until PDJB-1992 builds the update journey"
+    }
+
+    @Test
+    fun `ownership answer rows link to the ownership update journey start for landlords`() {
+        // Arrange
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(id = 123, ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS)
+
+        // Act
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+            )
+
+        // Assert
+        val expectedUrl =
+            UpdateOwnershipController.getUpdateOwnershipRoute(propertyOwnership.id) +
+                "/${InitialiseOwnershipUpdateStep.ROUTE_SEGMENT}"
+        assertEquals(3, viewModel.peopleResponsibleOwnershipSection.size)
+        assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.single().url == expectedUrl }) {
+            "Every ownership answer row should link to the start of the ownership update journey"
         }
     }
 

@@ -17,7 +17,7 @@
     </h1>
     <div class="govuk-inset-text" th:if="${insetText}" th:text="#{${insetText}}">insetText</div>
     <th:block th:each="card : ${summaryCards}">
-        <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, ~{fragments/summaryCardBodyText :: summaryCardBodyText(${card.bodyTextKey})})}"></div>
+        <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
     </th:block>
 </th:block>
 <th:block id="form-content">

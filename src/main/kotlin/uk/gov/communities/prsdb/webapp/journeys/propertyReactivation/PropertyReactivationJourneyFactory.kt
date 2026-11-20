@@ -11,12 +11,14 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.EPC
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.GAS_SAFETY
@@ -108,8 +110,6 @@ class PropertyReactivationJourneyFactory(
             }
             step(journey.alreadyRegisteredStep) {
                 routeSegment(ReactivationAlreadyRegisteredStep.ROUTE_SEGMENT)
-                // TODO PDJB-2045: also allow this step to be reached when the check just before reactivating the
-                //  property finds that it has already been registered
                 parents { journey.infoStep.hasOutcome(ReactivationInfoMode.PROPERTY_ALREADY_REGISTERED) }
                 noNextDestination()
             }
@@ -156,9 +156,7 @@ class PropertyReactivationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.checkAnswersParents() }
-                // TODO PDJB-2045: route through the remaining reactivation steps to completeReactivationStep, and stop
-                //  the check answers step deleting the journey
-                nextUrl { confirmationUrl(journey.propertyOwnershipId) }
+                nextStep { journey.completeReactivationStep }
             }
             step(journey.completeReactivationStep) {
                 parents { journey.completeReactivationParents() }
@@ -413,7 +411,10 @@ class PropertyReactivationJourneyFactory(
     }
 
     private fun PropertyReactivationJourneyState.completeReactivationParents(): Parentage =
-        SingleParent(infoStep) { requiredTaskTypes.isEmpty() && infoStep.outcome == ReactivationInfoMode.PROPERTY_AVAILABLE }
+        OrParents(
+            SingleParent(infoStep) { requiredTaskTypes.isEmpty() && infoStep.outcome == ReactivationInfoMode.PROPERTY_AVAILABLE },
+            checkAnswersStep.isComplete(),
+        )
 }
 
 @JourneyFrameworkComponent

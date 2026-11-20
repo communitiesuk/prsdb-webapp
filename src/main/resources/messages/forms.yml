@@ -437,6 +437,10 @@ update:
     notOccupied:
       summaryName: You have updated whether the property is occupied by tenants
       pageTitle: Check your occupancy answers
+  checkOwnership:
+    pageTitle: Check your ownership answers
+    subheading: You’ve updated the property’s ownership
+    insetText: We’ll notify anyone you add.
   checkHouseholdsAndTenants:
     pageTitle: Check your households and tenants answers
   checkRentIncludesBills:
