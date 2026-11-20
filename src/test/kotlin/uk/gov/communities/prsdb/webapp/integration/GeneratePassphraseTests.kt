@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePassphrasePage
@@ -74,5 +76,33 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
         assertEquals(passphrase, generatePassphrasePage.passphrase)
         assertThat(generatePassphrasePage.successBanner.content).containsText("The text message has been submitted")
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "+447700900001, Wait a short time",
+        "+447700900002, Contact support",
+    )
+    fun `failed SMS submission shows guidance and requires a new passphrase`(
+        phoneNumber: String,
+        guidance: String,
+        page: Page,
+    ) {
+        featureFlagManager.enableFeature(PASSPHRASE_SMS)
+        var generatePassphrasePage = navigator.goToGeneratePassphrasePage()
+        val passphrase = generatePassphrasePage.passphrase
+
+        generatePassphrasePage.smsForm.phoneNumber.fill(phoneNumber)
+        generatePassphrasePage.smsForm.submit()
+
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertEquals(passphrase, generatePassphrasePage.passphrase)
+        assertThat(generatePassphrasePage.notificationStatus).containsText(guidance)
+        assertThat(generatePassphrasePage.smsForm.submitButton).isHidden()
+        assertThat(generatePassphrasePage.letterGuidance).isHidden()
+
+        generatePassphrasePage.generateAnotherButton.clickAndWait()
+        generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
+        assertThat(generatePassphrasePage.smsForm.submitButton).isVisible()
     }
 }

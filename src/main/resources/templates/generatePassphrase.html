@@ -23,7 +23,7 @@
             <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(#{generatePassphrase.sms.phoneNumber.label}, 'phoneNumber', #{generatePassphrase.sms.phoneNumber.hint})}"></div>
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePassphrase.sms.send})}"></button>
         </form>
-        <section id="passphrase-letter-guidance" th:if="${!smsEnabled || !#strings.isEmpty(formModel.passphraseToken)}">
+        <section id="passphrase-letter-guidance" th:if="${attemptedPassphrase == null && (!smsEnabled || !#strings.isEmpty(formModel.passphraseToken))}">
             <h2 class="govuk-heading-m" th:text="#{generatePassphrase.letter.heading}">generatePassphrase.letter.heading</h2>
             <p class="govuk-body" th:text="#{generatePassphrase.letter.body}">generatePassphrase.letter.body</p>
         </section>

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -17,8 +18,8 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.PersistentSmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.TransientSmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
+import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
 import uk.gov.service.notify.NotificationClient
@@ -62,6 +63,20 @@ class NotifySmsNotificationServiceTests {
         verify(notifyClient).sendSms("template-id", "+447700900123", personalisation, null)
     }
 
+    @Test
+    fun `sendSms treats a Notify server error as an uncertain outcome`() {
+        val cause =
+            NotificationClientException(
+                """Status code: 500 {"errors":[{"error":"Exception","message":"Server error"}],"status_code":500}""",
+            )
+        doThrow(cause).whenever(notifyClient).sendSms(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+
+        val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", TestSmsTemplate()) }
+
+        assertEquals(cause, exception.cause)
+        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+    }
+
     @ParameterizedTest
     @ValueSource(strings = ["", " "])
     fun `sendSms rejects an unconfigured template without calling Notify`(templateId: String) {
@@ -70,49 +85,61 @@ class NotifySmsNotificationServiceTests {
         whenever(notifyIdService.getNotifyIdValue(sms.template)).thenReturn(templateId)
 
         // Act
-        val exception = assertThrows<PersistentSmsSendException> { service.sendSms("+447700900123", sms) }
+        val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", sms) }
 
         // Assert
         assertTrue(exception.message!!.contains("No Notify template ID"))
+        assertEquals(SmsSendFailureReason.TECHNICAL, exception.reason)
         verifyNoInteractions(notifyClient)
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["AuthError", "BadRequestError", "ValidationError", "TooManyRequestsError"])
-    fun `sendSms throws PersistentSmsSendException when the request cannot succeed`(errorType: String) {
+    @CsvSource(
+        "AuthError, TECHNICAL",
+        "BadRequestError, INVALID_REQUEST",
+        "ValidationError, INVALID_REQUEST",
+        "TooManyRequestsError, DAILY_LIMIT",
+        "RateLimitError, MINUTE_LIMIT",
+        "Exception, UNKNOWN",
+    )
+    fun `sendSms classifies Notify errors`(
+        errorType: String,
+        reason: SmsSendFailureReason,
+    ) {
         // Arrange
         val cause = NotificationClientException(errorResponse(errorType))
         doThrow(cause).whenever(notifyClient).sendSms(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
 
         // Act
         val exception =
-            assertThrows<PersistentSmsSendException> {
+            assertThrows<SmsSendException> {
                 service.sendSms("+447700900123", TestSmsTemplate())
             }
 
         // Assert
         assertEquals(cause, exception.cause)
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = ["RateLimitError", "Exception"])
-    fun `sendSms throws TransientSmsSendException when retrying may succeed`(errorType: String) {
-        // Arrange
-        val cause = NotificationClientException(errorResponse(errorType))
-        doThrow(cause).whenever(notifyClient).sendSms(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
-
-        // Act
-        val exception =
-            assertThrows<TransientSmsSendException> {
-                service.sendSms("+447700900123", TestSmsTemplate())
-            }
-
-        // Assert
-        assertEquals(cause, exception.cause)
+        assertEquals(reason, exception.reason)
     }
 
     @Test
-    fun `sendSms prioritises persistent failures over transient failures`() {
+    fun `sendSms treats a server response as uncertain even if its error type is recognised`() {
+        // Arrange
+        val cause = NotificationClientException(errorResponse("AuthError").replace("400", "500"))
+        doThrow(cause).whenever(notifyClient).sendSms(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+
+        // Act
+        val exception =
+            assertThrows<SmsSendException> {
+                service.sendSms("+447700900123", TestSmsTemplate())
+            }
+
+        // Assert
+        assertEquals(cause, exception.cause)
+        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+    }
+
+    @Test
+    fun `sendSms prioritises invalid requests over minute limits`() {
         // Arrange
         val cause =
             NotificationClientException(
@@ -124,13 +151,39 @@ class NotifySmsNotificationServiceTests {
 
         // Act
         val exception =
-            assertThrows<PersistentSmsSendException> {
+            assertThrows<SmsSendException> {
                 service.sendSms("+447700900123", TestSmsTemplate())
             }
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertTrue(exception.message!!.startsWith("There were multiple errors"))
+        assertEquals(SmsSendFailureReason.INVALID_REQUEST, exception.reason)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "AuthError, TooManyRequestsError, TECHNICAL",
+        "TooManyRequestsError, ValidationError, DAILY_LIMIT",
+        "NewError, AuthError, UNKNOWN",
+        "Exception, AuthError, UNKNOWN",
+    )
+    fun `sendSms classifies mixed errors conservatively`(
+        first: String,
+        second: String,
+        reason: SmsSendFailureReason,
+    ) {
+        val cause =
+            NotificationClientException(
+                """Status code: 400 {"errors":[""" +
+                    """{"error":"$first","message":"Error"},""" +
+                    """{"error":"$second","message":"Error"}],"status_code":400}""",
+            )
+        doThrow(cause).whenever(notifyClient).sendSms(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+
+        val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", TestSmsTemplate()) }
+
+        assertEquals(reason, exception.reason)
+        assertEquals(cause, exception.cause)
     }
 
     @ParameterizedTest
@@ -142,13 +195,13 @@ class NotifySmsNotificationServiceTests {
 
         // Act
         val exception =
-            assertThrows<PersistentSmsSendException> {
+            assertThrows<SmsSendException> {
                 service.sendSms("+447700900123", TestSmsTemplate())
             }
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertTrue(exception.message!!.contains("unknown whether that SMS was sent"))
+        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @ParameterizedTest
@@ -165,13 +218,13 @@ class NotifySmsNotificationServiceTests {
 
         // Act
         val exception =
-            assertThrows<PersistentSmsSendException> {
+            assertThrows<SmsSendException> {
                 service.sendSms("+447700900123", TestSmsTemplate())
             }
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertTrue(exception.message!!.contains("could not be classified"))
+        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @Test
@@ -182,13 +235,13 @@ class NotifySmsNotificationServiceTests {
 
         // Act
         val exception =
-            assertThrows<PersistentSmsSendException> {
+            assertThrows<SmsSendException> {
                 service.sendSms("+447700900123", TestSmsTemplate())
             }
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertTrue(exception.message!!.contains("unknown whether that SMS was sent"))
+        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
     }
 
     private fun errorResponse(errorType: String): String =

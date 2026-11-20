@@ -46,8 +46,8 @@ class GeneratePassphraseSinglePageTests : IntegrationTestWithImmutableData("data
 
     @ParameterizedTest
     @CsvSource(
-        "+447700900001, The text message could not be sent",
-        "+447700900002, We could not confirm whether the text message was sent",
+        "+447700900001, Wait a short time",
+        "+447700900002, not submitted because of a technical problem",
     )
     fun `SMS delivery failures require a new passphrase`(
         phoneNumber: String,
