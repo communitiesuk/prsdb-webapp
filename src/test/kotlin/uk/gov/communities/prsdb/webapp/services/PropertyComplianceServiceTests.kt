@@ -52,9 +52,9 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationElectricalSafetyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationEpcDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -712,7 +712,7 @@ class PropertyComplianceServiceTests {
             // Act
             propertyComplianceService.saveReactivationComplianceData(
                 propertyOwnershipId = propertyOwnershipId,
-                gasSafety = ReactivationGasSafetyDataModel(hasGasSupply = true, issueDate = issueDate, uploadIds = listOf(10L)),
+                gasSafety = GasSafetyDetailsDataModel(hasGasSupply = true, issueDate = issueDate, uploadIds = listOf(10L)),
                 electricalSafety = null,
                 epc = null,
             )
@@ -742,7 +742,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 gasSafety = null,
                 electricalSafety =
-                    ReactivationElectricalSafetyDataModel(
+                    ElectricalSafetyDetailsDataModel(
                         certType = CertificateType.Eicr,
                         eicrExpiryDate = eicrExpiryDate,
                         eicIssueDate = null,
@@ -750,7 +750,7 @@ class PropertyComplianceServiceTests {
                         uploadIds = listOf(20L),
                     ),
                 epc =
-                    ReactivationEpcDataModel(
+                    EpcDetailsDataModel(
                         certificateUrl = "https://epc.example/cert",
                         expiryDate = epcExpiryDate,
                         energyRating = "B",

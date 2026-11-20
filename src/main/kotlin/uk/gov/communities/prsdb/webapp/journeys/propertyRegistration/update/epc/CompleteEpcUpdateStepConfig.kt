@@ -2,37 +2,35 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
-import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.ComplianceDetailsDataModelFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 
 @JourneyFrameworkComponent
 class CompleteEpcUpdateStepConfig(
     private val propertyComplianceService: PropertyComplianceService,
-    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val complianceDetailsDataModelFactory: ComplianceDetailsDataModelFactory,
 ) : AbstractInternalStepConfig<Complete, UpdateEpcJourneyState>() {
     override fun mode(state: UpdateEpcJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateEpcJourneyState) {
-        val acceptedEpc = state.epcDetailsTask.acceptedEpcIfStillAccepted
+        val epc = complianceDetailsDataModelFactory.fromEpcDetailState(state.epcDetailsTask)
 
         try {
             propertyComplianceService.updateEpc(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                epcCertificateUrl = acceptedEpc?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
-                epcExpiryDate = acceptedEpc?.expiryDate?.toJavaLocalDate(),
-                epcEnergyRating = acceptedEpc?.energyRating,
-                tenancyStartedBeforeEpcExpiry =
-                    state.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
-                epcExemptionReason = state.epcDetailsTask.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                epcMeesExemptionReason = state.epcDetailsTask.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
+                epcCertificateUrl = epc.certificateUrl,
+                epcExpiryDate = epc.expiryDate,
+                epcEnergyRating = epc.energyRating,
+                tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
+                epcExemptionReason = epc.exemptionReason,
+                epcMeesExemptionReason = epc.meesExemptionReason,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

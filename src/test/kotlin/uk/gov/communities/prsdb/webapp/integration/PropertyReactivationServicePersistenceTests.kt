@@ -18,9 +18,9 @@ import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
@@ -58,7 +58,7 @@ class PropertyReactivationServicePersistenceTests : IntegrationTestWithMutableDa
         val reactivationData =
             PropertyReactivationDataModel(
                 licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null),
-                gasSafety = ReactivationGasSafetyDataModel(hasGasSupply = false, issueDate = null, uploadIds = emptyList()),
+                gasSafety = GasSafetyDetailsDataModel(hasGasSupply = false, issueDate = null, uploadIds = emptyList()),
                 tenancyDetails =
                     TenancyDetailsDataModel(
                         numberOfHouseholds = 1,

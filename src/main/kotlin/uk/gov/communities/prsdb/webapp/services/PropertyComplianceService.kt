@@ -26,9 +26,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationElectricalSafetyDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationEpcDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.ReactivationGasSafetyDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -223,9 +223,9 @@ class PropertyComplianceService(
     @Transactional
     fun saveReactivationComplianceData(
         propertyOwnershipId: Long,
-        gasSafety: ReactivationGasSafetyDataModel?,
-        electricalSafety: ReactivationElectricalSafetyDataModel?,
-        epc: ReactivationEpcDataModel?,
+        gasSafety: GasSafetyDetailsDataModel?,
+        electricalSafety: ElectricalSafetyDetailsDataModel?,
+        epc: EpcDetailsDataModel?,
     ) {
         val record = getComplianceForProperty(propertyOwnershipId)
         gasSafety?.let {
