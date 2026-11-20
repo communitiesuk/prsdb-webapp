@@ -104,20 +104,30 @@ jobs:
       - name: Start SSM port-forwarding Session
         id: start-session
         run: |
+          SSM_OUTPUT_FILE=ssm_output.txt
+          if [ "${{ inputs.environment }}" = "nft" ]; then
+            umask 077
+            SSM_OUTPUT_FILE="$RUNNER_TEMP/nft-deploy-ssm-output.txt"
+          fi
           BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=${{ inputs.environment }}-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
 
           DB_URL=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-url" --query "Parameter.Value")
 
           DB_ENDPOINT="${DB_URL%:*}"
 
-          aws ssm start-session --region $AWS_REGION --target $BASTION_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=$DB_ENDPOINT,portNumber="5432",localPortNumber="5432" > ssm_output.txt 2>&1 &
+          aws ssm start-session --region $AWS_REGION --target $BASTION_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=$DB_ENDPOINT,portNumber="5432",localPortNumber="5432" > "$SSM_OUTPUT_FILE" 2>&1 &
           sleep 10 # Wait for command to output the session Id
-          cat ssm_output.txt
+          if [ "${{ inputs.environment }}" != "nft" ]; then
+            cat "$SSM_OUTPUT_FILE"
+          fi
 
-          SESSION_ID=$(grep -oP 'SessionId: \K[a-zA-Z0-9-]+' ssm_output.txt | head -1)
+          SESSION_ID=$(grep -oP 'SessionId: \K[a-zA-Z0-9-]+' "$SSM_OUTPUT_FILE" | head -1)
           if [ -z "$SESSION_ID" ]; then
               echo "Session Id not found in the output."
               exit 1
+          fi
+          if [ "${{ inputs.environment }}" = "nft" ]; then
+            echo "::add-mask::$SESSION_ID"
           fi
           echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_OUTPUT
 

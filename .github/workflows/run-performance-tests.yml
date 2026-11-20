@@ -15,8 +15,9 @@ on:
         type: boolean
         default: false
       restore-task-definition:
-        description: Exact active restore worker revision (otherwise use NFT_RESTORE_TASK_DEFINITION environment variable)
+        description: Optional exact active restore worker revision (otherwise discover the active managed revision)
         type: string
+        default: ''
       expected-app-sha:
         description: Deployed app SHA for test-only revisions (otherwise require the workflow SHA)
         type: string
@@ -84,12 +85,16 @@ jobs:
     name: Restore and verify the large NFT dataset
     needs: changes
     if: needs.changes.outputs.run == 'true'
+    outputs:
+      restore-task-definition: ${{ steps.resolve_restore.outputs.task_definition }}
     environment: nft
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition }}
       EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
+      NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: ${{ secrets.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION }}
+      NFT_RESET_COMPATIBLE_APP_SHA: ${{ vars.NFT_RESET_COMPATIBLE_APP_SHA }}
     permissions:
       contents: read
       id-token: write
@@ -113,15 +118,28 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Resolve and checkpoint the active managed restore task
+        id: resolve_restore
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs resolve-task-definition
+      - name: Publish resolved restore task definition to this job
+        env:
+          NFT_RESTORE_TASK_DEFINITION: ${{ steps.resolve_restore.outputs.task_definition }}
+        run: |
+          test -n "$NFT_RESTORE_TASK_DEFINITION"
+          printf 'NFT_RESTORE_TASK_DEFINITION=%s\n' "$NFT_RESTORE_TASK_DEFINITION" >> "$GITHUB_ENV"
+      - name: Snapshot all seven maintenance schedules before mutation
+        run: node scripts/performance-tests/nft-vpc-restore.mjs snapshot-maintenance
+      - name: Store schedule snapshot privately before mutation
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-checkpoint
+      - name: Pause maintenance schedules and drain scheduled writers
+        run: node scripts/performance-tests/nft-vpc-restore.mjs pause-maintenance
       - name: Stop NFT app and async worker while replacing the database
         run: node scripts/performance-tests/nft-vpc-restore.mjs stop
-      - name: Preserve pre-restore recovery checkpoint
-        uses: actions/upload-artifact@v7
-        with:
-          name: nft-restore-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/nft-restore-state.json
-          if-no-files-found: error
-          retention-days: 7
+      - name: Store writer-stop recovery checkpoint privately, including partial failure
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state
       - name: Restore pinned seed dump inside the NFT VPC
         run: node scripts/performance-tests/nft-vpc-restore.mjs run
       - name: Migrate and verify the restored NFT database through SSM
@@ -132,14 +150,17 @@ jobs:
           NFT_SEED_PROPERTIES: ${{ vars.NFT_SEED_PROPERTIES }}
           NFT_SEED_INCOMPLETE_PROPERTIES: ${{ vars.NFT_SEED_INCOMPLETE_PROPERTIES }}
           NFT_LOAD_MINIMUM_FREE_ADDRESSES: ${{ vars.NFT_LOAD_MINIMUM_FREE_ADDRESSES }}
-      - name: Preserve restore state, including partial failure
+      - name: Refresh credentials for private restore checkpoint
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/nft-restore-state.json
-          if-no-files-found: error
-          retention-days: 7
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-restore-state-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Store restore state privately, including partial failure
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state
 
   performance-tests:
     name: Prepare simulator and run Gatling on one allowlisted runner
@@ -153,6 +174,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -173,10 +196,6 @@ jobs:
         run: |
           test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BasicJourneysSimulation.class
           test -s build/classes/kotlin/gatling/uk/gov/communities/prsdb/webapp/performance/BaselineLoadSimulation.class
-      - uses: actions/download-artifact@v8
-        with:
-          name: nft-restore-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}
       - name: Configure NFT performance-test credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -184,8 +203,19 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Start NFT app after database restore
         run: node scripts/performance-tests/nft-vpc-restore.mjs start
+      - name: Start and verify the exact candidate scan-result worker before uploads
+        env:
+          EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
+        run: node scripts/performance-tests/nft-vpc-restore.mjs start-async
+      - name: Store candidate worker state privately, including partial failure
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload worker-state
       - name: Read runner IPv4 address
         run: |
           runner_ip="$(curl --fail --silent --show-error --ipv4 --max-time 15 https://checkip.amazonaws.com)"
@@ -193,13 +223,8 @@ jobs:
           echo "RUNNER_IP=$runner_ip" >> "$GITHUB_ENV"
       - name: Record preparation ownership before any environment changes
         run: node scripts/performance-tests/nft-recovery-state.mjs mark-readiness
-      - name: Preserve pre-preparation recovery checkpoint
-        uses: actions/upload-artifact@v7
-        with:
-          name: nft-load-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/nft-restore-state.json
-          if-no-files-found: error
-          retention-days: 7
+      - name: Store pre-preparation recovery checkpoint privately
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload load-checkpoint
       - name: Prepare environment
         id: prepare
         env:
@@ -223,7 +248,7 @@ jobs:
           if [ "$FAIL_GATLING" = "true" ]; then
             landlord_subject=urn:fdc:gov.uk:2026:PERF-UNKNOWN
           fi
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs basicJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.BasicJourneysSimulation \
             -Dgatling.target=nft \
@@ -236,7 +261,7 @@ jobs:
         id: savedRegistrationJourneys
         continue-on-error: true
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs savedRegistrationJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.SavedRegistrationSimulation \
             -Dgatling.target=nft \
@@ -255,7 +280,7 @@ jobs:
         id: completedPropertyUpdates
         continue-on-error: true
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs completedPropertyUpdates -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.CompletedPropertySimulation \
             -Dgatling.target=nft \
@@ -274,7 +299,7 @@ jobs:
         id: organisationProfileUpdates
         continue-on-error: true
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs organisationProfileUpdates -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationProfileSimulation \
             -Dgatling.target=nft \
@@ -288,7 +313,7 @@ jobs:
         continue-on-error: true
         run: |
           node scripts/performance-tests/local-registration-certificate.mjs "$RUNNER_TEMP/performance-certificate.pdf"
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs certificateUploads -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.CompletedPropertyComplianceSimulation \
             -Dgatling.target=nft \
@@ -318,7 +343,7 @@ jobs:
         continue-on-error: true
         if: steps.exportRampTeamPreparation.outcome == 'success'
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareRampTeam -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationOperationsSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -347,7 +372,7 @@ jobs:
         continue-on-error: true
         if: steps.exportRampAgents.outcome == 'success'
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareRampAgents -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.AgentSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -382,7 +407,7 @@ jobs:
         continue-on-error: true
         if: steps.exportRampJoint.outcome == 'success'
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareRampJoint -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.JointLandlordSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -478,7 +503,7 @@ jobs:
           NODE
           agent_password="$(openssl rand -hex 24)"
           echo "::add-mask::$agent_password"
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs rampedJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.BaselineLoadSimulation \
             -Dgatling.target=nft \
@@ -528,7 +553,7 @@ jobs:
         id: organisationRegistrations
         continue-on-error: true
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs organisationRegistrations -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationRegistrationSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -558,7 +583,7 @@ jobs:
             throw new Error('Sequential organisation team actors overlap concurrent or profile actors');
           }
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareOrganisationInvitations -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationOperationsSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -595,7 +620,7 @@ jobs:
           }
           writeFileSync(currentPath, JSON.stringify(selected) + '\n', {mode: 0o600});
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs acceptOrganisationInvitations -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationOperationsSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -611,7 +636,7 @@ jobs:
         continue-on-error: true
         if: steps.acceptOrganisationInvitations.outcome == 'success'
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs organisationAccessChanges -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OrganisationOperationsSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -626,7 +651,7 @@ jobs:
         continue-on-error: true
         if: steps.exportOperatorFixtures.outcome == 'success'
         run: |
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs operatorJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OperatorOperationsSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -657,7 +682,7 @@ jobs:
           if (ramp.length !== 28 || fresh.length < 28) throw new Error('Insufficient correctness actors outside the concurrent allocation');
           writeFileSync(currentPath, JSON.stringify(fresh) + '\n', {mode: 0o600});
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareAgentInvitations -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.AgentSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -695,7 +720,7 @@ jobs:
           NODE
           agent_password="$(openssl rand -hex 24)"
           echo "::add-mask::$agent_password"
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs agentAccessJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.AgentAccessSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -734,7 +759,7 @@ jobs:
           if (ramp.length !== 28 || fresh.length < 28) throw new Error('Insufficient correctness actors outside the concurrent allocation');
           writeFileSync(currentPath, JSON.stringify(fresh) + '\n', {mode: 0o600});
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs prepareJointInvitations -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.JointLandlordSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -767,7 +792,7 @@ jobs:
           if (selected.length !== 28 || selected.some(row => !row)) throw new Error('Prepared invitations do not match re-exported tokens');
           writeFileSync(currentPath, JSON.stringify(selected) + '\n', {mode: 0o600});
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs jointAcceptanceJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.JointInvitationDecisionSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -798,7 +823,7 @@ jobs:
           if (ramp.length !== 17 || fresh.length < 28) throw new Error('Insufficient correctness actors outside the concurrent allocation');
           writeFileSync(currentPath, JSON.stringify(fresh) + '\n', {mode: 0o600});
           NODE
-          ./gradlew gatlingRun --no-daemon --non-interactive \
+          node scripts/performance-tests/nft-gatling.mjs offboardingJourneys -- ./gradlew gatlingRun --no-daemon --non-interactive \
             -x compileKotlin -x compileJava -x compileGatlingKotlin -x compileGatlingJava \
             --simulation uk.gov.communities.prsdb.webapp.performance.OffboardingSimulation \
             -Dgatling.target=nft -Dgatling.basic.mode=baseline \
@@ -902,39 +927,50 @@ jobs:
           done
           {
             echo '### PDJB-553 established NFT baseline'
-            echo 'Concurrent families include landlord registration, saved registration, completed-property and organisation profile updates, gas/electrical certificates, organisation registration/team, joint acceptance, agent access/update, operator and property deregistration.'
-            echo 'Offered profile: landlord registration 26/minute; saved, completed-property and organisation profile updates 4/minute each; six additional families 1/minute each (organisation registration/team share one arrival). Five-minute ramp and fifteen-minute hold: 767 starts. Landlord registration is a provisional proxy, NOT paid property-registration forecast fulfilment.'
+            echo 'Concurrent families preserve landlord registration, saved registration, completed-property and organisation profile updates, gas/electrical certificates, organisation registration/team, joint acceptance, new-password agent access/update, operator and property deregistration; paid property registration and basic council reads are appended.'
+            echo 'Offered profile: original ten families unchanged at 767 starts; basic vacant/manual/exempt paid property registration 26/minute adds 455 starts; basic council reads 1/minute adds 17 starts. Five-minute ramp and fifteen-minute hold: 1,239 measured starts, after one paid and one council warmup.'
             echo 'Gates: zero failed requests and expected successful completions for every included ramp family. Mean/max timings are calibration evidence, not agreed SLO thresholds.'
             echo 'Sequential correctness stages additionally exercise organisation registration and team operations, joint invitation acceptance, letting-agent access and update, operator operations and property deregistration. Their earlier local proof is not NFT acceptance.'
-            echo 'Paid property registration and EPC-dependent/public-probe scenarios and council journeys remain excluded.'
+            echo 'Paid confirmation, persisted property and persisted compliance must each complete 455 times; all five basic council reads must each complete 17 times. Exhaustive paid/council variants and EPC-dependent/public-probe scenarios remain excluded.'
           } >> "$GITHUB_STEP_SUMMARY"
           if [[ "$failed" == "true" ]]; then
             echo "::error::One or more journey stages failed; see the per-stage outcomes above."
             exit 1
           fi
-      - name: Upload Gatling report
+      - name: Refresh credentials for private recovery checkpoint
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          name: gatling-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: build/reports/gatling/**
-          if-no-files-found: ignore
-          retention-days: 30
-      - name: Preserve recovery state
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-readiness-checkpoint-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Publish private Gatling diagnostics
         if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: nft-readiness-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/nft-state.json
-          if-no-files-found: error
-          retention-days: 7
+        run: node scripts/performance-tests/nft-gatling.mjs publish
+      - name: Add private report download guidance
+        if: always()
+        env:
+          NFT_RUN_ID: ${{ github.run_id }}
+          NFT_RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          {
+            echo '### Private Gatling report'
+            echo 'When the preceding report archive status is complete, authorized NFT operators can retrieve the private archive with:'
+            echo "aws s3 cp s3://prsdb-seed-data-nft/performance-recovery/${NFT_RUN_ID}/${NFT_RUN_ATTEMPT}/gatling/reports.tar.gz reports.tar.gz --region eu-west-2"
+            echo 'No public or presigned report URL is created.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Store readiness state privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload readiness-state
 
   stop-writers-for-reset:
     name: Restore environment and stop actual writers before reset
     needs: [changes, restore-dataset, performance-tests]
     if: >-
       always() && needs.changes.result == 'success' &&
-      needs.changes.outputs.run == 'true'
+      needs.changes.outputs.run == 'true' &&
+      needs.restore-dataset.outputs.restore-task-definition != ''
     environment: nft
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -942,44 +978,44 @@ jobs:
       contents: read
       id-token: write
     env:
-      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
       READINESS_STATE_REQUIRED: ${{ needs.performance-tests.result != 'skipped' && needs.performance-tests.outputs.preparation-outcome != 'skipped' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: nft-*-${{ github.run_id }}-*
-          path: ${{ runner.temp }}/nft-recovery-artifacts
-      - name: Select the latest validated recovery checkpoints from this run
-        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
           role-session-name: nft-before-reset-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Stop owned worker, restore simulator configuration and stop actual writers
         run: node scripts/performance-tests/nft-vpc-restore.mjs cleanup
-      - name: Preserve cleanup recovery checkpoint, including partial failure
+      - name: Refresh credentials for private recovery checkpoint
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          name: nft-cleanup-state-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/nft-restore-state.json
-            ${{ runner.temp }}/nft-state.json
-          if-no-files-found: error
-          retention-days: 7
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-cleanup-checkpoint-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Store cleanup recovery checkpoint privately, including partial failure
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
 
   reset-database:
     name: Reset NFT database
-    needs: [changes, stop-writers-for-reset]
+    needs: [changes, restore-dataset, stop-writers-for-reset]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
+      needs.restore-dataset.result == 'success' &&
       needs.stop-writers-for-reset.result == 'success'
     uses: ./.github/workflows/reset-database.yml
     with:
@@ -992,7 +1028,7 @@ jobs:
 
   restore-app-after-database-reset:
     name: Start NFT app and verify all QA fixtures after reset
-    needs: [changes, reset-database]
+    needs: [changes, restore-dataset, reset-database]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
@@ -1003,17 +1039,14 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: nft-*-${{ github.run_id }}-*
-          path: ${{ runner.temp }}/nft-recovery-artifacts
-      - name: Select the latest validated recovery checkpoints from this run
-        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Configure NFT runner credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -1021,6 +1054,10 @@ jobs:
           role-session-name: nft-reset-recovery-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - name: Start NFT app and verify rollout and ALB health
         env:
           NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
@@ -1029,14 +1066,29 @@ jobs:
         uses: ./.github/actions/verify-nft-database
         with:
           mode: qa
+      - name: Restore NFT orchestrator credentials for private recovery checkpoints
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-reset-checkpoint-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Record successful QA verification in the private recovery state
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs mark-qa-verified
+      - name: Store post-reset QA checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
 
   restore-async-after-database-reset:
     name: Restore async service after QA reset
-    needs: [changes, reset-database, restore-app-after-database-reset]
+    needs: [changes, restore-dataset, reset-database, restore-app-after-database-reset]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
-      needs.reset-database.result == 'success'
+      needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success'
     environment: nft
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -1044,38 +1096,103 @@ jobs:
       contents: read
       id-token: write
     env:
-      NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition || vars.NFT_RESTORE_TASK_DEFINITION }}
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: nft-*-${{ github.run_id }}-*
-          path: ${{ runner.temp }}/nft-recovery-artifacts
-      - name: Select the latest validated recovery checkpoints from this run
-        run: node scripts/performance-tests/nft-recovery-state.mjs select
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
           role-session-name: nft-async-recovery-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
-      - name: Restore the recorded async service count
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
+      - name: Restore the exact recorded async task revision and count
         run: node scripts/performance-tests/nft-vpc-restore.mjs restore-async
+      - name: Store async recovery checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+
+  restore-maintenance-schedules:
+    name: Restore NFT maintenance schedules after verified recovery
+    needs: [changes, restore-dataset, reset-database, restore-app-after-database-reset, restore-async-after-database-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.restore-dataset.result == 'success' &&
+      needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success' &&
+      needs.restore-async-after-database-reset.result == 'success'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
+      NFT_MAINTENANCE_RECOVERY_VERIFIED: ${{ needs.restore-dataset.result == 'success' && needs.reset-database.result == 'success' && needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-schedule-recovery-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
+      - name: Restore exact prior maintenance schedule states
+        run: node scripts/performance-tests/nft-vpc-restore.mjs restore-maintenance
+      - name: Store final recovery checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+
+  maintenance-recovery-required:
+    name: Report incomplete NFT maintenance recovery
+    needs: [changes, restore-dataset, stop-writers-for-reset, reset-database, restore-app-after-database-reset, restore-async-after-database-reset, restore-maintenance-schedules]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.restore-maintenance-schedules.result != 'success' &&
+      !(needs.restore-dataset.result != 'success' && needs.stop-writers-for-reset.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require operator recovery
+        run: |
+          {
+            echo '### NFT maintenance recovery required'
+            echo 'The seven maintenance schedules were not verified in their exact original states. If database reset, app QA, or async recovery failed, leave any paused schedules disabled.'
+            echo 'Use this run’s private recovery checkpoint and the NFT recovery procedure; do not enable schedules against an unverified schema.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo '::error::NFT maintenance schedule recovery is incomplete; operator action is required.'
+          exit 1
 
   marker:
     name: Record successful NFT head
-    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset, restore-async-after-database-reset]
+    needs: [changes, performance-tests, reset-database, restore-app-after-database-reset, restore-async-after-database-reset, restore-maintenance-schedules]
     if: >-
-      always() && needs.changes.result == 'success' &&
+      always() && github.ref == 'refs/heads/nft' &&
+      inputs.fail-smoke != true && inputs.fail-gatling != true &&
+      needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
       (inputs.expected-app-sha == '' || inputs.expected-app-sha == needs.changes.outputs.sha) &&
-      ((needs.performance-tests.result == 'success' && needs.reset-database.result == 'success' &&
-      needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success') ||
-      (needs.performance-tests.result == 'skipped' && needs.reset-database.result == 'skipped' &&
-      needs.restore-app-after-database-reset.result == 'skipped' && needs.restore-async-after-database-reset.result == 'skipped' &&
-      needs.changes.outputs.run == 'false'))
+      needs.performance-tests.result == 'success' && needs.reset-database.result == 'success' &&
+      needs.restore-app-after-database-reset.result == 'success' && needs.restore-async-after-database-reset.result == 'success' &&
+      needs.restore-maintenance-schedules.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
