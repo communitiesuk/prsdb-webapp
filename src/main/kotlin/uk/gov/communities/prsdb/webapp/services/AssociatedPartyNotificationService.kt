@@ -31,12 +31,7 @@ class AssociatedPartyNotificationService(
                 name = freeholder.name,
                 emailAddress = freeholder.email,
                 postalAddress = freeholder.address,
-                emailTemplate =
-                    if (!freeholder.name.isNullOrBlank() && !freeholder.email.isNullOrBlank() && freeholder.address == null) {
-                        buildFreeholderAddedToPropertyEmail(freeholder, propertyOwnership)
-                    } else {
-                        null
-                    },
+                buildEmail = { buildFreeholderAddedToPropertyEmail(freeholder, propertyOwnership) },
                 buildLetter = { buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership) },
             ),
         )
@@ -75,7 +70,7 @@ class AssociatedPartyNotificationService(
             name = superiorLandlord.name,
             emailAddress = superiorLandlord.email,
             postalAddress = superiorLandlord.address,
-            emailTemplate = null,
+            buildEmail = { null },
             buildLetter = { buildSuperiorLandlordAddedToPropertyLetter(superiorLandlord, propertyOwnership) },
         )
 
@@ -104,7 +99,7 @@ class AssociatedPartyNotificationService(
         name: String?,
         emailAddress: String?,
         postalAddress: AddressDataModel?,
-        emailTemplate: EmailTemplateModel?,
+        buildEmail: () -> EmailTemplateModel?,
         buildLetter: () -> LetterTemplateModel,
     ): AssociatedPartyNotificationOutcome? {
         if (name.isNullOrBlank()) {
@@ -116,6 +111,7 @@ class AssociatedPartyNotificationService(
         }
 
         if (!emailAddress.isNullOrBlank()) {
+            val emailTemplate = buildEmail()
             if (emailTemplate == null) {
                 // TODO PDJB-1989: build and send the superior landlord added email.
                 return null

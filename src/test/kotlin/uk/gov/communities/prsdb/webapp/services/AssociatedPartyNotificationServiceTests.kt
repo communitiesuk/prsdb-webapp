@@ -382,7 +382,7 @@ class AssociatedPartyNotificationServiceTests {
                 name = freeholder.name,
                 emailAddress = freeholder.email,
                 postalAddress = freeholder.address,
-                emailTemplate = email,
+                buildEmail = { email },
                 buildLetter = { letter },
             ),
         )
@@ -393,7 +393,7 @@ class AssociatedPartyNotificationServiceTests {
                 name = superiorLandlord.name,
                 emailAddress = superiorLandlord.email,
                 postalAddress = superiorLandlord.address,
-                emailTemplate = email,
+                buildEmail = { email },
                 buildLetter = { letter },
             ),
         )
