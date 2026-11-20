@@ -75,8 +75,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicrFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.math.BigDecimal
 import java.nio.file.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
@@ -142,6 +144,16 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
+
+        val savedPropertyOwnership =
+            jdbcTemplate.queryForMap(
+                "SELECT license_provide_later, license_id, tenancy_provide_later, rent_amount FROM property_ownership WHERE id = ?",
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            )
+        assertEquals(false, savedPropertyOwnership["license_provide_later"])
+        assertNull(savedPropertyOwnership["license_id"])
+        assertEquals(false, savedPropertyOwnership["tenancy_provide_later"])
+        assertEquals(0, BigDecimal("400").compareTo(savedPropertyOwnership["rent_amount"] as BigDecimal))
     }
 
     @Test
