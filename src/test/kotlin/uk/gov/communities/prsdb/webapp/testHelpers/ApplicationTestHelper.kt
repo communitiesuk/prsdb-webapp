@@ -1,13 +1,21 @@
 package uk.gov.communities.prsdb.webapp.testHelpers
 
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import org.springframework.util.ClassUtils
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.TaskHasName
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.TaskOnly
 import kotlin.reflect.KClass
 
 class ApplicationTestHelper {
     companion object {
+        private const val BASE_PACKAGE = "uk.gov.communities.prsdb.webapp"
+
         // Beans added by component annotation scanning use their simple name as the bean name by default
         val KClass<*>.simpleBeanName: String
             get() = this.java.simpleName
@@ -38,8 +46,30 @@ class ApplicationTestHelper {
                         .beanFactory
                         .getBeanDefinition(it)
                         .beanClassName
-                        ?.contains("uk.gov.communities.prsdb.webapp") ?: false
+                        ?.contains(BASE_PACKAGE) ?: false
                 }.map { it.lowercase() }
                 .toSet()
+
+        fun getProcessOnlyBeanTypes(): Set<Class<*>> {
+            val classLoader = ApplicationTestHelper::class.java.classLoader
+            val resourceResolver = PathMatchingResourcePatternResolver(classLoader)
+            val metadataReaderFactory = CachingMetadataReaderFactory(resourceResolver)
+            val resourcePath = ClassUtils.convertClassNameToResourcePath(BASE_PACKAGE)
+
+            // Component scanning evaluates conditions so wouldn't find TaskOnly beans
+            return resourceResolver
+                .getResources("classpath*:$resourcePath/**/*.class")
+                .asSequence()
+                .map { metadataReaderFactory.getMetadataReader(it).annotationMetadata }
+                .filter { it.isConcrete && !it.isAnnotation }
+                .filter { metadata ->
+                    metadata.annotations.stream(Conditional::class.java).anyMatch { annotation ->
+                        annotation.getClassArray("value").any { condition ->
+                            condition == TaskOnly::class.java || TaskHasName::class.java.isAssignableFrom(condition)
+                        }
+                    }
+                }.map { Class.forName(it.className, false, classLoader) }
+                .toSet()
+        }
     }
 }

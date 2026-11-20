@@ -20,12 +20,9 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OneLoginConfig
-import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
-import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 import uk.gov.service.notify.NotificationClient
 
 @Import(TestcontainersConfiguration::class)
@@ -79,20 +76,18 @@ class PrsdbWebappApplicationTests {
 
     @Test
     fun `process only PRSDB beans aren't available in web mode`() {
-        val processOnlyBeansByName =
-            listOf(
-                OsDownloadsConfig::class.simpleBeanName,
-                NgdAddressLoader::class.simpleBeanName,
-            ).map { it.lowercase() }.toSet()
+        val processOnlyBeanTypes = ApplicationTestHelper.getProcessOnlyBeanTypes()
 
-        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
+        val unexpectedBeanNames =
+            processOnlyBeanTypes
+                .flatMap { context!!.getBeanNamesForType(it).asIterable() }
+                .toSet()
 
-        val unexpectedBeanNames = beanNames.intersect(processOnlyBeansByName)
         assertEquals(emptySet<String>(), unexpectedBeanNames) { buildHelpfulErrorMessage(unexpectedBeanNames) }
     }
 
     fun buildHelpfulErrorMessage(unexpectedBeanNames: Set<String>) =
-        """The following beans are being created in web server mode but have been added to the process only mode list: 
-        |${ unexpectedBeanNames.joinToString("\n- ", prefix = "- ")}
+        """The following process only beans are being created in web server mode:
+        | ${unexpectedBeanNames.joinToString("\n- ", prefix = "- ")}
         """.trimMargin()
 }
