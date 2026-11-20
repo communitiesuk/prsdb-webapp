@@ -1,4 +1,6 @@
 heading: New passphrase
+submitted:
+  heading: Passphrase sent
 passphrase:
   label: The passphrase is
   review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.heading}, ~{::main/content()}, false, null, null)}">
+<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.submitted.heading}, ~{::main/content()}, false, null, null)}">
 <main>
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-        <h1 class="govuk-heading-l" th:text="#{generatePassphrase.heading}">generatePassphrase.heading</h1>
+        <h1 class="govuk-heading-l" th:text="#{generatePassphrase.submitted.heading}">generatePassphrase.submitted.heading</h1>
         <th:block th:with="isSuccess=true">
             <div id="success-banner"
                  th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{generatePassphrase.successBanner.title}, ~{::#success-banner/content()})}">
