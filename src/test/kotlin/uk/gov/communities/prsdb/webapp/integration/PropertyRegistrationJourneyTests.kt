@@ -3292,7 +3292,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                         "Add, change or remove freeholders"
                     },
                 )
-            assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute("href", "#")
+            assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
+                "href",
+                "/landlord/property-details/${propertyOwnershipCaptor.value.id}/update-freeholders/start",
+            )
             assertEquals(3, detailsPage.freeholderCards.size)
             val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }
             assertEquals(setOf("First Freeholder", "Second Freeholder", "Unknown freeholder"), cards.keys)

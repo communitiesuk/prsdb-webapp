@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -261,9 +262,10 @@ class PropertyDetailsViewModelTests {
             )
 
         ownershipTypes.forEach { (ownershipType, headingKey, linkTextKey) ->
+            val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = ownershipType)
             val viewModel =
                 PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = ownershipType),
+                    propertyOwnership,
                     viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                 )
@@ -272,8 +274,10 @@ class PropertyDetailsViewModelTests {
             assertTrue(viewModel.showFreeholderSectionUpdateLink)
             assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
             assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
-            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
-            assertEquals("#", viewModel.freeholderSectionUpdateUrl)
+            assertEquals(
+                UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id),
+                viewModel.freeholderSectionUpdateUrl,
+            )
         }
     }
 

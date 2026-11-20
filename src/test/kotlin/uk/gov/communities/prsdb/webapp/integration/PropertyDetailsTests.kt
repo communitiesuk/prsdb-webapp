@@ -59,10 +59,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
-            // TODO PDJB-1993: update this assertion when the freeholder update journey route is added
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
-                "#",
+                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/start",
             )
         }
 
