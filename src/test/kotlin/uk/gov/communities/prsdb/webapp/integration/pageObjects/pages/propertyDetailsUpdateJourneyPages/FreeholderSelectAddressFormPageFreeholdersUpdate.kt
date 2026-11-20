@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.S
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-class FreeholderSelectAddressFormPagePropertyDetailsUpdate(
+class FreeholderSelectAddressFormPageFreeholdersUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : SelectAddressFormPage(
@@ -15,7 +15,7 @@ class FreeholderSelectAddressFormPagePropertyDetailsUpdate(
     ) {
     companion object {
         fun urlPath(propertyOwnershipId: Long): String =
-            UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
+            UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnershipId) +
                 "/${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}"
     }
 }

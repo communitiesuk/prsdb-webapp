@@ -60,7 +60,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
-                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/freeholders-list",
+                "/landlord/property-details/$PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID/update-freeholders/start",
             )
         }
 

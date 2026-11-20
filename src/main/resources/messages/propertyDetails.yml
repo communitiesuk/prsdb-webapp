@@ -38,11 +38,6 @@ peopleResponsible:
     ownsProperty: Do you own this property?
     ownershipType: Ownership type
     freeholdType: Freehold type
-  freeholders:
-    nonJointHeading: Freeholders
-    jointHeading: Joint freeholders
-    nonJointUpdateLink: Add, change or remove freeholders
-    jointUpdateLink: Add, change or remove joint freeholders
   freeholder:
     postalAddressNote: A <strong>postal address</strong> was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.
   superiorLandlord:

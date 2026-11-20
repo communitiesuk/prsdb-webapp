@@ -23,11 +23,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailCyaPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderLookupAddressFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderManualAddressFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderProvideDetailsFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderSelectAddressFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholdersListFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderLookupAddressFormPageFreeholdersUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderManualAddressFormPageFreeholdersUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderProvideDetailsFormPageFreeholdersUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderSelectAddressFormPageFreeholdersUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholdersListFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
@@ -58,27 +58,27 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.heading).containsText("You’ve added 1 freeholder")
         assertThat(freeholdersListPage.form.submitButton).hasAttribute("data-plausible-event", "Transaction")
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("New Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
         FreeholderEmailFormPagePropertyRegistration(page).submitEmail("new.freeholder@example.com")
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Postal Address Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.heading).containsText("You’ve added 4 freeholders")
         freeholdersListPage.submit()
 
@@ -121,26 +121,26 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove joint freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.heading).containsText("You’ve added 1 joint freeholder")
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("New Joint Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
         FreeholderEmailFormPagePropertyRegistration(page).submitEmail("new.joint.freeholder@example.com")
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Joint Postal Address Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.heading).containsText("You’ve added 4 joint freeholders")
         freeholdersListPage.submit()
 
@@ -183,8 +183,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Email Validation Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
         val emailPage = FreeholderEmailFormPagePropertyRegistration(page)
@@ -204,11 +204,11 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Postcode Validation Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("", "1")
 
         assertThat(lookupAddressPage.form.getErrorMessage()).containsText("Enter a postcode")
@@ -227,10 +227,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.getSummaryCard("Existing Freeholder").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.getSummaryCard("Unknown freeholder").title).hasText("Unknown freeholder")
         freeholdersListPage.submit()
 
@@ -256,7 +256,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(freeholdersListPage.warning).isVisible()
     }
 
@@ -268,7 +268,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).backLink.clickAndWait()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).backLink.clickAndWait()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
@@ -286,20 +286,20 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
             .getSummaryCard("Existing Freeholder")
             .getAction("Change")
             .link
             .clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).form.submit()
         val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
         contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
 
         val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
@@ -324,20 +324,20 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
             .getSummaryCard("Existing Freeholder")
             .getAction("Change")
             .link
             .clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).form.submit()
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
 
-        val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPagePropertyDetailsUpdate::class, urlArguments)
+        val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPageFreeholdersUpdate::class, urlArguments)
         manualAddressPage.submitAddress(
             addressLineOne = "2 Updated Street",
             addressLineTwo = "Example Court",
@@ -345,7 +345,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             county = "Exampleshire",
             postcode = "EG1 2AA",
         )
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
 
         val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
@@ -371,9 +371,9 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         page
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(initialFreeholderCount + 1, freeholdersListPage.removeActionCount)
 
         propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
@@ -385,7 +385,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         page
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(initialFreeholderCount, page.locator(".govuk-summary-card").count())
         freeholdersListPage.submit()
         assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -400,13 +400,13 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(0, freeholdersListPage.removeActionCount)
 
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
 
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(2, freeholdersListPage.removeActionCount)
         freeholdersListPage.submit()
 
@@ -424,9 +424,9 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        val freeholdersListPage = assertPageIs(propertyDetailsPage.page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        val freeholdersListPage = assertPageIs(propertyDetailsPage.page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(propertyDetailsPage.page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
+        assertPageIs(propertyDetailsPage.page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
 
         navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
 
@@ -445,9 +445,9 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.getSummaryCard("Existing Freeholder").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val namePage = FreeholderNameFormPagePropertyRegistration(page)
         assertEquals("Existing Freeholder", namePage.form.nameInput.locator.inputValue())
         namePage.submitName("Updated Freeholder")
@@ -457,7 +457,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         val emailPage = FreeholderEmailFormPagePropertyRegistration(page)
         assertEquals("existing@example.com", emailPage.form.emailInput.locator.inputValue())
         emailPage.submitEmail("updated@example.com")
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
 
         val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
@@ -485,11 +485,11 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.getSummaryCard("Freeholder to remove").getAction("Remove").link.clickAndWait()
         ConfirmRemoveFreeholderFormPagePropertyRegistration(page).submitYes()
 
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         assertEquals(0, freeholdersListPage.removeActionCount)
         freeholdersListPage.submit()
 
@@ -507,8 +507,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val namePage = FreeholderNameFormPagePropertyRegistration(page)
         namePage.submitName("")
 
@@ -537,20 +537,20 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
             .click()
 
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.getSummaryCard("Freeholder A").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Freeholder A")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.EMAIL)
         FreeholderEmailFormPagePropertyRegistration(page).submitEmail("updated.a@example.com")
 
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.getSummaryCard("Freeholder B").getAction("Remove").link.clickAndWait()
         ConfirmRemoveFreeholderFormPagePropertyRegistration(page).submitYes()
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
         freeholdersListPage.addAnotherButton.click()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
 
         val savedFreeholders = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId)
         assertEquals(2, savedFreeholders.size)

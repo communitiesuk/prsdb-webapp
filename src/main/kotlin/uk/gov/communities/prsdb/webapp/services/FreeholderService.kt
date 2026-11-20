@@ -5,19 +5,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
-import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
 @PrsdbWebService
 class FreeholderService(
     private val freeholderRepository: FreeholderRepository,
 ) {
-    fun getFreeholdersForProperty(propertyOwnership: PropertyOwnership): List<Freeholder> =
-        freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).sortedBy { it.id }
-
-    fun getFreeholderSnapshot(freeholders: List<Freeholder>): Map<Long, String> =
-        freeholders.associate { it.id to it.getMostRecentlyUpdated().toString() }
-
     // Updates the saved freeholders to match the list the user submitted, creating, updating and
     // deleting them one at a time.
     // Returns the newly added freeholders so they can be tracked by the journey and notified.
@@ -27,14 +20,9 @@ class FreeholderService(
     fun updateFreeholders(
         propertyOwnership: PropertyOwnership,
         freeholders: List<FreeholderDataModel>,
-        expectedSnapshot: Map<Long, String>,
     ): List<FreeholderDataModel> {
-        val existingFreeholders = getFreeholdersForProperty(propertyOwnership)
-        if (getFreeholderSnapshot(existingFreeholders) != expectedSnapshot) {
-            throw UpdateConflictException("The freeholders have changed since this update session started.")
-        }
-
-        val existingFreeholdersKeyedById = existingFreeholders.associateBy { it.id }
+        val existingFreeholdersKeyedById =
+            freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id).associateBy { it.id }
         val submittedIds = freeholders.mapNotNull { it.databaseId }.toSet()
 
         existingFreeholdersKeyedById.values.filter { it.id !in submittedIds }.forEach { removeFreeholder(it) }
@@ -42,8 +30,8 @@ class FreeholderService(
         val added = mutableListOf<FreeholderDataModel>()
 
         freeholders.forEach { submitted ->
-            // The snapshot check means every submitted id should match a saved row. Defensively treat an
-            // unmatched id as a new freeholder rather than losing the user's answers.
+            // An id that no longer matches a saved row means it was deleted elsewhere, so treat it as
+            // a new freeholder rather than losing the user's answers.
             val existingFreeholder = submitted.databaseId?.let { existingFreeholdersKeyedById[it] }
             when {
                 existingFreeholder == null -> {

@@ -27,7 +27,7 @@ data class FreeholderDataModel(
     fun hasUnstoredPostalAddress() = detailsKnown && email == null && address == null
 
     companion object {
-        fun fromFreeholder(freeholder: Freeholder): FreeholderDataModel =
+        fun fromFreeholder(freeholder: Freeholder) =
             FreeholderDataModel(
                 databaseId = freeholder.id,
                 detailsKnown = freeholder.detailsKnown(),

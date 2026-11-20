@@ -108,13 +108,11 @@
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.peopleResponsibleOwnershipHeadingKey}}">propertyDetails.peopleResponsible.ownership.heading</h3>
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
                             <div th:if="${propertyDetails.showFreeholderSection}" id="freeholder-section">
-                                <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholdersHeadingKey}}">propertyDetails.peopleResponsible.freeholders.nonJointHeading</h3>
-                                <p th:if="${propertyDetails.freeholdersUpdateLink != null}" class="govuk-body">
+                                <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholderSectionHeadingKey}}">registerProperty.freeholders.checkAnswers.heading</h3>
+                                <p th:if="${propertyDetails.showFreeholderSectionUpdateLink}" class="govuk-body">
                                     <a id="freeholder-update-link" class="govuk-link"
-                                       th:href="${propertyDetails.freeholdersUpdateLink}"
-                                       th:text="#{${propertyDetails.freeholdersUpdateLinkTextKey}}">
-                                        propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink
-                                    </a>
+                                       th:href="@{${propertyDetails.freeholderSectionUpdateUrl}}"
+                                       th:text="#{${propertyDetails.freeholderSectionLinkTextKey}}">registerProperty.freeholders.checkAnswers.changeLink</a>
                                 </p>
                                 <div id="freeholder-cards">
                                     <th:block th:each="card : ${freeholderSummaryCards}">

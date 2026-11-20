@@ -211,7 +211,6 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetails adds cards built from the property's persisted freeholders`() {
-            // Arrange
             val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
             propertyOwnership.freeholders.add(
                 createFreeholder(propertyOwnership, name = "Freeholder One", email = "freeholder@example.com"),
@@ -223,20 +222,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
             whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
 
-            // Act
-            val result =
-                mvc.get(
-                    PropertyDetailsController.getPropertyDetailsPath(
-                        propertyOwnership.id,
-                        isLocalCouncilView = false,
-                    ),
-                )
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("freeholderSummaryCards", expectedCards) }
+                }
 
-            // Assert
-            result.andExpect {
-                status { isOk() }
-                model { attribute("freeholderSummaryCards", expectedCards) }
-            }
             verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
         }
 

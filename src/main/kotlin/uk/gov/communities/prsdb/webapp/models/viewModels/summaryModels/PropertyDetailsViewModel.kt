@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.InitialiseFreeholdersUpdateStep
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -51,26 +52,17 @@ class PropertyDetailsViewModel(
     val showFreeholderSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresFreeholderRecords()
 
-    val freeholdersHeadingKey: String =
-        if (propertyOwnership.ownershipType.isJointFreeholder()) {
-            "propertyDetails.peopleResponsible.freeholders.jointHeading"
-        } else {
-            "propertyDetails.peopleResponsible.freeholders.nonJointHeading"
-        }
+    private val freeholderHeadingType = if (propertyOwnership.ownershipType.isJointFreeholder()) "joint" else "nonJoint"
 
-    val freeholdersUpdateLinkTextKey: String =
-        if (propertyOwnership.ownershipType.isJointFreeholder()) {
-            "propertyDetails.peopleResponsible.freeholders.jointUpdateLink"
-        } else {
-            "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink"
-        }
+    val freeholderSectionHeadingKey: String = "registerProperty.freeholders.checkAnswers.heading.$freeholderHeadingType"
 
-    val freeholdersUpdateLink: String? =
-        if (showFreeholderSection && viewType == PropertyDetailsViewType.LANDLORD) {
-            UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
-        } else {
-            null
-        }
+    val freeholderSectionLinkTextKey: String = "registerProperty.freeholders.checkAnswers.changeLink.$freeholderHeadingType"
+
+    val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    val freeholderSectionUpdateUrl: String =
+        UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnership.id) +
+            "/${InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT}"
 
     val showSuperiorLandlordSection: Boolean =
         showPeopleResponsibleOwnership && propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()

@@ -17,10 +17,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.InitialiseFreeholdersUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
@@ -100,80 +102,6 @@ class PropertyDetailsViewModelTests {
             PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
 
         assertEquals(3, bedroomsRow(viewModel).fieldValue)
-    }
-
-    @Test
-    fun `freeholder section is shown for eligible ownership types with an update link`() {
-        // Arrange
-        val propertyOwnership =
-            createPropertyOwnership(
-                ownershipType = OwnershipType.LEASEHOLD_ONLY,
-                id = 123,
-            )
-
-        // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-
-        // Assert
-        assertTrue(viewModel.showFreeholderSection)
-        assertEquals(
-            "/landlord/property-details/123/update-freeholders/freeholders-list",
-            viewModel.freeholdersUpdateLink,
-        )
-        assertEquals(
-            "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink",
-            viewModel.freeholdersUpdateLinkTextKey,
-        )
-    }
-
-    @Test
-    fun `freeholder section uses joint wording for joint ownership`() {
-        // Arrange
-        val propertyOwnership =
-            createPropertyOwnership(
-                ownershipType = OwnershipType.JOINT_TENANTS,
-                id = 123,
-            )
-
-        // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-
-        // Assert
-        assertTrue(viewModel.showFreeholderSection)
-        assertEquals(
-            "propertyDetails.peopleResponsible.freeholders.jointUpdateLink",
-            viewModel.freeholdersUpdateLinkTextKey,
-        )
-    }
-
-    @Test
-    fun `freeholder section is hidden for ineligible ownership types and when associated parties are disabled`() {
-        // Arrange
-        val ineligibleProperty =
-            createPropertyOwnership(
-                ownershipType = OwnershipType.SOLE_FREEHOLD,
-                id = 123,
-            )
-        val disabledFeatureProperty =
-            createPropertyOwnership(
-                ownershipType = OwnershipType.LEASEHOLD_ONLY,
-                id = 124,
-            )
-
-        // Act
-        val ineligibleViewModel = PropertyDetailsViewModel(ineligibleProperty, messageSource = mockMessageSource)
-        val disabledFeatureViewModel =
-            PropertyDetailsViewModel(
-                disabledFeatureProperty,
-                messageSource = mockMessageSource,
-                associatedPartiesEnabled = false,
-            )
-
-        // Assert
-        assertFalse(ineligibleViewModel.showFreeholderSection)
-        assertNull(ineligibleViewModel.freeholdersUpdateLink)
-        assertFalse(disabledFeatureViewModel.showFreeholderSection)
-        assertNull(disabledFeatureViewModel.freeholdersUpdateLink)
     }
 
     @Test
@@ -318,35 +246,39 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the freeholder section uses ownership specific update link text`() {
-        // Arrange
+    fun `the freeholder section uses ownership specific labels and update url`() {
         val ownershipTypes =
             listOf(
                 Triple(
                     OwnershipType.SHARE_OF_JOINT_TENANTS,
-                    "propertyDetails.peopleResponsible.freeholders.jointHeading",
-                    "propertyDetails.peopleResponsible.freeholders.jointUpdateLink",
+                    "registerProperty.freeholders.checkAnswers.heading.joint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.joint",
                 ),
                 Triple(
                     OwnershipType.LEASEHOLD_ONLY,
-                    "propertyDetails.peopleResponsible.freeholders.nonJointHeading",
-                    "propertyDetails.peopleResponsible.freeholders.nonJointUpdateLink",
+                    "registerProperty.freeholders.checkAnswers.heading.nonJoint",
+                    "registerProperty.freeholders.checkAnswers.changeLink.nonJoint",
                 ),
             )
 
-        // Act & Assert
         ownershipTypes.forEach { (ownershipType, headingKey, linkTextKey) ->
+            val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = ownershipType)
             val viewModel =
                 PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(ownershipType = ownershipType),
+                    propertyOwnership,
                     viewType = PropertyDetailsViewType.LANDLORD,
                     messageSource = mockMessageSource,
                 )
 
             assertTrue(viewModel.showFreeholderSection)
-            assertEquals(headingKey, viewModel.freeholdersHeadingKey)
-            assertEquals(linkTextKey, viewModel.freeholdersUpdateLinkTextKey)
-            assertTrue(viewModel.freeholdersUpdateLink != null)
+            assertTrue(viewModel.showFreeholderSectionUpdateLink)
+            assertEquals(headingKey, viewModel.freeholderSectionHeadingKey)
+            assertEquals(linkTextKey, viewModel.freeholderSectionLinkTextKey)
+            assertEquals(
+                UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnership.id) +
+                    "/${InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT}",
+                viewModel.freeholderSectionUpdateUrl,
+            )
         }
     }
 
@@ -1134,7 +1066,7 @@ class PropertyDetailsViewModelTests {
             )
 
         assertTrue(viewModel.showFreeholderSection)
-        assertNull(viewModel.freeholdersUpdateLink)
+        assertFalse(viewModel.showFreeholderSectionUpdateLink)
     }
 
     @Test

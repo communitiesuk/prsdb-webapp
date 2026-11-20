@@ -14,24 +14,24 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController.Companion.UPDATE_FREEHOLDERS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.freeholders.UpdateFreeholdersJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UpdateFreeholdersController.UPDATE_FREEHOLDERS_ROUTE)
+@RequestMapping(UPDATE_FREEHOLDERS_ROUTE)
 @AllowIfLandlord
 class UpdateFreeholdersController(
     private val journeyFactory: UpdateFreeholdersJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    @GetMapping("/{*stepPath}")
     // TODO PDJB-2016: Remove this annotation when the ASSOCIATED_PARTIES flag is removed
     @AvailableWhenFeatureEnabled(ASSOCIATED_PARTIES)
+    @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -41,9 +41,9 @@ class UpdateFreeholdersController(
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
-    @PostMapping("/{*stepPath}")
     // TODO PDJB-2016: Remove this annotation when the ASSOCIATED_PARTIES flag is removed
     @AvailableWhenFeatureEnabled(ASSOCIATED_PARTIES)
+    @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
         principal: Principal,
@@ -67,7 +67,7 @@ class UpdateFreeholdersController(
             initialiseJourney = {
                 journeyFactory.initializeJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
+                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).getOwnershipStructureMostRecentlyUpdated(),
                 )
             },
             dispatch = dispatch,
@@ -77,7 +77,7 @@ class UpdateFreeholdersController(
         const val UPDATE_FREEHOLDERS_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-freeholders"
 
-        fun getUpdateFreeholdersFirstStepRoute(propertyOwnershipId: Long): String =
-            "${UriTemplate(UPDATE_FREEHOLDERS_ROUTE).expand(propertyOwnershipId).toASCIIString()}/${FreeholdersListStep.ROUTE_SEGMENT}"
+        fun getUpdateFreeholdersRoute(propertyOwnershipId: Long): String =
+            UriTemplate(UPDATE_FREEHOLDERS_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }

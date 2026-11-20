@@ -423,9 +423,7 @@ class PropertyOwnershipService(
         val addedFreeholders =
             if (ownershipType.requiresFreeholderRecords()) {
                 require(freeholders.isNotEmpty()) { "Ownership type $ownershipType requires at least one freeholder" }
-                // The ownership structure check above already covers freeholder changes.
-                val freeholderSnapshot = freeholderService.getFreeholderSnapshot(propertyOwnership.freeholders.toList())
-                freeholderService.updateFreeholders(propertyOwnership, freeholders, freeholderSnapshot)
+                freeholderService.updateFreeholders(propertyOwnership, freeholders)
             } else {
                 freeholderService.clearFreeholders(propertyOwnership)
                 emptyList()
@@ -440,6 +438,26 @@ class PropertyOwnershipService(
             }
 
         return Pair(addedFreeholders, addedSuperiorLandlords)
+    }
+
+    @Transactional
+    fun updateFreeholders(
+        id: Long,
+        freeholders: List<FreeholderDataModel>,
+        initialLastModifiedDate: Instant,
+    ): List<FreeholderDataModel> {
+        val propertyOwnership = getPropertyOwnership(id)
+        if (propertyOwnership.getOwnershipStructureMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+        require(propertyOwnership.ownershipType.requiresFreeholderRecords()) {
+            "Ownership type ${propertyOwnership.ownershipType} does not require freeholders"
+        }
+        require(freeholders.isNotEmpty()) { "Ownership type ${propertyOwnership.ownershipType} requires at least one freeholder" }
+
+        return freeholderService.updateFreeholders(propertyOwnership, freeholders)
     }
 
     // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.

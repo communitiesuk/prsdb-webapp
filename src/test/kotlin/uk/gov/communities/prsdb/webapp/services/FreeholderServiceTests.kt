@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -21,11 +20,9 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FreeholderRepository
-import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.time.Instant
 
 @ExtendWith(MockitoExtension::class)
 class FreeholderServiceTests {
@@ -127,24 +124,6 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `getFreeholdersForProperty returns freeholders sorted by ID`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val freeholders =
-            listOf(
-                MockLandlordData.createFreeholder(propertyOwnership, name = "Second", id = 2),
-                MockLandlordData.createFreeholder(propertyOwnership, name = "First", id = 1),
-            )
-        whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(freeholders)
-
-        // Act
-        val result = freeholderService.getFreeholdersForProperty(propertyOwnership)
-
-        // Assert
-        assertEquals(listOf(1L, 2L), result.map { it.id })
-    }
-
-    @Test
     fun `updateFreeholder overwrites the details of an existing freeholder`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -205,89 +184,21 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `updateFreeholders saves and reports a freeholder the user added with their unstored postal address`() {
+    fun `updateFreeholders saves and reports a freeholder the user added`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(emptyList())
         val newFreeholder =
-            FreeholderDataModel(
-                detailsKnown = true,
-                name = "Alice Freeholder",
-                address = AddressDataModel("1 Freeholder Street, Town, AB1 2CD"),
-            )
+            FreeholderDataModel(detailsKnown = true, name = "Alice Freeholder", email = "alice@example.com")
 
         // Act
-        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(newFreeholder), emptyMap())
+        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(newFreeholder))
 
         // Assert
         assertEquals(listOf(newFreeholder), added)
         val captor = argumentCaptor<Freeholder>()
         verify(freeholderRepository).save(captor.capture())
         assertEquals("Alice Freeholder", captor.firstValue.name)
-    }
-
-    @Test
-    fun `updateFreeholders rejects a stale snapshot before making any changes`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val current = savedFreeholder(propertyOwnership, id = 1, name = "Alice Freeholder", email = "old@example.com")
-        val removed = savedFreeholder(propertyOwnership, id = 2, name = "Bob Freeholder", email = "bob@example.com")
-        val currentTimestamp = Instant.parse("2025-01-02T00:00:00Z")
-        ReflectionTestUtils.setField(current, "lastModifiedDate", currentTimestamp)
-        whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(listOf(current, removed))
-        val staleSnapshot =
-            mapOf(
-                1L to Instant.parse("2025-01-01T00:00:00Z").toString(),
-                2L to removed.getMostRecentlyUpdated().toString(),
-            )
-
-        // Act & Assert
-        assertThrows(UpdateConflictException::class.java) {
-            freeholderService.updateFreeholders(
-                propertyOwnership,
-                listOf(
-                    FreeholderDataModel(
-                        databaseId = 1,
-                        detailsKnown = true,
-                        name = "Alice Freeholder",
-                        email = "new@example.com",
-                    ),
-                    FreeholderDataModel(detailsKnown = true, name = "Carol Freeholder"),
-                ),
-                staleSnapshot,
-            )
-        }
-
-        verify(freeholderRepository, never()).save(any())
-        verify(freeholderRepository, never()).delete(any())
-    }
-
-    @Test
-    fun `updateFreeholders rejects a snapshot when the saved freeholder IDs have changed`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val existing = savedFreeholder(propertyOwnership, id = 1, name = "Alice Freeholder", email = "alice@example.com")
-        val concurrentlyAdded = savedFreeholder(propertyOwnership, id = 2, name = "Bob Freeholder", email = "bob@example.com")
-        whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(listOf(existing, concurrentlyAdded))
-
-        // Act & Assert
-        assertThrows(UpdateConflictException::class.java) {
-            freeholderService.updateFreeholders(
-                propertyOwnership,
-                listOf(
-                    FreeholderDataModel(
-                        databaseId = 1,
-                        detailsKnown = true,
-                        name = "Alice Freeholder",
-                        email = "alice@example.com",
-                    ),
-                ),
-                snapshotOf(existing),
-            )
-        }
-
-        verify(freeholderRepository, never()).save(any())
-        verify(freeholderRepository, never()).delete(any())
     }
 
     @Test
@@ -305,7 +216,7 @@ class FreeholderServiceTests {
             )
 
         // Act
-        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(amended), snapshotOf(existing))
+        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(amended))
 
         // Assert
         assertEquals("new@example.com", existing.email)
@@ -333,7 +244,6 @@ class FreeholderServiceTests {
                         email = "alice@example.com",
                     ),
                 ),
-                snapshotOf(existing),
             )
 
         // Assert
@@ -353,7 +263,6 @@ class FreeholderServiceTests {
             freeholderService.updateFreeholders(
                 propertyOwnership,
                 listOf(FreeholderDataModel(databaseId = 1, detailsKnown = true, name = "Bob Freeholder")),
-                snapshotOf(untouched),
             )
 
         // Assert
@@ -362,7 +271,7 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `updateFreeholders saves a postal freeholder when an address is submitted again`() {
+    fun `updateFreeholders updates a postal freeholder whose address was re-entered`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val existing = savedFreeholder(propertyOwnership, id = 1, name = "Bob Freeholder")
@@ -380,7 +289,6 @@ class FreeholderServiceTests {
                         address = AddressDataModel("1 Example Road, EG1 2AB"),
                     ),
                 ),
-                snapshotOf(existing),
             )
 
         // Assert
@@ -409,7 +317,6 @@ class FreeholderServiceTests {
                         email = "alice@example.com",
                     ),
                 ),
-                snapshotOf(kept, removed),
             )
 
         // Assert
@@ -450,7 +357,6 @@ class FreeholderServiceTests {
                     amended,
                     newFreeholder,
                 ),
-                snapshotOf(unchanged, amendedExisting),
             )
 
         // Assert
@@ -461,9 +367,8 @@ class FreeholderServiceTests {
     }
 
     @Test
-    fun `updateFreeholders treats a freeholder whose id matches no saved row as a new one`() {
+    fun `updateFreeholders treats a freeholder whose saved row has gone as a new one`() {
         // Arrange
-        // The snapshot check normally prevents this, so an empty snapshot is used to reach the defensive fallback
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         whenever(freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnership.id)).thenReturn(emptyList())
         val stale =
@@ -475,15 +380,12 @@ class FreeholderServiceTests {
             )
 
         // Act
-        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(stale), emptyMap())
+        val added = freeholderService.updateFreeholders(propertyOwnership, listOf(stale))
 
         // Assert
         assertEquals(listOf(stale), added)
         verify(freeholderRepository).save(any())
     }
-
-    private fun snapshotOf(vararg freeholders: Freeholder): Map<Long, String> =
-        freeholders.associate { it.id to it.getMostRecentlyUpdated().toString() }
 
     private fun savedFreeholder(
         propertyOwnership: PropertyOwnership,
@@ -491,8 +393,5 @@ class FreeholderServiceTests {
         name: String? = null,
         email: String? = null,
     ) = Freeholder(propertyOwnership, name = name, email = email)
-        .also {
-            ReflectionTestUtils.setField(it, "id", id)
-            ReflectionTestUtils.setField(it, "createdDate", Instant.parse("2025-01-01T00:00:00Z"))
-        }
+        .also { ReflectionTestUtils.setField(it, "id", id) }
 }

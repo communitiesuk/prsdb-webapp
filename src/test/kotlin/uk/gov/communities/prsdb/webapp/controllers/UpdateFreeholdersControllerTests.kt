@@ -38,7 +38,9 @@ class UpdateFreeholdersControllerTests(
 
     override val propertyOwnershipId = 1L
 
-    override val updateStepRoute = UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnershipId)
+    override val updateStepRoute =
+        UpdateFreeholdersController.getUpdateFreeholdersRoute(propertyOwnershipId) +
+            "/${FreeholdersListStep.ROUTE_SEGMENT}"
 
     override val formContent = "freeholderId=1"
 

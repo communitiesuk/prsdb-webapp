@@ -17,8 +17,8 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersListState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
-import uk.gov.communities.prsdb.webapp.services.FreeholderService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.time.Instant
 
@@ -26,9 +26,8 @@ import java.time.Instant
 class UpdateFreeholdersJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateFreeholdersJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val freeholderService: FreeholderService,
 ) {
-    fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
 
@@ -40,17 +39,9 @@ class UpdateFreeholdersJourneyFactory(
         }
 
         if (!state.isStateInitialized) {
-            val freeholders = freeholderService.getFreeholdersForProperty(propertyOwnership)
-
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
+            state.lastModifiedDate = propertyOwnership.getOwnershipStructureMostRecentlyUpdated().toString()
             state.isJointFreeholder = propertyOwnership.ownershipType.isJointFreeholder()
-            state.freeholdersMap =
-                freeholders
-                    .mapIndexed { index, freeholder -> (index + 1) to FreeholderDataModel.fromFreeholder(freeholder) }
-                    .toMap()
-            state.nextFreeholderId = freeholders.size + 1
-            state.freeholderSnapshot = freeholderService.getFreeholderSnapshot(freeholders)
             state.isStateInitialized = true
         }
 
@@ -58,11 +49,17 @@ class UpdateFreeholdersJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+        val peopleResponsibleRoute = "${PropertyDetailsController.getPropertyDetailsPath(propertyId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
 
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { peopleResponsibleRoute }
+            step(journey.initialiseFreeholdersUpdateStep) {
+                initialStep()
+                routeSegment(InitialiseFreeholdersUpdateStep.ROUTE_SEGMENT)
+                nextStep { journey.freeholdersDetailsTask.firstStep }
+            }
             task(journey.freeholdersDetailsTask) {
+                parents { journey.initialiseFreeholdersUpdateStep.isComplete() }
                 withDependencies {
                     FreeholdersDetailsDependencies(
                         listState = journey,
@@ -70,15 +67,15 @@ class UpdateFreeholdersJourneyFactory(
                         allowRemovingLastMember = false,
                     )
                 }
-                initialStep()
-                backUrl { "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT" }
+                backUrl { peopleResponsibleRoute }
                 nextStep { journey.completeFreeholdersUpdateStep }
-                saveProgress()
             }
             step(journey.completeFreeholdersUpdateStep) {
                 parents { journey.freeholdersDetailsTask.isComplete() }
-                nextUrl { "$propertyDetailsRoute#$PEOPLE_RESPONSIBLE_FRAGMENT" }
+                nextUrl { peopleResponsibleRoute }
             }
+            useContinueButtons(journey.freeholdersDetailsTask)
+            // There's no check your answers page, so the list page submits the update.
             configureStep(journey.freeholdersDetailsTask.freeholdersListStep) {
                 withAdditionalContentProperties {
                     mapOf(
@@ -100,16 +97,20 @@ class UpdateFreeholdersJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateFreeholdersJourney(
+    // Seeds the freeholders list from the database
+    override val initialiseFreeholdersUpdateStep: InitialiseFreeholdersUpdateStep,
+    // Freeholder list, details and removal steps shared with property registration
     override val freeholdersDetailsTask: FreeholdersDetailsTask,
+    // Completion step for the update
     override val completeFreeholdersUpdateStep: CompleteFreeholdersUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "freeholders",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateFreeholdersJourneyState {
-    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var isJointFreeholder: Boolean by delegateProvider.requiredImmutableDelegate("isJointFreeholder")
-    override var freeholderSnapshot: Map<Long, String> by delegateProvider.requiredImmutableDelegate("freeholderSnapshot")
+    override var freeholdersInitialised: Boolean? by delegateProvider.nullableDelegate("freeholdersInitialised")
     override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
     override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
     override var editingFreeholderId: Int? by delegateProvider.nullableDelegate("editingFreeholderId")
@@ -118,10 +119,11 @@ class UpdateFreeholdersJourney(
 interface UpdateFreeholdersJourneyState :
     JourneyState,
     FreeholdersListState {
+    val initialiseFreeholdersUpdateStep: InitialiseFreeholdersUpdateStep
     val freeholdersDetailsTask: FreeholdersDetailsTask
     val completeFreeholdersUpdateStep: CompleteFreeholdersUpdateStep
     val propertyId: Long
     val lastModifiedDate: String
     val isJointFreeholder: Boolean
-    val freeholderSnapshot: Map<Long, String>
+    var freeholdersInitialised: Boolean?
 }

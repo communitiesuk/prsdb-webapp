@@ -3227,19 +3227,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     inner class FreeholdersOnPropertyRecord {
         @ParameterizedTest
         @CsvSource(
-            "false, , , NONE, false",
-            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY, false",
-            "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS, true",
-            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON, true",
-            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS, true",
-            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON, true",
+            "false, , , NONE",
+            "true, LEASEHOLD_ONLY, , LEASEHOLD_ONLY",
+            "true, FREEHOLD_ONLY, JOINT_TENANTS, JOINT_TENANTS",
+            "true, FREEHOLD_ONLY, TENANTS_IN_COMMON, TENANTS_IN_COMMON",
+            "true, FREEHOLD_AND_LEASEHOLD, JOINT_TENANTS, SHARE_OF_JOINT_TENANTS",
+            "true, FREEHOLD_AND_LEASEHOLD, TENANTS_IN_COMMON, SHARE_OF_TENANTS_IN_COMMON",
         )
         fun `registered freeholders appear on the property record`(
             ownsProperty: Boolean,
             ownershipKind: OwnershipKind?,
             freeholdType: FreeholdType?,
             expectedOwnershipType: OwnershipType,
-            expectJointFreeholders: Boolean,
             page: Page,
         ) {
             val freeholders =
@@ -3284,10 +3283,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             detailsPage.tabs.goToPeopleResponsible()
 
             assertThat(detailsPage.freeholderSection.locator("h3"))
-                .hasText(if (expectJointFreeholders) "Joint freeholders" else "Freeholders")
+                .hasText(if (expectedOwnershipType.isJointFreeholder()) "Joint freeholders" else "Freeholders")
             assertThat(detailsPage.freeholderUpdateLink.locator)
                 .hasText(
-                    if (expectJointFreeholders) {
+                    if (expectedOwnershipType.isJointFreeholder()) {
                         "Add, change or remove joint freeholders"
                     } else {
                         "Add, change or remove freeholders"
@@ -3295,7 +3294,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             assertThat(detailsPage.freeholderUpdateLink.locator).hasAttribute(
                 "href",
-                "/landlord/property-details/${propertyOwnershipCaptor.value.id}/update-freeholders/freeholders-list",
+                "/landlord/property-details/${propertyOwnershipCaptor.value.id}/update-freeholders/start",
             )
             assertEquals(3, detailsPage.freeholderCards.size)
             val cards = detailsPage.freeholderCards.associateBy { it.title.getText() }

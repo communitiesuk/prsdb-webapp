@@ -5,115 +5,81 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
-import uk.gov.communities.prsdb.webapp.services.FreeholderService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.time.Instant
 
 @ExtendWith(MockitoExtension::class)
 class CompleteFreeholdersUpdateStepConfigTests {
-    @Mock
-    private lateinit var freeholderService: FreeholderService
-
     @Mock
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Mock
     private lateinit var journeyState: UpdateFreeholdersJourneyState
 
-    @Test
-    fun `completion reconciles the submitted freeholders against the saved snapshot`() {
-        // Arrange
-        val propertyOwnership = createPropertyOwnership()
-        val submittedFreeholders =
-            listOf(FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com"))
-        val snapshot = mapOf(1L to "2025-01-01T00:00:00Z")
-        whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
-        whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to submittedFreeholders.single()))
-        whenever(journeyState.freeholderSnapshot).thenReturn(snapshot)
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
+    private val propertyId = 123L
+    private val lastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
+    private val freeholder = FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com")
 
-        val stepConfig =
-            CompleteFreeholdersUpdateStepConfig(
-                freeholderService,
-                propertyOwnershipService,
-            )
+    @Test
+    fun `afterStepIsReached updates the freeholders with the journey's last modified date`() {
+        // Arrange
+        whenever(journeyState.propertyId).thenReturn(propertyId)
+        whenever(journeyState.lastModifiedDate).thenReturn(lastModifiedDate.toString())
+        whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to freeholder))
+        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService)
 
         // Act
         stepConfig.afterStepIsReached(journeyState)
 
         // Assert
-        verify(freeholderService).updateFreeholders(propertyOwnership, submittedFreeholders, snapshot)
+        verify(propertyOwnershipService).updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate)
     }
 
     @Test
-    fun `completion throws when the freeholder list is missing`() {
+    fun `afterStepIsReached throws when the freeholders list is missing`() {
         // Arrange
-        val propertyOwnership = createPropertyOwnership()
-        whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
         whenever(journeyState.freeholdersMap).thenReturn(null)
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
-
-        val stepConfig =
-            CompleteFreeholdersUpdateStepConfig(
-                freeholderService,
-                propertyOwnershipService,
-            )
+        whenever(journeyState.journeyId).thenReturn("journey-id")
+        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService)
 
         // Act & Assert
-        val exception =
-            assertThrows(PrsdbWebException::class.java) {
-                stepConfig.afterStepIsReached(journeyState)
-            }
-
-        assertEquals(
-            "Freeholder update journey for property ${propertyOwnership.id} has no freeholder list.",
-            exception.message,
-        )
-        verify(freeholderService, never()).updateFreeholders(any(), any(), any())
+        assertThrows(UnrecoverableJourneyStateException::class.java) {
+            stepConfig.afterStepIsReached(journeyState)
+        }
+        verifyNoInteractions(propertyOwnershipService)
     }
 
     @Test
-    fun `completion discards the journey when the freeholder snapshot is stale`() {
+    fun `afterStepIsReached deletes the journey and rethrows when there is an update conflict`() {
         // Arrange
-        val propertyOwnership = createPropertyOwnership()
-        val submittedFreeholders = emptyList<FreeholderDataModel>()
-        val snapshot = emptyMap<Long, String>()
-        whenever(journeyState.propertyId).thenReturn(propertyOwnership.id)
-        whenever(journeyState.freeholdersMap).thenReturn(emptyMap())
-        whenever(journeyState.freeholderSnapshot).thenReturn(snapshot)
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnership.id)).thenReturn(propertyOwnership)
-        doThrow(UpdateConflictException("Freeholders changed"))
-            .whenever(freeholderService)
-            .updateFreeholders(propertyOwnership, submittedFreeholders, snapshot)
-
-        val stepConfig =
-            CompleteFreeholdersUpdateStepConfig(
-                freeholderService,
-                propertyOwnershipService,
-            )
+        whenever(journeyState.propertyId).thenReturn(propertyId)
+        whenever(journeyState.lastModifiedDate).thenReturn(lastModifiedDate.toString())
+        whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to freeholder))
+        doThrow(UpdateConflictException("Conflict"))
+            .whenever(propertyOwnershipService)
+            .updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate)
+        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService)
 
         // Act & Assert
         assertThrows(UpdateConflictException::class.java) {
             stepConfig.afterStepIsReached(journeyState)
         }
-
         verify(journeyState).deleteJourney()
     }
 
     @Test
     fun `resolveNextDestination deletes the journey and returns the default destination`() {
         // Arrange
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(freeholderService, propertyOwnershipService)
+        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService)
         val defaultDestination = Destination.ExternalUrl("/landlord/property-details/1#people-responsible")
 
         // Act
