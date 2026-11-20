@@ -1,4 +1,4 @@
-Dear ((recipient name))
+Dear ((recipient name)),
 
 You have reactivated a property.
 
@@ -6,7 +6,7 @@ You have reactivated a property.
 
 ((property address))
 
-Property Registration Number: ((prn))
+Rental property number: ((prn))
 
 # Payment summary
 
