@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 import jakarta.servlet.http.HttpSession
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -11,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.GENERATE_PASSPHRASE_PATH_SEGMENT
@@ -64,6 +63,7 @@ class GeneratePassphraseController(
     }
 
     @PostMapping
+    @AvailableWhenFeatureEnabled(PASSPHRASE_SMS)
     fun sendSms(
         @Valid @ModelAttribute("formModel") formModel: SendPassphraseSmsFormModel,
         bindingResult: BindingResult,
@@ -71,9 +71,6 @@ class GeneratePassphraseController(
         session: HttpSession,
         redirectAttributes: RedirectAttributes,
     ): String {
-        if (!featureFlagManager.checkFeature(PASSPHRASE_SMS)) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND)
-        }
         val pendingPassphrase = session.getAttribute(PASSPHRASE_FOR_SMS) as? PendingPassphrase
         if (pendingPassphrase == null || pendingPassphrase.token != formModel.passphraseToken) {
             redirectAttributes.addFlashAttribute("smsStatus", "generatePassphrase.sms.expired")
