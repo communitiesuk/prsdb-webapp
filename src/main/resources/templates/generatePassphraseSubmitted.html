@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.submitted.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{generatePassphrase.submitted.heading}">generatePassphrase.submitted.heading</h1>
+        <th:block th:with="isSuccess=true">
+            <div id="success-banner"
+                 th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{generatePassphrase.successBanner.title}, ~{::#success-banner/content()})}">
+                <p class="govuk-notification-banner__heading" th:text="#{${smsStatus}(${recipient})}">smsStatus</p>
+            </div>
+        </th:block>
+        <div id="passphrase-preview" class="govuk-inset-text">
+            <span th:text="#{generatePassphrase.passphrase.label}" th:remove="tag">generatePassphrase.passphrase.label</span>
+            <br>
+            <strong class="govuk-!-font-size-27" th:text="${passphrase}"></strong>
+        </div>
+        <p id="passphrase-read-back" class="govuk-body" th:text="#{generatePassphrase.passphrase.readBack}">generatePassphrase.passphrase.readBack</p>
+        <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
+            generatePassphrase.generateAnother
+        </a>
+    </div>
+</main>
+</html>
