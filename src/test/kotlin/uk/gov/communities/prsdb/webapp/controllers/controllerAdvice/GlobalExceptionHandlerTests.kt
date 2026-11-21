@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Compani
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.NOTIFY_ALLOWLIST_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.UPDATE_CONFLICT_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import java.io.ByteArrayOutputStream
@@ -61,7 +62,10 @@ class GlobalExceptionHandlerTests {
 
     @Test
     fun `handleNotifyAllowlistException redirects to the notify allowlist error route`() {
-        val result = globalExceptionHandler.handleNotifyAllowlistException(NotifyAllowlistException("test message"))
+        val result =
+            globalExceptionHandler.handleNotifyAllowlistException(
+                NotifyAllowlistException(EmailSendFailureReason.TECHNICAL, "test message"),
+            )
 
         assertEquals("redirect:$NOTIFY_ALLOWLIST_ERROR_ROUTE", result)
     }
@@ -72,7 +76,9 @@ class GlobalExceptionHandlerTests {
         val originalOut = System.out
         System.setOut(PrintStream(outContent))
         try {
-            globalExceptionHandler.handleNotifyAllowlistException(NotifyAllowlistException("test message"))
+            globalExceptionHandler.handleNotifyAllowlistException(
+                NotifyAllowlistException(EmailSendFailureReason.TECHNICAL, "test message"),
+            )
 
             val output = outContent.toString()
             assertTrue(output.contains("Email sent to an address not on the Notify allowlist: test message"))

@@ -28,6 +28,8 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePassphraseController.Companion.GENERATE_PASSPHRASE_URL
+import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
@@ -167,7 +169,10 @@ class GeneratePassphraseControllerTests(
 
     @ParameterizedTest
     @ValueSource(
-        strings = ["sms.invalid", "sms.technical", "sms.dailyLimit", "sms.minuteLimit", "sms.unknown", "email.failed", "email.unknown"],
+        strings = [
+            "sms.invalid", "sms.technical", "sms.dailyLimit", "sms.minuteLimit", "sms.unknown",
+            "email.invalid", "email.technical", "email.dailyLimit", "email.minuteLimit", "email.unknown",
+        ],
     )
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `failed or uncertain submissions do not render a success page`(outcome: String) {
@@ -590,18 +595,33 @@ class GeneratePassphraseControllerTests(
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["persistent", "transient", "allowlist", "serialization", "json", "invalid-response"])
+    @ValueSource(
+        strings = [
+            "invalid", "technical", "daily", "minute", "uncertain-transient", "uncertain-persistent",
+            "validation", "allowlist", "serialization", "json", "invalid-response",
+        ],
+    )
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `email failures consume the token without retry or fallback`(failure: String) {
         val (session, token) = generateEmailForm()
         val exception =
             when (failure) {
-                "transient" -> TransientEmailSentException("Rate limited")
-                "allowlist" -> NotifyAllowlistException("Not allowed")
+                "invalid" -> PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "Invalid request")
+                "technical" -> PersistentEmailSendException(EmailSendFailureReason.TECHNICAL, "Technical problem")
+                "daily" -> PersistentEmailSendException(EmailSendFailureReason.DAILY_LIMIT, "Daily limit")
+                "minute" -> TransientEmailSentException(EmailSendFailureReason.MINUTE_LIMIT, "Rate limited")
+                "uncertain-transient" -> TransientEmailSentException(EmailSendFailureReason.UNKNOWN, "Unknown outcome")
+                "validation" ->
+                    EmailNotifyResponseException(
+                        EmailSendFailureReason.INVALID_REQUEST,
+                        "Invalid request",
+                        IllegalArgumentException(),
+                    )
+                "allowlist" -> NotifyAllowlistException(EmailSendFailureReason.TECHNICAL, "Not allowed")
                 "serialization" -> SerializationException("Unreadable error")
                 "json" -> JSONException("Unreadable response")
                 "invalid-response" -> IllegalArgumentException("Invalid response")
-                else -> PersistentEmailSendException("Unknown outcome")
+                else -> PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Unknown outcome")
             }
         doThrow(exception).whenever(emailNotificationService).sendEmailSynchronously(any(), any())
 
@@ -616,7 +636,13 @@ class GeneratePassphraseControllerTests(
             flash {
                 attribute(
                     "status",
-                    if (failure == "transient") "generatePassphrase.email.failed" else "generatePassphrase.email.unknown",
+                    when (failure) {
+                        "invalid", "validation" -> "generatePassphrase.email.invalid"
+                        "technical", "allowlist" -> "generatePassphrase.email.technical"
+                        "daily" -> "generatePassphrase.email.dailyLimit"
+                        "minute" -> "generatePassphrase.email.minuteLimit"
+                        else -> "generatePassphrase.email.unknown"
+                    },
                 )
             }
         }

@@ -21,6 +21,8 @@ import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.constants.PENDING_PASSPHRASE
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
@@ -166,16 +168,21 @@ class GeneratePassphraseController(
             emailNotificationService.sendEmailSynchronously(emailAddress, PassphraseEmail(passphrase))
             "generatePassphrase.email.accepted"
         } catch (exception: Exception) {
-            when (exception) {
-                is TransientEmailSentException -> {
-                    logger.warn("Passphrase email was not accepted by Notify", exception)
-                    "generatePassphrase.email.failed"
+            val reason =
+                when (exception) {
+                    is TransientEmailSentException -> exception.reason
+                    is PersistentEmailSendException -> exception.reason
+                    is EmailNotifyResponseException -> exception.reason
+                    is SerializationException, is JSONException, is IllegalArgumentException -> EmailSendFailureReason.UNKNOWN
+                    else -> throw exception
                 }
-                is PersistentEmailSendException, is SerializationException, is JSONException, is IllegalArgumentException -> {
-                    logger.warn("Passphrase email could not be confirmed", exception)
-                    "generatePassphrase.email.unknown"
-                }
-                else -> throw exception
+            logger.warn("Passphrase email submission failed: {}", reason, exception)
+            when (reason) {
+                EmailSendFailureReason.INVALID_REQUEST -> "generatePassphrase.email.invalid"
+                EmailSendFailureReason.TECHNICAL -> "generatePassphrase.email.technical"
+                EmailSendFailureReason.DAILY_LIMIT -> "generatePassphrase.email.dailyLimit"
+                EmailSendFailureReason.MINUTE_LIMIT -> "generatePassphrase.email.minuteLimit"
+                EmailSendFailureReason.UNKNOWN -> "generatePassphrase.email.unknown"
             }
         }
 

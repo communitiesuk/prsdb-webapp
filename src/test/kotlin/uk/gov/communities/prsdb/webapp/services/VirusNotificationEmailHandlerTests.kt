@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRep
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -278,7 +279,7 @@ class VirusNotificationEmailHandlerTests {
                 expectedCertType(CertificateType.GasSafetyCert),
                 listOf("landlord1@example.com", "landlord2@example.com"),
             )
-        doThrow(TransientEmailSentException("rate limited"))
+        doThrow(TransientEmailSentException(EmailSendFailureReason.MINUTE_LIMIT, "rate limited"))
             .whenever(emailNotificationService)
             .sendEmail(eq(landlordRecipientAddress(0)), any())
         val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)

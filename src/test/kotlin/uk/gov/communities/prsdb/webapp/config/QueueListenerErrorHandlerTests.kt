@@ -17,6 +17,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.MessageBuilder
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import java.util.concurrent.CompletableFuture
@@ -53,7 +54,11 @@ class QueueListenerErrorHandlerTests {
 
     @Test
     fun `handle passes other failures to the transient failure error handler`() {
-        val listenerFailure = RuntimeException("Listener failed", TransientEmailSentException("rate limited"))
+        val listenerFailure =
+            RuntimeException(
+                "Listener failed",
+                TransientEmailSentException(EmailSendFailureReason.MINUTE_LIMIT, "rate limited"),
+            )
         val transientFailureResult = CompletableFuture.failedFuture<Void>(listenerFailure)
         whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
 
@@ -71,7 +76,11 @@ class QueueListenerErrorHandlerTests {
                 transientFailureErrorHandler,
                 setOf(IllegalStateException::class),
             )
-        val listenerFailure = RuntimeException("Listener failed", PersistentEmailSendException("bad request"))
+        val listenerFailure =
+            RuntimeException(
+                "Listener failed",
+                PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "bad request"),
+            )
         val transientFailureResult = CompletableFuture.failedFuture<Void>(listenerFailure)
         whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
 
@@ -87,7 +96,7 @@ class QueueListenerErrorHandlerTests {
         @JvmStatic
         fun persistentFailures() =
             listOf(
-                PersistentEmailSendException("bad request"),
+                PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "bad request"),
                 SerializationException("undecodable"),
             )
     }

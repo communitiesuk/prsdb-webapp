@@ -4,6 +4,7 @@ import io.awspring.cloud.sqs.operations.SqsTemplate
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.QueuedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -22,6 +23,7 @@ class EmailQueueService(
             sqsTemplate.send(queueName, payload)
         } catch (exception: RuntimeException) {
             throw TransientEmailSentException(
+                EmailSendFailureReason.UNKNOWN,
                 "The email could not be added to the email queue, but retrying may work.",
                 exception,
             )

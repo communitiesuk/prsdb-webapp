@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationExpiryEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getInstantDaysAgoInUK
@@ -169,7 +170,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
         whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
-            .thenThrow(PersistentEmailSendException("boom"))
+            .thenThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "boom"))
             .thenAnswer { /* succeed on the second call */ }
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -200,7 +201,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
         whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
-            .thenThrow(PersistentEmailSendException("boom"))
+            .thenThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "boom"))
             .thenAnswer { /* succeed on the second call */ }
 
         val result = expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -225,7 +226,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
         whenever(mockSwapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(any()))
-            .thenThrow(PersistentEmailSendException("boom"))
+            .thenThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "boom"))
 
         val result = expiryService.sendExpiryEmailsForExpiredInvitations()
 
@@ -265,7 +266,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
         whenever(mockExpiryEmailNotificationService.sendEmailToLandlord(any(), any()))
-            .thenThrow(PersistentEmailSendException("boom"))
+            .thenThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "boom"))
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
 

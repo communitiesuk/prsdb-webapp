@@ -180,7 +180,7 @@ class GeneratePassphraseTests : IntegrationTestWithImmutableData("data-local.sql
         generatePassphrasePage = assertPageIs(page, GeneratePassphrasePage::class)
         assertEquals(passphrase, generatePassphrasePage.passphrase)
         assertThat(generatePassphrasePage.notificationStatus).containsText(
-            if (recipient.startsWith("transient")) "The email could not be sent" else "We could not confirm whether the email was sent",
+            if (recipient.startsWith("transient")) "Wait a short time" else "Contact support",
         )
         assertThat(generatePassphrasePage.successBanner).isHidden()
         assertThat(generatePassphrasePage.readBackGuidance).isHidden()

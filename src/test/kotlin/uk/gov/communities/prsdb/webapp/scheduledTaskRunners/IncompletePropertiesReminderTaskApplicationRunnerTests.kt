@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -89,7 +90,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         val expectedSucceedEmail = reminderEmail2
 
         whenever(emailSender.sendEmail(emailAddress1, expectedFailEmail))
-            .doThrow(PersistentEmailSendException("Persistent email failure"))
+            .doThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Persistent email failure"))
 
         // Act, capturing stdout
         // Assert does not throw and stdout contains expected messages
@@ -168,7 +169,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         setupTwoEntriesOnOneDatabasePage()
 
         whenever(emailSender.sendEmail(emailAddress1, reminderEmail1))
-            .doThrow(PersistentEmailSendException("Persistent email failure"))
+            .doThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Persistent email failure"))
 
         // Act
         taskLogic.sendIncompletePropertyReminders()
@@ -283,7 +284,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         setupTwoEntriesOnOneDatabasePage()
 
         whenever(emailSender.sendEmail(emailAddress1, reminderEmail1))
-            .doThrow(PersistentEmailSendException("Persistent email failure"))
+            .doThrow(PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Persistent email failure"))
 
         // Act
         val failureCount = taskLogic.sendIncompletePropertyReminders()
