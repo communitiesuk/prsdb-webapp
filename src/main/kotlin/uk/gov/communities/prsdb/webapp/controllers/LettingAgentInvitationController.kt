@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import java.util.UUID
 
 @PrsdbController
@@ -27,6 +28,7 @@ import java.util.UUID
 class LettingAgentInvitationController(
     private val journeyFactory: LettingAgentInvitationJourneyFactory,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) {
     @GetMapping
     fun startJourney(
@@ -44,7 +46,7 @@ class LettingAgentInvitationController(
         }
 
         val journeyId = journeyFactory.initializeJourneyState(token)
-        lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession(journeyId, token.toString())
+        lettingAgentSessionService.addJourneyIdInvitationTokenPairToSession(journeyId, token.toString())
         val startUrl =
             JourneyStateService.urlWithJourneyState(
                 "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",

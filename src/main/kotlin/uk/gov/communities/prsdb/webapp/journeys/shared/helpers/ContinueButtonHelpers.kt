@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 
 private fun JourneyBuilder<*>.useSubmitButtonText(
     vararg steps: JourneyStep<*, *, *>,
@@ -134,13 +135,17 @@ fun JourneyBuilder<*>.useContinueButtons(task: SuperiorLandlordsDetailsTask) {
     )
 }
 
+fun JourneyBuilder<*>.useContinueButtons(task: SuperiorLandlordsTask) {
+    useContinueButtons(task.anyoneInOwnershipChainStep)
+    useContinueButtons(task.superiorLandlordsDetailsTask)
+}
+
 fun JourneyBuilder<*>.useContinueButtons(task: OwnershipStructureTask) {
     useContinueButtons(
         task.ownershipTypeTask.ownsPropertyStep,
         task.ownershipTypeTask.ownershipKindStep,
         task.ownershipTypeTask.freeholdTypeStep,
-        task.superiorLandlordsTask.anyoneInOwnershipChainStep,
     )
     useContinueButtons(task.freeholdersTask.freeholdersDetailsTask)
-    useContinueButtons(task.superiorLandlordsTask.superiorLandlordsDetailsTask)
+    useContinueButtons(task.superiorLandlordsTask)
 }

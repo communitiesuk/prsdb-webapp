@@ -7,11 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAg
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentPasswordService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import java.util.UUID
 
 @JourneyFrameworkComponent
 class StoreAccessStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val lettingAgentPasswordService: LettingAgentPasswordService,
 ) : AbstractInternalStepConfig<Complete, LettingAgentInvitationJourneyState>() {
     override fun mode(state: LettingAgentInvitationJourneyState): Complete = Complete.COMPLETE
@@ -20,7 +22,7 @@ class StoreAccessStepConfig(
         val token = state.invitationToken
         val invitation = lettingAgentAccessService.getInvitationByTokenOrNull(UUID.fromString(token)) ?: return
         if (lettingAgentPasswordService.hasPasswordBeenSet(invitation)) {
-            lettingAgentAccessService.addAuthorisedTokenToSession(token)
+            lettingAgentSessionService.addAuthorisedTokenToSession(token)
         }
     }
 }

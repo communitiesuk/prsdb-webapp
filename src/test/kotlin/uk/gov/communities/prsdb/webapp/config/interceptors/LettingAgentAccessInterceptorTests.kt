@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationControl
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import java.util.UUID
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -30,6 +31,9 @@ class LettingAgentAccessInterceptorTests {
     @Mock
     private lateinit var mockLettingAgentAccessService: LettingAgentAccessService
 
+    @Mock
+    private lateinit var mockLettingAgentSessionService: LettingAgentSessionService
+
     @InjectMocks
     private lateinit var interceptor: LettingAgentAccessInterceptor
 
@@ -42,7 +46,7 @@ class LettingAgentAccessInterceptorTests {
     fun `preHandle allows a request to property details with a valid token that is authorised in the session`() {
         mockRequest.requestURI = propertyDetailsUri
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
-        whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
+        whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
 
         assertTrue(callPreHandle())
         verify(mockResponse, never()).sendRedirect(anyString())
@@ -52,7 +56,7 @@ class LettingAgentAccessInterceptorTests {
     fun `preHandle allows a valid authorised token for a property-details update sub-route`() {
         mockRequest.requestURI = "$propertyDetailsUri/update-rent-includes-bills/check-your-answers"
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
-        whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
+        whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
 
         assertTrue(callPreHandle())
         verify(mockResponse, never()).sendRedirect(anyString())
@@ -62,7 +66,7 @@ class LettingAgentAccessInterceptorTests {
     fun `preHandle redirects a valid but unauthorised token to the invitation journey`() {
         mockRequest.requestURI = propertyDetailsUri
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
-        whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(false)
+        whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(token.toString())).thenReturn(false)
 
         assertFalse(callPreHandle())
         verify(mockResponse).sendRedirect("$LETTING_AGENT_INVITATION_ROUTE?token=$token")
@@ -74,7 +78,7 @@ class LettingAgentAccessInterceptorTests {
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(false)
 
         assertFalse(callPreHandle())
-        verify(mockLettingAgentAccessService).removeAuthorisedTokenFromSession(token.toString())
+        verify(mockLettingAgentSessionService).removeAuthorisedTokenFromSession(token.toString())
         verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
@@ -83,7 +87,7 @@ class LettingAgentAccessInterceptorTests {
         mockRequest.requestURI = "/landlord/letting-agent/not-a-route"
 
         assertFalse(callPreHandle())
-        verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
+        verify(mockLettingAgentSessionService, never()).removeAuthorisedTokenFromSession(anyString())
         verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
@@ -92,7 +96,7 @@ class LettingAgentAccessInterceptorTests {
         val journeyId = "journey-123"
         mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
         mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
-        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
+        whenever(mockLettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
 
         assertTrue(callPreHandle())
@@ -104,11 +108,11 @@ class LettingAgentAccessInterceptorTests {
         val journeyId = "journey-123"
         mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
         mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
-        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
+        whenever(mockLettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(false)
 
         assertFalse(callPreHandle())
-        verify(mockLettingAgentAccessService).removeAuthorisedTokenFromSession(token.toString())
+        verify(mockLettingAgentSessionService).removeAuthorisedTokenFromSession(token.toString())
         verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
@@ -117,10 +121,10 @@ class LettingAgentAccessInterceptorTests {
         val journeyId = "journey-123"
         mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
         mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
-        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(null)
+        whenever(mockLettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(null)
 
         assertFalse(callPreHandle())
-        verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
+        verify(mockLettingAgentSessionService, never()).removeAuthorisedTokenFromSession(anyString())
         verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 }
