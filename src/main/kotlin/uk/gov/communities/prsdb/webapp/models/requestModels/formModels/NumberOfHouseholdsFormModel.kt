@@ -13,7 +13,7 @@ class NumberOfHouseholdsFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.numberOfHouseholds.input.error",
+                messageKey = "tenancyDetails.numberOfHouseholds.input.error",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "numberOfHouseholdsIsValidForAction",
             ),

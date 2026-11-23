@@ -3,6 +3,7 @@ uploadedFile:
   virusScanPendingWithName: "{0} (Pending virus scan)"
   virusScanFailed: Not added (virus scan failed)
 gasSafetyTask:
+  sectionHeading: Gas safety certificate
   gasSupply:
     heading: Does the property have a gas supply or any gas appliances?
     error:
@@ -29,7 +30,7 @@ gasSafetyTask:
           three: If you provide the appliance, it must be included.
   gasCert:
     heading: Do you have a gas safety certificate for this property?
-    hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.
+    hint: Provided by a Gas Safe engineer after an inspection
     radios:
       yesHint: We’ll ask you to upload this now
   gasSafetyCertificateMissingOccupied:
@@ -135,11 +136,11 @@ gasSafetyTask:
       whenToProvide:
         paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and complete this section within 28 days of a tenant moving in.
 electricalSafetyTask:
+  sectionHeading: Electrical safety certificate
   electricalCert:
     error:
       missing: Select which electrical safety certificate you have
     heading: Which electrical safety certificate do you have for this property?
-    hint: You must check a rental property’s electrics every 5 years
     radios:
       eicLabel: Electrical Installation Certificate (EIC)
       eicHint: Issued when a property is built or rewired
@@ -194,7 +195,7 @@ electricalSafetyTask:
       afterLink: .
     whenToAdd:
       heading: 'When you’ll need to add your electrical safety certificate'
-      paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
+      paragraph: 'You can continue to finish your registration and get a rental property number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
@@ -221,13 +222,13 @@ electricalSafetyTask:
         whatToDoNext:
           heading: What to do next
           unoccupied:
-            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that this property’s electrics are safe.
             learnHow:
               beforeLink: Learn how to get an EICR by reading the
               link: electrical safety standards for rented properties (opens in new tab)
               afterLink: .
           occupied:
-            needEicrParagraph: You need a valid Electrical Installation Condition Report (EICR) to check that your electrics are safe.
+            needEicrParagraph: You need an Electrical Installation Condition Report (EICR) to check that this property’s electrics are safe.
       occupied:
         # TODO PDJB-1679: Remove noValidCertParagraph when the EIC_ISSUE_DATE flag is removed
         noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
@@ -293,13 +294,31 @@ electricalSafetyTask:
           heading: You must upload an electrical safety certificate to this service
           paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
+  sectionHeading: Energy performance certificate (EPC)
+  epcRequirementsDetails:
+    summary: EPC requirements
+    intro:
+      paragraph:
+        one: Rental properties need a valid EPC of E or higher.
+        two: If the EPC expires during a tenancy, you do not need to get a new EPC immediately, as long as the same tenants continue to rent the property.
+        three: You will need a new EPC when you advertise the property or start a new tenancy.
+    lowRating:
+      heading: When you can have an EPC lower than E
+      paragraph:
+        one: Rental properties can be rented out with a rating below E if they have a registered energy efficiency exemption.
+        two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve registered for this property.
+      link: When you can register an exemption (opens in new tab)
+    notRequired:
+      heading: When you do not need an EPC
+      paragraph: Some properties do not need an EPC at all. This includes some listed buildings or properties within a conservation area.
+      link: When you do not need an EPC (opens in new tab)
   confirmEpcDetailsFromUprn:
     error:
-      missing: Select if you want to use the EPC we found for your property
+      missing: Select if you want to use the EPC we found for this property
     heading: Check this EPC
-    paragraph: 'We found this EPC for your property:'
+    paragraph: 'We found this EPC for this property:'
     summaryCard:
-      title: EPC linked to your property
+      title: EPC linked to this property
       action: View full EPC (opens in new tab)
     summaryList:
       address:
@@ -310,29 +329,7 @@ epcTask:
         heading: Expiry date
       certificateNumber:
         heading: Certificate number
-    question: Do you want to use the EPC we found for your property?
-    details:
-      heading: EPC requirements
-      forAdvertising:
-        heading: For advertising a property
-        paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building).
-      toLet:
-        heading: To let a property (new tenancy)
-        paragraph: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
-        bullets:
-          one: your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building
-          two: you have a registered energy efficiency exemption on the PRS exemptions register (but you still need a valid EPC)
-        expiryParagraph: If the EPC expires while the property’s occupied, you do not need to get a new EPC immediately. You only need a new EPC when you advertise the property or start a new tenancy.
-      lowerThanE:
-        heading: If you have an EPC lower than E
-        paragraphs:
-          one: Rental properties can be let with a rating below E if they have a registered energy efficiency exemption.
-          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve registered for this property.
-        link: When you can register an exemption (opens in new tab)
-      noEpcNeeded:
-        heading: Properties that do not need an EPC at all
-        paragraph: Some properties do not need an EPC at all. This includes some listed buildings or properties within a conservation area.
-        link: When you do not need an EPC (opens in new tab)
+    question: Do you want to use the EPC we found for this property?
     radios:
       'no':
         label: 'No (use a different EPC or the property does not need one)'
@@ -373,36 +370,6 @@ epcTask:
       option:
         'no':
           label: 'No (for example, the property does not require an EPC to be let)'
-    epcRequirements:
-      summary: EPC requirements
-      advertising:
-        heading: For advertising a property
-        paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example,
-          listed and work would unacceptably alter the character of the building).
-      toLet:
-        heading: To let a property (new tenancy)
-        paragraph:
-          one: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
-          two: If the EPC expires while the property’s occupied, you do not need to get a new EPC
-            immediately. You only need a new EPC when you advertise the property or start a new tenancy.
-        bullet:
-          one: your property is exempt from needing an EPC, for example, listed and work would
-            unacceptably alter the character of the building
-          two: you have a registered energy efficiency exemption on the PRS exemptions register
-            (but you still need a valid EPC)
-      lowRating:
-        heading: If you have an EPC lower than E
-        paragraph:
-          one: Rental properties can be let with a rating below E if they have a registered
-            energy efficiency exemption.
-          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve
-            registered for this property.
-        link: When you can register an exemption (opens in new tab)
-      notRequired:
-        heading: Properties that do not need an EPC at all
-        paragraph: Some properties do not need an EPC at all. This includes some listed buildings
-          or properties within a conservation area.
-        link: When you do not need an EPC (opens in new tab)
   isEpcRequired:
     error:
       missing: Select if an EPC is required to let this property
@@ -433,19 +400,18 @@ epcTask:
   findYourEpc:
     error:
       missing: Enter a certificate number
-    fieldSetHeading: Find your EPC
+    fieldSetHeading: What is your EPC’s certificate number?
     certificateNumber:
-      label: Certificate number
       hint: For example, 9002-3775-9101-5482-3149
     searchButton:
       text: Search
     explanation:
-      heading: How to find your EPC’s certificate number
+      heading: Find your EPC’s certificate number
       paragraph:
-        one: You can find this number on your digital EPC.
+        one: You can find this on your digital EPC.
         two:
           beforeLink: Go to
-          link: Find an energy certificate (opens in a new tab)
+          link: Find an energy certificate (opens in new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
   confirmEpcDetailsFromCertificateNumber:
     error:

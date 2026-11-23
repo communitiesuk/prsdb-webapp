@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
 class FurnishedStatusFormModel : FormModel {
-    @NotNull(message = "forms.furnishedStatus.radios.error.missing")
+    @NotNull(message = "tenancyDetails.furnishedStatus.radios.error.missing")
     var furnishedStatus: FurnishedStatus? = null
 
     companion object {

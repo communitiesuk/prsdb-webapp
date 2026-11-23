@@ -82,7 +82,7 @@ class LandlordViewModel(
                 )
                 if (isEnglandOrWalesResident) {
                     addRow(
-                        "landlordDetails.personalDetails.contactAddress",
+                        "landlordDetails.personalDetails.homeAddress",
                         landlord.address.singleLineAddress,
                         changeLinkMessageKey,
                         "$UPDATE_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",

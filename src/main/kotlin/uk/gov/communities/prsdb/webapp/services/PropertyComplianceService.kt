@@ -47,7 +47,7 @@ class PropertyComplianceService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val currentUserService: CurrentUserService,
     private val eicDateService: EicDateService,
-    // TODO: PDJB-1926: Remove featureFlagManager
+    // TODO: PDJB-1926 / PDJB-1679: Remove featureFlagManager once both the 14 month gas expiry and EIC_ISSUE_DATE flags are removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
@@ -135,7 +135,8 @@ class PropertyComplianceService(
     fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
         ComplianceStatusDataModel.fromPropertyCompliance(
             propertyCompliance = propertyCompliance,
-            eicIssueDate = null,
+            // TODO PDJB-1679: Remove the EIC_ISSUE_DATE check when the flag is removed
+            eicIssueDate = if (featureFlagManager.checkFeature(EIC_ISSUE_DATE)) eicDateService.issueDateFrom(propertyCompliance) else null,
             electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
             isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
         )

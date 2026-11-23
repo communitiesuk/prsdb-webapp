@@ -1,0 +1,9 @@
+scripts:
+  - name: Set up worktree
+    command: node scripts/git-worktrees/copilot-app-worktree.mjs
+    triggers:
+      - session.create
+  - name: Stop worktree containers
+    command: node scripts/git-worktrees/copilot-app-worktree.mjs
+    triggers:
+      - session.archive

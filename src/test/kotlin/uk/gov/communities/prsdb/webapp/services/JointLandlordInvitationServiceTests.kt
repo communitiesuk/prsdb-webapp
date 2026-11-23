@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -36,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
+import uk.gov.communities.prsdb.webapp.testHelpers.DateTimeTestHelper.Companion.getInstantDaysAgoInUK
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -132,10 +136,7 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 456L,
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
 
             whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
@@ -240,19 +241,13 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
             val hiddenExpiredInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 2L,
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                     isHidden = true,
                 )
 
@@ -707,10 +702,7 @@ class JointLandlordInvitationServiceTests {
                     id = 999L,
                     email = "expired@example.com",
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
             val mockUri = URI("https://example.com/invite/test-token")
 
@@ -733,10 +725,7 @@ class JointLandlordInvitationServiceTests {
                     id = 999L,
                     email = "unrelated@example.com",
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
             val mockUri = URI("https://example.com/invite/test-token")
 
@@ -759,10 +748,7 @@ class JointLandlordInvitationServiceTests {
                     id = 999L,
                     email = "expired@example.com",
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
             val mockUri = URI("https://example.com/invite/test-token")
 
@@ -1080,10 +1066,7 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
 
             whenever(mockJointLandlordInvitationRepository.findById(1L))
@@ -1117,10 +1100,7 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
                     propertyOwnership = propertyOwnership,
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
 
             whenever(mockJointLandlordInvitationRepository.findById(1L))
@@ -1172,10 +1152,7 @@ class JointLandlordInvitationServiceTests {
             val expiredInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     email = "expired@example.com",
-                    createdDate =
-                        Instant
-                            .now()
-                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    createdDate = getInstantDaysAgoInUK(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1),
                 )
             val hiddenInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
@@ -1541,6 +1518,44 @@ class JointLandlordInvitationServiceTests {
             whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
             assertNull(invitationService.getLastAcceptedPropertyFromSession())
+        }
+    }
+
+    @Nested
+    inner class LandlordReactivatedByLastAcceptance {
+        @ParameterizedTest
+        @ValueSource(booleans = [true, false])
+        fun `setLandlordReactivatedByLastAcceptance stores the value in session`(landlordReactivated: Boolean) {
+            invitationService.setLandlordReactivatedByLastAcceptance(landlordReactivated)
+
+            verify(mockHttpSession).setAttribute(
+                LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE,
+                landlordReactivated,
+            )
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns true when the session value is true`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(true)
+
+            assertTrue(invitationService.wasLandlordReactivatedByLastAcceptance())
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns false when the session value is false`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(false)
+
+            assertFalse(invitationService.wasLandlordReactivatedByLastAcceptance())
+        }
+
+        @Test
+        fun `wasLandlordReactivatedByLastAcceptance returns false when not present`() {
+            whenever(mockHttpSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE))
+                .thenReturn(null)
+
+            assertFalse(invitationService.wasLandlordReactivatedByLastAcceptance())
         }
     }
 

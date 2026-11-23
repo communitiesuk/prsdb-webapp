@@ -40,7 +40,7 @@ class PropertyComplianceViewModelFactoryTests {
             mockMessageSource,
             MockFeatureFlagConfig.createFeatureFlagManagerWithGas14MonthExpiryEnabled(),
         )
-    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource, mock(), mock())
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
     private val factory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
@@ -293,6 +293,31 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertNull(result.gasSafetySummaryCard.actions)
+            assertNull(result.electricalSafetySummaryCard.actions)
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
+                        opensInNewTab = true,
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
+        }
+
+        @Test
+        fun `cards have no change actions for the deactivated landlord view`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.DEACTIVATED_LANDLORD,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 

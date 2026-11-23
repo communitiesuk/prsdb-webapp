@@ -421,9 +421,6 @@ class NftDataSeeder(
                             ownershipPaymentStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
-                            // Associated party addresses are drawn here too, so bound this generator's
-                            // retained values with the property batches rather than the landlord ones.
-                            contactAddressGenerator.forgetUsedValues()
                             propertyAddressGenerator.forgetUsedValues()
                             fileUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
@@ -843,6 +840,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setDate(23, renewalDate)
         propertyOwnershipStmt.setInt(24, NftDataFaker.generateOwnershipTypeBeforePdjb955().ordinal)
         propertyOwnershipStmt.setLongOrNull(25, propertyManagerIdIfManaged)
+        propertyOwnershipStmt.setDate(26, renewalDate)
         propertyOwnershipStmt.addBatch()
 
         if (ownershipType.requiresFreeholderRecords()) {
@@ -886,7 +884,6 @@ class NftDataSeeder(
         freeholderStmt.setLong(2, propertyOwnershipId)
         freeholderStmt.setStringOrNull(3, freeholder.name)
         freeholderStmt.setStringOrNull(4, freeholder.email)
-        freeholderStmt.setLongOrNull(5, if (freeholder.hasAddress) contactAddressGenerator.next().id else null)
         freeholderStmt.addBatch()
     }
 
@@ -900,7 +897,6 @@ class NftDataSeeder(
         superiorLandlordStmt.setLong(2, propertyOwnershipId)
         superiorLandlordStmt.setStringOrNull(3, superiorLandlord.name)
         superiorLandlordStmt.setStringOrNull(4, superiorLandlord.email)
-        superiorLandlordStmt.setLongOrNull(5, if (superiorLandlord.hasAddress) contactAddressGenerator.next().id else null)
         superiorLandlordStmt.addBatch()
     }
 

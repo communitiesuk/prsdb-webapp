@@ -14,20 +14,6 @@ ifOccupied:
   bullet:
     one: how many people live in the property
     two: the rent you charge
-provideTenancyDetailsLater:
-  heading: Provide tenancy details later
-  paragraph:
-    one: You can continue and submit your registration now, but you’ll need to return later and provide details about the current tenancy.
-  whenToProvide:
-    heading: When you’ll need to provide these tenancy details
-    insetText: To keep your property registered, you must provide its tenancy details within 28 days.
-    paragraph: This is because you’ve told us this property’s occupied by tenants.
-  reason: 'We’ll need to know:'
-  weWillNeedToKnow:
-    bullet:
-      one: how many people are living in the property
-      two: if you’ve provided furniture
-      three: how much the rent is
 afterRegistered:
   heading: After you’ve registered
   paragraph:
@@ -67,14 +53,15 @@ confirmation:
     epc: energy performance certificate (EPC)
     tenancyDetails: tenancy details
   goToDashboard: Go to dashboard
+  landlordAccount:
+    heading: Your landlord account
+    individual: Your landlord account is now active.
+    organisation: Your organisation’s landlord account is now active.
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
 taskList:
   heading: Register a rental property
   subtitle: Your answers are saved as you go. You can return and finish this later.
-  gasSafety: Gas safety certificate
-  electricalSafety: Electrical safety certificate
-  epc: Energy performance certificate (EPC)
   aboutYourProperty:
     heading: About your property
     propertyDetails: Property details
@@ -88,8 +75,6 @@ taskList:
     whoProvidesDetails: Who will provide these details
     whoProvidesDetailsOccupiedHint: If you’re using a letting agent or property manager, they can provide the rest of this section
     whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
-    licensing: Tell us if your property needs a licence
-    tenancyDetails: Tenancy details
     tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
@@ -149,29 +134,6 @@ confirmMissingCompliance:
     error:
       missing: Select whether you want to submit this registration
   button: Confirm and submit
-provideLicensingLater:
-  occupied:
-    heading: Provide details about property licensing later
-    paragraph:
-      one: You can continue and submit your registration now, but you’ll need to return later and provide details about this property’s license.
-    whenToAdd:
-      heading: When you must do this by
-      insetText: To keep your property registered, you must provide its licensing details within 28 days.
-      paragraph: This is because you’ve told us this property’s occupied by tenants.
-  unoccupied:
-    heading: Provide details about property licensing later
-    paragraph:
-      one: If you’re unsure, check with the local council if your property needs a license to be rented out.
-    whenToAdd:
-      heading: When you’ll need to provide these property licensing details
-      paragraph:
-        one: You can continue to finish your registration and get a Property Registration Number.
-        two: 'Once your property’s occupied, you have 28 days to return and tell us:'
-  weWillNeedToKnow:
-    intro: 'We’ll need to know:'
-    bullet:
-      one: if your property needs a license or not
-      two: details about the license (if your property needs one)
 correspondenceEmail:
   heading: Where should the council send emails?
   hint: This is the email address the council will use if they need to contact someone about the property
@@ -275,10 +237,10 @@ paymentNotCompleted:
     heading: What you need to do
     paragraph: Try the payment again to complete your property registration.
 whoProvidesRentalDetails:
-  heading: Who will provide details about how your property’s rented out
+  heading: Who will provide details about how this property is rented out
   intro: 'To register your property, we need details about:'
   bullet:
-    licensing: if your property needs a license
+    licensing: if your property needs a licence
     complianceCertificates: compliance certificates
     tenancy: the current tenancy
   lettingAgentParagraph: If you’re using a letting agent or property manager, you can choose for them to provide these details for you. They can also keep these details up to date.
@@ -307,16 +269,17 @@ lettingAgentEmail:
   heading: Allow your letting agent or property manager to provide details
   howItWorks:
     heading: How it works
-    step1: "You’ll enter your letting agent or property manager’s email address, then skip to paying for this property."
-    step2: "We’ll ask your letting agent or property manager to provide the licensing, compliance certificates and tenancy details."
-    step3: They can keep these details up to date for you.
+    step1: Ask your letting agent or property manager which email address they want you to use.
+    step2: Enter this email address then skip to paying for this property.
+    step3: "We’ll ask your letting agent or property manager to provide the licensing, compliance certificates and tenancy details."
+    step4: They can keep these details up to date for you.
   canRemove: You can remove your letting agent or property manager at any time.
   responsible:
     heading: You remain responsible for this registration
     body: "You should always check that your registration is correct. We’ll email you whenever your letting agent or property manager makes an update."
   insetText: "You must check that all your property’s details are provided within 28 days. We’ll email you if no one has added these details after 14 days."
   emailLabel: "What is your letting agent or property manager’s email address?"
-  emailHint: "We’ll email them a link to provide this property’s remaining details"
+  emailHint: Enter the email address your letting agent or property manager gave you
   submitButton: Save and continue
 occupancyChangeInterruption:
   heading: Are you sure you want to change this?

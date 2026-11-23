@@ -259,7 +259,7 @@ class LandlordRegistrationCyaStepConfig(
                 ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
+                "registerAsALandlord.checkAnswers.rowHeading.homeAddress",
                 state.individualLandlordLocationTask.addressTask
                     .getAddress()
                     .singleLineAddress,

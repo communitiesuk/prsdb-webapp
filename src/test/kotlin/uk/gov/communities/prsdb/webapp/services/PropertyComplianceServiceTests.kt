@@ -97,7 +97,7 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockCurrentUserService: CurrentUserService
 
-    // TODO: PDJB-1926: Remove mockFeatureFlagManager
+    // TODO: PDJB-1926 / PDJB-1679: Remove mockFeatureFlagManager once both the 14 month gas expiry and EIC_ISSUE_DATE flags are removed
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
@@ -2642,6 +2642,36 @@ class PropertyComplianceServiceTests {
             val eicrStatus = propertyComplianceService.getComplianceStatus(eicrCompliance)
 
             assertEquals(expiryDate, eicrStatus.electricalSafetyExpiryDate)
+        }
+
+        @Test
+        fun `getComplianceStatus sets the EIC issue date when EIC_ISSUE_DATE is enabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(true)
+            val issueDate = LocalDate.of(2025, 6, 1)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withEicIssueDate(issueDate)
+                    .build()
+
+            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+            assertEquals(issueDate, complianceStatus.eicIssueDate)
+        }
+
+        // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
+        @Test
+        fun `getComplianceStatus does not set the EIC issue date when EIC_ISSUE_DATE is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(false)
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withEicIssueDate(LocalDate.of(2025, 6, 1))
+                    .build()
+
+            val complianceStatus = propertyComplianceService.getComplianceStatus(propertyCompliance)
+
+            assertNull(complianceStatus.eicIssueDate)
         }
     }
 

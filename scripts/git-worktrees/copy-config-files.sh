@@ -31,14 +31,20 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MAIN_REPO_PATH="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WORKTREE_BASE="$(dirname "$MAIN_REPO_PATH")"
 
+# Treat Windows drive paths (e.g. C:/... from `git worktree list` in Git Bash) as absolute
+WINDOWS_ABSOLUTE_PATH='^[A-Za-z]:[\/]'
+is_absolute() {
+    [[ "$1" == /* || "$1" =~ $WINDOWS_ABSOLUTE_PATH ]]
+}
+
 # If not an absolute path, treat as a sibling name
-if [[ "$SOURCE_INPUT" != /* ]]; then
+if ! is_absolute "$SOURCE_INPUT"; then
     SOURCE_PATH="$WORKTREE_BASE/$SOURCE_INPUT"
 else
     SOURCE_PATH="$SOURCE_INPUT"
 fi
 
-if [[ "$DEST_INPUT" != /* ]]; then
+if ! is_absolute "$DEST_INPUT"; then
     DEST_PATH="$WORKTREE_BASE/$DEST_INPUT"
 else
     DEST_PATH="$DEST_INPUT"
@@ -100,49 +106,6 @@ else
     echo "  No gitignored files found to copy."
 fi
 
-# Assign unique ports for parallel worktree execution.
-# Use the smallest offset (>= 1) for which none of the offset ports are already assigned to any port key in
-# sibling worktrees' .env files, so offsets freed by removed worktrees are reused rather than creeping ever higher.
-USED_PORTS=" "
-for SIBLING_ENV in "$WORKTREE_BASE"/*/.env; do
-    [ -f "$SIBLING_ENV" ] || continue
-    [ "$SIBLING_ENV" = "$DEST_PATH/.env" ] && continue
-    SIBLING_PORTS=$(grep -E '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT|ELASTICMQ_PORT)=' "$SIBLING_ENV" 2>/dev/null | sed -E 's/^[^=]*=[^0-9]*([0-9]+).*/\1/' | tr '\n' ' ' || true)
-    USED_PORTS="$USED_PORTS$SIBLING_PORTS "
-done
-is_port_used() { [[ "$USED_PORTS" == *" $1 "* ]]; }
-PORT_OFFSET=1
-while is_port_used $((8080 + PORT_OFFSET)) || is_port_used $((5433 + PORT_OFFSET)) || is_port_used $((6379 + PORT_OFFSET)) || is_port_used $((9324 + PORT_OFFSET)); do
-    PORT_OFFSET=$((PORT_OFFSET + 1))
-done
-
-NEW_SERVER_PORT=$((8080 + PORT_OFFSET))
-NEW_POSTGRES_PORT=$((5433 + PORT_OFFSET))
-NEW_REDIS_PORT=$((6379 + PORT_OFFSET))
-NEW_ELASTICMQ_PORT=$((9324 + PORT_OFFSET))
-
-ENV_FILE="$DEST_PATH/.env"
-if [ -f "$ENV_FILE" ]; then
-    echo ""
-    echo "Assigning unique ports for parallel execution (offset: $PORT_OFFSET)..."
-
-    # Helper: set a key=value in the .env file (replace if present, append if not)
-    set_env_var() {
-        local key="$1" value="$2"
-        if grep -q "^${key}=" "$ENV_FILE"; then
-            sed -i "s|^${key}=.*|${key}=\"${value}\"|" "$ENV_FILE"
-        else
-            printf '\n%s="%s"' "$key" "$value" >> "$ENV_FILE"
-        fi
-    }
-
-    set_env_var "SERVER_PORT" "$NEW_SERVER_PORT"
-    set_env_var "POSTGRES_PORT" "$NEW_POSTGRES_PORT"
-    set_env_var "REDIS_PORT" "$NEW_REDIS_PORT"
-    set_env_var "ELASTICMQ_PORT" "$NEW_ELASTICMQ_PORT"
-
-    echo "  SERVER_PORT=$NEW_SERVER_PORT"
-    echo "  POSTGRES_PORT=$NEW_POSTGRES_PORT"
-    echo "  REDIS_PORT=$NEW_REDIS_PORT"
-    echo "  ELASTICMQ_PORT=$NEW_ELASTICMQ_PORT"
-fi
+# Assign unique ports for parallel worktree execution
+echo ""
+node "$SCRIPT_DIR/assign-worktree-ports.mjs" "$DEST_PATH"

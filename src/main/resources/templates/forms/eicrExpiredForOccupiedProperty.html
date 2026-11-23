@@ -19,7 +19,6 @@
         </p>
         <section>
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.subHeading}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.subHeading</h2>
-            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.warning})}"></div>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.one}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.one</p>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.two}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.two</p>
             <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.three}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.paragraph.three</p>
@@ -31,9 +30,10 @@
             </ul>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.beforeLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.beforeLink</span>
-                <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link</a>
-                <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.link
+                </a><span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.readMore.afterLink</span>
             </p>
+            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.eicr.occupied.warning})}"></div>
         </section>
     </th:block>
     <th:block id="form-content">

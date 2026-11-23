@@ -120,7 +120,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = CertificateType::class, names = ["Eic", "Eicr"])
-    fun `The back link on the electrical cert date and certificate pages returns to the check answers page when reached from there`(
+    fun `The back links on the electrical cert pages are correct when changing answers from the check answers page`(
         certificateType: CertificateType,
         page: Page,
     ) {
@@ -150,7 +150,13 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         checkAnswersPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
         checkUploadsPage = assertCheckUploadsPage(page, certificateType)
         checkUploadsPage.backLink.clickAndWait()
-        assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+
+        // Change the certificate date from the check answers page, then check the uploads page links back to the date page
+        checkAnswersPage.summaryList.certificateDateRow(certificateType).clickFirstActionLinkAndWait()
+        assertCertDatePage(page, certificateType).submitDate(validCertDate(certificateType))
+        assertCheckUploadsPage(page, certificateType).backLink.clickAndWait()
+        assertCertDatePage(page, certificateType)
     }
 
     @Test

@@ -13,11 +13,14 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -103,10 +106,27 @@ class UpdateGasSafetyJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(
-                journey.gasSafetyDetailsTask,
-                { journey },
-            )
+            when (state.checkingAnswersFor) {
+                HasGasCertStep.ROUTE_SEGMENT -> {
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyDetailsTask.hasGasCertStep,
+                    )
+                }
+
+                GasCertIssueDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyDetailsTask.gasCertIssueDateStep,
+                    )
+                }
+
+                else -> {
+                    checkAnswerTask(journey.gasSafetyDetailsTask, { journey })
+                }
+            }
 
             step(journey.finishCyaStep) {
                 initialStep()

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasS
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration.CheckUploadsForm
@@ -21,4 +22,5 @@ class CheckGasCertUploadsFormPageUpdateGasSafety(
 
     val table = Table(page)
     val form = CheckUploadsForm(page)
+    val backLink = BackLink.default(page)
 }

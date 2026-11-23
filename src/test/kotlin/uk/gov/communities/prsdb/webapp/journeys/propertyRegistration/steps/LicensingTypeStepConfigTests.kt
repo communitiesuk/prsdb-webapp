@@ -76,6 +76,29 @@ class LicensingTypeStepConfigTests {
         assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
     }
 
+    @Test
+    fun `mode rejects PROVIDE_LATER when route is disabled`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.allowProvideLicensingLaterRoute).thenReturn(false)
+        whenever(mockState.journeyId).thenReturn("test-journey-id")
+        whenever(mockState.getStepData(routeSegment))
+            .thenReturn(mapOf("licensingType" to "PROVIDE_LATER", "action" to CONTINUE_BUTTON_ACTION_NAME))
+
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
+    }
+
+    @Test
+    fun `mode returns PROVIDE_LATER when licensingType is PROVIDE_LATER and route is allowed`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.allowProvideLicensingLaterRoute).thenReturn(true)
+        whenever(mockState.getStepData(routeSegment))
+            .thenReturn(mapOf("licensingType" to "PROVIDE_LATER", "action" to CONTINUE_BUTTON_ACTION_NAME))
+
+        val result = stepConfig.mode(mockState)
+
+        assertEquals(LicensingTypeMode.PROVIDE_LATER, result)
+    }
+
     private fun setupStepConfig(): LicensingTypeStepConfig {
         val stepConfig = LicensingTypeStepConfig()
         stepConfig.urlPath = routeSegment
