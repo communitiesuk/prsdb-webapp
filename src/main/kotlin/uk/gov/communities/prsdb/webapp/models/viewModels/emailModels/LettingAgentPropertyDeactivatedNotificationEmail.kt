@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+// TODO PDJB-2270: Add the deactivation reason to the email copy once PDJB-2027 adds the property deactivation reason enum
 data class LettingAgentPropertyDeactivatedNotificationEmail(
     val propertyAddress: String,
     val singleLineAddress: String,

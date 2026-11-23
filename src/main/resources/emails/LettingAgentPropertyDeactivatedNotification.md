@@ -2,7 +2,7 @@ You no longer have access to:
 
 ((property address))
 
-This property has been deactivated due to missing information.
+This property has been deactivated.
 
 This means you can no longer provide this rental property's details. Your link has stopped working.
 
