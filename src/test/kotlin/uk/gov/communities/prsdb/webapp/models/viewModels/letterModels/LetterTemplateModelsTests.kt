@@ -75,7 +75,7 @@ class LetterTemplateModelsTests {
                 metadata.enumName == testData.model.template.name
             }
 
-        val subjectParameters = extractParameters(storedMetadata.subject)
+        val subjectParameters = storedMetadata.subject?.let(::extractParameters).orEmpty()
         val bodyParameters = extractParameters(storedBody)
         val parameters = (subjectParameters + bodyParameters).distinct()
 
