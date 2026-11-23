@@ -8,10 +8,12 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -23,6 +25,7 @@ import java.time.LocalDate
 class DeactivationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
+    private val landlordDeactivationRepository: LandlordDeactivationRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService,
     private val transactionTemplate: TransactionTemplate,
@@ -80,6 +83,33 @@ class DeactivationService(
         }
 
         return failureCount
+    }
+
+    fun getIdsOfLandlordsWhoNeverRegisteredAProperty(): List<Long> {
+        val cutoff =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusMonths(LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
+        return landlordDeactivationRepository.findIdsOfActiveLandlordsWithNoRegisteredPropertyCreatedBefore(cutoff)
+    }
+
+    fun getIdsOfLandlordsWithNoActiveProperties(): List<Long> =
+        landlordDeactivationRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
+
+    // Re-checks the landlord in case they changed after the candidate queries ran. Returns whether they were deactivated.
+    @Transactional
+    fun deactivateLandlordIfNoActiveProperties(landlordId: Long): Boolean {
+        val landlord =
+            landlordRepository.findById(landlordId).orElseThrow {
+                IllegalStateException("Landlord $landlordId not found")
+            }
+        if (!landlord.isActive || propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)) return false
+
+        // The same reason applies whether the landlord never registered a property or has no active properties left
+        deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        return true
     }
 
     fun landlordHasOtherActiveProperties(

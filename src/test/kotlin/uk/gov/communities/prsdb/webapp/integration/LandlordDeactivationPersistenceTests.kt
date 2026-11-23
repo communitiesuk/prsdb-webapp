@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
@@ -15,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.services.LandlordDeactivationService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import java.time.LocalDate
 
 class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("data-landlords-for-deactivation-task.sql") {
@@ -27,6 +28,9 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
 
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
+    @Autowired
+    private lateinit var transactionTemplate: TransactionTemplate
 
     @Test
     fun `no registered property query only returns active landlords created before the cutoff with no property`() {
@@ -54,10 +58,14 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
         val featureFlagManager = mock<FeatureFlagManager> { on { checkFeature(ACTIVE_INACTIVE) } doReturn true }
         val taskLogic =
             DeactivateInactiveLandlordsTaskLogic(
-                LandlordDeactivationService(
+                DeactivationService(
+                    propertyOwnershipRepository,
                     landlordRepository,
                     landlordDeactivationRepository,
-                    propertyOwnershipRepository,
+                    mock(),
+                    mock(),
+                    transactionTemplate,
+                    featureFlagManager,
                     mock(),
                 ),
                 featureFlagManager,

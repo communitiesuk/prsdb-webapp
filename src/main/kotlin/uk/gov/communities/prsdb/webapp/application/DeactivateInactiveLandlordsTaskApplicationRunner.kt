@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskServ
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
-import uk.gov.communities.prsdb.webapp.services.LandlordDeactivationService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import kotlin.system.exitProcess
 
 @PrsdbScheduledTask("deactivate-inactive-landlords-scheduled-task")
@@ -33,7 +33,7 @@ class DeactivateInactiveLandlordsTaskApplicationRunner(
 
 @PrsdbTaskService
 class DeactivateInactiveLandlordsTaskLogic(
-    private val landlordDeactivationService: LandlordDeactivationService,
+    private val deactivationService: DeactivationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     fun deactivateInactiveLandlords(): Int {
@@ -43,8 +43,8 @@ class DeactivateInactiveLandlordsTaskLogic(
             return 0
         }
 
-        val neverRegisteredIds = landlordDeactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()
-        val noActivePropertiesIds = landlordDeactivationService.getIdsOfLandlordsWithNoActiveProperties()
+        val neverRegisteredIds = deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()
+        val noActivePropertiesIds = deactivationService.getIdsOfLandlordsWithNoActiveProperties()
         println(
             "Found ${neverRegisteredIds.size} landlords who have not registered a property within " +
                 "$LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS months and ${noActivePropertiesIds.size} landlords " +
@@ -55,7 +55,7 @@ class DeactivateInactiveLandlordsTaskLogic(
         var failureCount = 0
         (neverRegisteredIds + noActivePropertiesIds).distinct().forEach { landlordId ->
             try {
-                if (landlordDeactivationService.deactivateLandlordIfNoActiveProperties(landlordId)) {
+                if (deactivationService.deactivateLandlordIfNoActiveProperties(landlordId)) {
                     println("Deactivated landlord with id: $landlordId")
                     deactivatedCount++
                 }

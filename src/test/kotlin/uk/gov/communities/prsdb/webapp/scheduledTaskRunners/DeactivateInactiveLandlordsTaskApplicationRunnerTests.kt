@@ -13,12 +13,12 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
-import uk.gov.communities.prsdb.webapp.services.LandlordDeactivationService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 
 @ExtendWith(MockitoExtension::class)
 class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
     @Mock
-    private lateinit var landlordDeactivationService: LandlordDeactivationService
+    private lateinit var deactivationService: DeactivationService
 
     @Mock
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -34,39 +34,39 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
         val failureCount = taskLogic.deactivateInactiveLandlords()
 
         assertEquals(0, failureCount)
-        verifyNoInteractions(landlordDeactivationService)
+        verifyNoInteractions(deactivationService)
     }
 
     @Test
     fun `deactivateInactiveLandlords deactivates each candidate from both rules once and returns zero`() {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        whenever(landlordDeactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
-        whenever(landlordDeactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(2L, 3L))
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenReturn(true)
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(false)
+        whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
+        whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(2L, 3L))
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenReturn(true)
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(false)
 
         val failureCount = taskLogic.deactivateInactiveLandlords()
 
         assertEquals(0, failureCount)
-        verify(landlordDeactivationService, times(1)).deactivateLandlordIfNoActiveProperties(1L)
-        verify(landlordDeactivationService, times(1)).deactivateLandlordIfNoActiveProperties(2L)
-        verify(landlordDeactivationService, times(1)).deactivateLandlordIfNoActiveProperties(3L)
+        verify(deactivationService, times(1)).deactivateLandlordIfNoActiveProperties(1L)
+        verify(deactivationService, times(1)).deactivateLandlordIfNoActiveProperties(2L)
+        verify(deactivationService, times(1)).deactivateLandlordIfNoActiveProperties(3L)
     }
 
     @Test
     fun `deactivateInactiveLandlords carries on after a failure and returns the number of failures`() {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        whenever(landlordDeactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
-        whenever(landlordDeactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(3L))
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenThrow(RuntimeException("DB error"))
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
-        whenever(landlordDeactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(true)
+        whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
+        whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(3L))
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenThrow(RuntimeException("DB error"))
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
+        whenever(deactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(true)
 
         val failureCount = taskLogic.deactivateInactiveLandlords()
 
         assertEquals(1, failureCount)
-        verify(landlordDeactivationService).deactivateLandlordIfNoActiveProperties(2L)
-        verify(landlordDeactivationService).deactivateLandlordIfNoActiveProperties(3L)
+        verify(deactivationService).deactivateLandlordIfNoActiveProperties(2L)
+        verify(deactivationService).deactivateLandlordIfNoActiveProperties(3L)
     }
 }

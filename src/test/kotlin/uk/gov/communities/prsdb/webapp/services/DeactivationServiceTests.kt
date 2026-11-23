@@ -26,8 +26,10 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -44,6 +46,9 @@ class DeactivationServiceTests {
 
     @Mock
     private lateinit var landlordRepository: LandlordRepository
+
+    @Mock
+    private lateinit var landlordDeactivationRepository: LandlordDeactivationRepository
 
     @Mock
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
@@ -401,12 +406,81 @@ class DeactivationServiceTests {
         verifyNoInteractions(transactionTemplate)
     }
 
+    @Test
+    fun `getIdsOfLandlordsWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago as the cutoff`() {
+        whenever(landlordDeactivationRepository.findIdsOfActiveLandlordsWithNoRegisteredPropertyCreatedBefore(landlordCutoff()))
+            .thenReturn(listOf(1L, 2L))
+
+        assertEquals(listOf(1L, 2L), deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty())
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties by id deactivates an active landlord with no active properties`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
+
+        val wasDeactivated = deactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
+
+        assertTrue(wasDeactivated)
+        assertFalse(landlord.isActive)
+        assertEquals(today(), landlord.lastDeactivatedDate)
+        verify(landlordRepository).save(landlord)
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties by id emails the landlord when ACTIVE_INACTIVE is enabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
+
+        deactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
+
+        verify(landlordDeactivatedEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties by id makes no change when the landlord has an active property`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(true)
+
+        val wasDeactivated = deactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
+
+        assertFalse(wasDeactivated)
+        assertTrue(landlord.isActive)
+        verify(landlordRepository, never()).save(any())
+        verifyNoInteractions(landlordDeactivatedEmailService)
+    }
+
+    @Test
+    fun `deactivateLandlordIfNoActiveProperties by id makes no change for an already inactive landlord`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        landlord.deactivate(ORIGINAL_DATE)
+        whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+        val wasDeactivated = deactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
+
+        assertFalse(wasDeactivated)
+        assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
+        verify(landlordRepository, never()).save(any())
+        verifyNoInteractions(landlordDeactivatedEmailService)
+    }
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
+
+        private fun landlordCutoff() =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusMonths(LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
 
         private fun cutoff() =
             LocalDate
