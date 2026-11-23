@@ -30,7 +30,7 @@ checkAnswers:
     email: Email address
     telephoneNumber: Phone number
     englandOrWalesResident: Resident in England or Wales
-    contactAddress: Contact address
+    homeAddress: Home address
     localCouncil: Local Council
     landlordType: Landlord type
 orgCheckAnswers:
@@ -91,8 +91,8 @@ confirmation:
       one: You now need to register your rental properties.
       two: In the future you will need to include landlord and rental property numbers when advertising a property.
     deactivation:
-      individual: If you do not submit a property registration by {0,,deactivationDate} your landlord account will be deactivated.
-      organisation: If your organisation does not submit a property registration by {0,,deactivationDate} your landlord account will be deactivated.
+      individual: If you do not submit a property registration by {0,,scheduledDeactivationDate} your landlord account will be deactivated.
+      organisation: If your organisation does not submit a property registration by {0,,scheduledDeactivationDate} your landlord account will be deactivated.
   feedback:
     body: 'Answer a few short questions about <strong>landlord registration</strong>.'
 privacyNotice:

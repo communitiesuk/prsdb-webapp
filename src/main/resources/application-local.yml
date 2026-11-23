@@ -10,14 +10,9 @@ spring:
     username: postgres
     password: notarealpassword
 
-    jpa:
-      hibernate:
-        ddl-auto: validate
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-      defer-datasource-initialization: true
-      show-sql: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
   flyway:
     enabled: true
@@ -171,6 +166,9 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-844-active-inactive"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1878-international-addresses"
       enabled: true
       expiry-date: "2027-01-01"
 

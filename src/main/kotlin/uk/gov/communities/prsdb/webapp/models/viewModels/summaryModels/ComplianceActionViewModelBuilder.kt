@@ -57,13 +57,7 @@ class ComplianceActionViewModelBuilder {
                         )
                     }
                     if (dataModel.shouldShowElectricalSafetyAction()) {
-                        addCertRow(
-                            "complianceActions.summaryRow.electricalSafety",
-                            dataModel.electricalSafetyStatus,
-                            "electricalSafety",
-                            dataModel.provideLaterDeadline,
-                            dataModel.electricalSafetyExpiryDate,
-                        )
+                        addElectricalSafetyRow(dataModel)
                     }
                     if (dataModel.shouldShowEpcAction()) {
                         addCertRow(
@@ -75,6 +69,27 @@ class ComplianceActionViewModelBuilder {
                         )
                     }
                 }.toList()
+
+        private fun MutableList<SummaryListRowViewModel>.addElectricalSafetyRow(dataModel: ComplianceStatusDataModel) {
+            val eicIssueDate = dataModel.eicIssueDate
+            if (dataModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED && eicIssueDate != null) {
+                add(
+                    SummaryListRowViewModel(
+                        fieldHeading = "complianceActions.summaryRow.electricalSafety",
+                        fieldValue = "complianceActions.status.expiredEic",
+                        optionalFieldValueParam = eicIssueDate.format(DATE_FORMATTER),
+                    ),
+                )
+            } else {
+                addCertRow(
+                    "complianceActions.summaryRow.electricalSafety",
+                    dataModel.electricalSafetyStatus,
+                    "electricalSafety",
+                    dataModel.provideLaterDeadline,
+                    dataModel.electricalSafetyExpiryDate,
+                )
+            }
+        }
 
         private fun MutableList<SummaryListRowViewModel>.addCertRow(
             label: String,

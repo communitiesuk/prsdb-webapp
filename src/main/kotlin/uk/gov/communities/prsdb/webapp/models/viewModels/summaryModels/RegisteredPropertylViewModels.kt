@@ -68,19 +68,26 @@ data class RegisteredPropertyLandlordViewModel(
     }
 }
 
-// TODO PDJB-2035: Add a recordLink to the deactivated property record
 data class DeactivatedPropertyLandlordViewModel(
     val address: String,
     val registrationNumber: String,
+    val recordLink: String,
 ) {
     companion object {
-        fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): DeactivatedPropertyLandlordViewModel =
+        fun fromPropertyOwnership(
+            propertyOwnership: PropertyOwnership,
+            currentUrlKey: Int? = null,
+        ): DeactivatedPropertyLandlordViewModel =
             DeactivatedPropertyLandlordViewModel(
                 address = propertyOwnership.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(propertyOwnership.registrationNumber)
                         .toString(),
+                recordLink =
+                    PropertyDetailsController
+                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)
+                        .overrideBackLinkForUrl(currentUrlKey),
             )
     }
 }

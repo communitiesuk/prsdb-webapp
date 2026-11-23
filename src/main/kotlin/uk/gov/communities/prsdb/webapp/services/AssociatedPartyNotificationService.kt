@@ -2,63 +2,107 @@ package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
-import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyManager
-import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.SuperiorLandlordAddedToPropertyLetter
 
 @PrsdbWebService
 class AssociatedPartyNotificationService(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    // TODO PDJB-1987, PDJB-1988: implement once the freeholder creation email and letter templates are available
-    fun sendCreationNotificationForFreeholder(freeholder: Freeholder): AssociatedPartyNotificationOutcome =
-        TODO("Implement freeholder creation notification when its email and letter templates are available")
+    // TODO PDJB-1987: make the email template and return type non-nullable once the freeholder added email is sent.
+    fun sendNotificationToFreeholderAddedToProperty(
+        freeholder: FreeholderDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): AssociatedPartyNotificationOutcome? =
+        sendNotificationToAssociatedParty(
+            name = freeholder.name,
+            emailAddress = freeholder.email,
+            postalAddress = freeholder.address,
+            emailTemplate = null,
+            buildLetter = { buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership) },
+        )
 
-    // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
-    fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlord): AssociatedPartyNotificationOutcome =
-        TODO("Implement superior landlord creation notification when its email and letter templates are available")
+    internal fun buildFreeholderAddedToPropertyLetter(
+        freeholder: FreeholderDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): FreeholderAddedToPropertyLetter =
+        FreeholderAddedToPropertyLetter(
+            freeholderName = freeholder.name.orEmpty(),
+            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            landlords = landlordsRentingOutProperty(propertyOwnership),
+            freeholderAddress = freeholder.address?.toMultiLineAddress().orEmpty(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+        )
+
+    // TODO PDJB-1989: make the email template and return type non-nullable once the superior landlord added email is sent.
+    fun sendNotificationToSuperiorLandlordAddedToProperty(
+        superiorLandlord: SuperiorLandlordDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): AssociatedPartyNotificationOutcome? =
+        sendNotificationToAssociatedParty(
+            name = superiorLandlord.name,
+            emailAddress = superiorLandlord.email,
+            postalAddress = superiorLandlord.address,
+            emailTemplate = null,
+            buildLetter = { buildSuperiorLandlordAddedToPropertyLetter(superiorLandlord, propertyOwnership) },
+        )
+
+    internal fun buildSuperiorLandlordAddedToPropertyLetter(
+        superiorLandlord: SuperiorLandlordDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): SuperiorLandlordAddedToPropertyLetter =
+        SuperiorLandlordAddedToPropertyLetter(
+            superiorLandlordName = superiorLandlord.name.orEmpty(),
+            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            landlords = landlordsRentingOutProperty(propertyOwnership),
+            superiorLandlordAddress = superiorLandlord.address?.toMultiLineAddress().orEmpty(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+        )
+
+    private fun landlordsRentingOutProperty(propertyOwnership: PropertyOwnership): List<String> =
+        propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
+            "${landlord.name} (${landlord.getContactEmail()})"
+        }
 
     // TODO PDJB-1991: implement once the property manager creation email template is available
-    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManager): AssociatedPartyNotificationOutcome =
+    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
         TODO("Implement property manager creation notification when its email template is available")
 
-    internal fun sendNotificationToFreeholder(
-        freeholder: Freeholder,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome = sendNotification(freeholder.name, freeholder.email, freeholder.address, email, letter)
-
-    internal fun sendNotificationToSuperiorLandlord(
-        superiorLandlord: SuperiorLandlord,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome =
-        sendNotification(superiorLandlord.name, superiorLandlord.email, superiorLandlord.address, email, letter)
-
-    private fun sendNotification(
+    internal fun sendNotificationToAssociatedParty(
         name: String?,
         emailAddress: String?,
-        postalAddress: Address?,
-        email: EmailTemplateModel,
-        letter: LetterTemplateModel,
-    ): AssociatedPartyNotificationOutcome {
+        postalAddress: AddressDataModel?,
+        emailTemplate: EmailTemplateModel?,
+        buildLetter: () -> LetterTemplateModel,
+    ): AssociatedPartyNotificationOutcome? {
         if (name.isNullOrBlank()) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
+        // TODO PDJB-1987, PDJB-1989: double check that the user only has one contact type, otherwise throw
 
         if (!emailAddress.isNullOrBlank()) {
-            emailNotificationService.sendEmail(emailAddress, email)
+            if (emailTemplate == null) {
+                // TODO PDJB-1987, PDJB-1989: build and send the freeholder and superior landlord added emails.
+                return null
+            }
+            emailNotificationService.sendEmail(emailAddress, emailTemplate)
             return AssociatedPartyNotificationOutcome.EMAIL_SENT
         }
 
         if (postalAddress != null) {
-            letterNotificationService.sendLetter(letterAddress(name, postalAddress), letter)
+            letterNotificationService.sendLetter(letterAddress(name, postalAddress), buildLetter())
             return AssociatedPartyNotificationOutcome.LETTER_SENT
         }
 
@@ -67,7 +111,7 @@ class AssociatedPartyNotificationService(
 
     private fun letterAddress(
         name: String,
-        address: Address,
+        address: AddressDataModel,
     ): LetterAddressDataModel {
         val addressLines = listOf(name) + address.toMultiLineAddress().lines()
 

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -18,10 +19,12 @@ class FreeholderSummaryCardHelper {
             .map { (freeholderId, freeholder) ->
                 val actions = getActions(freeholderId)
                 if (freeholder.detailsKnown) {
+                    val contactRows = getContactRows(freeholder)
                     SummaryCardViewModel(
                         title = freeholder.name ?: throw PrsdbWebException("Freeholder $freeholderId has known details but no name"),
-                        summaryList = getContactRows(freeholder),
+                        summaryList = contactRows,
                         actions = actions,
+                        bodyTextKey = if (freeholder.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -32,6 +35,14 @@ class FreeholderSummaryCardHelper {
                     )
                 }
             }
+
+    fun getSummaryCards(freeholders: Collection<Freeholder>): List<SummaryCardViewModel> =
+        getSummaryCards(
+            freeholders
+                .sortedBy { it.id }
+                .withIndex()
+                .associate { (index, freeholder) -> index to FreeholderDataModel.fromFreeholder(freeholder) },
+        )
 
     private fun getContactRows(freeholder: FreeholderDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(
@@ -44,5 +55,9 @@ class FreeholderSummaryCardHelper {
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        ).ifEmpty { throw PrsdbWebException("Freeholder has known details but no email or postal address") }
+        )
+
+    companion object {
+        const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.freeholder.postalAddressNote"
+    }
 }

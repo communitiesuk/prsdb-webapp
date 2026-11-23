@@ -64,9 +64,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         return (urlPath to cyaJourneyId)
     }
 
-    val isCheckingAnswers: Boolean
-        get() = checkingAnswersFor != null
-
     var checkingAnswersFor: String?
 
     fun clearCyaFields() {

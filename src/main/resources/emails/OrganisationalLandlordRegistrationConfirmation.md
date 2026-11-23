@@ -16,6 +16,8 @@ Landlord Registration Number: ((LRN))
 
 You must register your rental properties.
 
+If your organisation does not submit a property registration by ((deactivation date)) your landlord account will be deactivated.
+
 You need to include your Landlord Registration Number and Property Registration Number on any property advertisements.
 
 [Go to dashboard](((PRSD URL)))

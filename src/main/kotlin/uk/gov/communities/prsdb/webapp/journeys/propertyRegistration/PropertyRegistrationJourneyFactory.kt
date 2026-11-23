@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicrE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
@@ -66,7 +67,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
@@ -96,7 +99,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
@@ -107,7 +110,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useCertDateBackStepsFromCheckUploads
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -179,6 +182,20 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
                 }
 
+                OwnsPropertyStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.ownershipAndLandlordsTask.ownershipStructureTask)
+                }
+
+                OwnershipKindStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    checkAnswerTaskFrom(ownershipStructureTask, startStep = ownershipStructureTask.ownershipTypeTask.ownershipKindStep)
+                }
+
+                FreeholdTypeStep.ROUTE_SEGMENT -> {
+                    val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
+                    checkAnswerTaskFrom(ownershipStructureTask, startStep = ownershipStructureTask.ownershipTypeTask.freeholdTypeStep)
+                }
+
                 AnyoneInOwnershipChainStep.ROUTE_SEGMENT,
                 SuperiorLandlordsListStep.ROUTE_SEGMENT,
                 -> {
@@ -193,7 +210,8 @@ class PropertyRegistrationJourneyFactory(
                     val ownershipStructureTask = journey.ownershipAndLandlordsTask.ownershipStructureTask
                     val ownershipTypeTask = ownershipStructureTask.ownershipTypeTask
                     val freeholdersTask = ownershipStructureTask.freeholdersTask
-                    // TODO PDJB-2146: Revisit whether check-answer routing should use freeholdersTask; ownershipTypeTask provides joint ownership.
+                    // The freeholders steps need isJointFreeholder, which is derived from the ownership type steps' outcomes.
+                    // Step outcomes are only available once a step is initialised, so the ownership type task must be mounted too.
                     checkAnswerTask(ownershipTypeTask)
                     checkAnswerTaskFrom(
                         freeholdersTask,
@@ -253,7 +271,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask)
+                    checkAnswerTask(journey.tenancyDetailsTask, { journey })
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
@@ -261,11 +279,11 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
                 }
 
                 TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    checkAnswerTask(journey.householdsAndTenantsTask, { journey })
                     configureStep(journey.householdsAndTenantsTask.tenants) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
@@ -311,13 +329,17 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
-                HasGasCertStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
-                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                }
+
+                HasGasCertStep.ROUTE_SEGMENT -> {
+                    checkAnswerTaskFrom(
+                        journey.gasSafetyTask.gasSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep,
+                    )
                 }
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
@@ -333,34 +355,31 @@ class PropertyRegistrationJourneyFactory(
                 CheckEicrUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicUploadsStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkEicrUploadsStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
                 }
 
                 // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
                 EicExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicExpiryDateStep,
+                    )
                 }
 
                 EicIssueDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicIssueDateStep,
+                    )
                 }
 
                 EicrExpiryDateStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
-                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep) {
-                        backDestination { journey.returnToCyaPageDestination }
-                    }
+                    checkAnswerTaskFrom(
+                        journey.electricalSafetyTask.electricalSafetyDetailsTask,
+                        { journey },
+                        startStep = journey.electricalSafetyTask.electricalSafetyDetailsTask.eicrExpiryDateStep,
+                    )
                 }
 
                 StartEpcStep.ROUTE_SEGMENT -> {
@@ -437,16 +456,9 @@ class PropertyRegistrationJourneyFactory(
                         )
                 }
             }
-            // We don't have a section header for these pages, as their titles are the same as the respective page header
-            listOf(
-                journey.gasSafetyTask.checkGasSafetyAnswersStep,
-                journey.electricalSafetyTask.checkElectricalSafetyAnswersStep,
-                journey.epcTask.checkEpcAnswersStep,
-            ).forEach { checkAnswersStep ->
-                configureStep(checkAnswersStep) {
-                    withAdditionalContentProperty { "sectionHeaderInfo" to null }
-                }
-            }
+            hideCheckAnswersSectionHeader(journey.gasSafetyTask)
+            hideCheckAnswersSectionHeader(journey.electricalSafetyTask)
+            hideCheckAnswersSectionHeader(journey.epcTask)
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
@@ -537,7 +549,7 @@ class PropertyRegistrationJourneyFactory(
                 saveProgress()
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
+                withHeadingMessageKey("licensing.sectionHeading", shouldUseNumbering = false)
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {
@@ -563,7 +575,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.gasSafetyTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
                     withDependencies { journey }
                     parents { journey.licensingTask.isComplete() }
@@ -572,7 +584,7 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.electricalSafetyTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.electricalSafetyTask) {
                     withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
@@ -580,10 +592,9 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                useCertDateBackStepsFromCheckUploads(journey.electricalSafetyTask.electricalSafetyDetailsTask)
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)
+                withHeadingMessageKey("propertyCompliance.epcTask.sectionHeading", shouldUseNumbering = false)
                 task(journey.epcTask) {
                     withDependencies { journey }
                     parents { journey.electricalSafetyTask.isComplete() }
@@ -593,8 +604,9 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
+                withHeadingMessageKey("tenancyDetails.sectionHeading", shouldUseNumbering = false)
                 task(journey.tenancyDetailsTask) {
+                    withDependencies { journey }
                     parents {
                         AndParents(
                             journey.epcTask.isComplete(),
@@ -848,6 +860,7 @@ class PropertyRegistrationJourney(
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -864,6 +877,7 @@ interface PropertyRegistrationJourneyState :
     OccupationState,
     BedroomsState,
     TenancyDetailsState,
+    HouseholdsAndTenantsDependencies,
     InviteJointLandlordsTaskDependencies,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,

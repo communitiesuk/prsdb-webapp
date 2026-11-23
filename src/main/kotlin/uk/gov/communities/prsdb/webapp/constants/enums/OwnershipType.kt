@@ -23,7 +23,6 @@ enum class OwnershipType {
 
     // Whether the property must have at least one freeholder record, because the ownership type does
     // not already identify all the freeholders. Repeated as ordinals in V1_62_0 and the seed scripts.
-    // TODO PDJB-960: use this to decide whether to show the freeholder section on the property record.
     fun requiresFreeholderRecords() =
         this in
             setOf(
@@ -35,8 +34,6 @@ enum class OwnershipType {
                 SHARE_OF_TENANTS_IN_COMMON,
             )
 
-    // TODO PDJB-1997: use this to decide whether to show the superior landlords section on the
-    //  property record.
     fun requiresSuperiorLandlordInfo() =
         this in
             setOf(

@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -27,6 +29,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val acceptedEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedEmail>,
     private val otherLandlordEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedOtherLandlordEmail>,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -68,6 +71,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             val invitation = invitationService.getInvitationForJourney(state.journeyId)
             val propertyOwnership = invitation.registeredOwnership
             val landlord = userToLandlordService.getCurrentLandlordForUser()
+            val landlordReactivated = !landlord.isActive
 
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, landlord)
 
@@ -75,14 +79,16 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 propertyOwnership.address.toMultiLineAddress(),
                 propertyOwnership.id,
             )
+            invitationService.setLandlordReactivatedByLastAcceptance(landlordReactivated)
 
-            sendAcceptanceEmails(propertyOwnership, landlord)
+            sendAcceptanceEmails(propertyOwnership, landlord, landlordReactivated)
         }
     }
 
     private fun sendAcceptanceEmails(
         propertyOwnership: PropertyOwnership,
         acceptingLandlord: Landlord,
+        landlordReactivated: Boolean,
     ) {
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
@@ -97,6 +103,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 propertyAddress = propertyAddress,
                 propertyRecordUrl = propertyRecordUrl,
                 propertyRegistrationNumber = propertyRegistrationNumber,
+                // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+                landlordReactivated = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && landlordReactivated,
             ),
         )
         // TODO: PDJB-1274: Send emails to other members of the org

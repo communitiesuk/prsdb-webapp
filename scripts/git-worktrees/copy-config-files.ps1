@@ -107,50 +107,10 @@ try {
     Pop-Location
 }
 
-# Assign unique ports for parallel worktree execution.
-# Use the smallest offset (>= 1) for which none of the offset ports are already assigned to any port key in
-# sibling worktrees' .env files, so offsets freed by removed worktrees are reused rather than creeping ever higher.
-$usedPorts = @{}
-$siblingEnvFiles = Get-ChildItem -Path $workTreeBase -Filter ".env" -Recurse -Depth 1 -ErrorAction SilentlyContinue
-foreach ($siblingEnv in $siblingEnvFiles) {
-    if ($siblingEnv.FullName -eq (Join-Path $DestinationPath ".env")) { continue }
-    foreach ($line in Get-Content $siblingEnv.FullName) {
-        if ($line -match '^(SERVER_PORT|POSTGRES_PORT|REDIS_PORT|ELASTICMQ_PORT)=\D*(\d+)') { $usedPorts[[int]$Matches[2]] = $true }
-    }
-}
-$portOffset = 1
-while ($usedPorts.ContainsKey(8080 + $portOffset) -or $usedPorts.ContainsKey(5433 + $portOffset) -or $usedPorts.ContainsKey(6379 + $portOffset) -or $usedPorts.ContainsKey(9324 + $portOffset)) {
-    $portOffset++
-}
-
-$newServerPort = 8080 + $portOffset
-$newPostgresPort = 5433 + $portOffset
-$newRedisPort = 6379 + $portOffset
-$newElasticMqPort = 9324 + $portOffset
-
-$envFilePath = Join-Path $DestinationPath ".env"
-if (Test-Path $envFilePath) {
-    Write-Host "`nAssigning unique ports for parallel execution (offset: $portOffset)..." -ForegroundColor Cyan
-    $content = Get-Content $envFilePath -Raw
-
-    # Helper: set a key=value in the .env content (replace if present, append if not)
-    function Set-EnvVar($content, $key, $value) {
-        if ($content -match "(?m)^${key}=") {
-            $content = $content -replace "(?m)^${key}=.*", "${key}=`"${value}`""
-        } else {
-            $content = $content.TrimEnd() + "`n${key}=`"${value}`""
-        }
-        return $content
-    }
-
-    $content = Set-EnvVar $content "SERVER_PORT" "$newServerPort"
-    $content = Set-EnvVar $content "POSTGRES_PORT" "$newPostgresPort"
-    $content = Set-EnvVar $content "REDIS_PORT" "$newRedisPort"
-    $content = Set-EnvVar $content "ELASTICMQ_PORT" "$newElasticMqPort"
-
-    Set-Content -Path $envFilePath -Value $content -NoNewline
-    Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
-    Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
-    Write-Host "  REDIS_PORT=$newRedisPort" -ForegroundColor Gray
-    Write-Host "  ELASTICMQ_PORT=$newElasticMqPort" -ForegroundColor Gray
+# Assign unique ports for parallel worktree execution
+Write-Host ""
+node (Join-Path $PSScriptRoot "assign-worktree-ports.mjs") $DestinationPath
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to assign ports."
+    exit 1
 }

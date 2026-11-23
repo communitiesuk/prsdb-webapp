@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -86,23 +87,9 @@ class UpdateLicensingJourneyFactory(
 
                 else -> {
                     checkAnswerTask(journey.licensingTask, { journey })
-                    configureStep(journey.licensingTask.licensingTypeStep) {
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
-                        }
-                        withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-                    }
                 }
             }
-            configureStep(journey.licensingTask.selectiveLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
-            configureStep(journey.licensingTask.hmoMandatoryLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
-            configureStep(journey.licensingTask.hmoAdditionalLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
+            useContinueButtons(journey.licensingTask)
             step(journey.finishCyaStep) {
                 if (isCheckingSingleLicenceStep) {
                     initialStep()
@@ -135,21 +122,7 @@ class UpdateLicensingJourneyFactory(
                         .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.licensing")
                 }
             }
-            configureStep(journey.licensingTask.licensingTypeStep) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
-                }
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
-            configureStep(journey.licensingTask.selectiveLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
-            configureStep(journey.licensingTask.hmoMandatoryLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
-            configureStep(journey.licensingTask.hmoAdditionalLicenceStep) {
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
-            }
+            useContinueButtons(journey.licensingTask)
         }
 
     fun initializeJourneyState(

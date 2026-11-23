@@ -124,4 +124,36 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
             status { isForbidden() }
         }
     }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
+    fun `getUpdateStep returns 403 for an inactive landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(validOrganisationLandlord())
+        stubCreateJourneySteps()
+        whenever(stepLifecycleOrchestrator.getStepModelAndView())
+            .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+        whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"], value = "user")
+    fun `postUpdateStep returns 403 for an inactive landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(validOrganisationLandlord())
+        stubCreateJourneySteps()
+        whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
+            .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+        whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+
+        mvc
+            .post(updateStepRoute) {
+                param("formData", "")
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
 }
