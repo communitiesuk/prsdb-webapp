@@ -2,24 +2,18 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.services.ActivationService
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.time.LocalDate
 
-class ActivationAndDeactivationPersistenceTests : IntegrationTestWithMutableData(
+class DeactivationPersistenceTests : IntegrationTestWithMutableData(
     "data-mockuser-landlord-with-sole-and-joint-properties.sql",
 ) {
-    @Autowired
-    private lateinit var activationService: ActivationService
-
     @Autowired
     private lateinit var deactivationService: DeactivationService
 
@@ -28,9 +22,6 @@ class ActivationAndDeactivationPersistenceTests : IntegrationTestWithMutableData
 
     @Autowired
     private lateinit var landlordRepository: LandlordRepository
-
-    @Autowired
-    private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @Test
     fun `deactivating a jointly owned property deactivates only the landlord with no other active property`() {
@@ -46,52 +37,12 @@ class ActivationAndDeactivationPersistenceTests : IntegrationTestWithMutableData
     }
 
     @Test
-    fun `reactivating a property reactivates its inactive landlords`() {
-        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
-        assertFalse(landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get().isActive)
-
-        activationService.reactivateProperty(JOINT_PROPERTY_ID)
-
-        assertTrue(propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().isActive)
-        val reactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
-        assertTrue(reactivatedLandlord.isActive)
-        assertNull(reactivatedLandlord.lastDeactivatedDate)
-    }
-
-    @Test
-    fun `reactivating a property leaves its already active landlords unchanged`() {
-        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
-        val activeLandlordBefore = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
-        assertTrue(activeLandlordBefore.isActive)
-
-        activationService.reactivateProperty(JOINT_PROPERTY_ID)
-
-        val activeLandlordAfter = landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get()
-        assertTrue(activeLandlordAfter.isActive)
-        assertNull(activeLandlordAfter.lastDeactivatedDate)
-        assertEquals(activeLandlordBefore.lastModifiedDate, activeLandlordAfter.lastModifiedDate)
-    }
-
-    @Test
     fun `deactivating a landlord's last active property deactivates the landlord`() {
         deactivationService.deactivateProperty(SOLE_PROPERTY_ID)
         assertTrue(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
 
         deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
         assertFalse(landlordRepository.findById(LANDLORD_WITH_OTHER_PROPERTY_ID).get().isActive)
-    }
-
-    @Test
-    fun `adding an inactive landlord to an active property reactivates the landlord`() {
-        deactivationService.deactivateProperty(JOINT_PROPERTY_ID)
-        val inactiveLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
-        assertFalse(inactiveLandlord.isActive)
-
-        propertyOwnershipService.addLandlordToPropertyOwnership(SOLE_PROPERTY_ID, inactiveLandlord)
-
-        val reactivatedLandlord = landlordRepository.findById(LANDLORD_WITH_NO_OTHER_PROPERTY_ID).get()
-        assertTrue(reactivatedLandlord.isActive)
-        assertNull(reactivatedLandlord.lastDeactivatedDate)
     }
 
     companion object {
