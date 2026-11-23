@@ -15,6 +15,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.AfterPdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import java.time.Instant
@@ -52,6 +55,29 @@ class MockPropertyComplianceData {
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
         )
+
+        fun createGasSafetyDetailsDataModel(
+            hasGasSupply: Boolean = true,
+            issueDate: LocalDate? = null,
+            uploadIds: List<Long> = emptyList(),
+        ) = GasSafetyDetailsDataModel(hasGasSupply, issueDate, uploadIds)
+
+        fun createElectricalSafetyDetailsDataModel(
+            certType: CertificateType? = null,
+            eicrExpiryDate: LocalDate? = null,
+            eicIssueDate: LocalDate? = null,
+            eicExpiryDate: LocalDate? = null,
+            uploadIds: List<Long> = emptyList(),
+        ) = ElectricalSafetyDetailsDataModel(certType, eicrExpiryDate, eicIssueDate, eicExpiryDate, uploadIds)
+
+        fun createEpcDetailsDataModel(
+            certificateUrl: String? = null,
+            expiryDate: LocalDate? = null,
+            energyRating: String? = null,
+            tenancyStartedBeforeExpiry: Boolean? = null,
+            exemptionReason: EpcExemptionReason? = null,
+            meesExemptionReason: MeesExemptionReason? = null,
+        ) = EpcDetailsDataModel(certificateUrl, expiryDate, energyRating, tenancyStartedBeforeExpiry, exemptionReason, meesExemptionReason)
 
         fun createPropertyComplianceForOwnership(
             propertyOwnership: PropertyOwnership,

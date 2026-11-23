@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
-import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -13,20 +12,12 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
-import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_AUTHORISED_ACCESS_TOKENS
-import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
@@ -35,9 +26,6 @@ import java.util.UUID
 class LettingAgentAccessServiceTests {
     @Mock
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
-
-    @Mock
-    private lateinit var session: HttpSession
 
     @InjectMocks
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
@@ -84,101 +72,6 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `addDelegatedPropertyOwnershipToSession adds the id and email to the existing map in the session`() {
-        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION))
-            .thenReturn(mutableMapOf(2L to "other.agent@example.com"))
-
-        lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(1L, "letting.agent@example.com")
-
-        verify(session).setAttribute(
-            PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION,
-            mapOf(2L to "other.agent@example.com", 1L to "letting.agent@example.com"),
-        )
-    }
-
-    @Test
-    fun `addDelegatedPropertyOwnershipToSession starts a new map when none exists in the session`() {
-        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(null)
-
-        lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(1L, "letting.agent@example.com")
-
-        verify(session).setAttribute(
-            PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION,
-            mapOf(1L to "letting.agent@example.com"),
-        )
-    }
-
-    @Test
-    fun `addRemovedLettingAgentToSession stores the email keyed by property ownership id`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
-
-        lettingAgentAccessService.addRemovedLettingAgentToSession(1L, "letting.agent@example.com")
-
-        verify(session).setAttribute(
-            LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
-            mapOf(1L to "letting.agent@example.com"),
-        )
-    }
-
-    @Test
-    fun `getDelegatedPropertyOwnershipEmailsFromSession returns the map from the session`() {
-        val delegatedEmails = mutableMapOf(1L to "letting.agent@example.com", 2L to "other.agent@example.com")
-        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(delegatedEmails)
-
-        assertEquals(delegatedEmails, lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession())
-    }
-
-    @Test
-    fun `getDelegatedPropertyOwnershipEmailsFromSession returns an empty map when none exists in the session`() {
-        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(null)
-
-        assertEquals(mutableMapOf<Long, String>(), lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession())
-    }
-
-    @Test
-    fun `addRemovedLettingAgentToSession preserves previously removed letting agents`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
-            .thenReturn(mapOf(1L to "first.agent@example.com"))
-
-        lettingAgentAccessService.addRemovedLettingAgentToSession(2L, "second.agent@example.com")
-
-        verify(session).setAttribute(
-            LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
-            mapOf(1L to "first.agent@example.com", 2L to "second.agent@example.com"),
-        )
-    }
-
-    @Test
-    fun `wasLettingAgentRemovedInThisSession returns true when the property is in the session`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
-            .thenReturn(mapOf(1L to "letting.agent@example.com"))
-
-        assertTrue(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(1L))
-    }
-
-    @Test
-    fun `wasLettingAgentRemovedInThisSession returns false when the property is not in the session`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
-
-        assertFalse(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(1L))
-    }
-
-    @Test
-    fun `getRemovedLettingAgentEmailFromSession returns the stored email`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
-            .thenReturn(mapOf(1L to "letting.agent@example.com"))
-
-        assertEquals("letting.agent@example.com", lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
-    }
-
-    @Test
-    fun `getRemovedLettingAgentEmailFromSession returns null when the property is not in the session`() {
-        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
-
-        assertNull(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
-    }
-
-    @Test
     fun `getInvitationByTokenOrNull returns the invitation when it exists`() {
         val token = UUID.randomUUID()
         val invitation = MockLettingAgentData.createLettingAgentAccess(token = token)
@@ -193,72 +86,6 @@ class LettingAgentAccessServiceTests {
         whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
 
         assertNull(lettingAgentAccessService.getInvitationByTokenOrNull(token))
-    }
-
-    @Nested
-    inner class AddJourneyIdInvitationTokenPairToSession {
-        @Test
-        fun `addJourneyIdInvitationTokenPairToSession adds pair to empty session`() {
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(null)
-
-            lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession("journey1", "token1")
-
-            val captor = argumentCaptor<MutableList<Pair<String, String>>>()
-            verify(session).setAttribute(
-                eq(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS),
-                captor.capture(),
-            )
-            assertEquals(listOf(Pair("journey1", "token1")), captor.firstValue)
-        }
-
-        @Test
-        fun `addJourneyIdInvitationTokenPairToSession appends pair to existing pairs`() {
-            val existingPairs = mutableListOf(Pair("journey1", "token1"))
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(existingPairs)
-
-            lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession("journey2", "token2")
-
-            val captor = argumentCaptor<MutableList<Pair<String, String>>>()
-            verify(session).setAttribute(
-                eq(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS),
-                captor.capture(),
-            )
-            assertEquals(listOf(Pair("journey1", "token1"), Pair("journey2", "token2")), captor.firstValue)
-        }
-    }
-
-    @Nested
-    inner class GetInvitationTokenForJourneyIdFromSession {
-        @Test
-        fun `getInvitationTokenForJourneyIdFromSession returns token when journey id exists`() {
-            val pairs = mutableListOf(Pair("journey1", "token1"), Pair("journey2", "token2"))
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(pairs)
-
-            assertEquals("token2", lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("journey2"))
-        }
-
-        @Test
-        fun `getInvitationTokenForJourneyIdFromSession throws when journey id does not exist`() {
-            val pairs = mutableListOf(Pair("journey1", "token1"))
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(pairs)
-
-            assertThrows<PrsdbWebException> {
-                lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("nonexistent")
-            }
-        }
-
-        @Test
-        fun `getInvitationTokenForJourneyIdFromSessionOrNull returns null when journey id does not exist`() {
-            val pairs = mutableListOf(Pair("journey1", "token1"))
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(pairs)
-
-            assertNull(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull("nonexistent"))
-        }
     }
 
     @Nested
@@ -283,62 +110,6 @@ class LettingAgentAccessServiceTests {
                 .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token))
 
             assertTrue(lettingAgentAccessService.getTokenIsValid(token.toString()))
-        }
-
-        @Test
-        fun `addAuthorisedTokenToSession adds the token to an empty session set`() {
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(null)
-            val token = UUID.randomUUID().toString()
-
-            lettingAgentAccessService.addAuthorisedTokenToSession(token)
-
-            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf(token))
-        }
-
-        @Test
-        fun `addAuthorisedTokenToSession preserves previously authorised tokens`() {
-            val existing = UUID.randomUUID().toString()
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf(existing))
-            val token = UUID.randomUUID().toString()
-
-            lettingAgentAccessService.addAuthorisedTokenToSession(token)
-
-            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf(existing, token))
-        }
-
-        @Test
-        fun `isTokenAuthorisedInSession returns true when the token is present`() {
-            val token = UUID.randomUUID().toString()
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf(token))
-
-            assertTrue(lettingAgentAccessService.isTokenAuthorisedInSession(token))
-        }
-
-        @Test
-        fun `isTokenAuthorisedInSession returns false when the token is absent`() {
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(null)
-
-            assertFalse(lettingAgentAccessService.isTokenAuthorisedInSession(UUID.randomUUID().toString()))
-        }
-
-        @Test
-        fun `removeAuthorisedTokenFromSession removes the token from the session set`() {
-            val token = UUID.randomUUID().toString()
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS))
-                .thenReturn(mutableSetOf(token, "other"))
-
-            lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
-
-            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf("other"))
-        }
-
-        @Test
-        fun `removeAuthorisedTokenFromSession does not write to the session when the token is absent`() {
-            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf("other"))
-
-            lettingAgentAccessService.removeAuthorisedTokenFromSession(UUID.randomUUID().toString())
-
-            verify(session, never()).setAttribute(eq(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS), any())
         }
     }
 }

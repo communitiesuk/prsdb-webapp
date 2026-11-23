@@ -1,13 +1,32 @@
-banner:
-  heading: New passphrase
-  body: The passphrase is
-paragraph:
-  one: This passphrase helps you to authenticate a landlord over the phone.
-  two: >
-    Prefer authenticating by email where possible, or SMS as a second choice. Use post only as a last resort. To authenticate a landlord
-    by email or SMS, send this passphrase to their stored contact details, ask them to repeat it to you (over the phone), and check it
-    matches. Always generate a new passphrase for every authentication attempt.
-  three: >
-    For postal-only landlords, send this passphrase by post and record it against their customer record. When they later call the
-    contact centre and you need them to authenticate, ask them to repeat their passphrase to you and check it matches their customer record.
+heading: New passphrase
+submitted:
+  heading: Passphrase sent
+passphrase:
+  label: The passphrase is
+  review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.
+  readBack: Ask the landlord to read the passphrase back when it arrives.
+successBanner:
+  title: Success
+letter:
+  heading: Use this passphrase in a letter
+  body: >
+    Include this passphrase in a letter to the landlord and record it against their customer record.
+    This is a long-lived secret: when they call the contact centre in future, ask them to repeat it
+    and check it matches their customer record.
 generateAnother: Generate another passphrase
+sms:
+  heading: Send this passphrase by text message
+  phoneNumber:
+    label: Telephone number
+    hint: Enter the mobile telephone number from the landlord’s stored contact details. Include the country code for international numbers.
+    error:
+      missing: Enter a telephone number
+      invalid: Enter a valid mobile telephone number
+  send: Send text message
+  accepted: The text message has been submitted to {0,,recipient}.
+  invalid: The text message was not submitted. Check the telephone number. If it is correct, contact support.
+  technical: The text message was not submitted because of a technical problem. Contact support.
+  dailyLimit: The text message was not submitted. The daily text message limit has been reached. Text messages can be sent again tomorrow.
+  minuteLimit: The text message was not submitted. Wait a short time, then generate a new passphrase before trying again.
+  unknown: We could not confirm whether the text message was submitted. Ask the landlord if it arrives. If it does not arrive after a short wait, generate a new passphrase and try again. If an earlier message arrives later, use only the newest passphrase.
+  expired: That passphrase is no longer available to send. A new passphrase has been generated.

@@ -11,9 +11,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationControl
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 
 class LettingAgentAccessInterceptor(
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) : HandlerInterceptor {
     override fun preHandle(
         request: HttpServletRequest,
@@ -36,7 +38,7 @@ class LettingAgentAccessInterceptor(
     ): Boolean {
         val journeyId = request.getParameter(JourneyIdProvider.PARAMETER_NAME)
         val token =
-            journeyId?.let { lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
+            journeyId?.let { lettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
                 ?: return redirectToInvalidLink(response)
 
         return allowIfTokenValid(token, response)
@@ -53,7 +55,7 @@ class LettingAgentAccessInterceptor(
             return false
         }
 
-        if (lettingAgentAccessService.isTokenAuthorisedInSession(token)) {
+        if (lettingAgentSessionService.isTokenAuthorisedInSession(token)) {
             return true
         }
 
@@ -70,7 +72,7 @@ class LettingAgentAccessInterceptor(
         if (lettingAgentAccessService.getTokenIsValid(token)) {
             return true
         }
-        lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
+        lettingAgentSessionService.removeAuthorisedTokenFromSession(token)
         return redirectToInvalidLink(response)
     }
 
