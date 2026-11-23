@@ -212,9 +212,9 @@ class CancelLettingAgentDelegationControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
-        whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
+        whenever(lettingAgentSessionService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
             .thenReturn(true)
-        whenever(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(eq(testPropertyOwnershipId)))
+        whenever(lettingAgentSessionService.getRemovedLettingAgentEmailFromSession(eq(testPropertyOwnershipId)))
             .thenReturn("letting.agent@example.com")
         val propertyOwnership = createPropertyOwnership()
         whenever(propertyOwnershipService.getPropertyOwnership(eq(testPropertyOwnershipId)))
@@ -229,7 +229,7 @@ class CancelLettingAgentDelegationControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 when no letting agent was removed in this session`() {
         mockAuthorizedProperty()
-        whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
+        whenever(lettingAgentSessionService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
             .thenReturn(false)
 
         mvc.get("${getRemoveLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {

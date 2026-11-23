@@ -85,7 +85,7 @@ class LettingAgentInvitationControllerTests(
             mvc
                 .get("$LETTING_AGENT_INVITATION_ROUTE?$TOKEN=$validToken")
 
-            verify(lettingAgentAccessService).addJourneyIdInvitationTokenPairToSession(journeyId, validToken.toString())
+            verify(lettingAgentSessionService).addJourneyIdInvitationTokenPairToSession(journeyId, validToken.toString())
         }
 
         @Test
@@ -125,7 +125,7 @@ class LettingAgentInvitationControllerTests(
     inner class GetJourneyStep {
         @BeforeEach
         fun stubInterceptorTokenCheck() {
-            whenever(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
+            whenever(lettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
                 .thenReturn(validToken.toString())
             whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
         }
@@ -171,7 +171,7 @@ class LettingAgentInvitationControllerTests(
     inner class PostJourneyData {
         @BeforeEach
         fun stubInterceptorTokenCheck() {
-            whenever(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
+            whenever(lettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
                 .thenReturn(validToken.toString())
             whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
         }
