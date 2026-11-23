@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -44,7 +45,13 @@ class PropertyReactivationServiceTests {
     private lateinit var mockAddressAvailabilityService: AddressAvailabilityService
 
     @Mock
+    private lateinit var mockLandlordActiveStatusService: LandlordActiveStatusService
+
+    @Mock
     private lateinit var mockSession: HttpSession
+
+    @Mock
+    private lateinit var mockPropertyReactivationEmailService: PropertyReactivationEmailService
 
     @Mock
     private lateinit var mockUserToLandlordService: UserToLandlordService
@@ -144,6 +151,7 @@ class PropertyReactivationServiceTests {
         verifyNoInteractions(mockPropertyComplianceService)
         verifyNoInteractions(mockActivationService)
         verifyNoInteractions(mockSession)
+        verifyNoInteractions(mockPropertyReactivationEmailService)
     }
 
     @Test
@@ -160,5 +168,57 @@ class PropertyReactivationServiceTests {
         verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
         verifyNoInteractions(mockAddressAvailabilityService)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable sends a confirmation email for an active landlord`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+
+        // Assert
+        verify(mockPropertyReactivationEmailService).sendConfirmationEmail(propertyOwnershipId, landlordReactivated = false)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable sends a landlord reactivated confirmation email when the landlord was inactive`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+
+        // Assert
+        val inOrder = inOrder(mockLandlordActiveStatusService, mockActivationService)
+        inOrder.verify(mockLandlordActiveStatusService).isCurrentLandlordInactive()
+        inOrder.verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
+        verify(mockPropertyReactivationEmailService).sendConfirmationEmail(propertyOwnershipId, landlordReactivated = true)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable still reactivates the property when the confirmation email fails to send`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockPropertyReactivationEmailService.sendConfirmationEmail(any(), any())).thenThrow(RuntimeException("Notify is down"))
+
+        // Act & Assert
+        assertDoesNotThrow {
+            propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+        }
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
+        verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
     }
 }

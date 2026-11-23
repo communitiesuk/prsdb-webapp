@@ -474,6 +474,36 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordDeactivatedNoPropertiesRegistered.md",
                 ),
                 EmailTemplateTestData(
+                    PropertyReactivationConfirmationEmail(
+                        recipientName = "Alice Smith",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                        hasJointLandlords = true,
+                        landlordReactivated = true,
+                    ),
+                    "/emails/PropertyReactivationConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    PropertyReactivationConfirmationEmail(
+                        recipientName = "Alice Smith",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                        hasJointLandlords = false,
+                        landlordReactivated = false,
+                        paymentDetails =
+                            PropertyRegistrationConfirmationEmail.PaymentDetails(
+                                amountInPence = 1000,
+                                paymentDate = LocalDate.of(2026, 10, 5),
+                                renewalDate = LocalDate.of(2027, 3, 31),
+                            ),
+                    ),
+                    "/emails/PropertyReactivationConfirmationWithPayment.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",
                         propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
@@ -814,6 +844,58 @@ class EmailTemplateModelsTests {
         Assertions.assertFalse(hashMap.keys.any { it in listOf("payment amount", "payment date", "renewal date") })
     }
 
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `property reactivation email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        val email = createPropertyReactivationConfirmationEmail(landlordReactivated = landlordReactivated)
+
+        Assertions.assertEquals(expectedPersonalisation, email.toHashMap()["landlordReactivated"])
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `property reactivation email includes whether the property has joint landlords as yes or no personalisation`(
+        hasJointLandlords: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        val email = createPropertyReactivationConfirmationEmail(hasJointLandlords = hasJointLandlords)
+
+        Assertions.assertEquals(expectedPersonalisation, email.toHashMap()["hasJointLandlords"])
+    }
+
+    @Test
+    fun `property reactivation email uses the template with payment information and formats the payment details when they are given`() {
+        val email =
+            createPropertyReactivationConfirmationEmail(
+                paymentDetails =
+                    PropertyRegistrationConfirmationEmail.PaymentDetails(
+                        amountInPence = 2550,
+                        paymentDate = LocalDate.of(2026, 10, 5),
+                        renewalDate = LocalDate.of(2027, 3, 31),
+                    ),
+            )
+
+        val hashMap = email.toHashMap()
+
+        Assertions.assertEquals(EmailTemplate.PROPERTY_REACTIVATION_CONFIRMATION_WITH_PAYMENT, email.template)
+        Assertions.assertEquals("£25.50", hashMap["payment amount"])
+        Assertions.assertEquals("5 October 2026", hashMap["payment date"])
+        Assertions.assertEquals("31 March 2027", hashMap["renewal date"])
+    }
+
+    @Test
+    fun `property reactivation email uses the template without payment information when no payment details are given`() {
+        val email = createPropertyReactivationConfirmationEmail()
+
+        val hashMap = email.toHashMap()
+
+        Assertions.assertEquals(EmailTemplate.PROPERTY_REACTIVATION_CONFIRMATION, email.template)
+        Assertions.assertFalse(hashMap.keys.any { it in listOf("payment amount", "payment date", "renewal date") })
+    }
+
     @Test
     fun `landlord registration email uses the template with the scheduled deactivation date and formats it when it is given`() {
         val email = LandlordRegistrationConfirmationEmail("L-CCCC-CCCC", "prsdUrl", scheduledDeactivationDate = LocalDate.of(2027, 2, 7))
@@ -860,6 +942,20 @@ class EmailTemplateModelsTests {
         Assertions.assertEquals(EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844, email.template)
         Assertions.assertFalse(email.toHashMap().containsKey("deactivation date"))
     }
+
+    private fun createPropertyReactivationConfirmationEmail(
+        hasJointLandlords: Boolean = false,
+        landlordReactivated: Boolean = false,
+        paymentDetails: PropertyRegistrationConfirmationEmail.PaymentDetails? = null,
+    ) = PropertyReactivationConfirmationEmail(
+        recipientName = "Alice Smith",
+        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+        registrationNumber = "P-XXXX-YYYY",
+        dashboardUrl = "https://example.com/landlord/dashboard",
+        hasJointLandlords = hasJointLandlords,
+        landlordReactivated = landlordReactivated,
+        paymentDetails = paymentDetails,
+    )
 
     private fun isOptionalContentParameter(parameter: String): Boolean = extractOptionalContentParameter(parameter).isNotEmpty()
 
