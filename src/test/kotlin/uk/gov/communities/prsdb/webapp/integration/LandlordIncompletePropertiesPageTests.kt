@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -87,10 +86,10 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         }
 
         @Test
-        fun `the register a new property link goes to the property registration start page`(page: Page) {
+        fun `the register a new property link goes to the property registration task list`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.registerANewPropertyLink.clickAndWait()
-            assertPageIs(page, RegisterPropertyStartPage::class)
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
         @Test
@@ -106,7 +105,7 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
         fun `clicking back from the register a new property link returns to incomplete properties`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
             incompletePropertiesPage.registerANewPropertyLink.clickAndWait()
-            val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+            val startPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
             startPage.backLink.clickAndWait()
             assertPageIs(page, LandlordIncompletePropertiesPage::class)
         }

@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -60,6 +61,27 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `chooseTemplate returns taskList`() {
         assertEquals("taskList", stepConfig.chooseTemplate(mockState))
+    }
+
+    @Test
+    fun `getTaskListViewModel falls back to the landlord dashboard back url when there is no stored back url`() {
+        stubState()
+        whenever(mockState.backUrlKey).thenReturn(null)
+
+        val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
+
+        assertEquals(LANDLORD_DASHBOARD_URL, taskListViewModel.backUrl)
+    }
+
+    @Test
+    fun `getTaskListViewModel uses the stored back url when one exists`() {
+        stubState()
+        whenever(mockState.backUrlKey).thenReturn(5)
+        whenever(mockBackUrlStorageService.getBackUrl(5)).thenReturn("/stored-url")
+
+        val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
+
+        assertEquals("/stored-url", taskListViewModel.backUrl)
     }
 
     @Nested
