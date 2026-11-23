@@ -15,6 +15,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -84,28 +85,40 @@ class AddressServiceTests {
 
     @Nested
     inner class SearchForAddressesTests {
+        private val houseNameOrNumber = "1"
+        private val postcode = "EG1 2AB"
+        private val matchingAddresses =
+            listOf(
+                MockLandlordData.createAddress(uprn = 1),
+                MockLandlordData.createAddress(uprn = 2),
+                MockLandlordData.createAddress(uprn = 3),
+            )
+        private val expectedResults = matchingAddresses.map { AddressDataModel.fromAddress(it) }
+
         @Test
-        fun `searchForAddresses calls the address repository search method and returns the results as AddressDataModels`() {
-            // Arrange
-            val houseNameOrNumber = "1"
-            val postcode = "EG1 2AB"
-            val restrictToEngland = true
-            val matchingAddresses =
-                listOf(
-                    MockLandlordData.createAddress(uprn = 1),
-                    MockLandlordData.createAddress(uprn = 2),
-                    MockLandlordData.createAddress(uprn = 3),
-                )
+        fun `searchForAddresses searches England with local council addresses for that region`() {
+            whenever(mockAddressRepository.searchInEnglandWithLocalCouncil(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
 
-            whenever(mockAddressRepository.search(houseNameOrNumber, postcode, restrictToEngland)).thenReturn(matchingAddresses)
+            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
 
-            // Act
-            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, restrictToEngland)
+            assertEquals(expectedResults, results)
+        }
 
-            // Assert
-            verify(mockAddressRepository).search(houseNameOrNumber, postcode, restrictToEngland)
+        @Test
+        fun `searchForAddresses searches England and Wales addresses for that region`() {
+            whenever(mockAddressRepository.searchInEnglandAndWales(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
 
-            val expectedResults = matchingAddresses.map { AddressDataModel.fromAddress(it) }
+            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.ENGLAND_AND_WALES)
+
+            assertEquals(expectedResults, results)
+        }
+
+        @Test
+        fun `searchForAddresses searches UK addresses for that region`() {
+            whenever(mockAddressRepository.searchInUk(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
+
+            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.UK)
+
             assertEquals(expectedResults, results)
         }
     }
