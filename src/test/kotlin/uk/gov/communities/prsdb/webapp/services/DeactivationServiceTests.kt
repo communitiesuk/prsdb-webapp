@@ -17,6 +17,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
@@ -207,6 +208,30 @@ class DeactivationServiceTests {
         deactivationService.deactivateProperty(PROPERTY_ID)
 
         verify(delegateToLettingAgentEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+    }
+
+    @Test
+    fun `deactivateProperty only emails the letting agent after the transaction commits`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val delegation =
+            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            deactivationService.deactivateProperty(PROPERTY_ID)
+
+            verifyNoInteractions(delegateToLettingAgentEmailService)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(delegateToLettingAgentEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     @Test
