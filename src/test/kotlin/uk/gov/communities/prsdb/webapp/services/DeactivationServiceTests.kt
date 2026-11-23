@@ -13,7 +13,6 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -30,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -82,19 +80,6 @@ class DeactivationServiceTests {
         deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
 
         verify(deactivationEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
-    }
-
-    @Test
-    fun `deactivateLandlord still deactivates the landlord when the email fails to send`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        val landlord = MockLandlordData.createIndividualLandlord()
-        doThrow(NoLandlordEmailRecipientsException(landlord.id))
-            .whenever(deactivationEmailService).sendLandlordDeactivatedEmail(any(), any())
-
-        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
-
-        assertFalse(landlord.isActive)
-        verify(landlordRepository).save(landlord)
     }
 
     @Test
@@ -249,29 +234,6 @@ class DeactivationServiceTests {
         deactivationService.deactivateProperty(PROPERTY_ID)
 
         verifyNoInteractions(deactivationEmailService)
-    }
-
-    @Test
-    fun `deactivateProperty still deactivates the property when the letting agent email fails to send`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
-        val delegation =
-            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
-        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
-        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
-            .thenReturn(true)
-        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
-        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        doThrow(RuntimeException("Notify is down"))
-            .whenever(deactivationEmailService)
-            .sendLettingAgentPropertyDeactivatedEmail(any(), any())
-
-        deactivationService.deactivateProperty(PROPERTY_ID)
-
-        assertFalse(property.isActive)
-        verify(propertyOwnershipRepository).save(property)
-        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
     }
 
     @Test

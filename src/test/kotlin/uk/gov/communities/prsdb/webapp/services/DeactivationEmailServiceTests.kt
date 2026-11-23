@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
@@ -45,6 +47,18 @@ class DeactivationEmailServiceTests {
     }
 
     @Test
+    fun `sendLettingAgentPropertyDeactivatedEmail does not throw when sending the email fails`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5)
+        doThrow(IllegalStateException("Email delivery failed"))
+            .whenever(mockLettingAgentEmailSender)
+            .sendEmail(any(), any())
+
+        deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, AGENT_EMAIL)
+
+        verify(mockLettingAgentEmailSender).sendEmail(any(), any())
+    }
+
+    @Test
     fun `sendLandlordDeactivatedEmail sends the landlord account deactivation email`() {
         val landlord =
             MockLandlordData.createIndividualLandlord(
@@ -65,6 +79,19 @@ class DeactivationEmailServiceTests {
                 dashboardUrl = dashboardUri.toString(),
             ),
         )
+    }
+
+    @Test
+    fun `sendLandlordDeactivatedEmail does not throw when sending the email fails`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/landlord/dashboard"))
+        doThrow(IllegalStateException("Email delivery failed"))
+            .whenever(mockLandlordEmailSender)
+            .sendEmailToLandlord(any(), any())
+
+        deactivationEmailService.sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+
+        verify(mockLandlordEmailSender).sendEmailToLandlord(any(), any())
     }
 
     companion object {
