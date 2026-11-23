@@ -8,8 +8,6 @@ import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReactivationConfirmationEmail
 
 @PrsdbWebService
 class PropertyReactivationService(
@@ -18,10 +16,7 @@ class PropertyReactivationService(
     private val activationService: ActivationService,
     private val addressAvailabilityService: AddressAvailabilityService,
     private val landlordActiveStatusService: LandlordActiveStatusService,
-    private val currentUserService: CurrentUserService,
-    private val userToLandlordService: UserToLandlordService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyReactivationConfirmationEmail>,
+    private val propertyReactivationEmailService: PropertyReactivationEmailService,
     private val session: HttpSession,
 ) {
     @Transactional
@@ -44,11 +39,10 @@ class PropertyReactivationService(
         runAfterTransactionCommits {
             session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
 
-            // TODO PDJB-2050: Notify joint landlords that the property has been reactivated
             NotificationHelper.sendNotificationAndLogFailures(
                 "the property reactivation confirmation email for property ownership $propertyOwnershipId",
             ) {
-                sendConfirmationEmail(propertyOwnershipId, landlordWillBeReactivated)
+                propertyReactivationEmailService.sendConfirmationEmail(propertyOwnershipId, landlordWillBeReactivated)
             }
         }
     }
@@ -71,29 +65,5 @@ class PropertyReactivationService(
                 reactivationData.epc,
             )
         }
-    }
-
-    private fun sendConfirmationEmail(
-        propertyOwnershipId: Long,
-        landlordReactivated: Boolean,
-    ) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val currentUser = currentUserService.getRegisteredUserDetails()
-        val hasJointLandlords = propertyOwnership.otherLandlordsTo(userToLandlordService.getCurrentLandlordForUser()).isNotEmpty()
-
-        // TODO PDJB-1274: Update emails to account for other users in the org
-        confirmationEmailSender.sendEmail(
-            currentUser.email,
-            PropertyReactivationConfirmationEmail(
-                recipientName = currentUser.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                hasJointLandlords = hasJointLandlords,
-                landlordReactivated = landlordReactivated,
-                // TODO PDJB-2076: Include the payment details when payment is taken during reactivation
-                paymentDetails = null,
-            ),
-        )
     }
 }
