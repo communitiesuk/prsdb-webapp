@@ -121,12 +121,7 @@ class ReactivatePropertyController(
         model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
-        if (propertyOwnershipId != propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "PropertyOwnershipId $propertyOwnershipId was not the last property reactivated in the session",
-            )
-        }
+        throwIfPropertyWasNotLastReactivatedThisSession(propertyOwnershipId)
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -148,6 +143,15 @@ class ReactivatePropertyController(
 
     private fun throwIfPropertyCannotBeReactivated(propertyOwnershipId: Long) {
         propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
+    }
+
+    private fun throwIfPropertyWasNotLastReactivatedThisSession(propertyOwnershipId: Long) {
+        if (propertyOwnershipId != propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "PropertyOwnershipId $propertyOwnershipId was not the last property reactivated in the session",
+            )
+        }
     }
 
     companion object {
