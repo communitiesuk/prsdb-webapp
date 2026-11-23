@@ -264,7 +264,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder updates their details in the list`(page: Page) {
+        fun `Changing a freeholder with an email does not preselect a contact type and updates their details in the list`(page: Page) {
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
 
@@ -278,8 +278,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(namePage.form.nameInput).hasValue("Freeholder With Email")
             namePage.submitName("Changed freeholder")
             val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-            assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
-            contactTypePage.form.submit()
+            assertEquals(null, contactTypePage.form.radios.selectedValue)
+            contactTypePage.submitContactType(FreeholderContactType.EMAIL)
             val emailPage = assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class)
             assertThat(emailPage.form.emailInput).hasValue("freeholder@example.com")
             emailPage.submitEmail("changed.freeholder@example.com")
@@ -293,7 +293,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder with a postal address pre-fills their address answers`(page: Page) {
+        fun `Changing a freeholder with a postal address does not preselect a contact type but pre-fills their address`(page: Page) {
             val freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
                     freeholders =
@@ -323,7 +323,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .clickAndWait()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).form.submit()
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).form.submit()
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(null, contactTypePage.form.radios.selectedValue)
+            contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
 
             val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
             assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")

@@ -2,9 +2,13 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
@@ -67,73 +71,6 @@ class FreeholderContactTypeStepConfigTests {
     }
 
     @Test
-    fun `resolvePageContent prefills email when the freeholder being changed has an email`() {
-        // Arrange
-        whenever(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertEquals(FreeholderContactType.EMAIL, (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
-    }
-
-    @Test
-    fun `resolvePageContent prefills postal address when the freeholder being changed has an address`() {
-        // Arrange
-        val address = AddressDataModel.fromManualAddressData("1 Street", "Town", "AB1 2CD")
-        whenever(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, address = address))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertEquals(
-            FreeholderContactType.POSTAL_ADDRESS,
-            (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType,
-        )
-    }
-
-    @Test
-    fun `resolvePageContent prefills postal address for a saved freeholder without a stored address`() {
-        // Arrange
-        whenever(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(databaseId = 1, detailsKnown = true, name = FREEHOLDER_NAME))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertEquals(
-            FreeholderContactType.POSTAL_ADDRESS,
-            (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType,
-        )
-    }
-
-    @Test
-    fun `resolvePageContent leaves contact type empty for an unknown freeholder`() {
-        // Arrange
-        whenever(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(databaseId = 1, detailsKnown = false))
-
-        // Act
-        val result =
-            FreeholderContactTypeStepConfig()
-                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
-
-        // Assert
-        assertNull((result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
-    }
-
-    @Test
     fun `resolvePageContent does not overwrite a contact type the user has already chosen`() {
         // Arrange
         val formModel = FreeholderContactTypeFormModel(contactType = FreeholderContactType.POSTAL_ADDRESS)
@@ -148,10 +85,11 @@ class FreeholderContactTypeStepConfigTests {
         )
     }
 
-    @Test
-    fun `resolvePageContent leaves the contact type empty when adding a new freeholder`() {
+    @ParameterizedTest
+    @MethodSource("provideEditedFreeholders")
+    fun `resolvePageContent does not preselect a contact type when editing a freeholder`(editedFreeholder: FreeholderDataModel) {
         // Arrange
-        whenever(mockJourneyState.editingFreeholder).thenReturn(null)
+        lenient().`when`(mockJourneyState.editingFreeholder).thenReturn(editedFreeholder)
 
         // Act
         val result =
@@ -164,5 +102,26 @@ class FreeholderContactTypeStepConfigTests {
 
     companion object {
         private const val FREEHOLDER_NAME = "James Hassan"
+
+        @JvmStatic
+        fun provideEditedFreeholders() =
+            listOf(
+                named(
+                    "freeholder with an email",
+                    FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"),
+                ),
+                named(
+                    "freeholder with a postal address",
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = FREEHOLDER_NAME,
+                        address = AddressDataModel.fromManualAddressData("1 Street", "Town", "AB1 2CD"),
+                    ),
+                ),
+                named(
+                    "saved freeholder without a stored address",
+                    FreeholderDataModel(databaseId = 1, detailsKnown = true, name = FREEHOLDER_NAME),
+                ),
+            )
     }
 }
