@@ -1,5 +1,5 @@
 # Notify
-Notify is the government notification service that we use to send all emails and letters.
+Notify is the government notification service that we use to send emails, letters and SMS messages.
 We have a Notify-integration account that sends the emails for the `integration` and `test` environments.
 We have a Notify-prod account that sends the emails for the `production` environment.
 You should register for Notify-prod using your MHCLG email address.
@@ -75,7 +75,7 @@ Locally, ElasticMQ (started by `docker-compose.local.yml`) is used in place of S
 We have unit tests for the emails in `EmailTemplateModelsTests`.
 
 #### Testing against notify templates
-`NotifyTemplateTests` checks that the email and letter templates in notify match the templates in the codebase.
+`NotifyTemplateTests` checks that the email, letter and SMS templates in Notify match the templates in the codebase.
 Every template is checked against both Notify-integration and Notify-prod, so a template that has only been updated in one of them is caught before it reaches production.
 The tests are built into our pipelines so run whenever a PR is made.
 
@@ -138,3 +138,25 @@ Letters use the same `EMAILNOTIFICATIONS_APIKEY` as emails, so check the key's
 - **Live** - Notify prints and posts the letter. Never use a live key locally.
 
 You can check a key's type on the API keys page of the Notify service.
+
+## SMS messages
+SMS messages use the same Notify accounts, API keys and default sender configured in Notify.
+
+### Creating SMS messages
+SMS templates follow the same process as emails and letters, but live in `src/main/resources/sms`:
+- Add a value to the `SmsTemplate` enum and a model implementing `SmsTemplateModel`.
+- Add the template body in `src/main/resources/sms` and an entry in `smsTemplates.json` with its `enumName`,
+  `bodyLocation`, `test_id` and `prod_id`. SMS templates have no subject.
+- Create the matching templates in both Notify services. `NotifyTemplateTests` checks these against the source-controlled copies.
+
+### Sending SMS messages
+Use `SmsNotificationService.sendSms(phoneNumber, sms)`. Sending is synchronous and does not use SQS.
+A successful return means Notify accepted the message, not that it has been delivered.
+Failures are mapped to `PersistentSmsSendException` or `TransientSmsSendException`, with the original error retained as the cause.
+There are no automatic retries; check Notify before retrying a failure whose outcome is unknown.
+
+### Sending SMS messages locally
+SMS messages are printed to the console instead of sent, using the same profile rules as the email and letter stubs.
+The numbers in `local.sms` in `application-local.yml` simulate persistent and transient failures.
+Use the `use-notify` profile to send through Notify; the API key type and service settings determine whether real messages
+are sent and which recipients are allowed.
