@@ -88,6 +88,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         const val INACTIVE_PROPERTY_OWNED_BY_ANOTHER_LANDLORD = 2L
         const val INACTIVE_PROPERTY_REGISTERED_AGAIN_BY_ANOTHER_LANDLORD = 53L
         const val ACTIVE_PROPERTY = 1L
+        const val INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY = 1L
     }
 
     private val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
@@ -331,7 +332,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
-        assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        assertThat(confirmationPage.reactivationDetailsHeading).isHidden()
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
     }
 
@@ -580,6 +582,49 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
             verify(epcRegisterClient, never()).getByUprn(any())
+        }
+    }
+
+    @Nested
+    inner class WithInactiveLandlord :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-mockuser-inactive-landlord.sql", "data-overlay-inactive-landlord-has-deactivated-property.sql"),
+        ) {
+        @Test
+        fun `the confirmation page tells the landlord their account was reactivated`(page: Page) {
+            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY)
+            infoPage.submit()
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY.toString()),
+                )
+            assertThat(confirmationPage.reactivationDetailsHeading).isVisible()
+            assertThat(confirmationPage.landlordAccountText).hasText("Your landlord account is now active.")
+            assertThat(confirmationPage.jointLandlordsHeading).isHidden()
+        }
+    }
+
+    @Nested
+    inner class WithJointLandlord :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-local.sql", "data-overlay-inactive-property-has-joint-landlord.sql"),
+        ) {
+        @Test
+        fun `the confirmation page tells the landlord their joint landlords were notified`(page: Page) {
+            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
+            infoPage.submit()
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString()),
+                )
+            assertThat(confirmationPage.jointLandlordsHeading).isVisible()
+            assertThat(confirmationPage.landlordAccountHeading).isHidden()
         }
     }
 

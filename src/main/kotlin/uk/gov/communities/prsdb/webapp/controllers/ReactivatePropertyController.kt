@@ -23,6 +23,8 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATE_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.PROPERTY_REACTIVATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
@@ -33,10 +35,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @AllowIfLandlord
 @PrsdbController
@@ -46,6 +50,7 @@ class ReactivatePropertyController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyReactivationService: PropertyReactivationService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     // TODO PDJB-2149: Remove this annotation when the ACTIVE_INACTIVE flag is removed
     @AvailableWhenFeatureEnabled(ACTIVE_INACTIVE)
@@ -123,9 +128,22 @@ class ReactivatePropertyController(
             )
         }
 
-        // TODO PDJB-2044: Show the confirmation page
-        model.addAttribute("todoComment", "TODO (PDJB-2044): Show the confirmation page")
-        return "forms/todoConfirmation"
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+
+        model.addAttribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
+        model.addAttribute(
+            "prn",
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+        )
+        // TODO PDJB-2076: Add the payment summary when a payment was made in the reactivation journey
+        model.addAttribute("hasJointLandlords", propertyOwnership.landlords.size > 1)
+        model.addAttribute("landlordReactivated", propertyReactivationService.wasLandlordReactivatedByLastReactivation())
+        model.addAttribute("isOrganisationLandlord", landlord.landlordType == LandlordType.ORGANISATION)
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+
+        return "reactivatePropertyConfirmation"
     }
 
     private fun throwIfPropertyCannotBeReactivated(propertyOwnershipId: Long) {

@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyRea
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 // TODO PDJB-2149: Delete this class when the ACTIVE_INACTIVE flag is removed
@@ -32,6 +33,9 @@ class ReactivatePropertyControllerFeatureFlagTests : FeatureFlagTestCallingEndpo
 
     @MockitoBean
     private lateinit var stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
+
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var propertyReactivationService: PropertyReactivationService
@@ -48,6 +52,9 @@ class ReactivatePropertyControllerFeatureFlagTests : FeatureFlagTestCallingEndpo
         whenever(stepLifecycleOrchestrator.getStepModelAndView()).thenReturn(redirectModelAndView)
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any())).thenReturn(redirectModelAndView)
         whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
     }
 
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
