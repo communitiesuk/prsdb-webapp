@@ -12,13 +12,19 @@ import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.SimpleTransactionStatus
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -32,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
+import java.util.function.Consumer
 
 @ExtendWith(MockitoExtension::class)
 class ActiveInactiveServiceTests {
@@ -46,6 +53,9 @@ class ActiveInactiveServiceTests {
 
     @Mock
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @Mock
+    private lateinit var transactionTemplate: TransactionTemplate
 
     @Mock
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -334,6 +344,42 @@ class ActiveInactiveServiceTests {
     }
 
     @Test
+    fun `batch property deactivation queries with the UK-local cutoff and continues after an individual failure`() {
+        val firstSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf())
+        val secondSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf())
+        whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
+            .thenReturn(listOf(PROPERTY_ID, firstSuccessfulProperty.id, secondSuccessfulProperty.id))
+
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.empty())
+        whenever(propertyOwnershipRepository.findById(firstSuccessfulProperty.id)).thenReturn(Optional.of(firstSuccessfulProperty))
+        whenever(propertyOwnershipRepository.findById(secondSuccessfulProperty.id)).thenReturn(Optional.of(secondSuccessfulProperty))
+        doAnswer { invocation ->
+            invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus())
+        }.whenever(transactionTemplate).executeWithoutResult(any())
+
+        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+
+        assertEquals(1, failureCount)
+        verify(propertyOwnershipRepository).findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff())
+        verify(transactionTemplate, times(3)).executeWithoutResult(any())
+
+        verify(lettingAgentAccessService, never()).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(firstSuccessfulProperty.id)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(secondSuccessfulProperty.id)
+    }
+
+    @Test
+    fun `batch property deactivation does nothing when there are no properties created before the cut-off with provide later tasks`() {
+        whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
+            .thenReturn(emptyList())
+
+        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+
+        assertEquals(0, failureCount)
+        verifyNoInteractions(transactionTemplate)
+    }
+
+    @Test
     fun `reactivateProperty marks an inactive property active, clears the date and saves it`() {
         val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID)
         property.deactivate(ORIGINAL_DATE)
@@ -447,5 +493,12 @@ class ActiveInactiveServiceTests {
         private val DASHBOARD_URI = URI("https://example.com/landlord/dashboard")
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
+
+        private fun cutoff() =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
     }
 }

@@ -11,6 +11,6 @@ abstract class LettingAgentAccessControllerTest(
     @BeforeEach
     fun allowPastLettingAgentAccessInterceptor() {
         whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
+        whenever(lettingAgentSessionService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 }

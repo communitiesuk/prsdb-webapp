@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLett
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -19,6 +20,7 @@ class AllowLettingAgentStepConfig(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val currentUserService: CurrentUserService,
 ) : AbstractRequestableStepConfig<Complete, AllowLettingAgentEmailFormModel, DelegateToLettingAgentJourneyState>() {
@@ -44,7 +46,7 @@ class AllowLettingAgentStepConfig(
         getFormModelFromState(state).emailAddress?.let { invitedEmailAddress ->
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
             val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
-            lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
+            lettingAgentSessionService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
             delegateToLettingAgentEmailService.sendDelegationEmailToLandlords(state.propertyOwnershipId, invitedEmailAddress)
             delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
                 propertyOwnership,

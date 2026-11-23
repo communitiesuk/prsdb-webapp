@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.application.DeactivateMissingDetailPropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredJointLandlordInvitationsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredOrganisationalLandlordInvitationsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.local.services.LetterNotificationStubServ
 import uk.gov.communities.prsdb.webapp.local.services.LocalDequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -45,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -53,19 +56,20 @@ import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
 
 @Import(TestcontainersConfiguration::class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("web-server-deactivated", "local")
 // These environment variables are required for the expected beans to be created - values aren't needed
 @TestPropertySource(properties = ["EMAILNOTIFICATIONS_APIKEY", "OS_API_KEY"])
 class PrsdbTaskApplicationTests {
     @Autowired
-    private var context: ConfigurableApplicationContext? = null
+    private lateinit var context: ConfigurableApplicationContext
 
     @MockitoBean
     lateinit var s3: S3TransferManager
@@ -108,12 +112,16 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                ActiveInactiveService::class.simpleBeanName,
+                LettingAgentAccessService::class.simpleBeanName,
+                UserToLandlordService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
                 JointLandlordInvitationDeletionService::class.simpleBeanName,
                 SwapToIndividualNudgeEmailService::class.simpleBeanName,
                 IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
                 DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
+                DeactivateMissingDetailPropertiesTaskLogic::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
                 DeleteExpiredJointLandlordInvitationsTaskLogic::class.simpleBeanName,
                 OrganisationalLandlordInvitationDeletionService::class.simpleBeanName,
@@ -125,7 +133,7 @@ class PrsdbTaskApplicationTests {
                 ReconcilePaymentsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
-        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
+        val beanNames = ApplicationTestHelper.getAvailableBeanNames(context)
 
         assertEquals(expectedBeansByName, beanNames) { buildHelpfulErrorMessage(expectedBeansByName, beanNames) }
     }
