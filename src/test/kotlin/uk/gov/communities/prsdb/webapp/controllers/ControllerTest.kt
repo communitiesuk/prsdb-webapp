@@ -20,10 +20,10 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfig
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
+import uk.gov.communities.prsdb.webapp.services.LandlordActiveStatusService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
@@ -85,5 +85,5 @@ abstract class ControllerTest(
     lateinit var mockPrsdbWebMvcRegistration: PrsdbWebMvcRegistration
 
     @MockitoBean
-    lateinit var activeInactiveService: ActiveInactiveService
+    lateinit var landlordActiveStatusService: LandlordActiveStatusService
 }

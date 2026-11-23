@@ -9,7 +9,7 @@ successBanner:
   title: Success
 letter:
   heading: Use this passphrase in a letter
-  body: >
+  body: > # pragma: allowlist secret
     Include this passphrase in a letter to the landlord and record it against their customer record.
     This is a long-lived secret: when they call the contact centre in future, ask them to repeat it
     and check it matches their customer record.
