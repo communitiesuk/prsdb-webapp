@@ -578,6 +578,13 @@ class EmailTemplateModelsTests {
                     "/emails/LettingAgentComplianceUpdateNotification.md",
                 ),
                 EmailTemplateTestData(
+                    LettingAgentPropertyDeactivatedNotificationEmail(
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        singleLineAddress = "Flat 1, 11 Elm Street, London, NW1 1AA",
+                    ),
+                    "/emails/LettingAgentPropertyDeactivatedNotification.md",
+                ),
+                EmailTemplateTestData(
                     ChangeOrgTeamMemberAccessLevelEmail(
                         memberName = "Anita Locke",
                         roleName = "administrator",
