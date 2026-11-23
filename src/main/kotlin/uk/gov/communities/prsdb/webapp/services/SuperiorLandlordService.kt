@@ -14,7 +14,6 @@ class SuperiorLandlordService(
     // Updates the saved superior landlords to match the list the user submitted, creating, updating
     // and deleting them one at a time.
     // Returns the newly added superior landlords so they can be tracked by the journey and notified.
-    // TODO PDJB-1994: also use this to update superior landlords in the superior landlord update journey.
     // TODO PDJB-2171: also return updated and removed superior landlords so they can be tracked by
     //  the journey and notified.
     @Transactional

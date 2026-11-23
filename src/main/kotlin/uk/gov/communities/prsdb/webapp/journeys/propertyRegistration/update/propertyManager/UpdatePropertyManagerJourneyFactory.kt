@@ -54,10 +54,13 @@ class UpdatePropertyManagerJourneyFactory(
                 parents { journey.startStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
-                        PropertyManagerUpdateRouteMode.HAS_PROPERTY_MANAGER ->
+                        PropertyManagerUpdateRouteMode.HAS_PROPERTY_MANAGER -> {
                             Destination(journey.propertyManagerTask.checkPropertyManagerStep)
-                        PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER ->
+                        }
+
+                        PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER_ADDED -> {
                             Destination(journey.propertyManagerTask.firstStep)
+                        }
                     }
                 }
             }
