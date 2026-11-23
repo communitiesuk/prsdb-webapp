@@ -100,6 +100,23 @@ class RegistrationHttpContractTests {
     }
 
     @Test
+    fun `warm-up and measured property lookup requests retain their prefixes`() {
+        for (prefix in listOf("Warm-up: ", "Concurrent paid: ")) {
+            RegistrationServer().use { server ->
+                val directory = Files.createDirectories(Path.of("build/registration-contract-tests", UUID.randomUUID().toString()))
+                val result = run(server, prefix = prefix, directory = directory)
+                assertEquals(0, result.exitCode, result.output)
+                val log =
+                    Files.walk(directory).use { paths ->
+                        val path = paths.filter { it.fileName.toString() == "simulation.log" }.findFirst().orElseThrow()
+                        String(Files.readAllBytes(path), Charsets.ISO_8859_1)
+                    }
+                assertTrue(log.contains("${prefix}Registration: find registered property"), "Missing prefixed property lookup")
+            }
+        }
+    }
+
+    @Test
     fun `paid registration confirms the quoted prorated fee`() {
         RegistrationServer(quotedPayment = "£23.45").use { server ->
             val result = run(server)
@@ -172,8 +189,9 @@ class RegistrationHttpContractTests {
     private fun run(
         server: RegistrationServer,
         variant: RegistrationVariant = RegistrationVariant.VACANT_MANUAL_EXEMPT,
+        prefix: String = "",
+        directory: Path = Files.createDirectories(Path.of("build/registration-contract-tests", UUID.randomUUID().toString())),
     ): GatlingTestRunner.Result {
-        val directory = Files.createDirectories(Path.of("build/registration-contract-tests", UUID.randomUUID().toString()))
         val certificate = Files.writeString(directory.resolve("contract-certificate.pdf"), CONTRACT_CERTIFICATE)
         return GatlingTestRunner(directory).run(
             RegistrationContractSimulation::class.java,
@@ -186,6 +204,7 @@ class RegistrationHttpContractTests {
                 "gatling.basic.iterations" to "1",
                 "gatling.contract.registrationVariant" to variant.name,
                 "gatling.contract.certificatePath" to certificate.toAbsolutePath().toString(),
+                "gatling.contract.prefix" to prefix,
             ),
         )
     }
@@ -691,10 +710,16 @@ class RegistrationContractSimulation : Simulation() {
                             ?: RegistrationVariant.VACANT_MANUAL_EXEMPT,
                         "${config.baseUrl}/local/gov-uk-pay",
                         properties["gatling.contract.certificatePath"],
+                        prefix = properties["gatling.contract.prefix"].orEmpty(),
                     ),
                 ).injectOpen(atOnceUsers(1)),
         ).protocols(http.baseUrl(config.baseUrl))
-            .assertions(BasicPerformanceAssertions.forRequests(config, RegistrationJourney.requiredRequests))
+            .assertions(
+                BasicPerformanceAssertions.forRequests(
+                    config,
+                    RegistrationJourney.requiredRequests.map { properties["gatling.contract.prefix"].orEmpty() + it },
+                ),
+            )
     }
 }
 

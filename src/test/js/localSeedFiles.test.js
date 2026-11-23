@@ -57,12 +57,35 @@ test('materializes a repeated versioned shared certificate once under isolated s
   }
 });
 
+test('materializes a per-seed certificate reference once under isolated storage', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'prsdb-seed-reference-'));
+  try {
+    const rows = structuredClone(sharedCertificateFixtures);
+    rows.forEach(row => { row.files[0].objectKey = 'seeding/certificate-references/1234-1.png'; });
+    assert.equal(await preparation.prepareLocalSeedFiles(rows, root), 1);
+    const body = await readFile(join(root, '.local-uploads', 'safe', rows[0].files[0].objectKey));
+    assert.deepEqual([...body.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+    assert.equal(await preparation.prepareLocalSeedFiles(rows, root), 1);
+  } finally {
+    await rm(root, {recursive: true});
+  }
+});
+
 for (const [description, mutate] of [
   ['missing version', rows => { delete rows[0].files[0].versionId; }],
   ['blank version', rows => { rows[0].files[0].versionId = '  '; }],
   ['mixed versions', rows => { rows[1].files[0].versionId = 'another-version'; }],
   ['unsupported extension', rows => { rows[0].files[0].extension = 'pdf'; }],
   ['arbitrary shared key', rows => { rows[0].files[0].objectKey = 'seeding/other.png'; }],
+  ['different per-seed keys', rows => {
+    rows[0].files[0].objectKey = 'seeding/certificate-references/1234-1.png';
+    rows[1].files[0].objectKey = 'seeding/certificate-references/1235-1.png';
+  }],
+  ['unsafe per-seed key', rows => { rows[0].files[0].objectKey = 'seeding/certificate-references/../1234-1.png'; }],
+  ['per-seed key with a trailing newline', rows => {
+    rows.forEach(row => { row.files[0].objectKey = 'seeding/certificate-references/1234-1.png\n'; });
+  }],
+  ['mixed legacy and per-seed keys', rows => { rows[0].files[0].objectKey = 'seeding/certificate-references/1234-1.png'; }],
 ]) {
   test(`rejects shared certificate with ${description} before creating any file`, async () => {
     const invalid = structuredClone(sharedCertificateFixtures);
@@ -129,6 +152,24 @@ test('rejects a symlink at the shared certificate parent path', async () => {
     if (process.platform !== 'win32') {
       await symlink(external, join(root, '.local-uploads', 'safe', 'seeding'));
       await assert.rejects(preparation.prepareLocalSeedFiles(sharedCertificateFixtures, root), /symlinks/);
+      assert.deepEqual(await readdir(external), []);
+    }
+  } finally {
+    await rm(root, {recursive: true});
+    await rm(external, {recursive: true});
+  }
+});
+
+test('rejects a symlink at the per-seed reference directory', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'prsdb-seed-reference-'));
+  const external = await mkdtemp(join(tmpdir(), 'prsdb-seed-target-'));
+  try {
+    await mkdir(join(root, '.local-uploads', 'safe', 'seeding'), {recursive: true});
+    if (process.platform !== 'win32') {
+      await symlink(external, join(root, '.local-uploads', 'safe', 'seeding', 'certificate-references'));
+      const rows = structuredClone(sharedCertificateFixtures);
+      rows.forEach(row => { row.files[0].objectKey = 'seeding/certificate-references/1234-1.png'; });
+      await assert.rejects(preparation.prepareLocalSeedFiles(rows, root), /symlinks/);
       assert.deepEqual(await readdir(external), []);
     }
   } finally {

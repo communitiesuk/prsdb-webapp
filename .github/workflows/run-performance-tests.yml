@@ -501,7 +501,7 @@ jobs:
             -Dgatling.registration.paymentBaseUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/gov-uk-pay \
             -Dgatling.registration.fixtureOffset=1 \
             -Dgatling.council.fixturePath="$RUNNER_TEMP/nft-council-read-fixtures.json" \
-            -Dgatling.council.simulatorUrl=https://nft.register-home-to-rent.test.communities.gov.uk/local/internal-access \
+            -Dgatling.council.simulatorUrl=https://nft.search-landlord-home-information.test.communities.gov.uk/local/internal-access \
             -Dgatling.council.fixtureOffset=1 \
             -Dgatling.council.emailDeliveryStub=true \
             -Dgatling.registration.certificatePath="$RUNNER_TEMP/performance-certificate.pdf" \

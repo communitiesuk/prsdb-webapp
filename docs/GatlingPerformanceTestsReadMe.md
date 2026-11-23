@@ -48,6 +48,42 @@ keys. It does not reset the database. Only on a disposable local database, stop 
 `FLYWAY_CLEAN_DISABLED=false ./gradlew flywayClean --console=plain` before starting it if a fresh schema
 is needed. The bootstrap loads the local performance address fixture.
 
+For local paid-registration variants, start the bootstrap with
+`node --env-file=.env scripts/performance-tests/start-local.mjs --performance-dependencies` instead.
+This adds the `performance-test` profile and uses loopback synthetic payment and EPC services; it
+does not need staging EPC credentials. The ordinary bootstrap keeps its existing profiles.
+
+The paid fixture SQL skips the first 3,000 landlords, so use a disposable locally seeded database
+with enough eligible landlords; the small default local seed is insufficient. With `PGHOST`,
+`PGPORT`, `PGDATABASE`, `PGUSER` and authentication already configured for that database, export
+the fixtures read-only and create the synthetic PDF outside the checkout:
+
+```bash
+mkdir -p "$HOME/prsdb-performance-local"
+PGOPTIONS="-c default_transaction_read_only=on" psql -X -qAt \
+  -f src/main/resources/data-nft-paid-registration-fixtures.sql \
+  -o "$HOME/prsdb-performance-local/paid-fixtures.json"
+node scripts/performance-tests/local-registration-certificate.mjs "$HOME/prsdb-performance-local/certificate.pdf"
+```
+
+Run one warm-up and one measured vacant registration with distinct exported subjects:
+
+```bash
+./gradlew gatlingRun --non-interactive \
+  --simulation uk.gov.communities.prsdb.webapp.performance.RegistrationSimulation \
+  -Dgatling.target=local -Dgatling.basic.mode=baseline -Dgatling.basic.iterations=1 \
+  -Dgatling.baseUrl=http://localhost:8080 \
+  -Dgatling.simulatorUrl=http://127.0.0.1:13000 \
+  -Dgatling.basic.landlordSubject=urn:fdc:gov.uk:2022:UVWXY \
+  -Dgatling.registration.variants=VACANT_MANUAL_EXEMPT \
+  -Dgatling.registration.fixturePath="$HOME/prsdb-performance-local/paid-fixtures.json" \
+  -Dgatling.registration.certificatePath="$HOME/prsdb-performance-local/certificate.pdf"
+```
+
+Each selected variant needs one distinct fixture per warm-up and measured iteration. Re-export
+from an appropriate fresh disposable seed before repeating a run. Upload variants require the PDF;
+it is synthetic and not valid for real compliance use.
+
 Run the basic journeys with a fresh registration subject prefix for each run:
 
 ```bash

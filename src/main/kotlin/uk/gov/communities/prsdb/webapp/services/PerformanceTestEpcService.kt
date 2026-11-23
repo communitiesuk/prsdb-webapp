@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import java.time.LocalDate
 
-@Profile("performance-test & nft & !production")
+@Profile("performance-test & (local | nft) & !production")
 @PrsdbWebService
 class PerformanceTestEpcService(
     private val addressRepository: AddressRepository,

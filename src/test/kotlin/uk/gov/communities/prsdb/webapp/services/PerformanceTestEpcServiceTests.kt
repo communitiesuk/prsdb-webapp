@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -18,6 +19,25 @@ import kotlin.test.assertTrue
 class PerformanceTestEpcServiceTests {
     private val repository: AddressRepository = mock()
     private val service = PerformanceTestEpcService(repository)
+
+    @Test
+    fun `service is active for local and NFT performance runs but not production`() {
+        for ((profiles, enabled) in listOf(
+            arrayOf("local", "performance-test") to true,
+            arrayOf("nft", "performance-test") to true,
+            arrayOf("local") to false,
+            arrayOf("local", "performance-test", "production") to false,
+            arrayOf("nft", "performance-test", "production") to false,
+        )) {
+            AnnotationConfigApplicationContext().use { context ->
+                context.environment.setActiveProfiles(*profiles)
+                context.beanFactory.registerSingleton("addressRepository", repository)
+                context.register(PerformanceTestEpcService::class.java)
+                context.refresh()
+                assertEquals(enabled, context.getBeansOfType(PerformanceTestEpcService::class.java).isNotEmpty())
+            }
+        }
+    }
 
     @Test
     fun `UPRN and synthetic certificate lookups return the same valid EPC for the selected address`() {

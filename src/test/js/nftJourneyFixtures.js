@@ -1,7 +1,7 @@
 export const uuidFor = i => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`;
 
 export const journeyFixtures = (family, count = family === 'paid-registration' ? 456 :
-  family === 'council-read' || family.startsWith('organisation-team') ? 17 : 28) => Array.from({length: count}, (_, i) => {
+  family === 'council-read' ? 18 : family.startsWith('organisation-team') ? 17 : 28) => Array.from({length: count}, (_, i) => {
   const row = {ownerSubject: `owner-${i}`, propertyOwnershipId: i + 1, address: `${i} Fixture Road`, files: []};
   if (family === 'joint' || family === 'joint-accept') Object.assign(row, {inviteeSubject: `invitee-${i}`, invitedEmail: `joint-${i}@example.test`});
   if (family === 'joint-accept') Object.assign(row, {token: uuidFor(i), invitationId: i + 1});

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.performance
 
 import org.junit.jupiter.api.Test
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.assertEquals
@@ -23,6 +24,10 @@ class BaselineWorkflowTests {
         val config = BasicRunConfig.from(arguments)
         assertEquals(PerformanceTarget.NFT, config.target)
         assertTrue(config.landlordSubject.isNotBlank())
+        val simulatorOrigin = URI.create(arguments.getValue("gatling.council.simulatorUrl"))
+        val councilOrigin = URI.create(config.councilBaseUrl)
+        assertEquals(councilOrigin.scheme, simulatorOrigin.scheme)
+        assertEquals(councilOrigin.authority, simulatorOrigin.authority)
         val mandatory =
             listOf(
                 "gatling.basic.registrationSubject",
@@ -79,6 +84,10 @@ class BaselineWorkflowTests {
         assertEquals(1239, schedules.values.sum())
         assertEquals("1", arguments["gatling.registration.fixtureOffset"])
         assertEquals("1", arguments["gatling.council.fixtureOffset"])
+        assertTrue(
+            arguments.getValue("gatling.registration.fixtureOffset").toInt() + schedules.getValue(BaselineFamily.PAID_REGISTRATION) <= 456,
+        )
+        assertTrue(arguments.getValue("gatling.council.fixtureOffset").toInt() + schedules.getValue(BaselineFamily.COUNCIL_READ) <= 18)
     }
 
     @Test

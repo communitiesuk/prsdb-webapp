@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.database
+package uk.gov.communities.prsdb.webapp.integration.database
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

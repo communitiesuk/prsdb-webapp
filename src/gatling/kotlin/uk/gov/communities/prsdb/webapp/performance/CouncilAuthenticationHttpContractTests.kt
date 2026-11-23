@@ -46,6 +46,17 @@ class CouncilAuthenticationHttpContractTests {
     }
 
     @Test
+    fun `internal access rejects the council simulator redirect when the allowed origin is the landlord`() {
+        AuthenticationServer(absoluteAuthorizationRedirect = true).use { server ->
+            val result = run(server, server.landlordBaseUrl, server.landlordBaseUrl)
+
+            assertTrue(result.exitCode != 0, result.output)
+            assertEquals(0, server.callbacks.get())
+            assertTrue(server.landlordRequests.isEmpty())
+        }
+    }
+
+    @Test
     fun `internal access rejects a callback redirect that does not reach the council dashboard`() {
         AuthenticationServer(wrongSuccessLocation = true).use { server ->
             val result = run(server)
@@ -67,6 +78,7 @@ class CouncilAuthenticationHttpContractTests {
     private fun run(
         server: AuthenticationServer,
         landlordBaseUrl: String = server.baseUrl,
+        simulatorUrl: String = server.baseUrl,
     ): GatlingTestRunner.Result =
         GatlingTestRunner(directory).run(
             CouncilReadContractSimulation::class.java,
@@ -79,7 +91,7 @@ class CouncilAuthenticationHttpContractTests {
                 "gatling.baseUrl" to landlordBaseUrl,
                 "gatling.council.baseUrl" to server.baseUrl,
                 "gatling.simulatorUrl" to "http://localhost:3000",
-                "gatling.council.simulatorUrl" to server.baseUrl,
+                "gatling.council.simulatorUrl" to simulatorUrl,
             ),
         )
 
@@ -87,6 +99,7 @@ class CouncilAuthenticationHttpContractTests {
         private val wrongCallback: Boolean = false,
         private val wrongSuccessLocation: Boolean = false,
         private val withTextarea: Boolean = true,
+        private val absoluteAuthorizationRedirect: Boolean = false,
     ) : AutoCloseable {
         private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
         private val landlordServer = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
@@ -109,7 +122,7 @@ class CouncilAuthenticationHttpContractTests {
                     "/oauth2/authorization/internal-access" -> {
                         code = 302
                         exchange.responseHeaders.add("Set-Cookie", "SESSION=council-auth; Path=/")
-                        exchange.responseHeaders.add("Location", "/authorize")
+                        exchange.responseHeaders.add("Location", if (absoluteAuthorizationRedirect) "$baseUrl/authorize" else "/authorize")
                     }
 
                     "/authorize" -> {

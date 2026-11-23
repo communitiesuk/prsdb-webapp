@@ -18,7 +18,7 @@ class RegistrationSimulation : Simulation() {
         require(selected.isNotEmpty() && selected.distinct().size == selected.size) { "Registration variants must be unique" }
         val fixturePath =
             requireNotNull(properties["gatling.registration.fixturePath"]?.takeIf { it.isNotBlank() }) {
-                "gatling.registration.fixturePath must identify the read-only export from data-nft-registration-fixtures.sql"
+                "gatling.registration.fixturePath must identify the read-only export from data-nft-paid-registration-fixtures.sql"
             }
         val offset = properties["gatling.registration.fixtureOffset"]?.toInt() ?: 0
         require(offset >= 0)

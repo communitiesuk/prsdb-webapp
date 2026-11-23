@@ -16,6 +16,7 @@ WITH landlord_pool AS MATERIALIZED (
     JOIN property_compliance seeded ON seeded.id = gas.property_compliance_id
     WHERE upload.object_key !~ '^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$'
       AND upload.object_key <> 'seeding/certificate_template.png'
+      AND upload.object_key !~ '^seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*[.]png$'
     UNION
     SELECT seeded.property_ownership_id
     FROM file_upload upload
@@ -23,6 +24,7 @@ WITH landlord_pool AS MATERIALIZED (
     JOIN property_compliance seeded ON seeded.id = electrical.property_compliance_id
     WHERE upload.object_key !~ '^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$'
       AND upload.object_key <> 'seeding/certificate_template.png'
+      AND upload.object_key !~ '^seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*[.]png$'
 ), app_touched_landlords AS MATERIALIZED (
     SELECT DISTINCT ol.landlord_id
     FROM ownership_link ol

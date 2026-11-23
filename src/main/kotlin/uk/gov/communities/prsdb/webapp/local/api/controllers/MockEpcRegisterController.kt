@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.local.api.controllers
 
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -16,12 +17,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestContr
 import uk.gov.communities.prsdb.webapp.services.PerformanceTestEpcService
 import java.util.Base64
 
-@Profile("performance-test & nft & !production")
+@Profile("performance-test & (local | nft) & !production")
 @PrsdbRestController
 @PreAuthorize("permitAll()")
 @RequestMapping("/local/epc")
 class MockEpcRegisterController(
     private val service: PerformanceTestEpcService,
+    @Value("\${spring.security.oauth2.client.registration.epc-register.client-id}")
+    private val clientId: String,
+    @Value("\${spring.security.oauth2.client.registration.epc-register.client-secret}")
+    private val clientSecret: String,
 ) {
     @GetMapping("/health")
     fun health() = mapOf("status" to "UP", "dependency" to "synthetic-epc")
@@ -32,7 +37,7 @@ class MockEpcRegisterController(
         @RequestParam parameters: MultiValueMap<String, String>,
     ): ResponseEntity<Any> {
         if (!isLoopback(request)) return error(HttpStatus.FORBIDDEN, "FORBIDDEN")
-        val credentials = Base64.getEncoder().encodeToString("performance-test:performance-test".toByteArray())
+        val credentials = Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray())
         if (request.getHeader(HttpHeaders.AUTHORIZATION) != "Basic $credentials") {
             return error(HttpStatus.UNAUTHORIZED, "INVALID_CLIENT")
         }

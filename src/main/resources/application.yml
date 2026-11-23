@@ -89,6 +89,7 @@ nft-seed:
   generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:0}
   # Deployed seeding must pin the immutable S3 object version; the blank default fails closed in NftDataSeeder.
   certificate-version-id: ${NFT_SEED_CERTIFICATE_VERSION_ID:}
+  certificate-object-key: ${NFT_SEED_CERTIFICATE_OBJECT_KEY:seeding/certificate_template.png}
   # Keep this many eligible addresses unallocated for registration journeys after seeding.
   minimum-free-addresses: ${NFT_SEED_MINIMUM_FREE_ADDRESSES:0}
 

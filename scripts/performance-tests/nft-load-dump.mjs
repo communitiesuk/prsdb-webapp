@@ -4,7 +4,7 @@ import {mkdtemp, readFile, rm, stat, statfs, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {account, awsCommand, region, requireCondition} from './nft-shared.mjs';
+import {account, awsCommand, isSharedSeedCertificateKey, region, requireCondition} from './nft-shared.mjs';
 
 const execute = promisify(execFile);
 const bucket = 'prsdb-seed-data-nft';
@@ -325,12 +325,14 @@ export async function exportCompletedPropertyFixtures(outputPath, {
 
 function requireOwnedCertificateFiles(fixtures) {
   const keys = new Set();
+  let sharedKey;
   let sharedVersionId;
   requireCondition(fixtures.every(row => Array.isArray(row.files) && row.files.length <= 20 &&
     row.files.every(file => {
-      if (file?.objectKey === 'seeding/certificate_template.png') {
+      if (isSharedSeedCertificateKey(file?.objectKey)) {
         if (file.extension !== 'png' || typeof file.versionId !== 'string' || !file.versionId.trim() ||
-            (sharedVersionId !== undefined && sharedVersionId !== file.versionId)) return false;
+            (sharedKey !== undefined && (sharedKey !== file.objectKey || sharedVersionId !== file.versionId))) return false;
+        sharedKey = file.objectKey;
         sharedVersionId = file.versionId;
         return true;
       }
@@ -351,14 +353,14 @@ export async function exportJourneyFixtures(family, outputPath, {
       strings: ['subject', 'address', 'postcode', 'building'],
       integers: ['localCouncilId', 'uprn'],
       unique: ['subject', 'uprn'],
-      minimum: 455,
+      minimum: 456,
       maximum: 456,
     },
     'council-read': {
       strings: ['subject', 'actorName', 'councilName', 'targetName', 'targetEmail', 'targetSubject', 'address', 'uprn', 'landlordName'],
       integers: ['councilId', 'targetId', 'propertyId', 'propertyRegistrationNumber', 'landlordId', 'landlordRegistrationNumber'],
       unique: ['subject', 'councilId', 'targetId', 'propertyId'],
-      minimum: 17,
+      minimum: 18,
     },
     operator: {
       strings: ['subject', 'councilName', 'targetName', 'targetEmail', 'targetSubject'],
@@ -442,7 +444,7 @@ export async function exportJourneyFixtures(family, outputPath, {
   );
   const fixtures = JSON.parse(await runPsql(environment, sql, executeCommand));
   requireCondition(Array.isArray(fixtures) && fixtures.length >= schema.minimum && fixtures.length <= (schema.maximum ?? 101),
-    `Journey fixtures need ${schema.minimum} to 101 distinct actors`);
+    `Journey fixtures need ${schema.minimum} to ${schema.maximum ?? 101} distinct actors`);
   requireCondition(fixtures.every(row =>
     schema.strings.every(field => typeof row?.[field] === 'string' && row[field].trim()) &&
     schema.integers.every(field => Number.isSafeInteger(row?.[field]) && row[field] > 0)),

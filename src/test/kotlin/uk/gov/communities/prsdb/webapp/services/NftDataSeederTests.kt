@@ -68,7 +68,7 @@ class NftDataSeederTests(
 ) {
     private val numOfLandlords = 200
     private val numOfProperties = 300
-    private val testCertificateObjectKey = "seeding/certificate_template.png"
+    private val testCertificateObjectKey = "seeding/certificate-references/1234-1.png"
     private val testCertificateObjectVersionId = "test-certificate-version"
 
     private fun newSeeder(
@@ -99,6 +99,7 @@ class NftDataSeederTests(
         minimumFreeAddresses = minimumFreeAddresses,
         numOfIncompleteProperties = incompleteProperties,
         certificateObjectVersionId = certificateObjectVersionId,
+        certificateObjectKey = testCertificateObjectKey,
     )
 
     @BeforeEach

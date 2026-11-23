@@ -154,12 +154,34 @@ test('completed-property export accepts repeated references to one versioned sha
   assert.deepEqual(exported[1].files, [sharedCertificate]);
 });
 
+test('completed-property export accepts one versioned per-seed certificate reference', async () => {
+  const fixtures = structuredClone(sharedCertificateFixtures);
+  fixtures.slice(0, 2).forEach(row => { row.files[0].objectKey = 'seeding/certificate-references/1234-1.png'; });
+  const deps = dependencies();
+  let written;
+  await loader.exportCompletedPropertyFixtures('properties.json', {
+    aws: deps.aws, env: deps.env, log: deps.log,
+    executeCommand: async () => ({stdout: JSON.stringify(fixtures)}),
+    save: async (...args) => { written = args; },
+  });
+  assert.deepEqual(JSON.parse(written[1]), fixtures);
+});
+
 for (const [description, mutate] of [
   ['missing version', rows => { delete rows[0].files[0].versionId; }],
   ['blank version', rows => { rows[0].files[0].versionId = '  '; }],
   ['mixed versions', rows => { rows[1].files[0].versionId = 'another-version'; }],
   ['unsupported extension', rows => { rows[0].files[0].extension = 'pdf'; }],
   ['arbitrary shared key', rows => { rows[0].files[0].objectKey = 'seeding/other.png'; }],
+  ['different per-seed keys', rows => {
+    rows[0].files[0].objectKey = 'seeding/certificate-references/1234-1.png';
+    rows[1].files[0].objectKey = 'seeding/certificate-references/1235-1.png';
+  }],
+  ['unsafe per-seed key', rows => { rows[0].files[0].objectKey = 'seeding/certificate-references/../1234-1.png'; }],
+  ['per-seed key with a trailing newline', rows => {
+    rows.slice(0, 2).forEach(row => { row.files[0].objectKey = 'seeding/certificate-references/1234-1.png\n'; });
+  }],
+  ['mixed legacy and per-seed keys', rows => { rows[0].files[0].objectKey = 'seeding/certificate-references/1234-1.png'; }],
 ]) {
   test(`completed-property export rejects shared certificate with ${description} before writing`, async () => {
     const fixtures = structuredClone(sharedCertificateFixtures);
@@ -671,6 +693,27 @@ test('does not report success when migration fails', async () => {
   await assert.rejects(loadSeededDataset(config, deps), /migration failed/);
   assert.equal(deps.calls.some(([kind]) => kind === 'verify'), false);
 });
+
+for (const [family, minimum, maximum] of [['paid-registration', 456, 456], ['council-read', 18, 101]]) {
+  for (const count of [minimum - 1, minimum, maximum + 1]) {
+    test(`${family} export enforces ${minimum} to ${maximum} fixtures (${count})`, async () => {
+      const deps = dependencies();
+      let written = false;
+      const result = () => loader.exportJourneyFixtures(family, 'output.json', {
+        aws: deps.aws, env: deps.env, log: deps.log,
+        executeCommand: async () => ({stdout: JSON.stringify(journeyFixtures(family, count))}),
+        save: async () => { written = true; },
+      });
+      if (count === minimum) {
+        await result();
+        assert.equal(written, true);
+      } else {
+        await assert.rejects(result(), new RegExp(`Journey fixtures need ${minimum} to ${maximum} distinct actors`));
+        assert.equal(written, false);
+      }
+    });
+  }
+}
 
 for (const family of ['paid-registration', 'council-read', 'organisation-team', 'organisation-team-preparation', 'organisation-team-ramp-preparation', 'organisation-team-ramp', 'joint', 'joint-accept', 'agent', 'agent-access', 'operator', 'offboarding']) {
   test(`journey export ${family} reads guarded fixtures and writes privately`, async () => {

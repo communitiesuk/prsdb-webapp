@@ -216,7 +216,7 @@ object RegistrationJourney {
                     ),
             ).exitHereIfFailed()
             .exec(
-                http("Registration: find registered property").get {
+                http("${prefix}Registration: find registered property").get {
                     HttpDestination.withCacheBuster("${config.baseUrl}/landlord/landlord-details")
                 }
                     .disableFollowRedirect().check(status().`is`(200))

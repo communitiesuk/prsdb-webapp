@@ -60,11 +60,15 @@ class NftDataSeeder(
     private val minimumFreeAddresses: Int = 0,
     @Value("\${nft-seed.incomplete-properties:0}")
     private val numOfIncompleteProperties: Int = 0,
+    @Value("\${nft-seed.certificate-object-key}")
+    private val certificateObjectKey: String = "seeding/certificate_template.png",
 ) {
-    private val certificateObjectKey = "seeding/certificate_template.png"
-
     init {
         require(certificateObjectVersionId.isNotBlank()) { "nft-seed.certificate-version-id must be configured" }
+        require(
+            certificateObjectKey == "seeding/certificate_template.png" ||
+                certificateObjectKey.matches(Regex("seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*\\.png")),
+        ) { "nft-seed.certificate-object-key must identify a supported seed certificate" }
     }
 
     private lateinit var nftDataSeederDao: NftDataSeederDao

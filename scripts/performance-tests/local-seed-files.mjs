@@ -2,9 +2,9 @@ import {readFile, writeFile, mkdir, realpath, lstat} from 'node:fs/promises';
 import {isAbsolute, relative, resolve, join, dirname} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {deflateSync} from 'node:zlib';
+import {isSharedSeedCertificateKey} from './nft-shared.mjs';
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const sharedCertificateKey = 'seeding/certificate_template.png';
 const requireCondition = (condition, message) => { if (!condition) throw new Error(message); };
 const contained = (parent, child) => {
   const path = relative(parent, child);
@@ -86,6 +86,7 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
   const subjects = new Set();
   const properties = new Set();
   const files = new Map();
+  let sharedCertificate;
   for (const fixture of fixtures) {
     requireCondition(typeof fixture?.subject === 'string' && fixture.subject.trim() &&
       Number.isSafeInteger(fixture.propertyOwnershipId) && fixture.propertyOwnershipId > 0 &&
@@ -94,16 +95,18 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
     subjects.add(fixture.subject);
     properties.add(fixture.propertyOwnershipId);
     for (const file of fixture.files) {
-      if (file?.objectKey === sharedCertificateKey) {
-        requireCondition(file.extension === 'png' && typeof file.versionId === 'string' && file.versionId.trim(),
+      if (isSharedSeedCertificateKey(file?.objectKey)) {
+        requireCondition(file.extension === 'png' && typeof file.versionId === 'string' && file.versionId.trim() &&
+          (!sharedCertificate || (sharedCertificate.objectKey === file.objectKey && sharedCertificate.versionId === file.versionId)),
           'The shared certificate fixture requires a PNG and nonblank version');
+        sharedCertificate = file;
       } else {
         requireCondition(/^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$/.test(file?.objectKey) &&
           ['png', 'pdf'].includes(file.extension), 'Only seed-owned PNG/PDF certificate fixtures are supported');
       }
       const existing = files.get(file.objectKey);
       requireCondition(!existing || existing.extension === file.extension &&
-        (file.objectKey !== sharedCertificateKey || existing.versionId === file.versionId),
+        (!isSharedSeedCertificateKey(file.objectKey) || existing.versionId === file.versionId),
       'Conflicting file fixture extensions or versions');
       files.set(file.objectKey, {extension: file.extension, versionId: file.versionId});
     }
@@ -115,8 +118,8 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
   const pathsToCheck = [
     join(canonical, '.local-uploads'),
     directory,
-    ...[...files.keys()].flatMap(key => key === sharedCertificateKey
-      ? [join(directory, 'seeding'), filePath(key)]
+    ...[...files.keys()].flatMap(key => isSharedSeedCertificateKey(key)
+      ? [join(directory, 'seeding'), ...(key.includes('/certificate-references/') ? [join(directory, 'seeding', 'certificate-references')] : []), filePath(key)]
       : [filePath(key)]),
   ];
   for (const path of pathsToCheck) {
@@ -138,7 +141,7 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
   await fs.mkdir(directory, {recursive: true, mode: 0o700});
   for (const [key, file] of files) {
     const path = filePath(key);
-    if (key === sharedCertificateKey) await fs.mkdir(dirname(path), {recursive: true, mode: 0o700});
+    if (isSharedSeedCertificateKey(key)) await fs.mkdir(dirname(path), {recursive: true, mode: 0o700});
     try {
       await fs.writeFile(path, bodies[file.extension], {mode: 0o600, flag: 'wx'});
     } catch (error) {
