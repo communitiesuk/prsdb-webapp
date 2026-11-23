@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
@@ -48,7 +49,7 @@ class PropertyRegistrationAddressTask(
                     }
                 }
                 stepSpecificInitialisation {
-                    restrictToEngland()
+                    restrictToRegion(AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
                 }
                 withAdditionalContentProperties {
                     mapOf(
@@ -73,7 +74,7 @@ class PropertyRegistrationAddressTask(
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
                 stepSpecificInitialisation {
-                    restrictToEngland()
+                    restrictToRegion(AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
                 }
             }
             step(journey.manualAddressStep) {

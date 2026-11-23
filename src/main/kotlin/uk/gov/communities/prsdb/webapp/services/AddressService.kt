@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -25,6 +26,15 @@ class AddressService(
     fun searchForAddresses(
         houseNameOrNumber: String,
         postcode: String,
-        restrictToEngland: Boolean = false,
-    ) = addressRepository.search(houseNameOrNumber, postcode, restrictToEngland).map { AddressDataModel.fromAddress(it) }
+        region: AddressSearchRegion = AddressSearchRegion.UK,
+    ): List<AddressDataModel> {
+        val addresses =
+            when (region) {
+                AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL ->
+                    addressRepository.searchInEnglandWithLocalCouncil(houseNameOrNumber, postcode)
+                AddressSearchRegion.ENGLAND_AND_WALES -> addressRepository.searchInEnglandAndWales(houseNameOrNumber, postcode)
+                AddressSearchRegion.UK -> addressRepository.searchInUk(houseNameOrNumber, postcode)
+            }
+        return addresses.map { AddressDataModel.fromAddress(it) }
+    }
 }

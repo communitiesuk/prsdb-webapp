@@ -1,25 +1,27 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
-<!--/*@thymesVar id="restrictToEngland" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="headingKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="paragraphOneBeforeLinkKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="paragraphTwoKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
 <!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${#bools.isTrue(restrictToEngland) ? 'addressForms.noAddressFound.english.heading' : 'addressForms.noAddressFound.heading'}(${postcode}, ${houseNameOrNumber})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${headingKey}(${postcode}, ${houseNameOrNumber})}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <h1 class="govuk-heading-l" th:with="headingMsg=${restrictToEngland} ? 'addressForms.noAddressFound.english.heading' : 'addressForms.noAddressFound.heading'" th:text="${#messages.msg(headingMsg, postcode, houseNameOrNumber)}">
-            addressForms.noAddressFound.(english.)heading
+        <h1 class="govuk-heading-l" th:text="#{${headingKey}(${postcode}, ${houseNameOrNumber})}">
+            addressForms.noAddressFound.heading.*
         </h1>
         <p class="govuk-body">
-            <span th:text="#{${#bools.isTrue(restrictToEngland) ? 'addressForms.noAddressFound.english.paragraph.one.beforeLink' : 'addressForms.noAddressFound.paragraph.one.beforeLink'}}" th:remove="tag">
-                addressForms.noAddressFound.(english.)paragraph.one.beforeLink
+            <span th:text="#{${paragraphOneBeforeLinkKey}}" th:remove="tag">
+                addressForms.noAddressFound.paragraph.one.beforeLink.*
             </span>
             <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{addressForms.noAddressFound.paragraph.one.linkText}">
                 addressForms.noAddressFound.paragraph.one.linkText
             </a><span th:remove="tag" th:text="#{addressForms.noAddressFound.paragraph.one.afterLink}">addressForms.noAddressFound.paragraph.one.afterLink</span>
         </p>
-        <p class="govuk-body" th:text="#{${#bools.isTrue(restrictToEngland) ? 'addressForms.noAddressFound.english.paragraph.two' : 'addressForms.noAddressFound.paragraph.two'}}">addressForms.noAddressFound.(english.)paragraph.two</p>
+        <p class="govuk-body" th:text="#{${paragraphTwoKey}}">addressForms.noAddressFound.paragraph.two.*</p>
     </th:block>
     <th:block id="form-content">
         <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{addressForms.noAddressFound.button.text})}"></button>
