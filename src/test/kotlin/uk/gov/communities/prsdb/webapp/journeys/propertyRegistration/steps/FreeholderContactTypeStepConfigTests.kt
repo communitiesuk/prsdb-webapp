@@ -74,6 +74,8 @@ class FreeholderContactTypeStepConfigTests {
     fun `resolvePageContent does not overwrite a contact type the user has already chosen`() {
         // Arrange
         val formModel = FreeholderContactTypeFormModel(contactType = FreeholderContactType.POSTAL_ADDRESS)
+        lenient().`when`(mockJourneyState.editingFreeholder)
+            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
 
         // Act
         val result = FreeholderContactTypeStepConfig().resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to formModel))
@@ -83,6 +85,34 @@ class FreeholderContactTypeStepConfigTests {
             FreeholderContactType.POSTAL_ADDRESS,
             (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType,
         )
+    }
+
+    @Test
+    fun `resolvePageContent preselects email when editing a freeholder with an email`() {
+        // Arrange
+        whenever(mockJourneyState.editingFreeholder)
+            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
+
+        // Act
+        val result =
+            FreeholderContactTypeStepConfig()
+                .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
+
+        // Assert
+        assertEquals(FreeholderContactType.EMAIL, (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
+    }
+
+    @Test
+    fun `resolvePageContent preselects email when no form model exists`() {
+        // Arrange
+        whenever(mockJourneyState.editingFreeholder)
+            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
+
+        // Act
+        val result = FreeholderContactTypeStepConfig().resolvePageContent(mockJourneyState, emptyMap())
+
+        // Assert
+        assertEquals(FreeholderContactType.EMAIL, (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
     }
 
     @ParameterizedTest
@@ -106,10 +136,6 @@ class FreeholderContactTypeStepConfigTests {
         @JvmStatic
         fun provideEditedFreeholders() =
             listOf(
-                named(
-                    "freeholder with an email",
-                    FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"),
-                ),
                 named(
                     "freeholder with a postal address",
                     FreeholderDataModel(

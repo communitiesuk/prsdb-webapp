@@ -264,7 +264,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder with an email does not preselect a contact type and updates their details in the list`(page: Page) {
+        fun `Changing a freeholder with an email preselects email and updates their details in the list`(page: Page) {
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
 
@@ -278,8 +278,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(namePage.form.nameInput).hasValue("Freeholder With Email")
             namePage.submitName("Changed freeholder")
             val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-            assertEquals(null, contactTypePage.form.radios.selectedValue)
-            contactTypePage.submitContactType(FreeholderContactType.EMAIL)
+            assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
             val emailPage = assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class)
             assertThat(emailPage.form.emailInput).hasValue("freeholder@example.com")
             emailPage.submitEmail("changed.freeholder@example.com")

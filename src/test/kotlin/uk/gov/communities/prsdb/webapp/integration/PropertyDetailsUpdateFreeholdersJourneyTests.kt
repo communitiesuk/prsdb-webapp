@@ -496,7 +496,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = OwnershipType::class, names = ["NONE", "SHARE_OF_JOINT_TENANTS"])
-    fun `editing another freeholder after abandoning an edit uses the correct details without preselecting a contact type`(
+    fun `editing another freeholder after abandoning an edit uses the correct contact type`(
         ownershipType: OwnershipType,
         page: Page,
     ) {
@@ -530,8 +530,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals("Email Freeholder", namePage.form.nameInput.locator.inputValue())
         namePage.form.submit()
         var contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(null, contactTypePage.form.radios.selectedValue)
-        contactTypePage.submitContactType(FreeholderContactType.EMAIL)
+        assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
+        contactTypePage.form.submit()
 
         page.navigate(listUrl)
         freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
@@ -552,11 +552,11 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals("Email Freeholder", namePage.form.nameInput.locator.inputValue())
         namePage.form.submit()
         contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(null, contactTypePage.form.radios.selectedValue)
+        assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
     }
 
     @Test
-    fun `editing a saved freeholder does not preselect a contact type and updates the existing record without adding a record`(page: Page) {
+    fun `editing a saved freeholder preselects email and updates the existing record without adding a record`(page: Page) {
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = "existing@example.com"
@@ -574,8 +574,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals("Existing Freeholder", namePage.form.nameInput.locator.inputValue())
         namePage.submitName("Updated Freeholder")
         val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(null, contactTypePage.form.radios.selectedValue)
-        contactTypePage.submitContactType(FreeholderContactType.EMAIL)
+        assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
+        contactTypePage.form.submit()
         val emailPage = FreeholderEmailFormPagePropertyRegistration(page)
         assertEquals("existing@example.com", emailPage.form.emailInput.locator.inputValue())
         emailPage.submitEmail("updated@example.com")
