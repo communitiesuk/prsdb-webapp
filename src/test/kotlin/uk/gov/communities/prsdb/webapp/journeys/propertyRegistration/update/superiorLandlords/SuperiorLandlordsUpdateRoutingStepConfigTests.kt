@@ -43,7 +43,7 @@ class SuperiorLandlordsUpdateRoutingStepConfigTests {
     fun `mode is NO_SUPERIOR_LANDLORDS when the ownership chain question has not been answered`() {
         whenever(mockAnyoneInOwnershipChainStep.formModelOrNull).thenReturn(null)
 
-        assertEquals(SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS, stepConfig.mode(mockState))
+        assertEquals(SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS_ADDED, stepConfig.mode(mockState))
     }
 
     @Test
@@ -51,6 +51,6 @@ class SuperiorLandlordsUpdateRoutingStepConfigTests {
         whenever(mockAnyoneInOwnershipChainStep.formModelOrNull).thenReturn(AnyoneInOwnershipChainFormModel(anyoneInOwnershipChain = true))
         whenever(mockSuperiorLandlordsTask.superiorLandlordsMap).thenReturn(emptyMap())
 
-        assertEquals(SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS, stepConfig.mode(mockState))
+        assertEquals(SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS_ADDED, stepConfig.mode(mockState))
     }
 }

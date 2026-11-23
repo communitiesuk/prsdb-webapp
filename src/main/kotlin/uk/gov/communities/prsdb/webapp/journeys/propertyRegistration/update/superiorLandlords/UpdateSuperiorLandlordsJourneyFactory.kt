@@ -66,7 +66,7 @@ class UpdateSuperiorLandlordsJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         SuperiorLandlordsUpdateRouteMode.HAS_SUPERIOR_LANDLORDS -> Destination(superiorLandlordsListStep)
-                        SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS -> Destination(journey.superiorLandlordsTask.firstStep)
+                        SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS_ADDED -> Destination(journey.superiorLandlordsTask.firstStep)
                     }
                 }
             }

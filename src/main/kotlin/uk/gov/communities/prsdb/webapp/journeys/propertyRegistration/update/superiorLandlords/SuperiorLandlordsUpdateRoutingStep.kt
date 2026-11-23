@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
 
 enum class SuperiorLandlordsUpdateRouteMode {
     HAS_SUPERIOR_LANDLORDS,
-    NO_SUPERIOR_LANDLORDS,
+    NO_SUPERIOR_LANDLORDS_ADDED,
 }
 
 @JourneyFrameworkComponent
@@ -19,7 +19,7 @@ class SuperiorLandlordsUpdateRoutingStepConfig :
         return if (hasOwnershipChain && !superiorLandlordsTask.superiorLandlordsMap.isNullOrEmpty()) {
             SuperiorLandlordsUpdateRouteMode.HAS_SUPERIOR_LANDLORDS
         } else {
-            SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS
+            SuperiorLandlordsUpdateRouteMode.NO_SUPERIOR_LANDLORDS_ADDED
         }
     }
 }
