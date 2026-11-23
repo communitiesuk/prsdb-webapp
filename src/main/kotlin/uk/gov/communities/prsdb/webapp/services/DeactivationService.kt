@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -18,12 +21,13 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import java.time.LocalDate
 
-@PrsdbWebService
+@Service
 class DeactivationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
-    private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
+    private val lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService,
+    private val transactionTemplate: TransactionTemplate,
     // TODO PDJB-2149: Remove the feature flag manager when the ACTIVE_INACTIVE flag is removed
     private val featureFlagManager: FeatureFlagManager,
     private val landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
@@ -46,7 +50,10 @@ class DeactivationService(
                 NotificationHelper.sendNotificationAndLogFailures(
                     "the letting agent property deactivated email for property ownership $propertyOwnershipId",
                 ) {
-                    delegateToLettingAgentEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, delegation.invitedEmail)
+                    lettingAgentPropertyDeactivatedEmailService.sendLettingAgentPropertyDeactivatedEmail(
+                        propertyOwnership,
+                        delegation.invitedEmail,
+                    )
                 }
             }
         }
@@ -54,6 +61,28 @@ class DeactivationService(
         propertyOwnership.landlords
             .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
             .forEach { markLandlordAsInactive(it, deactivationDate) }
+    }
+
+    fun deactivateMissingDetailPropertiesPastDueDateReturningFailureCount(): Int {
+        val cutoff =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
+        val propertyOwnershipIds = propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff)
+        var failureCount = 0
+
+        propertyOwnershipIds.forEach { propertyOwnershipId ->
+            try {
+                transactionTemplate.executeWithoutResult { deactivateProperty(propertyOwnershipId) }
+            } catch (exception: Exception) {
+                logger.error("Failed to deactivate property ownership $propertyOwnershipId", exception)
+                failureCount++
+            }
+        }
+
+        return failureCount
     }
 
     fun landlordHasOtherActiveProperties(
@@ -117,4 +146,8 @@ class DeactivationService(
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(DeactivationService::class.java)
+    }
 }

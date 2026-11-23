@@ -39,10 +39,12 @@ import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAf
 import uk.gov.communities.prsdb.webapp.helpers.converters.OwnershipTypeConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -64,7 +66,7 @@ class PropertyOwnershipService(
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
@@ -230,7 +232,7 @@ class PropertyOwnershipService(
         if (isCurrentUserLandlord(propertyOwnershipId)) return true
 
         val lettingAgentAccess = getLettingAgentAccess(propertyOwnershipId) ?: return false
-        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
+        return lettingAgentSessionService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
     }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
@@ -365,21 +367,31 @@ class PropertyOwnershipService(
     @Transactional
     fun updateLicensing(
         id: Long,
-        licensingType: LicensingType,
-        licenceNumber: String?,
+        licensing: LicensingDetailsDataModel,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        val updatedLicence =
-            licenseService.updateLicence(
-                propertyOwnership.license,
-                licensingType,
-                licenceNumber,
-            )
-        propertyOwnership.license = updatedLicence
-        propertyOwnership.licenseProvideLater = false
+        setLicensing(propertyOwnership, licensing)
         propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun saveReactivationLicensing(
+        propertyOwnership: PropertyOwnership,
+        licensing: LicensingDetailsDataModel,
+    ) {
+        setLicensing(propertyOwnership, licensing)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    private fun setLicensing(
+        propertyOwnership: PropertyOwnership,
+        licensing: LicensingDetailsDataModel,
+    ) {
+        propertyOwnership.license =
+            licenseService.updateLicence(propertyOwnership.license, licensing.licensingType, licensing.licenceNumber)
+        propertyOwnership.licenseProvideLater = false
     }
 
     // TODO PDJB-2016: delete this with the flag-off journey, which never asks who the freeholders are and so falls
@@ -540,29 +552,38 @@ class PropertyOwnershipService(
     @Transactional
     fun updateTenancyDetails(
         id: Long,
-        numberOfHouseholds: Int,
-        numberOfPeople: Int,
-        billsIncludedList: String?,
-        customBillsIncluded: String?,
-        furnishedStatus: FurnishedStatus,
-        rentFrequency: RentFrequency,
-        customRentFrequency: String?,
-        rentAmount: BigDecimal,
+        tenancyDetails: TenancyDetailsDataModel,
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        propertyOwnership.currentNumHouseholds = numberOfHouseholds
-        propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnership.billsIncludedList = billsIncludedList
-        propertyOwnership.customBillsIncluded = customBillsIncluded
-        propertyOwnership.furnishedStatus = furnishedStatus
-        propertyOwnership.rentFrequency = rentFrequency
-        propertyOwnership.customRentFrequency = customRentFrequency
-        propertyOwnership.rentAmount = rentAmount
+        setTenancyDetails(propertyOwnership, tenancyDetails)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun saveReactivationTenancyDetails(
+        propertyOwnership: PropertyOwnership,
+        tenancyDetails: TenancyDetailsDataModel,
+    ) {
+        setTenancyDetails(propertyOwnership, tenancyDetails)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    private fun setTenancyDetails(
+        propertyOwnership: PropertyOwnership,
+        tenancyDetails: TenancyDetailsDataModel,
+    ) {
+        propertyOwnership.currentNumHouseholds = tenancyDetails.numberOfHouseholds
+        propertyOwnership.currentNumTenants = tenancyDetails.numberOfPeople
+        propertyOwnership.billsIncludedList = tenancyDetails.billsIncludedList
+        propertyOwnership.customBillsIncluded = tenancyDetails.customBillsIncluded
+        propertyOwnership.furnishedStatus = tenancyDetails.furnishedStatus
+        propertyOwnership.rentFrequency = tenancyDetails.rentFrequency
+        propertyOwnership.customRentFrequency = tenancyDetails.customRentFrequency
+        propertyOwnership.rentAmount = tenancyDetails.rentAmount
         // The tenancy details are now provided, so the property record no longer needs to prompt for them.
         propertyOwnership.tenancyProvideLater = false
-        propertyOwnershipRepository.save(propertyOwnership)
     }
 
     @Transactional

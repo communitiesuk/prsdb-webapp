@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.application.DeactivateMissingDetailPropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
@@ -83,6 +84,7 @@ class PrsdbWebappApplicationTests {
             listOf(
                 OsDownloadsConfig::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
+                DeactivateMissingDetailPropertiesTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

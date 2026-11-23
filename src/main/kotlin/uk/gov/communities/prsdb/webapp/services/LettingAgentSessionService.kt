@@ -1,0 +1,87 @@
+package uk.gov.communities.prsdb.webapp.services
+
+import jakarta.servlet.http.HttpSession
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_AUTHORISED_ACCESS_TOKENS
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+
+@PrsdbWebService
+class LettingAgentSessionService(
+    private val session: HttpSession,
+) {
+    fun addAuthorisedTokenToSession(token: String) {
+        val tokens = getAuthorisedTokensFromSession()
+        tokens.add(token)
+        session.setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, tokens)
+    }
+
+    fun isTokenAuthorisedInSession(token: String): Boolean = token in getAuthorisedTokensFromSession()
+
+    fun removeAuthorisedTokenFromSession(token: String) {
+        val tokens = getAuthorisedTokensFromSession()
+        if (tokens.remove(token)) {
+            session.setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, tokens)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getAuthorisedTokensFromSession(): MutableSet<String> =
+        session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS) as MutableSet<String>?
+            ?: mutableSetOf()
+
+    fun addDelegatedPropertyOwnershipToSession(
+        propertyOwnershipId: Long,
+        invitedEmail: String,
+    ) = session.setAttribute(
+        PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION,
+        getDelegatedPropertyOwnershipEmailsFromSession() + (propertyOwnershipId to invitedEmail),
+    )
+
+    @Suppress("UNCHECKED_CAST")
+    fun getDelegatedPropertyOwnershipEmailsFromSession(): MutableMap<Long, String> =
+        session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION) as MutableMap<Long, String>?
+            ?: mutableMapOf()
+
+    fun addRemovedLettingAgentToSession(
+        propertyOwnershipId: Long,
+        lettingAgentEmail: String,
+    ) = session.setAttribute(
+        LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
+        getRemovedLettingAgentsFromSession() + (propertyOwnershipId to lettingAgentEmail),
+    )
+
+    fun wasLettingAgentRemovedInThisSession(propertyOwnershipId: Long): Boolean =
+        propertyOwnershipId in getRemovedLettingAgentsFromSession()
+
+    fun getRemovedLettingAgentEmailFromSession(propertyOwnershipId: Long): String? =
+        getRemovedLettingAgentsFromSession()[propertyOwnershipId]
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getRemovedLettingAgentsFromSession(): Map<Long, String> =
+        session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS) as Map<Long, String>?
+            ?: emptyMap()
+
+    fun addJourneyIdInvitationTokenPairToSession(
+        journeyId: String,
+        token: String,
+    ) {
+        val existingPairs =
+            getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
+        existingPairs.add(Pair(journeyId, token))
+        session.setAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS, existingPairs)
+    }
+
+    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String =
+        getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)
+            ?: throw PrsdbWebException("Invitation token not found in session for journey $journeyId")
+
+    fun getInvitationTokenForJourneyIdFromSessionOrNull(journeyId: String): String? =
+        getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
+        session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS) as? MutableList<Pair<String, String>>
+}

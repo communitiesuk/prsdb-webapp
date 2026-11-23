@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import uk.gov.communities.prsdb.webapp.services.LandlordActiveStatusService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.ManageTeamMembersUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -61,6 +62,9 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var lettingAgentAccessService: LettingAgentAccessService
+
+    @MockitoBean
+    lateinit var lettingAgentSessionService: LettingAgentSessionService
 
     @MockitoBean
     lateinit var mockClientRegistrationRepository: ClientRegistrationRepository

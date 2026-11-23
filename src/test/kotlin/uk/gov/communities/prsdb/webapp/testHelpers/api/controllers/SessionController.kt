@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.api.controllers
 
 import jakarta.servlet.http.HttpSession
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadataStore
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
@@ -23,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettin
 class SessionController(
     private val session: HttpSession,
     private val localCouncilInvitationService: LocalCouncilInvitationService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val organisationalInvitationService: OrganisationalLandlordInvitationService,
 ) {
     @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
@@ -52,14 +51,14 @@ class SessionController(
     fun storeLettingAgentAccess(
         @RequestBody requestBody: StoreInvitationTokenRequestModel,
     ) {
-        lettingAgentAccessService.addAuthorisedTokenToSession(requestBody.token)
+        lettingAgentSessionService.addAuthorisedTokenToSession(requestBody.token)
     }
 
     @PostMapping("/$STORE_LETTING_AGENT_JOURNEY_TOKEN_PATH_SEGMENT", consumes = ["application/json"])
     fun storeLettingAgentJourneyToken(
         @RequestBody requestBody: StoreLettingAgentJourneyTokenRequestModel,
     ) {
-        lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession(requestBody.journeyId, requestBody.token)
+        lettingAgentSessionService.addJourneyIdInvitationTokenPairToSession(requestBody.journeyId, requestBody.token)
     }
 
     @PostMapping("/$STORE_ORGANISATIONAL_JOURNEY_TOKEN_PATH_SEGMENT", consumes = ["application/json"])

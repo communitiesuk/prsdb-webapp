@@ -12,15 +12,21 @@ import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.SimpleTransactionStatus
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -35,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
+import java.util.function.Consumer
 
 @ExtendWith(MockitoExtension::class)
 class DeactivationServiceTests {
@@ -48,7 +55,10 @@ class DeactivationServiceTests {
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @Mock
-    private lateinit var delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
+    private lateinit var lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService
+
+    @Mock
+    private lateinit var transactionTemplate: TransactionTemplate
 
     // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE flag is removed
     @Mock
@@ -207,7 +217,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verify(delegateToLettingAgentEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+        verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
     }
 
     @Test
@@ -226,9 +236,9 @@ class DeactivationServiceTests {
         try {
             deactivationService.deactivateProperty(PROPERTY_ID)
 
-            verifyNoInteractions(delegateToLettingAgentEmailService)
+            verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
             TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
-            verify(delegateToLettingAgentEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+            verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
         } finally {
             TransactionSynchronizationManager.clearSynchronization()
         }
@@ -245,7 +255,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(delegateToLettingAgentEmailService)
+        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
     }
 
     // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
@@ -263,7 +273,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(delegateToLettingAgentEmailService)
+        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
     }
 
     @Test
@@ -279,7 +289,7 @@ class DeactivationServiceTests {
         // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         doThrow(RuntimeException("Notify is down"))
-            .whenever(delegateToLettingAgentEmailService)
+            .whenever(lettingAgentPropertyDeactivatedEmailService)
             .sendLettingAgentPropertyDeactivatedEmail(any(), any())
 
         deactivationService.deactivateProperty(PROPERTY_ID)
@@ -391,6 +401,42 @@ class DeactivationServiceTests {
         assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
     }
 
+    @Test
+    fun `batch property deactivation queries with the UK-local cutoff and continues after an individual failure`() {
+        val firstSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf())
+        val secondSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf())
+        whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
+            .thenReturn(listOf(PROPERTY_ID, firstSuccessfulProperty.id, secondSuccessfulProperty.id))
+
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.empty())
+        whenever(propertyOwnershipRepository.findById(firstSuccessfulProperty.id)).thenReturn(Optional.of(firstSuccessfulProperty))
+        whenever(propertyOwnershipRepository.findById(secondSuccessfulProperty.id)).thenReturn(Optional.of(secondSuccessfulProperty))
+        doAnswer { invocation ->
+            invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus())
+        }.whenever(transactionTemplate).executeWithoutResult(any())
+
+        val failureCount = deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+
+        assertEquals(1, failureCount)
+        verify(propertyOwnershipRepository).findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff())
+        verify(transactionTemplate, times(3)).executeWithoutResult(any())
+
+        verify(lettingAgentAccessService, never()).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(firstSuccessfulProperty.id)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(secondSuccessfulProperty.id)
+    }
+
+    @Test
+    fun `batch property deactivation does nothing when there are no properties created before the cut-off with provide later tasks`() {
+        whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
+            .thenReturn(emptyList())
+
+        val failureCount = deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+
+        assertEquals(0, failureCount)
+        verifyNoInteractions(transactionTemplate)
+    }
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
@@ -398,5 +444,12 @@ class DeactivationServiceTests {
         private val DASHBOARD_URI = URI("https://example.com/landlord/dashboard")
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
+
+        private fun cutoff() =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
     }
 }
