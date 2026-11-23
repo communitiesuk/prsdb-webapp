@@ -21,7 +21,7 @@ class NoAddressFoundStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: AddressState) =
-        messageKeys() +
+        regionSpecificMessageKeys() +
             mapOf(
                 "postcode" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::postcode),
                 "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
@@ -44,7 +44,7 @@ class NoAddressFoundStepConfig(
         return this
     }
 
-    private fun messageKeys(): Map<String, String> {
+    private fun regionSpecificMessageKeys(): Map<String, String> {
         val regionKey =
             when (region) {
                 AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL -> "englandPropertyDetails"
