@@ -317,6 +317,20 @@
     "bodyLocation": "/emails/PropertyDeactivationConfirmationAccountDeactivated.md"
   },
   {
+    "test_id": "3881a1b9-6f69-457a-8848-3c861ac00156",
+    "prod_id": "6dcd6781-bf76-40bf-9f40-7bc9387819b5",
+    "enumName": "PROPERTY_REACTIVATION_CONFIRMATION",
+    "subject": "Property reactivated",
+    "bodyLocation": "/emails/PropertyReactivationConfirmation.md"
+  },
+  {
+    "test_id": "1f0a91f6-bc63-4367-af37-d5a03da605f3",
+    "prod_id": "9a35ca8c-3d88-4a77-aa08-de00f7582b11",
+    "enumName": "PROPERTY_REACTIVATION_CONFIRMATION_WITH_PAYMENT",
+    "subject": "Property reactivated",
+    "bodyLocation": "/emails/PropertyReactivationConfirmationWithPayment.md"
+  },
+  {
     "test_id": "64ef660b-54b8-4c3d-a11f-8440aee5244c",
     "prod_id": "591e2252-1c40-4d0b-8f5d-49356db8c029",
     "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844",
@@ -357,6 +371,13 @@
     "enumName": "LETTING_AGENT_CANCEL_DELEGATION_LETTING_AGENT_NOTIFICATION_EMAIL",
     "subject": "You can no longer update ((single line address))",
     "bodyLocation": "/emails/CancelDelegationLettingAgentNotification.md"
+  },
+  {
+    "test_id": "1c27ef53-69fa-4b1d-a026-88ef21754c45",
+    "prod_id": "aa6e87c3-8810-4e5c-8f4b-7b4f01ea8b8e",
+    "enumName": "LETTING_AGENT_PROPERTY_DEACTIVATED_NOTIFICATION_EMAIL",
+    "subject": "You can no longer update ((single line address))",
+    "bodyLocation": "/emails/LettingAgentPropertyDeactivatedNotification.md"
   },
   {
     "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 
@@ -12,8 +13,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDat
 class PropertyReactivationService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
     private val addressAvailabilityService: AddressAvailabilityService,
+    private val landlordActiveStatusService: LandlordActiveStatusService,
+    private val propertyReactivationEmailService: PropertyReactivationEmailService,
     private val session: HttpSession,
 ) {
     @Transactional
@@ -29,9 +32,19 @@ class PropertyReactivationService(
             )
         }
 
+        val landlordWillBeReactivated = landlordActiveStatusService.isCurrentLandlordInactive()
+
         saveReactivationData(propertyOwnershipId, reactivationData)
-        activeInactiveService.reactivateProperty(propertyOwnershipId)
-        runAfterTransactionCommits { session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId) }
+        activationService.reactivateProperty(propertyOwnershipId)
+        runAfterTransactionCommits {
+            session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the property reactivation confirmation email for property ownership $propertyOwnershipId",
+            ) {
+                propertyReactivationEmailService.sendConfirmationEmail(propertyOwnershipId, landlordWillBeReactivated)
+            }
+        }
     }
 
     fun getLastPropertyOwnershipIdReactivatedThisSession(): Long? = session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID) as? Long

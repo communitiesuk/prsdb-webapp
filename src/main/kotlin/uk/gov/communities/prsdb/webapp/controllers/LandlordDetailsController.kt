@@ -31,8 +31,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveL
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.LandlordActiveStatusService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -50,7 +50,7 @@ class LandlordDetailsController(
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
     private val usersIncompletePropertyService: UsersIncompletePropertyService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val landlordActiveStatusService: LandlordActiveStatusService,
 ) {
     @AllowIfLandlord
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -76,7 +76,7 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val isInactiveVariant = activeInactiveService.isLandlordInactive(landlord)
+        val isInactiveVariant = landlordActiveStatusService.isLandlordInactive(landlord)
         val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = !isInactiveVariant)
 
         model.addAttribute("landlord", landlordViewModel)
@@ -94,7 +94,7 @@ class LandlordDetailsController(
         model: Model,
     ): String {
         val canPerformOrgAdminActions = organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()
-        val isInactiveVariant = activeInactiveService.isLandlordInactive(orgLandlord)
+        val isInactiveVariant = landlordActiveStatusService.isLandlordInactive(orgLandlord)
         val canChangeRecord = canPerformOrgAdminActions && !isInactiveVariant
 
         model.addAttribute(

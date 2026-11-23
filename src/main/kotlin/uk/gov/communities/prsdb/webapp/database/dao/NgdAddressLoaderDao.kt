@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
-import uk.gov.communities.prsdb.webapp.constants.ENGLAND
 import java.sql.Connection
 import java.sql.PreparedStatement
 
@@ -19,7 +18,6 @@ class NgdAddressLoaderDao(
         return session.createNativeQuery(query, String::class.java).singleResultOrNull
     }
 
-    // TODO: PDJB-2262: Seed a bigger variety of countries
     fun getLoadAddressPreparedStatement(connection: Connection): PreparedStatement {
         val query =
             """
@@ -37,8 +35,9 @@ class NgdAddressLoaderDao(
                     local_council_id,
                     is_active,
                     country,
+                    gss,
                     created_date
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '$ENGLAND', current_timestamp)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
                 ON CONFLICT (uprn) DO UPDATE SET
                     single_line_address = EXCLUDED.single_line_address,
                     organisation        = EXCLUDED.organisation,
@@ -51,6 +50,8 @@ class NgdAddressLoaderDao(
                     postcode            = EXCLUDED.postcode,
                     local_council_id    = EXCLUDED.local_council_id,
                     is_active           = EXCLUDED.is_active,
+                    country             = EXCLUDED.country,
+                    gss                 = EXCLUDED.gss,
                     last_modified_date  = current_timestamp
             """
         return connection.prepareStatement(query)

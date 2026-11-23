@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.PropertyDea
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -31,7 +31,7 @@ class ConfirmDeactivationStepConfigTests {
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    lateinit var mockActiveInactiveService: ActiveInactiveService
+    lateinit var mockDeactivationService: DeactivationService
 
     @Mock
     lateinit var mockUserToLandlordService: UserToLandlordService
@@ -77,7 +77,7 @@ class ConfirmDeactivationStepConfigTests {
 
         setupStepConfig().afterStepDataIsAdded(mockState)
 
-        verify(mockActiveInactiveService).deactivateProperty(propertyOwnershipId)
+        verify(mockDeactivationService).deactivateProperty(propertyOwnershipId)
     }
 
     @Test
@@ -119,13 +119,13 @@ class ConfirmDeactivationStepConfigTests {
         whenever(mockConfirmationEmailSender.sendEmail(any(), any())).thenThrow(RuntimeException("Notify is down"))
 
         assertDoesNotThrow { setupStepConfig().afterStepDataIsAdded(mockState) }
-        verify(mockActiveInactiveService).deactivateProperty(propertyOwnershipId)
+        verify(mockDeactivationService).deactivateProperty(propertyOwnershipId)
     }
 
     private fun arrangeLandlord(hasOtherActiveProperties: Boolean) {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(mockActiveInactiveService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId))
+        whenever(mockDeactivationService.landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId))
             .thenReturn(hasOtherActiveProperties)
     }
 
@@ -140,7 +140,7 @@ class ConfirmDeactivationStepConfigTests {
     private fun setupStepConfig() =
         ConfirmDeactivationStepConfig(
             mockPropertyOwnershipService,
-            mockActiveInactiveService,
+            mockDeactivationService,
             mockUserToLandlordService,
             mockCurrentUserService,
             mockAbsoluteUrlProvider,

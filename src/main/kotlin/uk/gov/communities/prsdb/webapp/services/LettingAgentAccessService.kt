@@ -38,6 +38,9 @@ class LettingAgentAccessService(
         return lettingAgentAccessRepository.findByToken(uuid) != null
     }
 
+    fun getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId: Long): LettingAgentAccess? =
+        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
+
     @Transactional
     fun deleteDelegationByPropertyOwnershipId(propertyOwnershipId: Long) {
         lettingAgentAccessRepository.deleteByPropertyOwnershipId(propertyOwnershipId)

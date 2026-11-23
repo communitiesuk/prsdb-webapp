@@ -6,7 +6,7 @@ import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import kotlin.system.exitProcess
 
 @PrsdbScheduledTask("deactivate-missing-detail-properties")
@@ -30,10 +30,10 @@ class DeactivateMissingDetailPropertiesTaskApplicationRunner(
 
 @PrsdbTaskService
 class DeactivateMissingDetailPropertiesTaskLogic(
-    private val activeInactiveService: ActiveInactiveService,
+    private val deactivationService: DeactivationService,
 ) {
     fun deactivateMissingDetailPropertiesReturningFailureCount(): Int {
-        val failureCount = activeInactiveService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+        val failureCount = deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
 
         println("Missing detail property deactivation task complete. There were $failureCount failures.")
         return failureCount
