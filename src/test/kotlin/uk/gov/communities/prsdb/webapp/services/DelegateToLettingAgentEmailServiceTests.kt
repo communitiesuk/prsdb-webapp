@@ -62,7 +62,7 @@ class DelegateToLettingAgentEmailServiceTests {
         EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>
 
     @Mock
-    private lateinit var mockPropertyDeactivatedLettingAgentNotificationEmailService:
+    private lateinit var mockLettingAgentPropertyDeactivatedEmailService:
         EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
 
     @Mock
@@ -87,7 +87,7 @@ class DelegateToLettingAgentEmailServiceTests {
                 mockCancelLettingAgentNotificationEmailService,
                 mockInvitationEmailService,
                 mockInvitationWithDeadlineEmailService,
-                mockPropertyDeactivatedLettingAgentNotificationEmailService,
+                mockLettingAgentPropertyDeactivatedEmailService,
                 mockCurrentUserService,
             )
     }
@@ -307,7 +307,7 @@ class DelegateToLettingAgentEmailServiceTests {
 
         emailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, agentEmail)
 
-        verify(mockPropertyDeactivatedLettingAgentNotificationEmailService).sendEmail(
+        verify(mockLettingAgentPropertyDeactivatedEmailService).sendEmail(
             agentEmail,
             LettingAgentPropertyDeactivatedNotificationEmail(
                 propertyAddress = propertyOwnership.address.toMultiLineAddress(),
