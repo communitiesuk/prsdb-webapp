@@ -1,21 +1,32 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.banner.heading}, ~{::main/content()}, false, null, null)}">
+<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.heading}, ~{::main/content()}, ${hasErrors}, null, null)}">
 <main>
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-        <div id="confirmation-banner" th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{generatePassphrase.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <span th:text="#{generatePassphrase.banner.body}" th:remove="tag">generatePassphrase.banner.body</span>
+        <th:block th:object="${formModel}">
+            <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
+        </th:block>
+        <h1 class="govuk-heading-l" th:text="#{generatePassphrase.heading}">generatePassphrase.heading</h1>
+        <div th:if="${smsStatus != null}" class="govuk-inset-text" role="status" th:text="#{${smsStatus}}">smsStatus</div>
+        <div id="passphrase-preview" class="govuk-inset-text">
+            <span th:text="#{generatePassphrase.passphrase.label}" th:remove="tag">generatePassphrase.passphrase.label</span>
             <br>
-            <strong th:text="${passphrase}"></strong>
+            <strong class="govuk-!-font-size-27" th:text="${passphrase}"></strong>
         </div>
-        <section>
-            <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.one}">generatePassphrase.paragraph.one</p>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.two}">generatePassphrase.paragraph.two</p>
-            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.three}">generatePassphrase.paragraph.three</p>
-        </section>
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
+        <p class="govuk-body" th:text="#{generatePassphrase.passphrase.review}">generatePassphrase.passphrase.review</p>
+        <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
             generatePassphrase.generateAnother
         </a>
+        <form th:if="${smsEnabled && !#strings.isEmpty(formModel.passphraseToken)}"
+              th:action="@{${generatePassphraseUrl}}" method="post" novalidate th:object="${formModel}">
+            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.sms.heading}">generatePassphrase.sms.heading</h2>
+            <input type="hidden" th:field="*{passphraseToken}">
+            <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(#{generatePassphrase.sms.phoneNumber.label}, 'phoneNumber', #{generatePassphrase.sms.phoneNumber.hint})}"></div>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePassphrase.sms.send})}"></button>
+        </form>
+        <section id="passphrase-letter-guidance" th:if="${attemptedPassphrase == null && (!smsEnabled || !#strings.isEmpty(formModel.passphraseToken))}">
+            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.letter.heading}">generatePassphrase.letter.heading</h2>
+            <p class="govuk-body" th:text="#{generatePassphrase.letter.body}">generatePassphrase.letter.body</p>
+        </section>
     </div>
 </main>
 </html>

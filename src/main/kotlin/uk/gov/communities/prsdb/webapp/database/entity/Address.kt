@@ -62,6 +62,13 @@ class Address() : ModifiableAuditableEntity() {
     var isActive: Boolean = true
         private set
 
+    @Column(nullable = false)
+    lateinit var country: String
+        private set
+
+    var gss: String? = null
+        private set
+
     constructor(addressDataModel: AddressDataModel, localCouncil: LocalCouncil? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
@@ -74,6 +81,8 @@ class Address() : ModifiableAuditableEntity() {
         this.townName = addressDataModel.townName
         this.postcode = addressDataModel.postcode
         this.localCouncil = localCouncil
+        this.country = addressDataModel.country
+        this.gss = addressDataModel.gss
     }
 
     fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress

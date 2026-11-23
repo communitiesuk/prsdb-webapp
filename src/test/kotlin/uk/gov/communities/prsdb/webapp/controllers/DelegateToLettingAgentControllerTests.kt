@@ -68,7 +68,7 @@ class DelegateToLettingAgentControllerTests(
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         whenever(propertyOwnershipService.getPropertyOwnership(testPropertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession())
+        whenever(lettingAgentSessionService.getDelegatedPropertyOwnershipEmailsFromSession())
             .thenReturn(mutableMapOf(testPropertyOwnershipId to "agent@example.com"))
     }
 
@@ -266,7 +266,7 @@ class DelegateToLettingAgentControllerTests(
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"], value = "user")
     fun `getConfirmation returns 404 when the property was not delegated in this session`() {
         mockAuthorizedProperty()
-        whenever(lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession()).thenReturn(mutableMapOf())
+        whenever(lettingAgentSessionService.getDelegatedPropertyOwnershipEmailsFromSession()).thenReturn(mutableMapOf())
 
         mvc.get("${getDelegateToLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isNotFound() }

@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateT
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -33,6 +34,9 @@ class AllowLettingAgentStepConfigTests {
     lateinit var mockLettingAgentAccessService: LettingAgentAccessService
 
     @Mock
+    lateinit var mockLettingAgentSessionService: LettingAgentSessionService
+
+    @Mock
     lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
 
     @Mock
@@ -46,6 +50,7 @@ class AllowLettingAgentStepConfigTests {
             mockUserToLandlordService,
             mockPropertyOwnershipService,
             mockLettingAgentAccessService,
+            mockLettingAgentSessionService,
             mockDelegateToLettingAgentEmailService,
             mockCurrentUserService,
         ).apply {
@@ -89,7 +94,7 @@ class AllowLettingAgentStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
         verify(mockLettingAgentAccessService).createInvitation(propertyOwnership, "agent@example.com")
-        verify(mockLettingAgentAccessService).addDelegatedPropertyOwnershipToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
+        verify(mockLettingAgentSessionService).addDelegatedPropertyOwnershipToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
     }
 
     @Test

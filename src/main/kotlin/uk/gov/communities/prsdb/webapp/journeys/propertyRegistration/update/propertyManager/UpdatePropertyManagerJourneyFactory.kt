@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
@@ -40,10 +41,10 @@ class UpdatePropertyManagerJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+        val peopleResponsibleRoute = "${PropertyDetailsController.getPropertyDetailsPath(propertyId)}#$PEOPLE_RESPONSIBLE_FRAGMENT"
 
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { peopleResponsibleRoute }
             step(journey.startStep) {
                 routeSegment(StartPropertyManagerUpdateStep.ROUTE_SEGMENT)
                 initialStep()
@@ -65,7 +66,7 @@ class UpdatePropertyManagerJourneyFactory(
             }
             task(journey.propertyManagerTask) {
                 parents { journey.routingStep.isComplete() }
-                backUrl { propertyDetailsRoute }
+                backUrl { peopleResponsibleRoute }
                 nextDestination {
                     if (journey.propertyManagerTask.propertyManagerStep.outcome == YesOrNo.NO) {
                         Destination(journey.checkYourAnswersStep)
@@ -101,7 +102,7 @@ class UpdatePropertyManagerJourneyFactory(
                         journey.propertyManagerTask.checkPropertyManagerStep.isComplete(),
                     )
                 }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { peopleResponsibleRoute }
             }
         }
     }

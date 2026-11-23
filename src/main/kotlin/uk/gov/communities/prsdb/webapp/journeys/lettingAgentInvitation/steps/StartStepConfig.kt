@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.Redire
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 
 @JourneyFrameworkComponent
 class StartStepConfig(
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LettingAgentInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -26,7 +26,7 @@ class StartStepConfig(
 
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
         if (!state.isStateInitialized) {
-            state.invitationToken = lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
+            state.invitationToken = lettingAgentSessionService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
             state.isStateInitialized = true
         }
     }
