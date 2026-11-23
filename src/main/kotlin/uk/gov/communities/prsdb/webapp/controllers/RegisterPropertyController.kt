@@ -19,7 +19,6 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
-import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -48,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.ProvideMissingDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PaymentSummaryViewModel
-import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PaymentService
@@ -69,22 +67,12 @@ class RegisterPropertyController(
     private val propertyRegistrationConfirmationService: PropertyRegistrationConfirmationService,
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
-    private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
     private val paymentService: PaymentService,
 ) {
     @GetMapping
-    fun index(model: Model): String {
-        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
-        model.addAttribute(
-            "registerPropertyInitialStep",
-            "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT".overrideBackLinkForUrl(backUrlKey),
-        )
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-
-        return "registerPropertyStartPage"
-    }
+    fun index(): String = "redirect:$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT"
 
     @GetMapping("/$RESUME_PAGE_PATH_SEGMENT")
     fun getResume(

@@ -1,25 +1,3 @@
-heading: Register a property
-intro:
-  paragraph: 'You’ll need to know:'
-  bullet:
-    one: 'basic information about the property, like whether it’s a house or flat'
-    two: 'details about the property’s rental licence, if it has one'
-certificates:
-  paragraph:
-    one: We’ll ask for gas safety, electrical safety and energy performance certificates. You can register without these certificates, but you must provide them later.
-    two: Check the information you add is accurate and up to date.
-ifOccupied:
-  heading: If your property is occupied
-  paragraph: 'We’ll ask for further details, like:'
-  bullet:
-    one: how many people live in the property
-    two: the rent you charge
-afterRegistered:
-  heading: After you’ve registered
-  paragraph:
-    one: 'You’ll get a <strong>Property Registration Number</strong>.'
-    two: You must put this number on any adverts to rent this property, along with each landlord’s Landlord Registration Number.
-  insetText: You need to keep your property’s registration up to date.
 confirmation:
   banner:
     heading: Property registered
