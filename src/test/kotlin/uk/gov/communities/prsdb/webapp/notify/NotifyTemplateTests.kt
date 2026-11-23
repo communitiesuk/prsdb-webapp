@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
+import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyEnvironment
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadata
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -17,7 +18,7 @@ import uk.gov.service.notify.Template
 import uk.gov.service.notify.TemplateList
 
 /*
- * These tests verify that the email and letter templates we have in this code base match the templates stored in
+ * These tests verify that the email, letter and SMS templates we have in this code base match the templates stored in
  * notify. Every template is checked against both the integration and the production notify services, so that a
  * template which has only been updated in one of them is caught before it reaches production.
  *
@@ -39,6 +40,7 @@ class NotifyTemplateTests {
     ) {
         EMAIL("email", "/emails/emailTemplates.json", EmailTemplate.entries.map { it.name }),
         LETTER("letter", "/letters/letterTemplates.json", LetterTemplate.entries.map { it.name }),
+        SMS("sms", "/sms/smsTemplates.json", SmsTemplate.entries.map { it.name }),
     }
 
     companion object NotifyTestsCompanion {
