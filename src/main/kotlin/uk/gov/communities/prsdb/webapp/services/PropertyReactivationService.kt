@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 
@@ -13,8 +14,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDat
 class PropertyReactivationService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
     private val addressAvailabilityService: AddressAvailabilityService,
+    private val landlordActiveStatusService: LandlordActiveStatusService,
+    private val propertyReactivationEmailService: PropertyReactivationEmailService,
     private val session: HttpSession,
 ) {
     @Transactional
@@ -30,15 +33,19 @@ class PropertyReactivationService(
             )
         }
 
-        val landlordReactivated = activeInactiveService.isCurrentLandlordInactive()
+        val landlordWillBeReactivated = landlordActiveStatusService.isCurrentLandlordInactive()
 
         saveReactivationData(propertyOwnershipId, reactivationData)
-        activeInactiveService.reactivateProperty(propertyOwnershipId)
-        // TODO PDJB-2051: Send the property reactivation confirmation email
-        // TODO PDJB-2050: Notify any joint landlords that the property has been reactivated
+        activationService.reactivateProperty(propertyOwnershipId)
         runAfterTransactionCommits {
             session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
-            session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, landlordReactivated)
+            session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, landlordWillBeReactivated)
+
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the property reactivation confirmation email for property ownership $propertyOwnershipId",
+            ) {
+                propertyReactivationEmailService.sendConfirmationEmail(propertyOwnershipId, landlordWillBeReactivated)
+            }
         }
     }
 

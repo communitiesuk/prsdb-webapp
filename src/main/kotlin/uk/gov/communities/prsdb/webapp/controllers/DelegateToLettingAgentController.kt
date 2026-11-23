@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.stepConfig.AllowLettingAgentStep
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @AllowIfLandlord
@@ -31,7 +31,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class DelegateToLettingAgentController(
     private val delegateToLettingAgentJourneyFactory: DelegateToLettingAgentJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
@@ -73,7 +73,7 @@ class DelegateToLettingAgentController(
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
         val invitedEmailAddress =
-            lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession()[propertyOwnershipId]
+            lettingAgentSessionService.getDelegatedPropertyOwnershipEmailsFromSession()[propertyOwnershipId]
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "PropertyOwnershipId $propertyOwnershipId was not delegated to a letting agent in this session",

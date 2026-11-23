@@ -24,7 +24,7 @@ class LeavePropertyService(
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val currentUserService: CurrentUserService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val deactivationService: DeactivationService,
     private val featureFlagManager: FeatureFlagManager,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
@@ -53,7 +53,7 @@ class LeavePropertyService(
         val currentUser = currentUserService.getRegisteredUserDetails()
 
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
-        activeInactiveService.deactivateLandlordIfNoActiveProperties(landlord)
+        deactivationService.deactivateLandlordIfNoActiveProperties(landlord)
         val landlordWasDeactivated = !landlord.isActive
 
         TransactionHelper.runAfterTransactionCommits {

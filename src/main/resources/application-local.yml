@@ -71,6 +71,9 @@ local:
   letters:
     transientExceptionPostcode: TE99 9TF
     persistentExceptionPostcode: PE99 9PF
+  sms:
+    transientExceptionPhoneNumber: "+447700900001"
+    persistentExceptionPhoneNumber: "+447700900002"
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
   sqs:
     endpoint: http://localhost:${ELASTICMQ_PORT:9324}
@@ -169,6 +172,9 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-1878-international-addresses"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-sms"
       enabled: true
       expiry-date: "2027-01-01"
 

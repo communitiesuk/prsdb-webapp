@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
+import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import kotlin.test.assertEquals
 
 class NotifyIdServiceTests {
@@ -14,7 +15,7 @@ class NotifyIdServiceTests {
         val test_id: String? = null,
         val prod_id: String? = null,
         val enumName: String,
-        val subject: String,
+        val subject: String? = null,
         val bodyLocation: String,
     )
 
@@ -27,6 +28,11 @@ class NotifyIdServiceTests {
         private val letterMetadataList =
             Json.decodeFromString<List<NotifyIdMetadata>>(
                 javaClass.getResource("/letters/letterTemplates.json")!!.readText(),
+            )
+
+        private val smsMetadataList =
+            Json.decodeFromString<List<NotifyIdMetadata>>(
+                javaClass.getResource("/sms/smsTemplates.json")!!.readText(),
             )
     }
 
@@ -84,5 +90,33 @@ class NotifyIdServiceTests {
 
         // Assert
         assertEquals(metadata?.test_id, idValue)
+    }
+
+    @ParameterizedTest
+    @EnumSource(SmsTemplate::class)
+    fun `getIdValue returns production Notify SMS id values if production is set`(id: SmsTemplate) {
+        // Arrange
+        val service = NotifyIdService(useProductionNotify = true)
+        val metadata = smsMetadataList.first { it.enumName == id.name }
+
+        // Act
+        val idValue = service.getNotifyIdValue(id)
+
+        // Assert
+        assertEquals(metadata.prod_id, idValue)
+    }
+
+    @ParameterizedTest
+    @EnumSource(SmsTemplate::class)
+    fun `getIdValue returns test Notify SMS id values if production is not set`(id: SmsTemplate) {
+        // Arrange
+        val service = NotifyIdService(useProductionNotify = false)
+        val metadata = smsMetadataList.first { it.enumName == id.name }
+
+        // Act
+        val idValue = service.getNotifyIdValue(id)
+
+        // Assert
+        assertEquals(metadata.test_id, idValue)
     }
 }

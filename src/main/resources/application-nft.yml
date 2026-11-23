@@ -47,6 +47,9 @@ features:
     - name: "pdjb-1878-international-addresses"
       enabled: false
       expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-sms"
+      enabled: false
+      expiry-date: "2027-01-01"
 
 argon2:
   iterations: 2

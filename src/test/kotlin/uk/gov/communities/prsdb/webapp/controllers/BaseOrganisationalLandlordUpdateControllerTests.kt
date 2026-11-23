@@ -132,7 +132,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.getStepModelAndView())
             .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
-        whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+        whenever(landlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
 
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }
@@ -146,7 +146,7 @@ abstract class BaseOrganisationalLandlordUpdateControllerTests(
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
             .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
-        whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+        whenever(landlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
 
         mvc
             .post(updateStepRoute) {

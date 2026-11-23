@@ -290,7 +290,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(landlordActiveStatusService.isLandlordInactive(landlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
@@ -360,7 +360,7 @@ class LandlordDetailsControllerTests(
                     .createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
                     .apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
-            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
+            whenever(landlordActiveStatusService.isLandlordInactive(orgLandlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
@@ -408,7 +408,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(landlordActiveStatusService.isLandlordInactive(landlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,
@@ -448,7 +448,7 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val orgLandlord = MockLandlordData.createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
-            whenever(activeInactiveService.isLandlordInactive(orgLandlord)).thenReturn(true)
+            whenever(landlordActiveStatusService.isLandlordInactive(orgLandlord)).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     orgLandlord,
@@ -479,8 +479,8 @@ class LandlordDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
             val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-            whenever(activeInactiveService.isLandlordInactive(landlord)).thenReturn(true)
-            whenever(activeInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+            whenever(landlordActiveStatusService.isLandlordInactive(landlord)).thenReturn(true)
+            whenever(landlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
             whenever(
                 propertyOwnershipService.getActivePropertiesForLandlordUser(
                     landlord,

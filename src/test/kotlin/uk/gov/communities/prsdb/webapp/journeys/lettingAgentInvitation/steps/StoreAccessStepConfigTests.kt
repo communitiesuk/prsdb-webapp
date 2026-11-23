@@ -11,6 +11,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentPasswordService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
 
@@ -18,6 +19,9 @@ import java.util.UUID
 class StoreAccessStepConfigTests {
     @Mock
     lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+
+    @Mock
+    lateinit var mockLettingAgentSessionService: LettingAgentSessionService
 
     @Mock
     lateinit var mockLettingAgentPasswordService: LettingAgentPasswordService
@@ -35,7 +39,7 @@ class StoreAccessStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockLettingAgentAccessService).addAuthorisedTokenToSession(token.toString())
+        verify(mockLettingAgentSessionService).addAuthorisedTokenToSession(token.toString())
     }
 
     @Test
@@ -48,7 +52,7 @@ class StoreAccessStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockLettingAgentAccessService, never()).addAuthorisedTokenToSession(token.toString())
+        verify(mockLettingAgentSessionService, never()).addAuthorisedTokenToSession(token.toString())
     }
 
     @Test
@@ -59,8 +63,9 @@ class StoreAccessStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockLettingAgentAccessService, never()).addAuthorisedTokenToSession(any())
+        verify(mockLettingAgentSessionService, never()).addAuthorisedTokenToSession(any())
     }
 
-    private fun setupStepConfig() = StoreAccessStepConfig(mockLettingAgentAccessService, mockLettingAgentPasswordService)
+    private fun setupStepConfig() =
+        StoreAccessStepConfig(mockLettingAgentAccessService, mockLettingAgentSessionService, mockLettingAgentPasswordService)
 }

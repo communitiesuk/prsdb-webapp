@@ -66,12 +66,12 @@ class PropertyOwnershipService(
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val addressService: AddressService,
     private val eicDateService: EicDateService,
     private val landlordRepository: LandlordRepository,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
     // TODO: PDJB-1926: Remove featureFlagManager
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -232,7 +232,7 @@ class PropertyOwnershipService(
         if (isCurrentUserLandlord(propertyOwnershipId)) return true
 
         val lettingAgentAccess = getLettingAgentAccess(propertyOwnershipId) ?: return false
-        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
+        return lettingAgentSessionService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
     }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
@@ -477,6 +477,29 @@ class PropertyOwnershipService(
         return freeholderService.updateFreeholders(propertyOwnership, freeholders)
     }
 
+    @Transactional
+    fun updateSuperiorLandlords(
+        id: Long,
+        superiorLandlords: List<SuperiorLandlordDataModel>,
+        initialLastModifiedDate: Instant,
+    ): List<SuperiorLandlordDataModel> {
+        val propertyOwnership = getPropertyOwnership(id)
+        if (propertyOwnership.getOwnershipStructureMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+        require(propertyOwnership.ownershipType.requiresSuperiorLandlordInfo()) {
+            "Ownership type ${propertyOwnership.ownershipType} does not require superior landlord info"
+        }
+
+        if (superiorLandlords.isEmpty()) {
+            superiorLandlordService.clearSuperiorLandlords(propertyOwnership)
+            return emptyList()
+        }
+        return superiorLandlordService.updateSuperiorLandlords(propertyOwnership, superiorLandlords)
+    }
+
     // The one-to-one has orphanRemoval, so nulling the reference deletes the property manager row.
     @Transactional
     fun removePropertyManager(
@@ -698,7 +721,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
         landlord.markAsHavingRegisteredProperty()
         landlordRepository.save(landlord)
-        activeInactiveService.reactivateLandlordIfInactive(landlord)
+        activationService.reactivateLandlordIfInactive(landlord)
     }
 
     @Transactional
