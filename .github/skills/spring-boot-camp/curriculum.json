@@ -1,0 +1,759 @@
+{
+  "version": 1,
+  "anchorPrefixes": {
+    "main:": "src/main/kotlin/uk/gov/communities/prsdb/webapp/",
+    "test:": "src/test/kotlin/uk/gov/communities/prsdb/webapp/",
+    "res:": "src/main/resources/"
+  },
+  "tiers": {
+    "1": "Foundation - needed to read almost any ticket",
+    "2": "Core - needed to write most features confidently",
+    "3": "Advanced - how things work under the hood, or less common features"
+  },
+  "modules": [
+    {
+      "id": "prsdb-architecture",
+      "name": "How PRSDB fits together",
+      "concepts": [
+        {
+          "id": "prsdb-layered-flow",
+          "name": "The big picture: from browser to database and back",
+          "tier": 1,
+          "prereqs": [],
+          "summary": "A page request goes browser -> security -> controller -> service -> repository -> entity -> PostgreSQL, and back as data model -> view model -> Thymeleaf template -> HTML. Each layer is a different package with one job.",
+          "why": "Every ticket touches some slice of this flow; knowing the slice tells you which files to change.",
+          "keywords": ["controller", "service", "repository", "entity", "template", "layer"],
+          "anchors": ["main:controllers/IncompletePropertiesController.kt", "main:services/UsersIncompletePropertyService.kt", "main:database/repository/LandlordIncompletePropertiesRepository.kt"],
+          "readMore": [".github/copilot-instructions.md"]
+        },
+        {
+          "id": "prsdb-package-layout",
+          "name": "Package layout: what lives where",
+          "tier": 1,
+          "prereqs": ["prsdb-layered-flow"],
+          "summary": "controllers/, services/, database/{entity,repository}/, models/{dataModels,requestModels,viewModels}/, journeys/, validation/, config/, annotations/, clients/, helpers/, constants/, exceptions/, application/ (task runners) and local/ (dev-only stubs).",
+          "why": "Finding the right package is the first step of every change, and reviewers expect code in the conventional place.",
+          "keywords": ["package", "folder", "where does", "uk.gov.communities.prsdb.webapp"],
+          "anchors": ["main:", ".github/copilot-instructions.md"],
+          "readMore": [".github/copilot-instructions.md"]
+        },
+        {
+          "id": "prsdb-model-types",
+          "name": "Entities vs data, request/form and view models",
+          "tier": 1,
+          "prereqs": ["prsdb-layered-flow"],
+          "summary": "Entities mirror tables; data models carry domain data between services; request/form models receive user input (with validation); view models are shaped for one template. Converters and builders map between them.",
+          "why": "Keeps database structure out of templates and user input away from entities, so each can change independently.",
+          "keywords": ["DataModel", "FormModel", "RequestModel", "ViewModel", "models/", "converter", "builder"],
+          "anchors": ["main:models/dataModels/AddressDataModel.kt", "main:models/requestModels/formModels/AcceptOrRejectFormModel.kt", "main:models/viewModels/InvitationViewModel.kt"]
+        },
+        {
+          "id": "prsdb-journey-framework",
+          "name": "The journey framework (multi-step forms)",
+          "tier": 2,
+          "prereqs": ["prsdb-model-types", "controllers-mappings", "form-binding-validation"],
+          "summary": "Multi-page forms are journeys: a factory uses the builder DSL to wire steps (pages) and tasks into a directed graph; each step has a step config and form model; a generic controller endpoint dispatches requests to the current step.",
+          "why": "Most user-facing features (registrations, updates, invitations) are journeys; new pages usually mean new steps, not new controllers.",
+          "keywords": ["JourneyFactory", "StepConfig", "Step", "JourneyBuilder", "@JourneyFrameworkComponent", "ROUTE_SEGMENT", "task", "journeys/"],
+          "anchors": ["main:journeys/propertyRegistration/PropertyRegistrationJourneyFactory.kt", "main:journeys/builders/JourneyBuilder.kt", "main:controllers/RegisterPropertyController.kt"],
+          "readMore": ["main:journeys/docs/JourneyFrameworkReadMe.md", "main:journeys/docs/JourneyFrameworkModel.md", "main:journeys/docs/JourneyFrameworkCreateAJourney.md"]
+        },
+        {
+          "id": "prsdb-journey-state",
+          "name": "Journey state: session storage, delegates and saving progress",
+          "tier": 3,
+          "prereqs": ["prsdb-journey-framework", "http-session", "kotlin-delegated-properties"],
+          "summary": "Answers are held in a JourneyState stored in the HTTP session (serialised with kotlinx.serialization), exposed as Kotlin delegated properties, and can be persisted to the database so users resume later.",
+          "why": "Explains why answers survive between pages, how 'save and return later' works and why state classes look unusual.",
+          "keywords": ["JourneyState", "JourneyStateService", "delegateProvider", "requiredDelegate", "JourneyStatePersistenceService", "states/"],
+          "anchors": ["main:journeys/JourneyStateService.kt", "main:journeys/JourneyStateDelegateProvider.kt", "main:journeys/JourneyStatePersistenceService.kt"],
+          "readMore": ["main:journeys/docs/JourneyFrameworkModel.md"]
+        },
+        {
+          "id": "prsdb-run-modes",
+          "name": "One codebase, several run modes",
+          "tier": 2,
+          "prereqs": ["stereotype-annotations", "profiles"],
+          "summary": "The same jar runs as the web server, as one-off scheduled tasks, or as queue workers (email, virus-scan results). Profiles plus the Prsdb* annotations decide which beans exist in each mode.",
+          "why": "Explains why there are @PrsdbWebService and @PrsdbTaskService, and why a bean can be 'missing' in one mode.",
+          "keywords": ["scheduled-task", "web-server-deactivated", "email-worker", "@PrsdbTaskService", "@PrsdbScanProcessingService", "run mode"],
+          "anchors": ["main:annotations/webAnnotations/WebServerOnly.kt", "main:annotations/taskAnnotations/TaskOnly.kt", "res:application-email-worker.yml"]
+        },
+        {
+          "id": "prsdb-build-pipeline",
+          "name": "The build: Gradle, Kotlin plugins and frontend assets",
+          "tier": 2,
+          "prereqs": ["spring-boot-app"],
+          "summary": "build.gradle.kts applies the Kotlin, Spring Boot, ktlint and Flyway plugins, declares dependencies, and runs npm/Rollup to bundle JS and SCSS into static assets before packaging one runnable jar.",
+          "why": "Explains build failures, where dependencies are added and why frontend changes need npm run build.",
+          "keywords": ["build.gradle.kts", "gradlew", "dependency", "plugin", "npm", "rollup", "ktlint", "jar"],
+          "anchors": ["build.gradle.kts", "package.json", "rollup.config.mjs"]
+        },
+        {
+          "id": "prsdb-local-dev-stack",
+          "name": "Running locally: Docker services, local profile and stubs",
+          "tier": 2,
+          "prereqs": ["profiles"],
+          "summary": "docker-compose.local.yml provides PostgreSQL, Redis and ElasticMQ (a local SQS queue); the local profile swaps real third parties (One Login, Notify, Pay, OS Places) for stubs in local/; local-no-auth fakes login with every role.",
+          "why": "Lets you run and test any journey on your machine without real credentials.",
+          "keywords": ["docker-compose", "local-no-auth", "local/api", "@Profile(\"local\")", "MockOneLogin", "stub", "running locally"],
+          "anchors": ["docker-compose.local.yml", "res:application-local.yml", "main:local/api/controllers/MockOneLoginController.kt"]
+        },
+        {
+          "id": "prsdb-feature-flags",
+          "name": "Feature flags in PRSDB: names, config and releases",
+          "tier": 2,
+          "prereqs": ["externalised-config", "profiles"],
+          "summary": "Each unreleased feature gets a flag constant in FeatureFlagNames.kt and an entry (enabled, expiry-date, optional release) under features: in every application*.yml; code checks it via @AvailableWhenFeatureEnabled, @PrsdbFlip or featureFlagManager.checkFeature. Startup validation keeps YAML and constants in sync.",
+          "why": "Lets half-built features merge to main and be switched on per environment; a missed YAML entry fails startup.",
+          "keywords": ["FeatureFlagNames", "FeatureFlagReleaseNames", "expiry-date", "checkFeature", "@AvailableWhenFeatureEnabled", "@PrsdbFlip", "feature flag"],
+          "anchors": ["main:constants/FeatureFlagNames.kt", "res:application.yml"],
+          "readMore": [".github/instructions/feature-flags.instructions.md"]
+        },
+        {
+          "id": "prsdb-test-layers",
+          "name": "How the tests are organised",
+          "tier": 2,
+          "prereqs": ["prsdb-layered-flow"],
+          "summary": "Unit tests for services and helpers, @WebMvcTest controller tests extending ControllerTest, and Playwright integration tests (page objects, Navigator) against the full app with a Testcontainers database.",
+          "why": "Tells you which tests a ticket needs and where to put them.",
+          "keywords": ["Tests.kt", "ControllerTest", "IntegrationTest", "page object", "Navigator", "Playwright"],
+          "anchors": ["test:controllers/ControllerTest.kt", "test:integration/IntegrationTest.kt"],
+          "readMore": ["docs/IntegrationTestReadMe.md"]
+        }
+      ]
+    },
+    {
+      "id": "kotlin",
+      "name": "Kotlin as used in PRSDB",
+      "concepts": [
+        {
+          "id": "kotlin-classes-properties",
+          "name": "Classes, primary constructors and properties",
+          "tier": 1,
+          "prereqs": [],
+          "summary": "class Foo(private val bar: Bar) declares a constructor and a property in one line; val is read-only, var is mutable; properties replace Java getters/setters.",
+          "why": "This one-liner is exactly how Spring constructor injection looks in every PRSDB bean.",
+          "keywords": ["primary constructor", "private set", "init {", "val vs var", "getter", "setter"],
+          "anchors": ["main:services/LandlordService.kt", "main:database/entity/Landlord.kt"]
+        },
+        {
+          "id": "kotlin-null-safety",
+          "name": "Null safety (?, ?:, !!, ?.let)",
+          "tier": 1,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "Types are non-null unless marked with ?; ?. and ?: handle nulls safely; !! asserts non-null and throws if wrong. -Xjsr305=strict makes Spring's nullability annotations visible to Kotlin.",
+          "why": "Repository finders return nullable results; handling them correctly decides between a 404 page and a crash.",
+          "keywords": ["?:", "!!", "?.let", "nullable", "orElse", "OrNull", "jsr305", "NullPointerException"],
+          "anchors": ["main:services/LandlordService.kt", "build.gradle.kts"]
+        },
+        {
+          "id": "kotlin-data-classes",
+          "name": "Data classes",
+          "tier": 1,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "data class generates equals, hashCode, toString and copy from the constructor properties - ideal for models that just carry values.",
+          "why": "Data, form and view models are mostly data classes; entities deliberately are not.",
+          "keywords": ["data class", "copy(", "componentN", "destructuring"],
+          "anchors": ["main:models/dataModels/AddressDataModel.kt"]
+        },
+        {
+          "id": "kotlin-objects-companions",
+          "name": "object, companion object and const val",
+          "tier": 1,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "object declares a singleton; a companion object holds class-level members (like Java static), e.g. ROUTE_SEGMENT constants and factory functions; const val is a compile-time constant usable in annotations.",
+          "why": "Route segments, message keys and URL constants used in @GetMapping paths live in companion objects and constants/.",
+          "keywords": ["companion object", "object ", "const val", "ROUTE_SEGMENT", "@JvmStatic"],
+          "anchors": ["main:constants", "main:config/security/LandlordSecurityConfig.kt"]
+        },
+        {
+          "id": "kotlin-enums-sealed-when",
+          "name": "Enums, sealed classes and when",
+          "tier": 1,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "enum class models fixed choices (stored as DB values, form options, step modes); sealed classes model a closed set of subtypes; when expressions over either must cover every case.",
+          "why": "The compiler forces you to handle new enum values or subtypes everywhere they're switched on.",
+          "keywords": ["enum class", "sealed class", "sealed interface", "when (", "else ->", "exhaustive"],
+          "anchors": ["main:journeys/Destination.kt", "main:journeys/shared/YesOrNo.kt"]
+        },
+        {
+          "id": "kotlin-lambdas-scope-functions",
+          "name": "Lambdas, collection operations and scope functions",
+          "tier": 2,
+          "prereqs": ["kotlin-null-safety"],
+          "summary": "Functions can take lambdas (trailing-lambda syntax); collections use map/filter/associate; scope functions let/apply/also/run/with configure or transform an object in a block.",
+          "why": "Builder DSLs, view-model building and null handling all rely on these idioms.",
+          "keywords": [".let {", ".apply {", ".also {", ".map {", ".filter {", "associate", "lambda", "scope function"],
+          "anchors": ["main:journeys/propertyRegistration/PropertyRegistrationJourneyFactory.kt"]
+        },
+        {
+          "id": "kotlin-extension-functions",
+          "name": "Extension functions",
+          "tier": 2,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "fun String.foo() adds a function to an existing type without subclassing it; PRSDB keeps them in helpers/extensions/.",
+          "why": "Explains methods that seem to appear on library classes (e.g. MessageSource helpers).",
+          "keywords": ["extension function", "helpers/extensions", "Extensions.kt"],
+          "anchors": ["main:helpers/extensions/MessageSourceExtensions.kt", "main:helpers/extensions/StringExtensions.kt"]
+        },
+        {
+          "id": "kotlin-annotations",
+          "name": "Annotations in Kotlin (declaring, meta-annotations, use-site targets, ::class)",
+          "tier": 2,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "annotation class declares an annotation; annotating it with Spring annotations makes a meta-annotation (how @PrsdbController works); @get:/@field: targets choose where a Kotlin annotation lands; Foo::class gives a KClass reference.",
+          "why": "Almost all Spring configuration in PRSDB is expressed through annotations, many of them custom.",
+          "keywords": ["annotation class", "@Target", "@Retention", "@get:", "@field:", "::class", "KClass", "@AliasFor"],
+          "anchors": ["main:annotations/webAnnotations/PrsdbController.kt", "main:annotations/webAnnotations/AllowIfLandlord.kt"]
+        },
+        {
+          "id": "kotlin-spring-plugins",
+          "name": "Kotlin meets Spring and JPA: open classes, no-arg and lateinit",
+          "tier": 3,
+          "prereqs": ["kotlin-classes-properties", "aop-proxies"],
+          "summary": "Kotlin classes are final by default but Spring proxies need to subclass them, so the kotlin-spring (all-open) plugin opens annotated classes; JPA needs a no-arg constructor, provided by the noArg plugin for @Entity; lateinit var lets entities and frameworks set fields after construction.",
+          "why": "Explains why entities use lateinit/private set and why removing a plugin breaks @Transactional or Hibernate.",
+          "keywords": ["plugin.spring", "noArg", "all-open", "open class", "lateinit", "final"],
+          "anchors": ["build.gradle.kts", "main:database/entity/Landlord.kt"]
+        },
+        {
+          "id": "kotlin-generics-variance",
+          "name": "Generics, variance (in/out) and reified types",
+          "tier": 3,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "Generic types take type parameters; out marks a producer, in a consumer, controlling which subtypes can be substituted; inline fun with reified T keeps the type available at runtime.",
+          "why": "The journey framework's step types (AbstractStepConfig<out TEnum, TFormModel, in TState>) are heavily generic.",
+          "keywords": ["<out ", "<in ", ", in ", "variance", "generic", "reified", "inline fun", "where T"],
+          "anchors": ["main:journeys/AbstractStepConfig.kt", "main:journeys/JourneyStep.kt"]
+        },
+        {
+          "id": "kotlin-delegated-properties",
+          "name": "Delegated properties (by lazy, custom delegates)",
+          "tier": 3,
+          "prereqs": ["kotlin-classes-properties"],
+          "summary": "val x by lazy { } computes once on first access; var y by someDelegate routes get/set through another object - PRSDB journey states use delegates to read and write the session.",
+          "why": "Journey state properties look like plain fields but actually read/write session data.",
+          "keywords": [" by lazy", " by delegateProvider", "requiredDelegate", "nullableDelegate", "ReadWriteProperty", "getValue"],
+          "anchors": ["main:journeys/JourneyStateDelegateProvider.kt", "main:config/MessageSourceConfig.kt"]
+        },
+        {
+          "id": "kotlin-serialization",
+          "name": "kotlinx.serialization",
+          "tier": 2,
+          "prereqs": ["kotlin-data-classes"],
+          "summary": "@Serializable classes are converted to/from JSON by a compiler plugin, without reflection; PRSDB uses it for journey state and some API payloads, alongside Spring's Jackson.",
+          "why": "Anything stored in journey state must be serialisable or saving the journey fails.",
+          "keywords": ["@Serializable", "@SerialName", "Json.encodeToString", "Json.decodeFromString", "kotlinx.serialization"],
+          "anchors": ["main:journeys/JourneyStateService.kt"]
+        }
+      ]
+    },
+    {
+      "id": "foundations",
+      "name": "Spring Boot foundations",
+      "concepts": [
+        {
+          "id": "spring-boot-app",
+          "name": "Spring Boot application and auto-configuration",
+          "tier": 1,
+          "prereqs": [],
+          "summary": "@SpringBootApplication starts an ApplicationContext, scans packages for components and auto-configures libraries found on the classpath (web server, JPA, Thymeleaf, security).",
+          "why": "Without auto-configuration you would hand-wire the web server, database connection pool, template engine and more.",
+          "keywords": ["@SpringBootApplication", "runApplication", "auto-configuration", "classpath", "starter"],
+          "anchors": ["main:PrsdbWebappApplication.kt", "build.gradle.kts"]
+        },
+        {
+          "id": "ioc-container-beans",
+          "name": "The IoC container, ApplicationContext and beans",
+          "tier": 1,
+          "prereqs": ["spring-boot-app"],
+          "summary": "Spring owns object creation (Inversion of Control). Objects it creates and manages are 'beans', held in the ApplicationContext; by default there is one shared instance of each.",
+          "why": "Centralising creation lets Spring wire dependencies, apply cross-cutting behaviour (transactions, security) and swap implementations per environment.",
+          "keywords": ["bean", "ApplicationContext", "IoC", "inversion of control", "singleton"],
+          "anchors": ["main:services/LandlordService.kt"]
+        },
+        {
+          "id": "dependency-injection",
+          "name": "Dependency injection (constructor injection)",
+          "tier": 1,
+          "prereqs": ["ioc-container-beans"],
+          "summary": "A bean declares what it needs as constructor parameters; Spring finds matching beans and passes them in. PRSDB uses constructor injection only (no @Autowired fields).",
+          "why": "Classes stay decoupled and easy to unit test - tests pass mocks into the constructor.",
+          "keywords": ["constructor", "private val", "@Autowired", "inject", "dependency"],
+          "anchors": ["main:controllers/LandlordController.kt", "main:services/LandlordService.kt"]
+        },
+        {
+          "id": "stereotype-annotations",
+          "name": "Stereotype annotations and the PRSDB wrappers",
+          "tier": 1,
+          "prereqs": ["ioc-container-beans"],
+          "summary": "@Component, @Service, @Controller and @Repository mark classes for component scanning. PRSDB wraps them (@PrsdbWebService, @PrsdbController, @PrsdbWebComponent, @PrsdbTaskService) to add a @Conditional run-mode guard.",
+          "why": "Scanning turns annotated classes into beans automatically; the wrappers stop web-only beans loading when the app runs as a scheduled task.",
+          "keywords": ["@Component", "@Service", "@Controller", "@Repository", "@PrsdbWebService", "@PrsdbController", "@PrsdbWebComponent", "@PrsdbTaskService", "component scan"],
+          "anchors": ["main:annotations/webAnnotations/PrsdbController.kt", "main:annotations/webAnnotations/PrsdbWebService.kt"]
+        },
+        {
+          "id": "configuration-beans",
+          "name": "@Configuration classes and @Bean methods",
+          "tier": 2,
+          "prereqs": ["stereotype-annotations"],
+          "summary": "A @Configuration class (PRSDB: @PrsdbWebConfiguration) contains @Bean methods whose return values become beans - used for third-party objects you cannot annotate yourself.",
+          "why": "Library classes (e.g. the Notify client, RestClient) need constructing with config values; @Bean methods are where that happens.",
+          "keywords": ["@Configuration", "@Bean", "@PrsdbWebConfiguration", "Config.kt"],
+          "anchors": ["main:config/NotifyConfig.kt", "main:config/EpcRegisterConfig.kt"]
+        },
+        {
+          "id": "externalised-config",
+          "name": "Externalised configuration (application.yml, @Value, @ConfigurationProperties)",
+          "tier": 1,
+          "prereqs": ["dependency-injection"],
+          "summary": "Settings live in application*.yml and environment variables; beans read them with @Value(\"${key}\") or bind a whole prefix with @ConfigurationProperties.",
+          "why": "The same build runs in local, test, nft and production with different URLs, keys and flags.",
+          "keywords": ["application.yml", "@Value", "@ConfigurationProperties", "${", "environment variable"],
+          "anchors": ["res:application.yml", "main:config/NotifyConfig.kt", "main:config/FeatureFlagConfig.kt"]
+        },
+        {
+          "id": "profiles",
+          "name": "Spring profiles",
+          "tier": 2,
+          "prereqs": ["externalised-config"],
+          "summary": "Profiles (local, local-no-auth, integration, scheduled-task...) activate extra yml files and beans marked @Profile.",
+          "why": "Local development swaps real third-party services for stubs in local/ without changing production code.",
+          "keywords": ["@Profile", "application-local.yml", "spring.profiles.active", "@ActiveProfiles", "local-no-auth"],
+          "anchors": ["res:application-local.yml", "main:local/services/LocalFileUploader.kt"]
+        },
+        {
+          "id": "conditional-beans",
+          "name": "Conditional beans (@Conditional)",
+          "tier": 3,
+          "prereqs": ["stereotype-annotations", "profiles"],
+          "summary": "@Conditional(SomeCondition::class) decides at startup whether a bean is created. WebServerOnly / TaskOnly power the PRSDB stereotype wrappers.",
+          "why": "One codebase produces several run modes (web server, scheduled tasks, queue workers) with different beans in each.",
+          "keywords": ["@Conditional", "Condition", "WebServerOnly", "TaskOnly", "@ConditionalOnProperty"],
+          "anchors": ["main:annotations/webAnnotations/WebServerOnly.kt", "main:annotations/taskAnnotations/TaskOnly.kt"]
+        },
+        {
+          "id": "bean-resolution",
+          "name": "Choosing between candidate beans (@Primary, @Qualifier)",
+          "tier": 2,
+          "prereqs": ["dependency-injection"],
+          "summary": "When several beans match an injected type, @Primary marks the default and @Qualifier(\"name\") picks a specific one; otherwise startup fails with NoUniqueBeanDefinitionException.",
+          "why": "Local stubs override real services with @Primary; multiple AWS clients are distinguished by qualifier.",
+          "keywords": ["@Primary", "@Qualifier", "NoUniqueBeanDefinitionException", "multiple beans"],
+          "anchors": ["main:local/services/LocalFileUploader.kt", "main:clients/AwsCloudWatchMetricsClient.kt"]
+        },
+        {
+          "id": "bean-scopes",
+          "name": "Bean scopes (singleton, prototype, request, session)",
+          "tier": 3,
+          "prereqs": ["ioc-container-beans"],
+          "summary": "Singleton beans are shared app-wide; prototype beans are new per injection; request-scoped beans live for one HTTP request. Shorter-lived beans are injected into singletons via proxies.",
+          "why": "Journey steps hold per-journey state so they are prototype; JourneyIdProvider is per request. Storing request data in a singleton field leaks it between users.",
+          "keywords": ["@Scope", "prototype", "@RequestScope", "@SessionScope", "singleton", "JourneyFrameworkComponent"],
+          "anchors": ["main:annotations/webAnnotations/JourneyFrameworkComponent.kt", "main:journeys/JourneyIdProvider.kt"]
+        },
+        {
+          "id": "bean-lifecycle-events",
+          "name": "Bean lifecycle, BeanPostProcessor and application events",
+          "tier": 3,
+          "prereqs": ["ioc-container-beans"],
+          "summary": "Beans go through creation, injection, post-processing and destruction. BeanPostProcessors can wrap beans; ApplicationListeners react to events such as ContextRefreshedEvent.",
+          "why": "PRSDB validates feature-flag annotations at startup and wraps flipped beans in proxies using these hooks.",
+          "keywords": ["BeanPostProcessor", "ApplicationListener", "ContextRefreshedEvent", "@PostConstruct", "@EventListener"],
+          "anchors": ["main:config/FeatureFlagAnnotationValidator.kt", "main:config/FeatureFlagProxyBeanPostProcessor.kt"]
+        },
+        {
+          "id": "aop-proxies",
+          "name": "Proxies and AOP (how annotations like @Transactional work)",
+          "tier": 3,
+          "prereqs": ["ioc-container-beans", "dependency-injection"],
+          "summary": "Spring wraps beans in proxies that run extra logic around method calls (transactions, security checks). Calls from a bean to its own methods skip the proxy, so annotations there are ignored.",
+          "why": "Explains the self-invocation gotcha and why @Transactional/@PreAuthorize only take effect on calls coming from another bean.",
+          "keywords": ["proxy", "AOP", "aspect", "self-invocation", "CGLIB", "open class"],
+          "anchors": ["main:services/LandlordService.kt", "main:config/FeatureFlagProxyBeanPostProcessor.kt"]
+        }
+      ]
+    },
+    {
+      "id": "web-mvc",
+      "name": "Spring MVC web layer",
+      "concepts": [
+        {
+          "id": "request-lifecycle",
+          "name": "The request lifecycle (DispatcherServlet)",
+          "tier": 1,
+          "prereqs": ["spring-boot-app"],
+          "summary": "Each HTTP request passes through servlet filters (incl. security), the DispatcherServlet, interceptors, then the controller method; the returned view is rendered by Thymeleaf.",
+          "why": "Knowing the order tells you where a behaviour belongs and where to look when a request is rejected or redirected.",
+          "keywords": ["DispatcherServlet", "request", "filter", "interceptor", "handler"],
+          "anchors": ["main:controllers/LandlordController.kt", "main:config/security/LandlordSecurityConfig.kt"]
+        },
+        {
+          "id": "controllers-mappings",
+          "name": "Controllers and request mappings",
+          "tier": 1,
+          "prereqs": ["request-lifecycle", "stereotype-annotations"],
+          "summary": "@PrsdbController classes map URLs to methods with @RequestMapping (class-level base path) and @GetMapping / @PostMapping.",
+          "why": "This is how a URL in the browser reaches your code.",
+          "keywords": ["@Controller", "@PrsdbController", "@RequestMapping", "@GetMapping", "@PostMapping"],
+          "anchors": ["main:controllers/LandlordController.kt", "main:controllers/IncompletePropertiesController.kt"]
+        },
+        {
+          "id": "request-binding",
+          "name": "Binding request data (@PathVariable, @RequestParam, @ModelAttribute...)",
+          "tier": 1,
+          "prereqs": ["controllers-mappings"],
+          "summary": "Method parameter annotations pull values from the URL path, query string, form body, cookies or request attributes and convert them to Kotlin types.",
+          "why": "Avoids manual parsing of the raw request; a missing required parameter becomes a 400 automatically.",
+          "keywords": ["@PathVariable", "@RequestParam", "@ModelAttribute", "@RequestBody", "@CookieValue", "@RequestAttribute"],
+          "anchors": ["main:controllers/IncompletePropertiesController.kt", "main:controllers/LandlordDetailsController.kt"]
+        },
+        {
+          "id": "model-and-views",
+          "name": "Model, view names and redirects",
+          "tier": 1,
+          "prereqs": ["controllers-mappings"],
+          "summary": "Controllers add data to the Model and return a view name (template path) or \"redirect:/url\". Post/Redirect/Get avoids duplicate form submissions.",
+          "why": "Separates what data a page needs from how it is rendered.",
+          "keywords": ["Model", "addAttribute", "ModelAndView", "redirect:", "view name", "RedirectAttributes"],
+          "anchors": ["main:controllers/LandlordController.kt"]
+        },
+        {
+          "id": "thymeleaf-templates",
+          "name": "Thymeleaf templates and fragments",
+          "tier": 1,
+          "prereqs": ["model-and-views"],
+          "summary": "Server-side HTML templates with th:* attributes read Model data, reuse fragments (th:replace) and resolve message keys (#{key}).",
+          "why": "Every page the user sees is rendered from a template; GOV.UK components live in fragments.",
+          "keywords": ["th:", "templates/", "fragments", "th:replace", "th:each", "#{"],
+          "anchors": ["res:templates/fragments", "res:templates/forms"]
+        },
+        {
+          "id": "form-binding-validation",
+          "name": "Form binding and validation",
+          "tier": 2,
+          "prereqs": ["request-binding"],
+          "summary": "Posted form fields bind onto a form model object; validation results go into BindingResult and are shown as errors. PRSDB uses its own @IsValidPrioritised / @ValidatedBy framework instead of Bean Validation annotations.",
+          "why": "Gives consistent, prioritised error messages on GOV.UK forms.",
+          "keywords": ["BindingResult", "@Valid", "@Validated", "@ValidatedBy", "@IsValidPrioritised", "FormModel"],
+          "anchors": ["main:validation/ConstraintDescriptor.kt", "main:controllers/ManageLocalCouncilAdminsController.kt"]
+        },
+        {
+          "id": "rest-controllers",
+          "name": "REST controllers and JSON",
+          "tier": 2,
+          "prereqs": ["controllers-mappings"],
+          "summary": "@RestController (PRSDB: @PrsdbRestController) returns objects serialised to JSON by Jackson instead of rendering a view.",
+          "why": "Used for API-style endpoints and the local stubs of third-party APIs.",
+          "keywords": ["@RestController", "@PrsdbRestController", "@ResponseBody", "@RequestBody", "ResponseEntity", "Jackson", "JSON"],
+          "anchors": ["main:local/api/controllers/MockOneLoginController.kt", "main:annotations/webAnnotations/PrsdbRestController.kt"]
+        },
+        {
+          "id": "exception-handling",
+          "name": "Exception handling (@ControllerAdvice, @ExceptionHandler)",
+          "tier": 2,
+          "prereqs": ["controllers-mappings"],
+          "summary": "Exceptions thrown from controllers are translated into responses by @ExceptionHandler methods in a @ControllerAdvice, or by a ResponseStatusException's status code.",
+          "why": "Gives users proper 404/403/500 pages instead of stack traces, from one central place.",
+          "keywords": ["@ControllerAdvice", "@PrsdbControllerAdvice", "@ExceptionHandler", "ResponseStatusException", "HttpStatus"],
+          "anchors": ["main:controllers/controllerAdvice/GlobalExceptionHandler.kt", "main:config/CustomErrorConfig.kt"]
+        },
+        {
+          "id": "servlet-filters",
+          "name": "Servlet filters",
+          "tier": 3,
+          "prereqs": ["request-lifecycle"],
+          "summary": "Filters (e.g. OncePerRequestFilter) wrap every request before Spring MVC sees it; their order matters.",
+          "why": "Used for cross-cutting concerns such as CSP nonces, trailing slashes and token validation.",
+          "keywords": ["Filter", "OncePerRequestFilter", "FilterRegistrationBean", "@Order", "doFilter"],
+          "anchors": ["main:config/filters/MultipartFormDataFilter.kt", "main:config/filters/TrailingSlashFilterConfiguration.kt"]
+        },
+        {
+          "id": "handler-interceptors",
+          "name": "Handler interceptors and WebMvcConfigurer",
+          "tier": 2,
+          "prereqs": ["request-lifecycle"],
+          "summary": "HandlerInterceptors run before/after controller methods and are registered for URL patterns via a WebMvcConfigurer.",
+          "why": "Back links, maintenance mode, passcode and access checks apply to many pages without touching each controller.",
+          "keywords": ["HandlerInterceptor", "preHandle", "postHandle", "WebMvcConfigurer", "addInterceptors"],
+          "anchors": ["main:config/interceptors/BackLinkInterceptor.kt", "main:config/BackLinkInterceptorConfig.kt"]
+        },
+        {
+          "id": "http-session",
+          "name": "HTTP session state",
+          "tier": 2,
+          "prereqs": ["request-lifecycle", "bean-scopes"],
+          "summary": "HttpSession stores per-user data between requests (journey progress, passcode). Injecting HttpSession into a singleton gives a proxy to the current user's session.",
+          "why": "Multi-step journeys need to remember earlier answers before anything is saved to the database.",
+          "keywords": ["HttpSession", "session", "setAttribute", "getAttribute"],
+          "anchors": ["main:journeys/JourneyStateService.kt", "main:controllers/PasscodeEntryController.kt"]
+        },
+        {
+          "id": "i18n-messages",
+          "name": "Messages and internationalisation (MessageSource)",
+          "tier": 2,
+          "prereqs": ["thymeleaf-templates"],
+          "summary": "User-facing text lives in messages/*.yml and is looked up by key via MessageSource (#{key} in templates).",
+          "why": "Keeps content out of code so it can be reviewed and changed centrally (and translated).",
+          "keywords": ["MessageSource", "messages/", "#{", "getMessage", "message key"],
+          "anchors": ["main:config/MessageSourceConfig.kt", "res:messages"]
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "name": "Spring Security",
+      "concepts": [
+        {
+          "id": "security-filter-chain",
+          "name": "Security filter chains",
+          "tier": 2,
+          "prereqs": ["request-lifecycle", "configuration-beans"],
+          "summary": "SecurityFilterChain beans define, per URL pattern, which requests need authentication, how users log in, CSRF and headers. PRSDB has separate chains for landlords, local councils, letting agents and a default.",
+          "why": "A new URL is only protected if it falls under the right chain.",
+          "keywords": ["SecurityFilterChain", "HttpSecurity", "securityMatcher", "authorizeHttpRequests", "SecurityConfig"],
+          "anchors": ["main:config/security/LandlordSecurityConfig.kt", "main:config/security/DefaultSecurityConfig.kt"]
+        },
+        {
+          "id": "authentication-oauth2",
+          "name": "Authentication with OAuth2 / OpenID Connect (GOV.UK One Login)",
+          "tier": 3,
+          "prereqs": ["security-filter-chain"],
+          "summary": "Users log in via One Login using OAuth2/OIDC; Spring Security handles the redirects and creates an Authentication holding the user's identity and roles.",
+          "why": "Explains login redirects, the local-no-auth mock and where user roles come from.",
+          "keywords": ["oauth2Login", "OIDC", "One Login", "OAuth2AuthenticationToken", "OidcUser", "UserServiceFactory"],
+          "anchors": ["main:config/OneLoginConfig.kt", "main:config/security/UserServiceFactory.kt", "main:local/api/controllers/MockOneLoginController.kt"]
+        },
+        {
+          "id": "security-context",
+          "name": "SecurityContext, Authentication and Principal",
+          "tier": 2,
+          "prereqs": ["security-filter-chain"],
+          "summary": "The logged-in user is held in the SecurityContext for the request; controllers receive it as a Principal parameter.",
+          "why": "Services use the principal's name (the One Login subject id) to load the current user's data.",
+          "keywords": ["Principal", "SecurityContextHolder", "Authentication", "principal.name"],
+          "anchors": ["main:controllers/IncompletePropertiesController.kt", "main:config/filters/InvalidCoreIdentityFilter.kt"]
+        },
+        {
+          "id": "method-security",
+          "name": "Method security and roles (@PreAuthorize)",
+          "tier": 1,
+          "prereqs": ["controllers-mappings"],
+          "summary": "@PreAuthorize(\"hasRole('LANDLORD')\") - or PRSDB's @AllowIfLandlord meta-annotation - checks roles before a method runs; enabled by @EnableMethodSecurity.",
+          "why": "Stops users reaching pages for roles they don't have; every controller needs it.",
+          "keywords": ["@PreAuthorize", "hasRole", "hasAnyRole", "@AllowIfLandlord", "@EnableMethodSecurity", "ROLE_"],
+          "anchors": ["main:annotations/webAnnotations/AllowIfLandlord.kt", "main:controllers/LandlordController.kt"]
+        },
+        {
+          "id": "csrf",
+          "name": "CSRF protection",
+          "tier": 2,
+          "prereqs": ["security-filter-chain", "thymeleaf-templates"],
+          "summary": "Spring Security rejects state-changing requests without a valid CSRF token; Thymeleaf forms add the token automatically.",
+          "why": "Prevents other sites tricking a logged-in user's browser into submitting forms.",
+          "keywords": ["csrf", "_csrf", "CsrfTokenRepository", "403"],
+          "anchors": ["main:config/security/LettingAgentSecurityConfig.kt"]
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "name": "Data access with Spring Data JPA",
+      "concepts": [
+        {
+          "id": "jpa-entities",
+          "name": "JPA entities",
+          "tier": 1,
+          "prereqs": [],
+          "summary": "@Entity classes map to tables; @Id/@GeneratedValue define the primary key and @Column maps fields. Hibernate (the JPA implementation) turns objects into SQL.",
+          "why": "Lets code work with Kotlin objects rather than raw SQL rows.",
+          "keywords": ["@Entity", "@Table", "@Id", "@Column", "@GeneratedValue", "Hibernate", "database/entity"],
+          "anchors": ["main:database/entity/Landlord.kt", "main:database/entity/PropertyOwnership.kt"]
+        },
+        {
+          "id": "entity-relationships",
+          "name": "Entity relationships and lazy loading",
+          "tier": 2,
+          "prereqs": ["jpa-entities"],
+          "summary": "@ManyToOne, @OneToMany, @OneToOne and @JoinColumn model foreign keys. Related entities may load lazily, only when first accessed inside a transaction.",
+          "why": "Explains LazyInitializationException and N+1 query problems.",
+          "keywords": ["@ManyToOne", "@OneToMany", "@OneToOne", "@JoinColumn", "@JoinTable", "FetchType", "LAZY", "mappedBy"],
+          "anchors": ["main:database/entity/PropertyOwnership.kt"]
+        },
+        {
+          "id": "spring-data-repositories",
+          "name": "Spring Data repositories and derived queries",
+          "tier": 1,
+          "prereqs": ["jpa-entities", "dependency-injection"],
+          "summary": "Interfaces extending JpaRepository get CRUD methods for free; Spring generates queries from method names such as findAllByLocalCouncil_IdAndIsManagerTrue (underscore = navigate into a related entity).",
+          "why": "Most data access needs no hand-written SQL or implementation class.",
+          "keywords": ["JpaRepository", "CrudRepository", "findBy", "findAllBy", "existsBy", "countBy", "deleteBy", "database/repository"],
+          "anchors": ["main:database/repository/LocalCouncilUserRepository.kt", "main:database/repository/LandlordRepository.kt"]
+        },
+        {
+          "id": "custom-queries",
+          "name": "Custom queries (@Query, @Modifying)",
+          "tier": 2,
+          "prereqs": ["spring-data-repositories"],
+          "summary": "@Query supplies JPQL or native SQL when a derived name gets unwieldy; @Modifying marks updates/deletes; @Param binds named parameters.",
+          "why": "Complex searches and bulk updates need explicit queries.",
+          "keywords": ["@Query", "@Modifying", "@Param", "nativeQuery", "JPQL"],
+          "anchors": ["main:database/repository/PaymentRepository.kt", "main:database/repository/LandlordIncompletePropertiesRepository.kt"]
+        },
+        {
+          "id": "paging",
+          "name": "Paging and sorting (Pageable, Page)",
+          "tier": 2,
+          "prereqs": ["spring-data-repositories"],
+          "summary": "Passing a Pageable to a repository method returns a Page with the slice of results plus total counts.",
+          "why": "Search and list pages show results a page at a time without loading everything.",
+          "keywords": ["Pageable", "PageRequest", "Page<", "Sort"],
+          "anchors": ["main:database/repository/LandlordIncompletePropertiesRepository.kt", "main:services/UsersIncompletePropertyService.kt"]
+        },
+        {
+          "id": "transactions",
+          "name": "Transactions (@Transactional) and the persistence context",
+          "tier": 2,
+          "prereqs": ["spring-data-repositories"],
+          "summary": "@Transactional runs a method in one database transaction: all writes commit together or roll back on a runtime exception. Managed entities changed inside it are saved automatically (dirty checking). PRSDB mostly imports jakarta.transaction.Transactional, which Spring also honours.",
+          "why": "Prevents half-saved data when a multi-step write fails part way.",
+          "keywords": ["@Transactional", "jakarta.transaction.Transactional", "rollback", "readOnly", "propagation", "dirty checking", "flush"],
+          "anchors": ["main:services/LandlordService.kt"]
+        },
+        {
+          "id": "jpa-auditing",
+          "name": "JPA auditing (created/modified dates)",
+          "tier": 2,
+          "prereqs": ["jpa-entities"],
+          "summary": "@EnableJpaAuditing plus @CreatedDate/@LastModifiedDate on base classes fill timestamps automatically; PRSDB entities extend AuditableEntity or ModifiableAuditableEntity.",
+          "why": "Consistent audit timestamps without code in every service.",
+          "keywords": ["@EnableJpaAuditing", "@CreatedDate", "@LastModifiedDate", "AuditableEntity", "ModifiableAuditableEntity", "@EntityListeners"],
+          "anchors": ["main:config/AuditingConfig.kt", "main:database/entity/AuditableEntity.kt", "main:database/entity/ModifiableAuditableEntity.kt"]
+        },
+        {
+          "id": "jpa-inheritance-keys",
+          "name": "Mapped superclasses, inheritance and composite keys",
+          "tier": 3,
+          "prereqs": ["jpa-entities"],
+          "summary": "@MappedSuperclass shares columns; @Inheritance/@DiscriminatorColumn store subclasses in one table; @IdClass, @Embeddable/@EmbeddedId and @MapsId model composite or shared keys.",
+          "why": "Needed to read the less common entity mappings in the schema.",
+          "keywords": ["@MappedSuperclass", "@Inheritance", "@DiscriminatorColumn", "@DiscriminatorValue", "@IdClass", "@Embeddable", "@EmbeddedId", "@MapsId"],
+          "anchors": ["main:database/entity/AuditableEntity.kt", "main:database/entity/LocalCouncilUserOrInvitation.kt"]
+        },
+        {
+          "id": "flyway-migrations",
+          "name": "Database migrations with Flyway",
+          "tier": 2,
+          "prereqs": ["jpa-entities"],
+          "summary": "Spring Boot runs Flyway on startup, applying versioned SQL files in db/migrations in order; the schema is never generated from entities.",
+          "why": "Entity changes need a matching migration or the app fails schema validation.",
+          "keywords": ["Flyway", "db/migrations", "V1_", "migration", "ddl"],
+          "anchors": ["res:db/migrations"]
+        }
+      ]
+    },
+    {
+      "id": "beyond-web",
+      "name": "Beyond the web request",
+      "concepts": [
+        {
+          "id": "http-clients",
+          "name": "Calling external APIs (RestClient)",
+          "tier": 2,
+          "prereqs": ["configuration-beans", "externalised-config"],
+          "summary": "RestClient beans configured with base URLs and headers make HTTP calls to third-party APIs; responses deserialise into Kotlin classes.",
+          "why": "EPC Register, GOV.UK Pay and Plausible integrations use this pattern, with local stubs for development.",
+          "keywords": ["RestClient", "WebClient", "RestTemplate", "clients/", "retrieve()"],
+          "anchors": ["main:clients/EpcRegisterClient.kt", "main:config/EpcRegisterConfig.kt"]
+        },
+        {
+          "id": "messaging-sqs",
+          "name": "Message queues with Spring Cloud AWS (@SqsListener)",
+          "tier": 3,
+          "prereqs": ["configuration-beans"],
+          "summary": "@SqsListener methods are invoked by a listener container when a message arrives on an SQS queue.",
+          "why": "Emails and virus-scan results are processed asynchronously by worker run modes.",
+          "keywords": ["@SqsListener", "SQS", "queue", "listener container", "SqsTemplate"],
+          "anchors": ["main:services/EmailQueueListener.kt", "main:config/EmailQueueListenerConfig.kt"]
+        },
+        {
+          "id": "task-runners",
+          "name": "Non-web run modes and ApplicationRunner",
+          "tier": 3,
+          "prereqs": ["conditional-beans"],
+          "summary": "ApplicationRunner beans run once after startup. With the web server deactivated and the scheduled-task profile, PRSDB starts, runs a task and exits.",
+          "why": "Scheduled jobs (reminders, clean-ups) reuse services without running a web server.",
+          "keywords": ["ApplicationRunner", "CommandLineRunner", "@PrsdbTaskService", "@PrsdbScheduledTask", "scheduled-task", "application/"],
+          "anchors": ["main:application/DeleteIncompletePropertiesTaskApplicationRunner.kt", "main:annotations/taskAnnotations/TaskOnly.kt"]
+        },
+        {
+          "id": "feature-flag-mechanics",
+          "name": "How feature flags hook into Spring",
+          "tier": 3,
+          "prereqs": ["controllers-mappings", "bean-lifecycle-events"],
+          "summary": "FF4J flags toggle endpoints via a custom RequestCondition (@AvailableWhenFeatureEnabled) and swap bean implementations via proxy (@PrsdbFlip).",
+          "why": "Lets unreleased features ship to production switched off.",
+          "keywords": ["@AvailableWhenFeatureEnabled", "@AvailableWhenFeatureDisabled", "@PrsdbFlip", "FeatureFlagManager", "RequestCondition", "FF4J"],
+          "anchors": ["main:config/mappings/FeatureFlagConditionMapping.kt", "main:config/FeatureFlagProxyBeanPostProcessor.kt"]
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "name": "Testing Spring applications",
+      "concepts": [
+        {
+          "id": "unit-tests-with-mocks",
+          "name": "Unit testing beans without Spring",
+          "tier": 1,
+          "prereqs": ["dependency-injection"],
+          "summary": "Because dependencies arrive through the constructor, a service can be tested by constructing it with Mockito mocks - no Spring context needed.",
+          "why": "Fast, focused tests of business logic.",
+          "keywords": ["mock()", "whenever", "verify", "Mockito", "@Mock", "@InjectMocks"],
+          "anchors": ["test:services"]
+        },
+        {
+          "id": "webmvctest-mockmvc",
+          "name": "Controller slice tests (@WebMvcTest, MockMvc)",
+          "tier": 2,
+          "prereqs": ["controllers-mappings", "method-security"],
+          "summary": "@WebMvcTest starts only the web layer for one controller; MockMvc sends fake requests and asserts status, view and model. PRSDB's ControllerTest base adds security config.",
+          "why": "Tests URL mapping, security and validation without a database.",
+          "keywords": ["@WebMvcTest", "MockMvc", "ControllerTest", "@WithMockUser", "perform(", "andExpect"],
+          "anchors": ["test:controllers/ControllerTest.kt"]
+        },
+        {
+          "id": "mocking-beans",
+          "name": "Replacing beans in tests (@MockitoBean, @MockitoSpyBean)",
+          "tier": 2,
+          "prereqs": ["webmvctest-mockmvc"],
+          "summary": "@MockitoBean replaces a bean in the test ApplicationContext with a mock; @MockitoSpyBean wraps the real bean.",
+          "why": "Slice tests need stand-ins for services outside the slice.",
+          "keywords": ["@MockitoBean", "@MockitoSpyBean", "@MockBean", "@SpyBean"],
+          "anchors": ["test:controllers/ControllerTest.kt", "test:integration/IntegrationTest.kt"]
+        },
+        {
+          "id": "spring-test-context",
+          "name": "Full-context tests (@SpringBootTest) and context caching",
+          "tier": 3,
+          "prereqs": ["profiles", "mocking-beans"],
+          "summary": "@SpringBootTest starts the whole application (integration tests use a random port plus Playwright); @ActiveProfiles and @Import adjust it. Spring caches contexts between tests with identical configuration.",
+          "why": "Different mock/profile combinations create new contexts and slow the suite.",
+          "keywords": ["@SpringBootTest", "@ActiveProfiles", "@Import", "@TestConfiguration", "context caching", "@DirtiesContext", "RANDOM_PORT"],
+          "anchors": ["test:integration/IntegrationTest.kt"]
+        },
+        {
+          "id": "testcontainers",
+          "name": "Testcontainers and @ServiceConnection",
+          "tier": 3,
+          "prereqs": ["spring-test-context"],
+          "summary": "Tests start real PostgreSQL (and other services) in Docker; @ServiceConnection points Spring Boot's auto-configuration at them.",
+          "why": "Integration tests hit a real database identical to production.",
+          "keywords": ["Testcontainers", "@ServiceConnection", "PostgreSQLContainer", "TestcontainersConfiguration"],
+          "anchors": ["test:TestcontainersConfiguration.kt", "test:integration/IntegrationTestWithMutableData.kt"]
+        }
+      ]
+    }
+  ]
+}

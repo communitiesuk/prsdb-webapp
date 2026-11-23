@@ -28,6 +28,7 @@ Before responding to any task, check whether a repository skill applies.
 | `preflight-checks` | Verifying tools and services are available |
 | `branch-and-commit-naming` | Creating branches or writing commit messages |
 | `reviewing-code` | Reviewing code changes |
+| `spring-boot-camp` | **Only when the user asks** to learn about or be quizzed on Spring, Kotlin or the project architecture during a ticket or review |
 
 ## The Rule
 
