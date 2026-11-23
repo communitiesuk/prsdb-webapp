@@ -14,10 +14,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
@@ -28,7 +26,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -38,6 +38,7 @@ class AcceptOrRejectJointLandlordInvitationController(
     private val journeyFactory: AcceptOrRejectJointLandlordInvitationJourneyFactory,
     private val invitationService: JointLandlordInvitationService,
     private val userRolesService: UserRolesService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -89,15 +90,10 @@ class AcceptOrRejectJointLandlordInvitationController(
 
         model.addAttribute("addressParts", propertyAddress.split("\n"))
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        model.addAttribute("prn", RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString())
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val isOrganisationLandlord = landlord.landlordType == LandlordType.ORGANISATION
-        val surveyUrl =
-            if (isOrganisationLandlord) {
-                ORG_LANDLORD_REGISTRATION_SURVEY_URL
-            } else {
-                INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
-            }
-        model.addAttribute("landlordRegistrationSurveyUrl", surveyUrl)
 
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
         val showLandlordReactivated =
