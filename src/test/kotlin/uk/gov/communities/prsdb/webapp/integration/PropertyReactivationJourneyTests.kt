@@ -88,7 +88,6 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         const val INACTIVE_PROPERTY_OWNED_BY_ANOTHER_LANDLORD = 2L
         const val INACTIVE_PROPERTY_REGISTERED_AGAIN_BY_ANOTHER_LANDLORD = 53L
         const val ACTIVE_PROPERTY = 1L
-        const val INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY = 1L
     }
 
     private val urlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER.toString())
@@ -591,16 +590,18 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         NestedIntegrationTestWithMutableData(
             listOf("data-mockuser-inactive-landlord.sql", "data-overlay-inactive-landlord-has-deactivated-property.sql"),
         ) {
+        private val deactivatedPropertyId = 1L
+
         @Test
         fun `the confirmation page tells the landlord their account was reactivated`(page: Page) {
-            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY)
+            val infoPage = navigator.goToPropertyReactivationInfoPage(deactivatedPropertyId)
             infoPage.submit()
 
             val confirmationPage =
                 assertPageIs(
                     page,
                     ConfirmationPagePropertyReactivation::class,
-                    mapOf("propertyOwnershipId" to INACTIVE_LANDLORDS_DEACTIVATED_PROPERTY.toString()),
+                    mapOf("propertyOwnershipId" to deactivatedPropertyId.toString()),
                 )
             assertThat(confirmationPage.reactivationDetailsHeading).isVisible()
             assertThat(confirmationPage.landlordAccountText).hasText("Your landlord account is now active.")

@@ -297,8 +297,28 @@ class ReactivatePropertyControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation shows an individual landlord that their account was reactivated`() {
+        // Arrange
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyReactivationService.wasLandlordReactivatedByLastReactivation()).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+
+        // Act, Assert
+        mvc.get(confirmationPath).andExpect {
+            status { isOk() }
+            model {
+                attribute("landlordReactivated", true)
+                attribute("isOrganisationLandlord", false)
+            }
+        }
+    }
+
+    @Test
     @WithMockUser(roles = ["ORG_ADMIN"])
-    fun `getConfirmation shows the organisation landlord account was reactivated when the landlord was reactivated`() {
+    fun `getConfirmation shows an organisation landlord that their organisation's account was reactivated`() {
         // Arrange
         whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
         whenever(propertyReactivationService.wasLandlordReactivatedByLastReactivation()).thenReturn(true)
