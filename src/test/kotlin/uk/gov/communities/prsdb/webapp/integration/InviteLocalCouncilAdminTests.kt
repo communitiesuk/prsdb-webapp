@@ -6,7 +6,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminConfirmationPage
@@ -38,7 +38,7 @@ class InviteLocalCouncilAdminTests : IntegrationTestWithMutableData("data-local.
     fun `if a TransientEmailException is returned the page is re-rendered with an error message`() {
         val emailAddressTriggeringTransientError = "transient@example.com"
         whenever(invitationEmailSender.sendEmail(eq(emailAddressTriggeringTransientError), any()))
-            .thenThrow(TransientEmailSentException(EmailSendFailureReason.UNKNOWN, "email failed"))
+            .thenThrow(TransientEmailSentException(NotificationSendFailureReason.UNKNOWN, "email failed"))
 
         val invitePage = navigator.goToInviteLocalCouncilAdmin()
         invitePage.fillInFormAndSubmit(

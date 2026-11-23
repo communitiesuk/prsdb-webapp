@@ -29,11 +29,10 @@ import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePassphraseController.Companion.GENERATE_PASSPHRASE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SendPassphraseEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SendPassphraseSmsFormModel
@@ -330,7 +329,7 @@ class GeneratePassphraseControllerTests(
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `sendSms rejects resubmitting the same form after an uncertain failure`() {
         val (session, token) = generateSmsForm()
-        doThrow(SmsSendException(SmsSendFailureReason.UNKNOWN, "Unknown outcome"))
+        doThrow(SmsSendException(NotificationSendFailureReason.UNKNOWN, "Unknown outcome"))
             .whenever(smsNotificationService)
             .sendSms(any(), any())
 
@@ -368,7 +367,7 @@ class GeneratePassphraseControllerTests(
     )
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `sendSms reports the reason without retrying`(
-        reason: SmsSendFailureReason,
+        reason: NotificationSendFailureReason,
         status: String,
         guidance: String,
     ) {
@@ -606,22 +605,22 @@ class GeneratePassphraseControllerTests(
         val (session, token) = generateEmailForm()
         val exception =
             when (failure) {
-                "invalid" -> PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "Invalid request")
-                "technical" -> PersistentEmailSendException(EmailSendFailureReason.TECHNICAL, "Technical problem")
-                "daily" -> PersistentEmailSendException(EmailSendFailureReason.DAILY_LIMIT, "Daily limit")
-                "minute" -> TransientEmailSentException(EmailSendFailureReason.MINUTE_LIMIT, "Rate limited")
-                "uncertain-transient" -> TransientEmailSentException(EmailSendFailureReason.UNKNOWN, "Unknown outcome")
+                "invalid" -> PersistentEmailSendException(NotificationSendFailureReason.INVALID_REQUEST, "Invalid request")
+                "technical" -> PersistentEmailSendException(NotificationSendFailureReason.TECHNICAL, "Technical problem")
+                "daily" -> PersistentEmailSendException(NotificationSendFailureReason.DAILY_LIMIT, "Daily limit")
+                "minute" -> TransientEmailSentException(NotificationSendFailureReason.MINUTE_LIMIT, "Rate limited")
+                "uncertain-transient" -> TransientEmailSentException(NotificationSendFailureReason.UNKNOWN, "Unknown outcome")
                 "validation" ->
                     EmailNotifyResponseException(
-                        EmailSendFailureReason.INVALID_REQUEST,
+                        NotificationSendFailureReason.INVALID_REQUEST,
                         "Invalid request",
                         IllegalArgumentException(),
                     )
-                "allowlist" -> NotifyAllowlistException(EmailSendFailureReason.TECHNICAL, "Not allowed")
+                "allowlist" -> NotifyAllowlistException(NotificationSendFailureReason.TECHNICAL, "Not allowed")
                 "serialization" -> SerializationException("Unreadable error")
                 "json" -> JSONException("Unreadable response")
                 "invalid-response" -> IllegalArgumentException("Invalid response")
-                else -> PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Unknown outcome")
+                else -> PersistentEmailSendException(NotificationSendFailureReason.UNKNOWN, "Unknown outcome")
             }
         doThrow(exception).whenever(emailNotificationService).sendEmailSynchronously(any(), any())
 

@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -27,13 +27,13 @@ class EmailDeliveryStubService : EmailDeliveryService {
     ) {
         if (recipientAddress == persistentExceptionRecipient) {
             throw PersistentEmailSendException(
-                EmailSendFailureReason.TECHNICAL,
+                NotificationSendFailureReason.TECHNICAL,
                 "Emails sent to $persistentExceptionRecipient always persistently fail",
             )
         }
         if (recipientAddress == transientExceptionRecipient) {
             throw TransientEmailSentException(
-                EmailSendFailureReason.MINUTE_LIMIT,
+                NotificationSendFailureReason.MINUTE_LIMIT,
                 "Emails sent to $transientExceptionRecipient always transiently fail",
             )
         }

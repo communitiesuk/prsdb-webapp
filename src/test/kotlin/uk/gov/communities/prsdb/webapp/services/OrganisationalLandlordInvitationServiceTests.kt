@@ -42,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInv
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -367,7 +367,7 @@ class OrganisationalLandlordInvitationServiceTests {
         val organisation = createOrgLandlord()
         whenever(mockAbsoluteUrlProvider.buildOrganisationalLandlordInvitationUri(any()))
             .thenReturn(URI("https://www.example.com/landlord/accept-invitation"))
-        doThrow(TransientEmailSentException(EmailSendFailureReason.UNKNOWN, "Email failed to send"))
+        doThrow(TransientEmailSentException(NotificationSendFailureReason.UNKNOWN, "Email failed to send"))
             .whenever(mockInvitationEmailSender)
             .sendEmail(any(), any())
 
@@ -778,9 +778,9 @@ class OrganisationalLandlordInvitationServiceTests {
         val mocks = arrangePendingInvitationAcceptance(EDITOR)
         val exception =
             if (isPersistentFailure) {
-                PersistentEmailSendException(EmailSendFailureReason.UNKNOWN, "Email failed to send")
+                PersistentEmailSendException(NotificationSendFailureReason.UNKNOWN, "Email failed to send")
             } else {
-                TransientEmailSentException(EmailSendFailureReason.UNKNOWN, "Email failed to send")
+                TransientEmailSentException(NotificationSendFailureReason.UNKNOWN, "Email failed to send")
             }
         doThrow(exception)
             .whenever(mockAcceptedEmailSender)

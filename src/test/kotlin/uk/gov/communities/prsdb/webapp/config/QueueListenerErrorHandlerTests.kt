@@ -17,7 +17,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.MessageBuilder
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import java.util.concurrent.CompletableFuture
@@ -57,7 +57,7 @@ class QueueListenerErrorHandlerTests {
         val listenerFailure =
             RuntimeException(
                 "Listener failed",
-                TransientEmailSentException(EmailSendFailureReason.MINUTE_LIMIT, "rate limited"),
+                TransientEmailSentException(NotificationSendFailureReason.MINUTE_LIMIT, "rate limited"),
             )
         val transientFailureResult = CompletableFuture.failedFuture<Void>(listenerFailure)
         whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
@@ -79,7 +79,7 @@ class QueueListenerErrorHandlerTests {
         val listenerFailure =
             RuntimeException(
                 "Listener failed",
-                PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "bad request"),
+                PersistentEmailSendException(NotificationSendFailureReason.INVALID_REQUEST, "bad request"),
             )
         val transientFailureResult = CompletableFuture.failedFuture<Void>(listenerFailure)
         whenever(transientFailureErrorHandler.handle(message, listenerFailure)).thenReturn(transientFailureResult)
@@ -96,7 +96,7 @@ class QueueListenerErrorHandlerTests {
         @JvmStatic
         fun persistentFailures() =
             listOf(
-                PersistentEmailSendException(EmailSendFailureReason.INVALID_REQUEST, "bad request"),
+                PersistentEmailSendException(NotificationSendFailureReason.INVALID_REQUEST, "bad request"),
                 SerializationException("undecodable"),
             )
     }

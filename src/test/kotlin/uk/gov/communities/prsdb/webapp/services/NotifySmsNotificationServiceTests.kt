@@ -18,8 +18,8 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
 import uk.gov.service.notify.NotificationClient
@@ -74,7 +74,7 @@ class NotifySmsNotificationServiceTests {
         val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", TestSmsTemplate()) }
 
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @ParameterizedTest
@@ -89,7 +89,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertTrue(exception.message!!.contains("No Notify template ID"))
-        assertEquals(SmsSendFailureReason.TECHNICAL, exception.reason)
+        assertEquals(NotificationSendFailureReason.TECHNICAL, exception.reason)
         verifyNoInteractions(notifyClient)
     }
 
@@ -104,7 +104,7 @@ class NotifySmsNotificationServiceTests {
     )
     fun `sendSms classifies Notify errors`(
         errorType: String,
-        reason: SmsSendFailureReason,
+        reason: NotificationSendFailureReason,
     ) {
         // Arrange
         val cause = NotificationClientException(errorResponse(errorType))
@@ -135,7 +135,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @Test
@@ -157,7 +157,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.INVALID_REQUEST, exception.reason)
+        assertEquals(NotificationSendFailureReason.INVALID_REQUEST, exception.reason)
     }
 
     @ParameterizedTest
@@ -170,7 +170,7 @@ class NotifySmsNotificationServiceTests {
     fun `sendSms classifies mixed errors conservatively`(
         first: String,
         second: String,
-        reason: SmsSendFailureReason,
+        reason: NotificationSendFailureReason,
     ) {
         val cause =
             NotificationClientException(
@@ -201,7 +201,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @ParameterizedTest
@@ -224,7 +224,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
     }
 
     @Test
@@ -241,7 +241,7 @@ class NotifySmsNotificationServiceTests {
 
         // Assert
         assertEquals(cause, exception.cause)
-        assertEquals(SmsSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
     }
 
     private fun errorResponse(errorType: String): String =

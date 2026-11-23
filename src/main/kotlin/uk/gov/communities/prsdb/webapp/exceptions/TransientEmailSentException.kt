@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.exceptions
 
 class TransientEmailSentException : PrsdbWebException {
-    val reason: EmailSendFailureReason
+    val reason: NotificationSendFailureReason
 
-    constructor(reason: EmailSendFailureReason, message: String, cause: Throwable) : super(message, cause) {
+    constructor(reason: NotificationSendFailureReason, message: String, cause: Throwable) : super(message, cause) {
         this.reason = reason
     }
 
-    constructor(reason: EmailSendFailureReason, message: String) : super(message) {
+    constructor(reason: NotificationSendFailureReason, message: String) : super(message) {
         this.reason = reason
     }
 }

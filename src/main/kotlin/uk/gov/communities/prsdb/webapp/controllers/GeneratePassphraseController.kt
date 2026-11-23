@@ -22,10 +22,9 @@ import uk.gov.communities.prsdb.webapp.constants.PASSPHRASE_SMS
 import uk.gov.communities.prsdb.webapp.constants.PENDING_PASSPHRASE
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.PendingPassphrase
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SendPassphraseEmailFormModel
@@ -151,13 +150,7 @@ class GeneratePassphraseController(
             "generatePassphrase.sms.accepted"
         } catch (exception: SmsSendException) {
             logger.warn("Passphrase SMS submission failed: {}", exception.reason, exception)
-            when (exception.reason) {
-                SmsSendFailureReason.INVALID_REQUEST -> "generatePassphrase.sms.invalid"
-                SmsSendFailureReason.TECHNICAL -> "generatePassphrase.sms.technical"
-                SmsSendFailureReason.DAILY_LIMIT -> "generatePassphrase.sms.dailyLimit"
-                SmsSendFailureReason.MINUTE_LIMIT -> "generatePassphrase.sms.minuteLimit"
-                SmsSendFailureReason.UNKNOWN -> "generatePassphrase.sms.unknown"
-            }
+            failureStatus("sms", exception.reason)
         }
 
     private fun sendEmailNotification(
@@ -173,18 +166,27 @@ class GeneratePassphraseController(
                     is TransientEmailSentException -> exception.reason
                     is PersistentEmailSendException -> exception.reason
                     is EmailNotifyResponseException -> exception.reason
-                    is SerializationException, is JSONException, is IllegalArgumentException -> EmailSendFailureReason.UNKNOWN
+                    is SerializationException, is JSONException, is IllegalArgumentException -> NotificationSendFailureReason.UNKNOWN
                     else -> throw exception
                 }
             logger.warn("Passphrase email submission failed: {}", reason, exception)
-            when (reason) {
-                EmailSendFailureReason.INVALID_REQUEST -> "generatePassphrase.email.invalid"
-                EmailSendFailureReason.TECHNICAL -> "generatePassphrase.email.technical"
-                EmailSendFailureReason.DAILY_LIMIT -> "generatePassphrase.email.dailyLimit"
-                EmailSendFailureReason.MINUTE_LIMIT -> "generatePassphrase.email.minuteLimit"
-                EmailSendFailureReason.UNKNOWN -> "generatePassphrase.email.unknown"
-            }
+            failureStatus("email", reason)
         }
+
+    private fun failureStatus(
+        channel: String,
+        reason: NotificationSendFailureReason,
+    ): String {
+        val outcome =
+            when (reason) {
+                NotificationSendFailureReason.INVALID_REQUEST -> "invalid"
+                NotificationSendFailureReason.TECHNICAL -> "technical"
+                NotificationSendFailureReason.DAILY_LIMIT -> "dailyLimit"
+                NotificationSendFailureReason.MINUTE_LIMIT -> "minuteLimit"
+                NotificationSendFailureReason.UNKNOWN -> "unknown"
+            }
+        return "generatePassphrase.$channel.$outcome"
+    }
 
     private fun renderPage(
         model: Model,

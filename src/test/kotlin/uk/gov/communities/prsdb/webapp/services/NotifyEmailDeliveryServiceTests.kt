@@ -16,7 +16,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -55,7 +55,7 @@ class NotifyEmailDeliveryServiceTests {
         val exception =
             assertThrows<PersistentEmailSendException> { emailDeliveryService.deliverEmail("recipient@example.com", TestEmailTemplate()) }
 
-        assertEquals(EmailSendFailureReason.TECHNICAL, exception.reason)
+        assertEquals(NotificationSendFailureReason.TECHNICAL, exception.reason)
         Mockito.verifyNoInteractions(notifyClient)
     }
 
@@ -167,7 +167,7 @@ class NotifyEmailDeliveryServiceTests {
     fun `Notify errors carry a conservative submission outcome`(
         statusCode: Int,
         errors: String,
-        expectedReason: EmailSendFailureReason,
+        expectedReason: NotificationSendFailureReason,
     ) {
         val innerException =
             NotificationClientException("Status code: $statusCode {\"errors\":[$errors],\"status_code\":$statusCode}")
@@ -189,22 +189,26 @@ class NotifyEmailDeliveryServiceTests {
         @JvmStatic
         fun emailFailureReasons(): List<Arguments> =
             listOf(
-                Arguments.of(403, """{"error":"AuthError","message":"bad credentials"}""", EmailSendFailureReason.TECHNICAL),
-                Arguments.of(400, """{"error":"BadRequestError","message":"bad request"}""", EmailSendFailureReason.INVALID_REQUEST),
-                Arguments.of(400, """{"error":"ValidationError","message":"bad email"}""", EmailSendFailureReason.INVALID_REQUEST),
-                Arguments.of(429, """{"error":"TooManyRequestsError","message":"daily limit"}""", EmailSendFailureReason.DAILY_LIMIT),
-                Arguments.of(429, """{"error":"RateLimitError","message":"minute limit"}""", EmailSendFailureReason.MINUTE_LIMIT),
-                Arguments.of(500, """{"error":"Exception","message":"server error"}""", EmailSendFailureReason.UNKNOWN),
-                Arguments.of(500, """{"error":"BadRequestError","message":"server error"}""", EmailSendFailureReason.UNKNOWN),
+                Arguments.of(403, """{"error":"AuthError","message":"bad credentials"}""", NotificationSendFailureReason.TECHNICAL),
+                Arguments.of(400, """{"error":"BadRequestError","message":"bad request"}""", NotificationSendFailureReason.INVALID_REQUEST),
+                Arguments.of(400, """{"error":"ValidationError","message":"bad email"}""", NotificationSendFailureReason.INVALID_REQUEST),
+                Arguments.of(
+                    429,
+                    """{"error":"TooManyRequestsError","message":"daily limit"}""",
+                    NotificationSendFailureReason.DAILY_LIMIT,
+                ),
+                Arguments.of(429, """{"error":"RateLimitError","message":"minute limit"}""", NotificationSendFailureReason.MINUTE_LIMIT),
+                Arguments.of(500, """{"error":"Exception","message":"server error"}""", NotificationSendFailureReason.UNKNOWN),
+                Arguments.of(500, """{"error":"BadRequestError","message":"server error"}""", NotificationSendFailureReason.UNKNOWN),
                 Arguments.of(
                     400,
                     """{"error":"AuthError","message":"auth"},{"error":"ValidationError","message":"bad email"}""",
-                    EmailSendFailureReason.TECHNICAL,
+                    NotificationSendFailureReason.TECHNICAL,
                 ),
                 Arguments.of(
                     429,
                     """{"error":"RateLimitError","message":"rate"},{"error":"Exception","message":"server"}""",
-                    EmailSendFailureReason.UNKNOWN,
+                    NotificationSendFailureReason.UNKNOWN,
                 ),
             )
 

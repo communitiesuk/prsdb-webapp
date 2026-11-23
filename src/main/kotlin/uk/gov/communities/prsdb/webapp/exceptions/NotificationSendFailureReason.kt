@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.exceptions
 
-enum class EmailSendFailureReason {
+enum class NotificationSendFailureReason {
     INVALID_REQUEST,
     TECHNICAL,
     DAILY_LIMIT,

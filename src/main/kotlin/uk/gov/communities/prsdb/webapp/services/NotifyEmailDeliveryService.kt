@@ -4,7 +4,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
-import uk.gov.communities.prsdb.webapp.exceptions.EmailSendFailureReason
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -30,7 +30,7 @@ class NotifyEmailDeliveryService(
             val idValue = notifyIdService.getNotifyIdValue(email.template)
             if (idValue.isBlank()) {
                 throw PersistentEmailSendException(
-                    EmailSendFailureReason.TECHNICAL,
+                    NotificationSendFailureReason.TECHNICAL,
                     "No Notify template ID is configured for ${email.template}. No email was sent.",
                 )
             }
@@ -48,13 +48,13 @@ class NotifyEmailDeliveryService(
             when {
                 response.statusCode !in 400..499 ||
                     NotifyErrorType.UNKNOWN in errorTypes ||
-                    NotifyErrorType.EXCEPTION in errorTypes -> EmailSendFailureReason.UNKNOWN
-                isAllowlistError(errors) || NotifyErrorType.AUTH in errorTypes -> EmailSendFailureReason.TECHNICAL
-                NotifyErrorType.TOO_MANY_REQUESTS in errorTypes -> EmailSendFailureReason.DAILY_LIMIT
+                    NotifyErrorType.EXCEPTION in errorTypes -> NotificationSendFailureReason.UNKNOWN
+                isAllowlistError(errors) || NotifyErrorType.AUTH in errorTypes -> NotificationSendFailureReason.TECHNICAL
+                NotifyErrorType.TOO_MANY_REQUESTS in errorTypes -> NotificationSendFailureReason.DAILY_LIMIT
                 NotifyErrorType.BAD_REQUEST in errorTypes || NotifyErrorType.VALIDATION in errorTypes ->
-                    EmailSendFailureReason.INVALID_REQUEST
-                NotifyErrorType.RATE_LIMIT in errorTypes -> EmailSendFailureReason.MINUTE_LIMIT
-                else -> EmailSendFailureReason.UNKNOWN
+                    NotificationSendFailureReason.INVALID_REQUEST
+                NotifyErrorType.RATE_LIMIT in errorTypes -> NotificationSendFailureReason.MINUTE_LIMIT
+                else -> NotificationSendFailureReason.UNKNOWN
             }
         val multipleErrorMessagePrefix =
             if (errorTypes.size > 1) "There were multiple errors sending an email with Notify. " else ""
