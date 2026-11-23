@@ -117,7 +117,7 @@ class LookupAddressStepConfigTests {
 
         @ParameterizedTest
         @EnumSource(AddressSearchRegion::class)
-        fun `searches the configured region when international addresses are enabled`(region: AddressSearchRegion) {
+        fun `searches the region if configured`(region: AddressSearchRegion) {
             lenient().`when`(mockFeatureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES)).thenReturn(true)
 
             setupStepConfig().restrictToRegion(region).afterStepDataIsAdded(mockState)
@@ -125,6 +125,7 @@ class LookupAddressStepConfigTests {
             verify(mockAddressService).searchForAddresses(houseNameOrNumber, postcode, region)
         }
 
+        // TODO: PDJB-2259: Remove this test
         @ParameterizedTest
         @CsvSource(
             "WITH_ENGLISH_LOCAL_COUNCIL, WITH_ENGLISH_LOCAL_COUNCIL",
