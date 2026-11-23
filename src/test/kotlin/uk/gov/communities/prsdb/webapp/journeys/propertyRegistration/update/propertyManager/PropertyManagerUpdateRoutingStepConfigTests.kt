@@ -49,7 +49,7 @@ class PropertyManagerUpdateRoutingStepConfigTests {
         whenever(mockPropertyManagerStep.formModelOrNull).thenReturn(null)
         whenever(mockPropertyManagerDetailsStep.formModelOrNull).thenReturn(null)
 
-        assertEquals(PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER, stepConfig.mode(mockState))
+        assertEquals(PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER_ADDED, stepConfig.mode(mockState))
     }
 
     @Test
@@ -57,6 +57,6 @@ class PropertyManagerUpdateRoutingStepConfigTests {
         whenever(mockPropertyManagerStep.formModelOrNull).thenReturn(PropertyManagerFormModel().apply { usingPropertyManager = false })
         whenever(mockPropertyManagerDetailsStep.formModelOrNull).thenReturn(PropertyManagerDetailsFormModel())
 
-        assertEquals(PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER, stepConfig.mode(mockState))
+        assertEquals(PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER_ADDED, stepConfig.mode(mockState))
     }
 }

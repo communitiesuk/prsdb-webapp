@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceA
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceEmailController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -70,8 +71,8 @@ class PropertyDetailsViewModel(
 
     val showSuperiorLandlordSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 
-    // TODO PDJB-1994: Replace this placeholder URL with the superior landlord update journey route.
-    val superiorLandlordSectionUpdateUrl: String = PLACEHOLDER_ACTION_LINK
+    val superiorLandlordSectionUpdateUrl: String =
+        UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(propertyOwnership.id)
 
     val superiorLandlordNotUsedRows: List<SummaryListRowViewModel> =
         listOf(
