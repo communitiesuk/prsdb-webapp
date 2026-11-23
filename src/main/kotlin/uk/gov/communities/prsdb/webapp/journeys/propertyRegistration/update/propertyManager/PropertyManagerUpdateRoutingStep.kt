@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
 
 enum class PropertyManagerUpdateRouteMode {
     HAS_PROPERTY_MANAGER,
-    NO_PROPERTY_MANAGER,
+    NO_PROPERTY_MANAGER_ADDED,
 }
 
 @JourneyFrameworkComponent
@@ -20,7 +20,7 @@ class PropertyManagerUpdateRoutingStepConfig :
         return if (isUsingPropertyManager && hasPropertyManagerDetails) {
             PropertyManagerUpdateRouteMode.HAS_PROPERTY_MANAGER
         } else {
-            PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER
+            PropertyManagerUpdateRouteMode.NO_PROPERTY_MANAGER_ADDED
         }
     }
 }
