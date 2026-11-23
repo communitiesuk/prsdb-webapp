@@ -34,10 +34,6 @@
                     th:text="#{reactivateProperty.confirmation.reactivationDetails.paymentSummary.heading}">
                     reactivateProperty.confirmation.reactivationDetails.paymentSummary.heading
                 </h3>
-                <p class="govuk-body"
-                   th:text="#{reactivateProperty.confirmation.reactivationDetails.paymentSummary.bankStatement}">
-                    reactivateProperty.confirmation.reactivationDetails.paymentSummary.bankStatement
-                </p>
                 <dl th:replace="~{fragments/summaryList :: summaryList(${paymentSummaryViewModel.rows})}"></dl>
             </th:block>
 

@@ -36,7 +36,6 @@ confirmation:
     heading: Reactivation details
     paymentSummary:
       heading: Payment summary
-      bankStatement: 'This will appear on your bank statement as: Ministry of Housing, Communities and Local Government'
     jointLandlords:
       heading: Joint landlords
       paragraph: We have notified all joint landlords that the property has been reactivated.
