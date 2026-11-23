@@ -48,7 +48,8 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
-    fun buildLandlordPrivacyNoticeDisplayUrl(): String =
+    // For printed letters only: without a scheme, this URL won't work as a link in emails, so use buildLandlordPrivacyNoticeUri there.
+    fun buildLandlordPrivacyNoticeLetterDisplayUrl(): String =
         buildLandlordPrivacyNoticeUri()
             .toString()
             .removePrefix("https://")

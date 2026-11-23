@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class AssociatedPartyNotificationServiceTests {
@@ -101,7 +102,7 @@ class AssociatedPartyNotificationServiceTests {
                     ),
             )
         val freeholder = createFreeholderModel(name = "Sarah Thompson", address = postalAddress)
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -130,7 +131,7 @@ class AssociatedPartyNotificationServiceTests {
             expectedFreeholderAddedToPropertyLetter.copy(
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
             )
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -167,7 +168,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder with an email receives an added-to-property email`() {
+    fun `freeholder with an email receives an added-to-property email with a full privacy notice link`() {
         // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com")
         val propertyOwnership =
@@ -182,10 +183,10 @@ class AssociatedPartyNotificationServiceTests {
                 propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
                 gdsStartPageUrl = "https://example.test/gds-start-page",
-                privacyNoticeUrl = "example.test/landlord/privacy-notice",
+                privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
             )
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
-            .thenReturn("example.test/landlord/privacy-notice")
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
+            .thenReturn(URI("https://www.example.test/landlord/privacy-notice"))
         whenever(absoluteUrlProvider.buildGdsStartPageUrl())
             .thenReturn("https://example.test/gds-start-page")
 
@@ -249,7 +250,7 @@ class AssociatedPartyNotificationServiceTests {
                     ),
             )
         val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", address = postalAddress)
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -274,7 +275,7 @@ class AssociatedPartyNotificationServiceTests {
                 address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
                 landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
             )
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act

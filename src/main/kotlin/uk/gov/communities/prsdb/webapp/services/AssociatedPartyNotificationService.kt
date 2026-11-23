@@ -47,7 +47,7 @@ class AssociatedPartyNotificationService(
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlordsRentingOutProperty(propertyOwnership),
             freeholderAddress = freeholder.address?.toMultiLineAddress().orEmpty(),
-            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl(),
         )
 
     private fun buildFreeholderAddedToPropertyEmail(
@@ -60,7 +60,7 @@ class AssociatedPartyNotificationService(
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlordsRentingOutProperty(propertyOwnership),
             gdsStartPageUrl = absoluteUrlProvider.buildGdsStartPageUrl(),
-            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
         )
 
     // TODO PDJB-1989: make the email template and return type non-nullable once the superior landlord added email is sent.
@@ -85,7 +85,7 @@ class AssociatedPartyNotificationService(
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlordsRentingOutProperty(propertyOwnership),
             superiorLandlordAddress = superiorLandlord.address?.toMultiLineAddress().orEmpty(),
-            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl(),
         )
 
     private fun landlordsRentingOutProperty(propertyOwnership: PropertyOwnership): List<String> =
