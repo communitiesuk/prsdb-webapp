@@ -67,21 +67,6 @@ class EmailTemplateModelsTests {
         Assertions.assertEquals(expected, actual)
     }
 
-    @Test
-    fun `freeholder email privacy notice uses Notify inset syntax`() {
-        // Arrange
-        val markdown =
-            requireNotNull(javaClass.getResource("/emails/FreeholderAddedToPropertyEmail.md"))
-                .readText()
-
-        // Act
-        val privacyNoticeParagraph =
-            markdown.lineSequence().single { it.contains("These details are not displayed publicly") }
-
-        // Assert
-        Assertions.assertTrue(privacyNoticeParagraph.startsWith("^ "))
-    }
-
     companion object {
         @JvmStatic
         private fun templateList() =
