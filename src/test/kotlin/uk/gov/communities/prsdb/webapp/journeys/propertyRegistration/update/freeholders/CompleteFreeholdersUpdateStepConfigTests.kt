@@ -41,7 +41,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
     private val freeholder = FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com")
 
     @Test
-    fun `afterStepIsReached updates the freeholders and sends a summary when there are no additions`() {
+    fun `afterStepIsReached emails the landlords even when no freeholders are added`() {
         // Arrange
         whenever(journeyState.propertyId).thenReturn(propertyId)
         whenever(journeyState.lastModifiedDate).thenReturn(lastModifiedDate.toString())
