@@ -46,11 +46,15 @@ class PropertyReactivationServiceTests {
     @Mock
     private lateinit var mockSession: HttpSession
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var propertyReactivationService: PropertyReactivationService
 
     private val propertyOwnershipId = 1L
     private val uprn = 2L
+    private val landlord = MockLandlordData.createIndividualLandlord()
 
     private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, isActive = false)
 
@@ -76,6 +80,7 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(
@@ -89,7 +94,7 @@ class PropertyReactivationServiceTests {
             verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
             verify(mockPropertyOwnershipService).saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
             verify(mockPropertyComplianceService).saveReactivationComplianceData(propertyOwnership, gasSafety, electricalSafety, epc)
-            verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+            verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         }
     }
 
@@ -99,6 +104,7 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -107,7 +113,7 @@ class PropertyReactivationServiceTests {
         verify(mockPropertyOwnershipService, never()).saveReactivationLicensing(any(), any())
         verify(mockPropertyOwnershipService, never()).saveReactivationTenancyDetails(any(), any())
         verifyNoInteractions(mockPropertyComplianceService)
-        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
     }
 
     @Test
@@ -116,6 +122,7 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -144,12 +151,13 @@ class PropertyReactivationServiceTests {
         // Arrange
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
 
         // Assert
-        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
         verifyNoInteractions(mockAddressAvailabilityService)
     }

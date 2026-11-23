@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.MonthDay
@@ -52,5 +54,25 @@ class RenewalDateHelperTests {
             LocalDate.of(2029, 3, 1),
             RenewalDateHelper.getRenewalDate(MonthDay.of(2, 29), LocalDate.of(2028, 3, 15)),
         )
+    }
+
+    @Test
+    fun `isOnAnniversary returns true when the date falls on the anniversary`() {
+        assertTrue(RenewalDateHelper.isOnAnniversary(LocalDate.of(2027, 6, 15), MonthDay.of(6, 15)))
+    }
+
+    @Test
+    fun `isOnAnniversary returns false when the date does not fall on the anniversary`() {
+        assertFalse(RenewalDateHelper.isOnAnniversary(LocalDate.of(2027, 6, 15), MonthDay.of(6, 16)))
+    }
+
+    @Test
+    fun `isOnAnniversary returns true for 1 Mar on a non-leap year when the anniversary is 29 Feb`() {
+        assertTrue(RenewalDateHelper.isOnAnniversary(LocalDate.of(2027, 3, 1), MonthDay.of(2, 29)))
+    }
+
+    @Test
+    fun `isOnAnniversary returns false for 1 Mar on a leap year when the anniversary is 29 Feb`() {
+        assertFalse(RenewalDateHelper.isOnAnniversary(LocalDate.of(2028, 3, 1), MonthDay.of(2, 29)))
     }
 }
