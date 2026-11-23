@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.database.audit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.authentication.AnonymousAuthenticationToken
@@ -17,10 +18,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.AuditRevision
 class AuditRevisionListenerTests {
     private val listener = AuditRevisionListener()
 
+    @BeforeEach
     @AfterEach
-    fun tearDown() {
+    fun clearContexts() {
         SecurityContextHolder.clearContext()
         RequestContextHolder.resetRequestAttributes()
+        AuditRevisionListener.currentTaskName = null
     }
 
     @Test
@@ -60,12 +63,25 @@ class AuditRevisionListenerTests {
     }
 
     @Test
-    fun `newRevision records neither a user nor a letting agent outside a request`() {
+    fun `newRevision records the name of the running task`() {
+        AuditRevisionListener.currentTaskName = "test-task"
+        val revision = AuditRevision()
+
+        listener.newRevision(revision)
+
+        assertEquals("test-task", revision.taskName)
+        assertNull(revision.userSubjectIdentifier)
+        assertNull(revision.lettingAgentAccessId)
+    }
+
+    @Test
+    fun `newRevision records no actor outside a request or task`() {
         val revision = AuditRevision()
 
         listener.newRevision(revision)
 
         assertNull(revision.userSubjectIdentifier)
         assertNull(revision.lettingAgentAccessId)
+        assertNull(revision.taskName)
     }
 }

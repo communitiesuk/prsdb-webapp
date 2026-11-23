@@ -13,6 +13,7 @@ class AuditRevisionListener : RevisionListener {
         val revision = revisionEntity as AuditRevision
         revision.userSubjectIdentifier = currentUserSubjectIdentifier()
         revision.lettingAgentAccessId = currentLettingAgentAccessId()
+        revision.taskName = currentTaskName
     }
 
     private fun currentUserSubjectIdentifier(): String? =
@@ -27,4 +28,10 @@ class AuditRevisionListener : RevisionListener {
             .getRequestAttributes()
             ?.getAttribute(LettingAgentAccessInterceptor.LETTING_AGENT_ACCESS_ID_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST)
             as? Long
+
+    companion object {
+        // Envers creates this listener itself rather than through Spring, so AuditTaskNameRecorder sets this at startup
+        @Volatile
+        var currentTaskName: String? = null
+    }
 }

@@ -27,4 +27,6 @@ class AuditRevision {
     var userSubjectIdentifier: String? = null
 
     var lettingAgentAccessId: Long? = null
+
+    var taskName: String? = null
 }
