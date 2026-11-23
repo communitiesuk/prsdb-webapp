@@ -162,6 +162,18 @@ class NotifyEmailDeliveryServiceTests {
         assertThrows<SerializationException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
     }
 
+    @Test
+    fun `an empty Notify error list produces an uncertain email failure`() {
+        val cause = NotificationClientException("""Status code: 400 {"errors":[],"status_code":400}""")
+        Mockito.doThrow(cause).whenever(notifyClient).sendEmail(any(), any(), any(), any())
+
+        val exception =
+            assertThrows<TransientEmailSentException> { emailDeliveryService.deliverEmail("recipient@example.com", TestEmailTemplate()) }
+
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(cause, exception.cause)
+    }
+
     @ParameterizedTest
     @MethodSource("emailFailureReasons")
     fun `Notify errors carry a conservative submission outcome`(

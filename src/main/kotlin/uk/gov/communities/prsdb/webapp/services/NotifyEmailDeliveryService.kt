@@ -40,7 +40,7 @@ class NotifyEmailDeliveryService(
         }
     }
 
-    private fun throwEmailSendException(notifyException: NotificationClientException) {
+    private fun throwEmailSendException(notifyException: NotificationClientException): Nothing {
         val response = NotifyErrorsDataModel.fromExceptionMessage(notifyException.message ?: "", Json)
         val errors = response.errors
         val errorTypes = errors.map { it.error }
@@ -109,6 +109,12 @@ class NotifyEmailDeliveryService(
                 reason,
                 multipleErrorMessagePrefix +
                     "Notify could not confirm whether that email was sent, but retrying may work.",
+                notifyException,
+            )
+
+            else -> throw TransientEmailSentException(
+                NotificationSendFailureReason.UNKNOWN,
+                "Notify could not confirm whether that email was sent, but retrying may work.",
                 notifyException,
             )
         }
