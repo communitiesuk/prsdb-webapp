@@ -66,7 +66,7 @@ class CompleteFreeholdersUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends a property update summary when a freeholder is added`() {
+    fun `afterStepIsReached sends a property update summary when the freeholder journey is completed`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(journeyState.propertyId).thenReturn(propertyId)
