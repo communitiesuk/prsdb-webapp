@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailQueueService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
+import uk.gov.communities.prsdb.webapp.services.LandlordDeactivatedEmailService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeactivationService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
@@ -126,6 +127,7 @@ class PrsdbTaskApplicationTests {
                 PaymentReconciliationService::class.simpleBeanName,
                 ReconcilePaymentsTaskLogic::class.simpleBeanName,
                 LandlordDeactivationService::class.simpleBeanName,
+                LandlordDeactivatedEmailService::class.simpleBeanName,
                 DeactivateInactiveLandlordsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 

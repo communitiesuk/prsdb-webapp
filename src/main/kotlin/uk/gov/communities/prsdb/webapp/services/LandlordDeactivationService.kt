@@ -4,14 +4,10 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import java.time.LocalDate
 
 @PrsdbTaskService
@@ -19,8 +15,7 @@ class LandlordDeactivationService(
     private val landlordRepository: LandlordRepository,
     private val landlordDeactivationRepository: LandlordDeactivationRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
-    private val landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val landlordDeactivatedEmailService: LandlordDeactivatedEmailService,
 ) {
     fun getIdsOfLandlordsWhoNeverRegisteredAProperty(): List<Long> {
         val cutoff =
@@ -50,21 +45,7 @@ class LandlordDeactivationService(
         landlordRepository.save(landlord)
 
         // The same reason applies whether the landlord never registered a property or has no active properties left
-        sendLandlordDeactivatedEmail(landlord)
+        landlordDeactivatedEmailService.sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
         return true
-    }
-
-    private fun sendLandlordDeactivatedEmail(landlord: Landlord) {
-        NotificationHelper.sendNotificationAndLogFailures("the landlord deactivated email for landlord ${landlord.id}") {
-            landlordDeactivatedEmailSender.sendEmailToLandlord(
-                landlord,
-                LandlordDeactivatedEmail(
-                    recipientName = landlord.name,
-                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                    reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                ),
-            )
-        }
     }
 }

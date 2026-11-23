@@ -12,9 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -24,8 +21,7 @@ class ActiveInactiveService(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
-    private val landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val landlordDeactivatedEmailService: LandlordDeactivatedEmailService,
 ) {
     fun isCurrentLandlordInactive(): Boolean =
         userToLandlordService.getCurrentLandlordForUserOrNull()?.let { isLandlordInactive(it) } ?: false
@@ -80,7 +76,7 @@ class ActiveInactiveService(
 
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
         if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
-            sendLandlordDeactivatedEmail(landlord, reason)
+            landlordDeactivatedEmailService.sendLandlordDeactivatedEmail(landlord, reason)
         }
     }
 
@@ -112,23 +108,6 @@ class ActiveInactiveService(
 
         landlord.deactivate(deactivationDate)
         landlordRepository.save(landlord)
-    }
-
-    private fun sendLandlordDeactivatedEmail(
-        landlord: Landlord,
-        reason: LandlordDeactivationReason,
-    ) {
-        NotificationHelper.sendNotificationAndLogFailures("the landlord deactivated email for landlord ${landlord.id}") {
-            landlordDeactivatedEmailSender.sendEmailToLandlord(
-                landlord,
-                LandlordDeactivatedEmail(
-                    recipientName = landlord.name,
-                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                    reason = reason,
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                ),
-            )
-        }
     }
 
     private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =

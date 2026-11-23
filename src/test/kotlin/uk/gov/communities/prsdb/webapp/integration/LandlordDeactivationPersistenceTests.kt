@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.services.LandlordDeactivationService
-import java.net.URI
 import java.time.LocalDate
 
 class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("data-landlords-for-deactivation-task.sql") {
@@ -60,7 +59,6 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
                     landlordDeactivationRepository,
                     propertyOwnershipRepository,
                     mock(),
-                    mock { on { buildLandlordDashboardUri() } doReturn URI("http://localhost/landlord") },
                 ),
                 featureFlagManager,
             )

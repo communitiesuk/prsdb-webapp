@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -19,10 +19,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationR
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
 
@@ -38,10 +35,7 @@ class LandlordDeactivationServiceTests {
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @Mock
-    private lateinit var landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>
-
-    @Mock
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var landlordDeactivatedEmailService: LandlordDeactivatedEmailService
 
     @InjectMocks
     private lateinit var landlordDeactivationService: LandlordDeactivationService
@@ -81,33 +75,10 @@ class LandlordDeactivationServiceTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost/landlord"))
 
         landlordDeactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
 
-        verify(landlordDeactivatedEmailSender).sendEmailToLandlord(
-            landlord,
-            LandlordDeactivatedEmail(
-                recipientName = landlord.name,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
-                dashboardUrl = "http://localhost/landlord",
-            ),
-        )
-    }
-
-    @Test
-    fun `deactivateLandlordIfNoActiveProperties still deactivates the landlord when the email fails to send`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        whenever(landlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
-        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(false)
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost/landlord"))
-        whenever(landlordDeactivatedEmailSender.sendEmailToLandlord(any(), any())).doThrow(RuntimeException("Notify down"))
-
-        val wasDeactivated = landlordDeactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
-
-        assertTrue(wasDeactivated)
-        assertFalse(landlord.isActive)
+        verify(landlordDeactivatedEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
     }
 
     @Test
@@ -122,7 +93,7 @@ class LandlordDeactivationServiceTests {
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verify(landlordDeactivatedEmailSender, never()).sendEmailToLandlord(any(), any())
+        verifyNoInteractions(landlordDeactivatedEmailService)
     }
 
     @Test
@@ -136,7 +107,7 @@ class LandlordDeactivationServiceTests {
         assertFalse(wasDeactivated)
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verify(landlordDeactivatedEmailSender, never()).sendEmailToLandlord(any(), any())
+        verifyNoInteractions(landlordDeactivatedEmailService)
     }
 
     companion object {

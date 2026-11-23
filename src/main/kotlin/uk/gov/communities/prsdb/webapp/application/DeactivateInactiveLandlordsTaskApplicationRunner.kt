@@ -31,7 +31,6 @@ class DeactivateInactiveLandlordsTaskApplicationRunner(
     }
 }
 
-// Not @Transactional, so each landlord's deactivation commits on its own and one failure can't roll back the others
 @PrsdbTaskService
 class DeactivateInactiveLandlordsTaskLogic(
     private val landlordDeactivationService: LandlordDeactivationService,

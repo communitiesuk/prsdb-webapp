@@ -26,6 +26,7 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
     @InjectMocks
     private lateinit var taskLogic: DeactivateInactiveLandlordsTaskLogic
 
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
     @Test
     fun `deactivateInactiveLandlords does nothing and returns zero when the active inactive flag is off`() {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
