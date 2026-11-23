@@ -31,7 +31,7 @@ interface AddressRepository : JpaRepository<Address, Long> {
     ): List<Address>
 
     @Query(SEARCH_SELECT + SEARCH_ORDER_AND_LIMIT, nativeQuery = true)
-    fun searchInUk(
+    fun searchAllAddresses(
         houseNameOrNumber: String,
         postcode: String,
     ): List<Address>

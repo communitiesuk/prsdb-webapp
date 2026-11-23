@@ -115,7 +115,7 @@ class AddressServiceTests {
 
         @Test
         fun `searchForAddresses searches UK addresses for that region`() {
-            whenever(mockAddressRepository.searchInUk(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
+            whenever(mockAddressRepository.searchAllAddresses(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
 
             val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.UK)
 

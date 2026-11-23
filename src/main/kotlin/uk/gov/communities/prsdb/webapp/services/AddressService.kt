@@ -39,7 +39,7 @@ class AddressService(
                 }
 
                 AddressSearchRegion.UK -> {
-                    addressRepository.searchInUk(houseNameOrNumber, postcode)
+                    addressRepository.searchAllAddresses(houseNameOrNumber, postcode)
                 }
             }
         return addresses.map { AddressDataModel.fromAddress(it) }
