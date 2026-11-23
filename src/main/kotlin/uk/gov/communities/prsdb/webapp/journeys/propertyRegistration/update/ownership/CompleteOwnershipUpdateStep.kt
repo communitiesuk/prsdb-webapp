@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -12,6 +13,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.anyo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getFreeholdersOrNull
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.getSuperiorLandlordsOrNull
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
@@ -19,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 class CompleteOwnershipUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
+    private val associatedPartyNotificationService: AssociatedPartyNotificationService,
 ) : AbstractInternalStepConfig<Complete, UpdateOwnershipJourneyState>() {
     override fun mode(state: UpdateOwnershipJourneyState): Complete = Complete.COMPLETE
 
@@ -51,22 +56,47 @@ class CompleteOwnershipUpdateStepConfig(
                 emptyList()
             }
 
-        try {
-            propertyOwnershipService.updateOwnershipStructure(
-                id = state.propertyId,
-                ownershipType = ownershipType,
-                freeholders = freeholders,
-                superiorLandlords = superiorLandlords,
-                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-            )
-        } catch (ex: UpdateConflictException) {
-            state.deleteJourney()
-            throw ex
-        }
+        val (addedFreeholders, addedSuperiorLandlords) =
+            try {
+                propertyOwnershipService.updateOwnershipStructure(
+                    id = state.propertyId,
+                    ownershipType = ownershipType,
+                    freeholders = freeholders,
+                    superiorLandlords = superiorLandlords,
+                    initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+                )
+            } catch (ex: UpdateConflictException) {
+                state.deleteJourney()
+                throw ex
+            }
 
-        // TODO PDJB-1992: notify the added freeholders and superior landlords returned by updateOwnershipStructure here.
-        //  Their postal addresses only exist in journey state (PDJB-2226).
+        sendAddedAssociatedPartyNotifications(state.propertyId, addedFreeholders, addedSuperiorLandlords)
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The property’s ownership"))
+    }
+
+    // Use the submitted details for notifications: postal addresses aren't saved and can't be retrieved from the database.
+    private fun sendAddedAssociatedPartyNotifications(
+        propertyId: Long,
+        addedFreeholders: List<FreeholderDataModel>,
+        addedSuperiorLandlords: List<SuperiorLandlordDataModel>,
+    ) {
+        if (addedFreeholders.isEmpty() && addedSuperiorLandlords.isEmpty()) return
+
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
+        addedFreeholders.forEachIndexed { index, freeholder ->
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the freeholder ${index + 1} added-to-property notification for property ownership $propertyId",
+            ) {
+                associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
+            }
+        }
+        addedSuperiorLandlords.forEachIndexed { index, superiorLandlord ->
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the superior landlord ${index + 1} added-to-property notification for property ownership $propertyId",
+            ) {
+                associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
+            }
+        }
     }
 
     override fun resolveNextDestination(
