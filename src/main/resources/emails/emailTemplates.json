@@ -240,8 +240,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
   },
   {
-    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
-    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "test_id": "227a40c5-f571-4869-a3cf-61a9a0cfd68e",
+    "prod_id": "72c37078-c575-4c83-8685-1951fe447b90",
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
     "subject": "You’re now a registered landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
@@ -359,6 +359,13 @@
     "bodyLocation": "/emails/CancelDelegationLettingAgentNotification.md"
   },
   {
+    "test_id": "1c27ef53-69fa-4b1d-a026-88ef21754c45",
+    "prod_id": "aa6e87c3-8810-4e5c-8f4b-7b4f01ea8b8e",
+    "enumName": "LETTING_AGENT_PROPERTY_DEACTIVATED_NOTIFICATION_EMAIL",
+    "subject": "You can no longer update ((single line address))",
+    "bodyLocation": "/emails/LettingAgentPropertyDeactivatedNotification.md"
+  },
+  {
     "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
     "prod_id": "b3f8620c-67b8-4988-98c7-1d8bf7738aea",
     "enumName": "DELEGATE_TO_LETTING_AGENT_CONFIRMATION_EMAIL",
@@ -455,5 +462,12 @@
     "enumName": "PAYMENT_REQUIRES_MANUAL_INTERVENTION_EMAIL",
     "subject": "A property registration payment needs checking",
     "bodyLocation": "/emails/PaymentRequiresManualIntervention.md"
+  },
+  {
+    "test_id": "df60db12-0141-4927-aa6a-a4fd1e28ad60",
+    "prod_id": "a59546df-b789-4dab-9883-a60c9d834c08",
+    "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
+    "subject": "Landlord account deactivated",
+    "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
   }
 ]

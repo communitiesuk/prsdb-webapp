@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -1803,6 +1804,13 @@ class PropertyRegistrationServiceTests {
                 address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
             )
         val freeholderWithEmail = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts", email = "daniel@example.com")
+        val superiorLandlordWithAddress =
+            SuperiorLandlordDataModel(
+                detailsKnown = true,
+                name = "Alex Jones",
+                address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val superiorLandlordWithEmail = SuperiorLandlordDataModel(detailsKnown = true, name = "Sam Lee", email = "sam@example.com")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, LETTING_AGENT_EMAIL))
             .thenReturn(createLettingAgentInvitation(propertyOwnership))
@@ -1812,7 +1820,10 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithEmail)),
+            registrationDataWithInvitations.copy(
+                freeholders = listOf(freeholderWithAddress, freeholderWithEmail),
+                superiorLandlords = listOf(superiorLandlordWithAddress, superiorLandlordWithEmail),
+            ),
         )
 
         // Assert
@@ -1839,6 +1850,13 @@ class PropertyRegistrationServiceTests {
                 address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
             )
         val freeholderWithEmail = FreeholderDataModel(detailsKnown = true, name = "Daniel Roberts", email = "daniel@example.com")
+        val superiorLandlordWithAddress =
+            SuperiorLandlordDataModel(
+                detailsKnown = true,
+                name = "Alex Jones",
+                address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val superiorLandlordWithEmail = SuperiorLandlordDataModel(detailsKnown = true, name = "Sam Lee", email = "sam@example.com")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         val currentUserEmail = "admin@example.com"
@@ -1853,7 +1871,10 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            registrationDataWithInvitations.copy(freeholders = listOf(freeholderWithAddress, freeholderWithEmail)),
+            registrationDataWithInvitations.copy(
+                freeholders = listOf(freeholderWithAddress, freeholderWithEmail),
+                superiorLandlords = listOf(superiorLandlordWithAddress, superiorLandlordWithEmail),
+            ),
         )
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
 
@@ -1865,6 +1886,10 @@ class PropertyRegistrationServiceTests {
             .sendNotificationToFreeholderAddedToProperty(freeholderWithAddress, propertyOwnership)
         verify(mockAssociatedPartyNotificationService)
             .sendNotificationToFreeholderAddedToProperty(freeholderWithEmail, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlordWithAddress, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlordWithEmail, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -2006,6 +2031,86 @@ class PropertyRegistrationServiceTests {
         verify(mockAssociatedPartyNotificationService)
             .sendNotificationToFreeholderAddedToProperty(
                 secondFreeholder,
+                propertyOwnership,
+            )
+    }
+
+    @Test
+    fun `registerProperty reports a superior landlord notification skipped because details are fully redacted`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val superiorLandlord = SuperiorLandlordDataModel(detailsKnown = false)
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership),
+        ).thenReturn(AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED)
+        TransactionSynchronizationManager.initSynchronization()
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+
+        // Act
+        System.setOut(PrintStream(outContent))
+        try {
+            propertyRegistrationService.registerProperty(
+                MockPropertyRegistrationData.createPropertyRegistrationDataModel(superiorLandlords = listOf(superiorLandlord)),
+            )
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        // Assert
+        assertEquals(
+            "Not sending superior landlord 1 added-to-property notification for property ownership ${propertyOwnership.id}: " +
+                "details are fully redacted",
+            outContent.toString().trim(),
+        )
+    }
+
+    @Test
+    fun `registerProperty attempts the next superior landlord notification when the previous one fails`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        val firstSuperiorLandlord =
+            SuperiorLandlordDataModel(
+                detailsKnown = true,
+                name = "Alex Jones",
+                address = AddressDataModel("Flat 2, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        val secondSuperiorLandlord =
+            SuperiorLandlordDataModel(
+                detailsKnown = true,
+                name = "Sam Lee",
+                address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
+            )
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+        whenever(
+            mockAssociatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
+                firstSuperiorLandlord,
+                propertyOwnership,
+            ),
+        ).thenThrow(RuntimeException("Letter failed to send"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(
+                superiorLandlords = listOf(firstSuperiorLandlord, secondSuperiorLandlord),
+            ),
+        )
+
+        // Assert
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToSuperiorLandlordAddedToProperty(
+                firstSuperiorLandlord,
+                propertyOwnership,
+            )
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToSuperiorLandlordAddedToProperty(
+                secondSuperiorLandlord,
                 propertyOwnership,
             )
     }

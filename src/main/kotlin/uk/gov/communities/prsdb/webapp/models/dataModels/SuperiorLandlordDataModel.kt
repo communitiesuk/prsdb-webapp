@@ -28,8 +28,6 @@ data class SuperiorLandlordDataModel(
     fun hasUnstoredPostalAddress() = detailsKnown && email == null && address == null
 
     companion object {
-        // TODO PDJB-1994: use this to pre-populate the superior landlords list from the database when
-        //  the update journey starts.
         fun fromSuperiorLandlord(superiorLandlord: SuperiorLandlord) =
             SuperiorLandlordDataModel(
                 databaseId = superiorLandlord.id,

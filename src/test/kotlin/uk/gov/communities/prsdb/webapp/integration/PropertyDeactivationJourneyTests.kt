@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.CannotDeactivatePropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -36,6 +38,9 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyDeactivationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
 
     @Test
     fun `landlord can deactivate a single-landlord property from the property record`(page: Page) {
@@ -55,6 +60,7 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertFalse(propertyOwnershipRepository.findById(propertyOwnershipId).get().isActive)
         assertNull(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId))
         verify(confirmationEmailSender).sendEmail(any(), argThat { !landlordDeactivated })
+        verify(lettingAgentDeactivatedEmailSender).sendEmail(eq("letting.agent.one@example.com"), any())
 
         val deactivatedDetailsPage =
             assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))

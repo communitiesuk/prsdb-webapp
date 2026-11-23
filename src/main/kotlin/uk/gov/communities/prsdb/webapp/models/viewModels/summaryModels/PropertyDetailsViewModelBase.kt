@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentInclude
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -128,8 +130,6 @@ abstract class PropertyDetailsViewModelBase(
         )
     }
 
-    // TODO PDJB-1992: point each of these rows at the real update route once the flag-on ownership
-    //  update journey exists.
     private fun ownershipAnswerRow(
         key: String,
         value: Any?,
@@ -137,7 +137,9 @@ abstract class PropertyDetailsViewModelBase(
         rowWithViewTypeSpecificChangeLink(
             key = key,
             value = value,
-            landlordActionLink = PLACEHOLDER_ACTION_LINK,
+            landlordActionLink =
+                UpdateOwnershipController.getUpdateOwnershipRoute(propertyOwnership.id) +
+                    "/${InitialiseOwnershipUpdateStep.ROUTE_SEGMENT}",
         )
 
     protected fun occupiedRow(): SummaryListRowViewModel =
@@ -468,10 +470,6 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
-        // TODO PDJB-1992, PDJB-1993, PDJB-1995: remove once the ownership answer rows, freeholder section and property
-        //  manager section link to their real update routes.
-        protected const val PLACEHOLDER_ACTION_LINK = "#"
-
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }

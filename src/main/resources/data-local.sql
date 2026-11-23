@@ -656,17 +656,19 @@ VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111
        ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, current_date),
        ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, current_date);
 
--- Property-record freeholder card fixtures used by integration tests and seeded locally.
+-- Property-record freeholder and superior landlord card fixtures used by integration tests and seeded locally.
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (90, current_timestamp, 1502423354, 0),
        (91, current_timestamp, 1502423355, 0),
-       (92, current_timestamp, 1502423356, 0)
+       (92, current_timestamp, 1502423356, 0),
+       (93, current_timestamp, 1502423357, 0)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO address (id, created_date, uprn, single_line_address, local_council_id, postcode, building_name, building_number, street_name)
 VALUES (61, current_timestamp, NULL, 'Joint Freeholders House, PRSDB Road, JF1 1AA', 1, 'JF1 1AA', 'Joint Freeholders House', NULL, 'PRSDB Road'),
        (62, current_timestamp, NULL, 'Non-Joint Freeholders House, PRSDB Road, NF1 1AA', 1, 'NF1 1AA', 'Non-Joint Freeholders House', NULL, 'PRSDB Road'),
-       (65, current_timestamp, NULL, 'No Freeholders House, PRSDB Road, NF1 3AA', 1, 'NF1 3AA', 'No Freeholders House', NULL, 'PRSDB Road')
+       (65, current_timestamp, NULL, 'No Freeholders House, PRSDB Road, NF1 3AA', 1, 'NF1 3AA', 'No Freeholders House', NULL, 'PRSDB Road'),
+       (66, current_timestamp, NULL, 'Superior Landlords House, PRSDB Road, SL1 1AA', 1, 'SL1 1AA', 'Superior Landlords House', NULL, 'PRSDB Road')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO property_ownership (id, is_active, ownership_type_before_pdjb955, ownership_type, current_num_households,
@@ -680,13 +682,16 @@ VALUES (54, true, 2, 3, 0, 0, 90, 61, current_timestamp, NULL, NULL, 1, NULL, NU
        (55, true, 1, 1, 0, 0, 91, 62, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
         NULL, NULL, false, false, NULL, false, false, 'email@example.com', 62, current_date + 365, current_date + 365),
        (56, true, 0, 2, 0, 0, 92, 65, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 65, current_date + 365, current_date + 365)
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 65, current_date + 365, current_date + 365),
+       (57, true, 1, 1, 0, 0, 93, 66, current_timestamp, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL,
+        NULL, NULL, false, false, NULL, false, false, 'email@example.com', 66, current_date + 365, current_date + 365)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 54, current_timestamp),
        (1, 55, current_timestamp),
-       (1, 56, current_timestamp)
+       (1, 56, current_timestamp),
+       (1, 57, current_timestamp)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO property_compliance (property_ownership_id, created_date, last_modified_date, has_gas_supply,
@@ -694,7 +699,8 @@ INSERT INTO property_compliance (property_ownership_id, created_date, last_modif
                                  has_responsibility_to_tenants_declaration)
 VALUES (54, current_timestamp, NULL, false, true, true, true),
        (55, current_timestamp, NULL, false, true, true, true),
-       (56, current_timestamp, NULL, false, true, true, true)
+       (56, current_timestamp, NULL, false, true, true, true),
+       (57, current_timestamp, NULL, false, true, true, true)
 ON CONFLICT (property_ownership_id) DO NOTHING;
 
 INSERT INTO freeholder (name, email, property_ownership_id)
@@ -706,6 +712,14 @@ FROM (VALUES ('Jordan Joint', 'joint.freeholder@example.com', 54),
              ('Alex Non-Joint', NULL, 55),
              (NULL, NULL, 55)) AS v(name, email, property_ownership_id)
 WHERE NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = v.property_ownership_id);
+
+INSERT INTO superior_landlord (name, email, property_ownership_id)
+SELECT v.name, v.email, v.property_ownership_id
+FROM (VALUES ('Sam Superior', 'superior.landlord@example.com', 57),
+             ('Robin Superior', NULL, 57),
+             (NULL, NULL, 57),
+             ('Sam Superior', 'superior.landlord@example.com', 55)) AS v(name, email, property_ownership_id)
+WHERE NOT EXISTS (SELECT 1 FROM superior_landlord s WHERE s.property_ownership_id = v.property_ownership_id);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));

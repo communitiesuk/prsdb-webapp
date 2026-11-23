@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -377,8 +378,10 @@ class EmailTemplateModelsTests {
                         propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
                         propertyRecordUrl = "https://example.com/property",
                         propertyRegistrationNumber = "P-GD47-39FX",
+                        landlordReactivated = true,
                     ),
                     "/emails/JointLandlordInvitationAccepted.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
@@ -460,6 +463,15 @@ class EmailTemplateModelsTests {
                         dashboardUrl = "https://example.com/landlord/dashboard",
                     ),
                     "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                ),
+                EmailTemplateTestData(
+                    LandlordDeactivatedEmail(
+                        recipientName = "Alice",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123456L).toString(),
+                        reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
+                        dashboardUrl = "https://example.com/landlord/dashboard",
+                    ),
+                    "/emails/LandlordDeactivatedNoPropertiesRegistered.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
@@ -566,6 +578,13 @@ class EmailTemplateModelsTests {
                     "/emails/LettingAgentComplianceUpdateNotification.md",
                 ),
                 EmailTemplateTestData(
+                    LettingAgentPropertyDeactivatedNotificationEmail(
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        singleLineAddress = "Flat 1, 11 Elm Street, London, NW1 1AA",
+                    ),
+                    "/emails/LettingAgentPropertyDeactivatedNotification.md",
+                ),
+                EmailTemplateTestData(
                     ChangeOrgTeamMemberAccessLevelEmail(
                         memberName = "Anita Locke",
                         roleName = "administrator",
@@ -624,7 +643,7 @@ class EmailTemplateModelsTests {
                 metadata.enumName == testData.model.template.name
             }
 
-        val subjectParameters = extractParameters(storedMetadata.subject)
+        val subjectParameters = storedMetadata.subject?.let(::extractParameters).orEmpty()
         val bodyParameters = extractParameters(storedBody)
         val parameters = (subjectParameters + bodyParameters).distinct()
 
@@ -643,6 +662,29 @@ class EmailTemplateModelsTests {
                 modelHashMap.keys.single { key -> key == parameter }
             }
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource("true,yes", "false,no")
+    fun `joint landlord invitation accepted email includes whether the landlord was reactivated as yes or no personalisation`(
+        landlordReactivated: Boolean,
+        expectedPersonalisation: String,
+    ) {
+        // Arrange
+        val email =
+            JointLandlordInvitationAcceptedEmail(
+                recipientName = "Jill",
+                propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
+                propertyRecordUrl = "https://example.com/property",
+                propertyRegistrationNumber = "P-GD47-39FX",
+                landlordReactivated = landlordReactivated,
+            )
+
+        // Act
+        val hashMap = email.toHashMap()
+
+        // Assert
+        Assertions.assertEquals(expectedPersonalisation, hashMap["landlordReactivated"])
     }
 
     @ParameterizedTest

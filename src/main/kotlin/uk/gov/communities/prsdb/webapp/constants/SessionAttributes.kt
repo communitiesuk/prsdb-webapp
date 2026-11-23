@@ -12,6 +12,8 @@ const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDereg
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
+const val REACTIVATED_PROPERTY_OWNERSHIP_ID = "reactivatedPropertyOwnershipId"
+
 const val PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION = "propertiesDelegatedToLettingAgentThisSession"
 
 const val LETTING_AGENT_AUTHORISED_ACCESS_TOKENS = "lettingAgentAuthorisedAccessTokens"
@@ -25,6 +27,8 @@ const val COOKIE_TOKENS = "cookieTokens"
 const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
 
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
+
+const val PASSPHRASE_FOR_SMS = "passphraseForSms"
 
 const val SUBMITTED_PASSCODE = "submittedPasscode"
 
@@ -49,6 +53,8 @@ const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEm
 const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"
 
 const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
+
+const val LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE = "landlordReactivatedByLastJointLandlordInvitationAcceptance"
 
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 

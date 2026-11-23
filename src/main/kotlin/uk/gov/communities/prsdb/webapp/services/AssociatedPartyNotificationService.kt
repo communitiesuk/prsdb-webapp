@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.SuperiorLandlordAddedToPropertyLetter
 
 @PrsdbWebService
 class AssociatedPartyNotificationService(
@@ -36,24 +37,44 @@ class AssociatedPartyNotificationService(
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
-    ): FreeholderAddedToPropertyLetter {
-        val landlords =
-            propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
-                "${landlord.name} (${landlord.getContactEmail()})"
-            }
-
-        return FreeholderAddedToPropertyLetter(
+    ): FreeholderAddedToPropertyLetter =
+        FreeholderAddedToPropertyLetter(
             freeholderName = freeholder.name.orEmpty(),
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-            landlords = landlords,
+            landlords = landlordsRentingOutProperty(propertyOwnership),
             freeholderAddress = freeholder.address?.toMultiLineAddress().orEmpty(),
             privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
         )
-    }
 
-    // TODO PDJB-1989, PDJB-1990: implement once the superior landlord creation email and letter templates are available
-    fun sendCreationNotificationForSuperiorLandlord(superiorLandlord: SuperiorLandlordDataModel): AssociatedPartyNotificationOutcome =
-        TODO("Implement superior landlord creation notification when its email and letter templates are available")
+    // TODO PDJB-1989: make the email template and return type non-nullable once the superior landlord added email is sent.
+    fun sendNotificationToSuperiorLandlordAddedToProperty(
+        superiorLandlord: SuperiorLandlordDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): AssociatedPartyNotificationOutcome? =
+        sendNotificationToAssociatedParty(
+            name = superiorLandlord.name,
+            emailAddress = superiorLandlord.email,
+            postalAddress = superiorLandlord.address,
+            emailTemplate = null,
+            buildLetter = { buildSuperiorLandlordAddedToPropertyLetter(superiorLandlord, propertyOwnership) },
+        )
+
+    internal fun buildSuperiorLandlordAddedToPropertyLetter(
+        superiorLandlord: SuperiorLandlordDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): SuperiorLandlordAddedToPropertyLetter =
+        SuperiorLandlordAddedToPropertyLetter(
+            superiorLandlordName = superiorLandlord.name.orEmpty(),
+            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            landlords = landlordsRentingOutProperty(propertyOwnership),
+            superiorLandlordAddress = superiorLandlord.address?.toMultiLineAddress().orEmpty(),
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl(),
+        )
+
+    private fun landlordsRentingOutProperty(propertyOwnership: PropertyOwnership): List<String> =
+        propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
+            "${landlord.name} (${landlord.getContactEmail()})"
+        }
 
     // TODO PDJB-1991: implement once the property manager creation email template is available
     fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
@@ -69,10 +90,11 @@ class AssociatedPartyNotificationService(
         if (name.isNullOrBlank()) {
             return AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED
         }
+        // TODO PDJB-1987, PDJB-1989: double check that the user only has one contact type, otherwise throw
 
         if (!emailAddress.isNullOrBlank()) {
             if (emailTemplate == null) {
-                // TODO PDJB-1987: build and send the freeholder added email.
+                // TODO PDJB-1987, PDJB-1989: build and send the freeholder and superior landlord added emails.
                 return null
             }
             emailNotificationService.sendEmail(emailAddress, emailTemplate)

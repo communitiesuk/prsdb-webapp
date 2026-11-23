@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
@@ -48,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val freeholderSummaryCardHelper: FreeholderSummaryCardHelper,
+    private val superiorLandlordSummaryCardHelper: SuperiorLandlordSummaryCardHelper,
     private val propertyManagerSummaryCardHelper: PropertyManagerSummaryCardHelper,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
@@ -180,6 +182,12 @@ class PropertyDetailsController(
             modelAndView.addObject(
                 "freeholderSummaryCards",
                 freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
+            )
+        }
+        if (propertyDetails.showSuperiorLandlordSection) {
+            modelAndView.addObject(
+                "superiorLandlordSummaryCards",
+                superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
             )
         }
         // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed

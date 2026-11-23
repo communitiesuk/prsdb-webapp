@@ -7,9 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
 
 private fun JourneyBuilder<*>.useSubmitButtonText(
     vararg steps: JourneyStep<*, *, *>,
@@ -107,4 +111,41 @@ fun JourneyBuilder<*>.useContinueButtons(tenancyDetails: TenancyDetailsState) {
         tenancyDetails.rentFrequencyAndAmountTask.rentFrequency,
         tenancyDetails.rentFrequencyAndAmountTask.rentAmount,
     )
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: FreeholdersDetailsTask) {
+    useContinueButtons(
+        task.freeholderProvideDetailsStep,
+        task.freeholderNameStep,
+        task.freeholderEmailStep,
+        task.freeholderAddressTask.manualAddressStep,
+        task.freeholdersListStep,
+        task.confirmRemoveFreeholderStep,
+    )
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: SuperiorLandlordsDetailsTask) {
+    useContinueButtons(
+        task.superiorLandlordProvideDetailsStep,
+        task.superiorLandlordNameStep,
+        task.superiorLandlordEmailStep,
+        task.superiorLandlordAddressTask.manualAddressStep,
+        task.superiorLandlordsListStep,
+        task.confirmRemoveSuperiorLandlordStep,
+    )
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: SuperiorLandlordsTask) {
+    useContinueButtons(task.anyoneInOwnershipChainStep)
+    useContinueButtons(task.superiorLandlordsDetailsTask)
+}
+
+fun JourneyBuilder<*>.useContinueButtons(task: OwnershipStructureTask) {
+    useContinueButtons(
+        task.ownershipTypeTask.ownsPropertyStep,
+        task.ownershipTypeTask.ownershipKindStep,
+        task.ownershipTypeTask.freeholdTypeStep,
+    )
+    useContinueButtons(task.freeholdersTask.freeholdersDetailsTask)
+    useContinueButtons(task.superiorLandlordsTask)
 }

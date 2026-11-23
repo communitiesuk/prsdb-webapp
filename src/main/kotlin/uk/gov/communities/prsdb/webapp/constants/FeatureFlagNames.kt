@@ -32,6 +32,10 @@ const val ASYNCHRONOUS_EMAIL_SENDING = "pdjb-973-asynchronous-email-sending"
 
 const val ACTIVE_INACTIVE = "pdjb-844-active-inactive"
 
+const val INTERNATIONAL_ADDRESSES = "pdjb-1878-international-addresses"
+
+const val PASSPHRASE_SMS = "pdjb-2227-passphrase-sms"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -46,4 +50,6 @@ val featureFlagNames =
         EIC_ISSUE_DATE,
         ASYNCHRONOUS_EMAIL_SENDING,
         ACTIVE_INACTIVE,
+        INTERNATIONAL_ADDRESSES,
+        PASSPHRASE_SMS,
     )

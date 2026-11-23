@@ -75,8 +75,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicrFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadGasCertFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.math.BigDecimal
 import java.nio.file.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
@@ -98,7 +101,10 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord can walk through every provide later step to the confirmation page`(page: Page) {
+    fun `a landlord can walk through every provide later step to the confirmation page`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
         assertThat(infoPage.heading).containsText("Reactivate your property")
         infoPage.submit()
@@ -138,6 +144,29 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkAnswersPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
+
+        val savedPropertyOwnership =
+            jdbcTemplate.queryForMap(
+                "SELECT license_provide_later, license_id, tenancy_provide_later, rent_amount FROM property_ownership WHERE id = ?",
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            )
+        assertEquals(false, savedPropertyOwnership["license_provide_later"])
+        assertNull(savedPropertyOwnership["license_id"])
+        assertEquals(false, savedPropertyOwnership["tenancy_provide_later"])
+        assertEquals(0, BigDecimal("400").compareTo(savedPropertyOwnership["rent_amount"] as BigDecimal))
+
+        val savedCompliance =
+            jdbcTemplate.queryForMap(
+                "SELECT has_gas_supply, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later, epc_url " +
+                    "FROM property_compliance WHERE property_ownership_id = ?",
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            )
+        assertEquals(false, savedCompliance["has_gas_supply"])
+        assertEquals(false, savedCompliance["gas_safety_cert_provide_later"])
+        assertEquals(false, savedCompliance["electrical_safety_cert_provide_later"])
+        assertEquals(false, savedCompliance["epc_provide_later"])
+        assertNotNull(savedCompliance["epc_url"])
     }
 
     @Test
@@ -293,13 +322,17 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord goes straight to the confirmation page when there are no details to provide`(page: Page) {
+    fun `a landlord goes straight to the confirmation page when there are no details to provide`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
         val noDetailsUrlArguments = mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString())
 
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
     }
 
     @Test
@@ -402,6 +435,25 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
+    fun `a landlord is shown the already registered page if the address is registered by someone else before they confirm their answers`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        val checkAnswersPage = navigator.skipToPropertyReactivationCheckAnswersPage(INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER)
+        // Simulate someone else registering the address after the landlord started the journey
+        jdbcTemplate.update(
+            "UPDATE property_ownership SET address_id = (SELECT address_id FROM property_ownership WHERE id = ?) WHERE id = ?",
+            INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            ACTIVE_PROPERTY,
+        )
+
+        checkAnswersPage.submit()
+
+        assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
+        assertEquals(false, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
+    }
+
+    @Test
     fun `a landlord is sent to the info page if they visit the already registered page when the property hasn't already been registered`(
         page: Page,
     ) {
@@ -441,7 +493,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(typePage.form.submitButton).hasCount(1)
         assertThat(typePage.form.submitButton).hasText("Continue")
         assertThat(typePage.provideThisLaterButton).isHidden()
-        assertThat(typePage.form.sectionHeader).containsText("Tell us if your property needs a licence")
+        assertThat(typePage.form.sectionHeader).containsText("Tell us if this property needs a licence")
         typePage.submitLicensingType(type)
 
         var numberPage = assertLicenceNumberPage(page, type)
@@ -656,4 +708,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyReactivation::class, urlArguments)
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
+
+    private fun isPropertyActive(
+        jdbcTemplate: JdbcTemplate,
+        propertyOwnershipId: Long,
+    ) = jdbcTemplate.queryForObject(
+        "SELECT is_active FROM property_ownership WHERE id = ?",
+        Boolean::class.java,
+        propertyOwnershipId,
+    )
 }

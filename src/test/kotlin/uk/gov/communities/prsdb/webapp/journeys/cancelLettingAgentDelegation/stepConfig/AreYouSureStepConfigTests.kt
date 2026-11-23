@@ -85,7 +85,7 @@ class AreYouSureStepConfigTests {
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals("cancelLettingAgentDelegation.areYouSure.confirmButton", content["submitButtonTextKey"])
+        assertEquals("cancelLettingAgentDelegation.areYouSure.confirmButton", content["submitButtonText"])
         assertFalse(content["showCancelLink"] as Boolean)
     }
 
