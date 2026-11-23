@@ -10,13 +10,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class StartStepConfigTests {
     @Mock
-    lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+    lateinit var mockLettingAgentSessionService: LettingAgentSessionService
 
     @Mock
     lateinit var mockState: LettingAgentInvitationJourneyState
@@ -27,9 +27,9 @@ class StartStepConfigTests {
         val token = UUID.randomUUID().toString()
         whenever(mockState.isStateInitialized).thenReturn(false)
         whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
+        whenever(mockLettingAgentSessionService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
 
-        StartStepConfig(mockLettingAgentAccessService).afterStepIsReached(mockState)
+        StartStepConfig(mockLettingAgentSessionService).afterStepIsReached(mockState)
 
         verify(mockState).invitationToken = token
         verify(mockState).isStateInitialized = true
@@ -39,9 +39,9 @@ class StartStepConfigTests {
     fun `afterStepIsReached does not overwrite the invitation token once the state is initialised`() {
         whenever(mockState.isStateInitialized).thenReturn(true)
 
-        StartStepConfig(mockLettingAgentAccessService).afterStepIsReached(mockState)
+        StartStepConfig(mockLettingAgentSessionService).afterStepIsReached(mockState)
 
         verify(mockState, never()).invitationToken = any()
-        verifyNoInteractions(mockLettingAgentAccessService)
+        verifyNoInteractions(mockLettingAgentSessionService)
     }
 }
