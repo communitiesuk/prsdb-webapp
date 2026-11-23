@@ -9,12 +9,26 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.math.BigDecimal
 
 @ExtendWith(MockitoExtension::class)
 class PropertyReactivationServiceTests {
+    @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
     @Mock
     private lateinit var mockActiveInactiveService: ActiveInactiveService
 
@@ -30,34 +44,94 @@ class PropertyReactivationServiceTests {
     private val propertyOwnershipId = 1L
     private val uprn = 2L
 
+    private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, isActive = false)
+
     @Test
-    fun `reactivatePropertyIfAddressAvailable reactivates the property and stores it in the session when its address is available`() {
+    fun `reactivatePropertyIfAddressAvailable saves the details provided and then reactivates the property`() {
         // Arrange
+        val licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null)
+        val tenancyDetails =
+            TenancyDetailsDataModel(
+                1,
+                2,
+                null,
+                null,
+                FurnishedStatus.FURNISHED,
+                RentFrequency.MONTHLY,
+                null,
+                BigDecimal("400"),
+            )
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
 
         // Act
-        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn)
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(
+            propertyOwnershipId,
+            uprn,
+            PropertyReactivationDataModel(licensing = licensing, tenancyDetails = tenancyDetails),
+        )
 
         // Assert
+        inOrder(mockPropertyOwnershipService, mockActiveInactiveService) {
+            verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
+            verify(mockPropertyOwnershipService).saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
+            verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
+        }
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable doesn't save any details when the property had none to provide`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+
+        // Assert
+        verify(mockPropertyOwnershipService, never()).saveReactivationLicensing(any(), any())
+        verify(mockPropertyOwnershipService, never()).saveReactivationTenancyDetails(any(), any())
         verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable stores the property in the session as the last property reactivated`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+
+        // Assert
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
     }
 
     @Test
-    fun `reactivatePropertyIfAddressAvailable throws an EntityExistsException without reactivating when the address is unavailable`() {
+    fun `reactivatePropertyIfAddressAvailable throws an EntityExistsException without saving when the address is unavailable`() {
         // Arrange
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(true)
 
         // Act & Assert
-        assertThrows<EntityExistsException> { propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn) }
+        assertThrows<EntityExistsException> {
+            propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+        }
+        verifyNoInteractions(mockPropertyOwnershipService)
         verifyNoInteractions(mockActiveInactiveService)
         verifyNoInteractions(mockSession)
     }
 
     @Test
     fun `reactivatePropertyIfAddressAvailable reactivates the property without checking its address when it has no UPRN`() {
+        // Arrange
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+
         // Act
-        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null)
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
 
         // Assert
         verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)

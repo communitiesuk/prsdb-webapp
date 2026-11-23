@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
+import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -1226,20 +1227,22 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             val propertyDetailsPage =
                 assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
-            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
             assertEquals("New Agent", propertyDetailsPage.propertyManagerCard.title.getText())
             assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("new.agent@example.com")
         }
 
         @Test
-        fun `the back link on the first page returns to the property record when there is no property manager`(page: Page) {
+        fun `the back link on the first page returns to the people responsible tab when there is no property manager`(page: Page) {
             navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
             val propertyManagerPage =
                 assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments)
 
             propertyManagerPage.backLink.clickAndWait()
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
 
         @Test
@@ -1262,7 +1265,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             val propertyDetailsPage =
                 assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
-            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
             assertEquals("Changed Agent", propertyDetailsPage.propertyManagerCard.title.getText())
             assertThat(propertyDetailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("changed.agent@example.com")
             assertEquals(
@@ -1319,10 +1322,25 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             val propertyDetailsPage =
                 assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
-            propertyDetailsPage.tabs.goToPeopleResponsible()
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
             assertThat(propertyDetailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
                 .containsText("No, I manage this property")
             assertEquals(propertyManagerCount - 1, propertyManagerRepository.count())
+        }
+
+        @Test
+        fun `answering no on a property without a property manager returns to the people responsible tab`(page: Page) {
+            navigator.navigateToUpdatePropertyManagerJourney(propertyWithoutPropertyManagerId)
+            assertPageIs(page, PropertyManagerFormPagePropertyDetailsUpdate::class, propertyWithoutPropertyManagerUrlArguments).submitNo()
+            assertPageIs(
+                page,
+                UpdatePropertyManagerCheckYourAnswersPagePropertyDetailsUpdate::class,
+                propertyWithoutPropertyManagerUrlArguments,
+            ).confirm()
+
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithoutPropertyManagerUrlArguments)
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
 
         @Test
@@ -1340,10 +1358,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
 
         @Test
-        fun `entering the journey part-way through redirects to the property record`(page: Page) {
+        fun `entering the journey part-way through redirects to the people responsible tab`(page: Page) {
             navigator.navigateToUpdatePropertyManagerJourney(propertyWithPropertyManagerId, PropertyManagerStep.ROUTE_SEGMENT)
 
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            val propertyDetailsPage =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, propertyWithPropertyManagerUrlArguments)
+            assertEquals(PEOPLE_RESPONSIBLE_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
     }
 }

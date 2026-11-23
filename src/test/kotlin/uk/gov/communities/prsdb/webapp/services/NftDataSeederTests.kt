@@ -197,8 +197,8 @@ class NftDataSeederTests(
     fun `seedDatabase preserves the NFT fixture and adds the configured volume`() {
         jdbcTemplate.execute(
             """
-            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, local_council_id)
-            VALUES (1, current_timestamp, 1, '1 Test Street', 'TE1 1ST', 1)
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, local_council_id, country)
+            VALUES (1, current_timestamp, 1, '1 Test Street', 'TE1 1ST', 1, 'England')
             """.trimIndent(),
         )
         jdbcTemplate.execute(
@@ -391,8 +391,8 @@ class NftDataSeederTests(
         val street = NftDataFaker.generateFakeStreet()
         jdbcTemplate.update(
             """
-            INSERT INTO address (created_date, uprn, single_line_address, postcode, building_number, street_name, local_council_id)
-            VALUES (current_timestamp, 1, ?, ?, '1', ?, 1)
+            INSERT INTO address (created_date, uprn, single_line_address, postcode, building_number, street_name, local_council_id, country)
+            VALUES (current_timestamp, 1, ?, ?, '1', ?, 1, 'England')
             """.trimIndent(),
             NftDataFaker.buildSingleLineAddress(1, street),
             street.postcode,
@@ -1227,8 +1227,8 @@ class NftDataSeederTests(
     fun `QA fixture preserves imported addresses and remains idempotent`() {
         jdbcTemplate.execute(
             """
-            INSERT INTO address (id, created_date, single_line_address, postcode, local_council_id)
-            VALUES (1, current_timestamp, 'Preserved address', 'QA9 9AA', 2)
+            INSERT INTO address (id, created_date, single_line_address, postcode, local_council_id, country)
+            VALUES (1, current_timestamp, 'Preserved address', 'QA9 9AA', 2, 'England')
             """.trimIndent(),
         )
         jdbcTemplate.execute("SELECT setval(pg_get_serial_sequence('address', 'id'), 8000000)")
@@ -1285,9 +1285,9 @@ class NftDataSeederTests(
     fun `performance lookup fixture has unambiguous labels alongside legacy QA addresses`() {
         jdbcTemplate.execute(
             """
-            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
-            VALUES (13, current_timestamp, 1013, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1),
-                   (9100000001, current_timestamp, 9100000001, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1)
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id, country)
+            VALUES (13, current_timestamp, 1013, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1, 'England'),
+                   (9100000001, current_timestamp, 9100000001, '1 PRSDB Square, EG1 2AA', 'EG1 2AA', '1', 1, 'England')
             """.trimIndent(),
         )
         repeat(2) {
