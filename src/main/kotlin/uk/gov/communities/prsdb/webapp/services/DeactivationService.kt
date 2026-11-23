@@ -17,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import java.time.LocalDate
 
 @Service
@@ -26,12 +24,10 @@ class DeactivationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
-    private val lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService,
+    private val deactivationEmailService: DeactivationEmailService,
     private val transactionTemplate: TransactionTemplate,
     // TODO PDJB-2149: Remove the feature flag manager when the ACTIVE_INACTIVE flag is removed
     private val featureFlagManager: FeatureFlagManager,
-    private val landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
@@ -50,7 +46,7 @@ class DeactivationService(
                 NotificationHelper.sendNotificationAndLogFailures(
                     "the letting agent property deactivated email for property ownership $propertyOwnershipId",
                 ) {
-                    lettingAgentPropertyDeactivatedEmailService.sendLettingAgentPropertyDeactivatedEmail(
+                    deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(
                         propertyOwnership,
                         delegation.invitedEmail,
                     )
@@ -104,7 +100,9 @@ class DeactivationService(
 
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
         if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
-            sendLandlordDeactivatedEmail(landlord, reason)
+            NotificationHelper.sendNotificationAndLogFailures("the landlord deactivated email for landlord ${landlord.id}") {
+                deactivationEmailService.sendLandlordDeactivatedEmail(landlord, reason)
+            }
         }
     }
 
@@ -123,23 +121,6 @@ class DeactivationService(
 
         landlord.deactivate(deactivationDate)
         landlordRepository.save(landlord)
-    }
-
-    private fun sendLandlordDeactivatedEmail(
-        landlord: Landlord,
-        reason: LandlordDeactivationReason,
-    ) {
-        NotificationHelper.sendNotificationAndLogFailures("the landlord deactivated email for landlord ${landlord.id}") {
-            landlordDeactivatedEmailSender.sendEmailToLandlord(
-                landlord,
-                LandlordDeactivatedEmail(
-                    recipientName = landlord.name,
-                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                    reason = reason,
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                ),
-            )
-        }
     }
 
     private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
