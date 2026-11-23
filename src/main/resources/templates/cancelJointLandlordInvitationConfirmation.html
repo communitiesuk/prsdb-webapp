@@ -4,12 +4,11 @@
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{cancelJointLandlordInvitation.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <strong>
-                <span th:text="#{cancelJointLandlordInvitation.confirmation.banner.body(${cancelledEmail})}"
-                      th:remove="tag">cancelJointLandlordInvitation.confirmation.banner.body</span>
-            </strong>
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{cancelJointLandlordInvitation.confirmation.banner.heading}, null)}">
         </div>
+        <p id="cancelled-invitation-message" class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.cancelled(${cancelledEmail})}">
+            cancelJointLandlordInvitation.confirmation.paragraph.cancelled
+        </p>
         <p class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.one}">
             cancelJointLandlordInvitation.confirmation.paragraph.one
         </p>
@@ -19,7 +18,7 @@
         <p class="govuk-body">
             <a class="govuk-link" th:href="${propertyRecordUrl}" th:text="#{cancelJointLandlordInvitation.confirmation.goBack}">
                 cancelJointLandlordInvitation.confirmation.goBack
-            </a><span class="govuk-body">.</span>
+            </a>
         </p>
     </div>
 </main>

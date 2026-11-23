@@ -18,5 +18,7 @@ class ConfirmationPageCancelJointLandlordInvitation(
 
     val confirmationBanner = ConfirmationBanner(page)
 
-    val goBackToPropertyRecordLink = Link.byText(page, "Go back to property record")
+    val cancelledInvitationMessage = page.locator("#cancelled-invitation-message")
+
+    val goBackToPropertyRegistrationLink = Link.byText(page, "Go back to property registration")
 }

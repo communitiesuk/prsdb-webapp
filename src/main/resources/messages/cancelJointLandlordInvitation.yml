@@ -12,8 +12,8 @@ confirmation:
   pageTitle: Joint landlord invitation cancelled
   banner:
     heading: Invitation cancelled
-    body: '{0} no longer invited to be a joint landlord'
   paragraph:
-    one: We’ve emailed this person to say that their invitation link no longer works.
+    cancelled: 'You’ve cancelled the joint landlord invitation for {0}'
+    one: We’ve emailed them to say that their invitation link no longer works.
     two: We’ve also sent you a confirmation email.
-  goBack: Go back to property record
+  goBack: Go back to property registration
