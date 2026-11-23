@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDat
 class PropertyReactivationService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
     private val addressAvailabilityService: AddressAvailabilityService,
     private val session: HttpSession,
 ) {
@@ -30,7 +30,7 @@ class PropertyReactivationService(
         }
 
         saveReactivationData(propertyOwnershipId, reactivationData)
-        activeInactiveService.reactivateProperty(propertyOwnershipId)
+        activationService.reactivateProperty(propertyOwnershipId)
         runAfterTransactionCommits { session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId) }
     }
 

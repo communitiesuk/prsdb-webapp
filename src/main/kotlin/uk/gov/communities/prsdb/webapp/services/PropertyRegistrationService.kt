@@ -46,7 +46,7 @@ class PropertyRegistrationService(
     private val featureFlagManager: FeatureFlagManager,
     private val currentUserService: CurrentUserService,
     private val paymentRepository: PaymentRepository,
-    private val activeInactiveService: ActiveInactiveService,
+    private val activationService: ActivationService,
 ) {
     @Transactional
     fun registerProperty(registrationData: PropertyRegistrationDataModel): PropertyOwnership =
@@ -63,7 +63,7 @@ class PropertyRegistrationService(
                 )
 
             val landlordReactivated = !landlord.isActive
-            activeInactiveService.reactivateLandlordIfInactive(landlord)
+            activationService.reactivateLandlordIfInactive(landlord)
 
             landlord.setAnniversaryIfAbsent(anniversary)
 

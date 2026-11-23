@@ -38,7 +38,7 @@ class PropertyReactivationServiceTests {
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockActivationService: ActivationService
 
     @Mock
     private lateinit var mockAddressAvailabilityService: AddressAvailabilityService
@@ -85,11 +85,11 @@ class PropertyReactivationServiceTests {
         )
 
         // Assert
-        inOrder(mockPropertyOwnershipService, mockPropertyComplianceService, mockActiveInactiveService) {
+        inOrder(mockPropertyOwnershipService, mockPropertyComplianceService, mockActivationService) {
             verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
             verify(mockPropertyOwnershipService).saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
             verify(mockPropertyComplianceService).saveReactivationComplianceData(propertyOwnership, gasSafety, electricalSafety, epc)
-            verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
+            verify(mockActivationService).reactivateProperty(propertyOwnershipId)
         }
     }
 
@@ -107,7 +107,7 @@ class PropertyReactivationServiceTests {
         verify(mockPropertyOwnershipService, never()).saveReactivationLicensing(any(), any())
         verify(mockPropertyOwnershipService, never()).saveReactivationTenancyDetails(any(), any())
         verifyNoInteractions(mockPropertyComplianceService)
-        verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
     }
 
     @Test
@@ -135,7 +135,7 @@ class PropertyReactivationServiceTests {
         }
         verifyNoInteractions(mockPropertyOwnershipService)
         verifyNoInteractions(mockPropertyComplianceService)
-        verifyNoInteractions(mockActiveInactiveService)
+        verifyNoInteractions(mockActivationService)
         verifyNoInteractions(mockSession)
     }
 
@@ -149,7 +149,7 @@ class PropertyReactivationServiceTests {
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
 
         // Assert
-        verify(mockActiveInactiveService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
         verifyNoInteractions(mockAddressAvailabilityService)
     }
