@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -36,6 +37,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PaymentSummaryViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -131,7 +134,11 @@ class ReactivatePropertyController(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
-        // TODO PDJB-2076: Add the payment summary when a payment was made in the reactivation journey
+        // TODO PDJB-2076: Set this from the session, so the payment summary only shows when a payment was made in the reactivation journey
+        val paymentMade = true
+        if (paymentMade) {
+            model.addAttribute("paymentSummaryViewModel", getPlaceholderPaymentSummary())
+        }
         model.addAttribute("hasJointLandlords", propertyOwnership.landlords.size > 1)
         model.addAttribute("landlordReactivated", propertyReactivationService.wasLandlordReactivatedByLastReactivation())
         model.addAttribute("isOrganisationLandlord", landlord.landlordType == LandlordType.ORGANISATION)
@@ -153,6 +160,16 @@ class ReactivatePropertyController(
             )
         }
     }
+
+    // TODO PDJB-2076: Replace with PaymentSummaryViewModel.from using the payment made in the reactivation journey
+    private fun getPlaceholderPaymentSummary() =
+        PaymentSummaryViewModel(
+            mutableListOf<SummaryListRowViewModel>().apply {
+                addRow("registerProperty.confirmation.paymentSummary.payment", "TODO PDJB-2076")
+                addRow("registerProperty.confirmation.paymentSummary.paymentDate", "TODO PDJB-2076")
+                addRow("registerProperty.confirmation.paymentSummary.renewalDate", "TODO PDJB-2076")
+            },
+        )
 
     companion object {
         const val PROPERTY_REACTIVATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REACTIVATE_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"

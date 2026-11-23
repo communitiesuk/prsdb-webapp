@@ -271,6 +271,7 @@ class ReactivatePropertyControllerTests(
                 attribute("isOrganisationLandlord", false)
                 attribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
                 attribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+                attributeExists("paymentSummaryViewModel")
             }
         }
     }

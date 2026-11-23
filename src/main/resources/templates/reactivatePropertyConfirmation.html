@@ -23,12 +23,23 @@
             reactivateProperty.confirmation.emailSent
         </p>
 
-        <!--/* TODO PDJB-2076: Also show this section, with a payment summary, when a payment was made in the reactivation journey */-->
-        <th:block th:if="${hasJointLandlords or landlordReactivated}">
+        <th:block th:if="${paymentSummaryViewModel != null or hasJointLandlords or landlordReactivated}">
             <h2 class="govuk-heading-m"
                 th:text="#{reactivateProperty.confirmation.reactivationDetails.heading}">
                 reactivateProperty.confirmation.reactivationDetails.heading
             </h2>
+
+            <th:block th:if="${paymentSummaryViewModel != null}">
+                <h3 class="govuk-heading-s"
+                    th:text="#{reactivateProperty.confirmation.reactivationDetails.paymentSummary.heading}">
+                    reactivateProperty.confirmation.reactivationDetails.paymentSummary.heading
+                </h3>
+                <p class="govuk-body"
+                   th:text="#{reactivateProperty.confirmation.reactivationDetails.paymentSummary.bankStatement}">
+                    reactivateProperty.confirmation.reactivationDetails.paymentSummary.bankStatement
+                </p>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${paymentSummaryViewModel.rows})}"></dl>
+            </th:block>
 
             <th:block th:if="${hasJointLandlords}">
                 <h3 class="govuk-heading-s"

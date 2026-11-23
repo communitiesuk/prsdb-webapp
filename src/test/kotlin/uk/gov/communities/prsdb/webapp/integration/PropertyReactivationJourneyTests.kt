@@ -333,7 +333,8 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         infoPage.submit()
 
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
-        assertThat(confirmationPage.reactivationDetailsHeading).isHidden()
+        assertThat(confirmationPage.jointLandlordsHeading).isHidden()
+        assertThat(confirmationPage.landlordAccountHeading).isHidden()
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
     }
 
