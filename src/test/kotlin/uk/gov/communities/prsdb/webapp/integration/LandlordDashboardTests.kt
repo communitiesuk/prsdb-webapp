@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OutstandingActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,7 +30,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
     fun `the register property buttons links to the property registration journey`(page: Page) {
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.registerPropertyButton.clickAndWait()
-        assertPageIs(page, RegisterPropertyStartPage::class)
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
     @Test
@@ -192,10 +192,10 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
             }
 
             @Test
-            fun `the register a property link goes to the property registration start page`(page: Page) {
+            fun `the register a property link goes to the property registration task list`(page: Page) {
                 val dashboard = navigator.goToLandlordDashboard()
                 dashboard.inactiveLandlordNotificationBanner.registerAPropertyLink.clickAndWait()
-                assertPageIs(page, RegisterPropertyStartPage::class)
+                assertPageIs(page, TaskListPagePropertyRegistration::class)
             }
         }
 
