@@ -108,6 +108,7 @@ class SaveGovBodyMemberStepConfigTests {
         assertEquals("1 Test Street", savedMember.manualAddressLineOne)
         assertEquals("Test Town", savedMember.manualTownOrCity)
         assertEquals("TT1 1TT", savedMember.manualPostcode)
+        assertEquals("England", savedMember.manualCountry)
     }
 
     @Test
@@ -191,6 +192,7 @@ class SaveGovBodyMemberStepConfigTests {
                 addressLineOne = "1 Test Street"
                 townOrCity = "Test Town"
                 postcode = "TT1 1TT"
+                country = "England"
             }
 
         whenever(mockState.orgGovBodyMemberNameStep).thenReturn(orgGovBodyMemberNameStep)

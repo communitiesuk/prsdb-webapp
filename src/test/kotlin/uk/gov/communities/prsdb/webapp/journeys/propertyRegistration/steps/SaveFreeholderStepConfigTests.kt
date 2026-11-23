@@ -156,6 +156,7 @@ class SaveFreeholderStepConfigTests {
                 townOrCity = "Manual Town"
                 county = "Manual County"
                 postcode = "MA1 1AA"
+                country = "England"
             }
         setupAddressAnswers(selectedAddress = MANUAL_ADDRESS_CHOSEN, manualFormModel = manualFormModel)
         val manualAddress = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA")
@@ -181,6 +182,7 @@ class SaveFreeholderStepConfigTests {
                 manualTownOrCity = "Manual Town",
                 manualCounty = "Manual County",
                 manualPostcode = "MA1 1AA",
+                manualCountry = "England",
             )
         assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
     }
