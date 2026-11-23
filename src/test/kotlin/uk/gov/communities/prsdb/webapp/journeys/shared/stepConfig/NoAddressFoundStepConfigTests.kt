@@ -36,7 +36,7 @@ class NoAddressFoundStepConfigTests {
         "ENGLAND_AND_WALES, englandOrWales",
         "UK, uk",
     )
-    fun `getStepSpecificContent returns the region's message keys when international addresses are enabled`(
+    fun `getStepSpecificContent returns the region's message keys`(
         region: AddressSearchRegion,
         regionKey: String,
     ) {
@@ -65,6 +65,7 @@ class NoAddressFoundStepConfigTests {
         assertEquals("addressForms.noAddressFound.heading.uk", content["headingKey"])
     }
 
+    // TODO: PDJB-2259: Remove this test
     @ParameterizedTest
     @CsvSource(
         "WITH_ENGLISH_LOCAL_COUNCIL, englandPropertyDetails, englandPropertyDetails",
