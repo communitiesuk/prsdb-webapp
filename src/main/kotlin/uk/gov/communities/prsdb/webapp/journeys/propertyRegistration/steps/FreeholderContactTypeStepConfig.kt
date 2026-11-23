@@ -47,7 +47,7 @@ class FreeholderContactTypeStepConfig :
         prepopulatedFormModel.contactType =
             when {
                 editingFreeholder.email != null -> FreeholderContactType.EMAIL
-                editingFreeholder.address != null -> FreeholderContactType.POSTAL_ADDRESS
+                editingFreeholder.address != null || editingFreeholder.hasUnstoredPostalAddress() -> FreeholderContactType.POSTAL_ADDRESS
                 else -> null
             }
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
