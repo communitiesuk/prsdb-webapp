@@ -23,6 +23,8 @@ interface AddressState : AddressSearchState {
                 townOrCity = manualAddressData.notNullValue(ManualAddressFormModel::townOrCity),
                 county = manualAddressData.county,
                 postcode = manualAddressData.notNullValue(ManualAddressFormModel::postcode),
+                // TODO: PDJB-2259: Leave this as nullable
+                country = manualAddressData.country,
             )
         }
 

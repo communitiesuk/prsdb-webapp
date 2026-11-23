@@ -119,3 +119,7 @@ manualAddress:
     label: Postcode
     error:
       missing: Enter postcode
+  country:
+    label: Country
+    error:
+      missing: Enter country

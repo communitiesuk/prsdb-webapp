@@ -102,6 +102,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
             manualTownOrCity = manualFormModel?.townOrCity,
             manualCounty = manualFormModel?.county,
             manualPostcode = manualFormModel?.postcode,
+            manualCountry = manualFormModel?.country,
         )
     }
 }

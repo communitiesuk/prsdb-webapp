@@ -107,6 +107,7 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
             manualTownOrCity = manualFormModel?.townOrCity,
             manualCounty = manualFormModel?.county,
             manualPostcode = manualFormModel?.postcode,
+            manualCountry = manualFormModel?.country,
         )
     }
 }
