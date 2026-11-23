@@ -15,7 +15,6 @@ class PropertyReactivationService(
     private val propertyComplianceService: PropertyComplianceService,
     private val activeInactiveService: ActiveInactiveService,
     private val addressAvailabilityService: AddressAvailabilityService,
-    private val userToLandlordService: UserToLandlordService,
     private val session: HttpSession,
 ) {
     @Transactional
@@ -31,10 +30,12 @@ class PropertyReactivationService(
             )
         }
 
-        val landlordReactivated = !userToLandlordService.getCurrentLandlordForUser().isActive
+        val landlordReactivated = activeInactiveService.isCurrentLandlordInactive()
 
         saveReactivationData(propertyOwnershipId, reactivationData)
         activeInactiveService.reactivateProperty(propertyOwnershipId)
+        // TODO PDJB-2051: Send the property reactivation confirmation email
+        // TODO PDJB-2050: Notify any joint landlords that the property has been reactivated
         runAfterTransactionCommits {
             session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
             session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, landlordReactivated)

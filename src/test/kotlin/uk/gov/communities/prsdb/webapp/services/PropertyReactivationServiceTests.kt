@@ -47,9 +47,6 @@ class PropertyReactivationServiceTests {
     private lateinit var mockAddressAvailabilityService: AddressAvailabilityService
 
     @Mock
-    private lateinit var mockUserToLandlordService: UserToLandlordService
-
-    @Mock
     private lateinit var mockSession: HttpSession
 
     @InjectMocks
@@ -82,7 +79,6 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(
@@ -106,7 +102,6 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -124,7 +119,6 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -146,7 +140,6 @@ class PropertyReactivationServiceTests {
         verifyNoInteractions(mockPropertyOwnershipService)
         verifyNoInteractions(mockPropertyComplianceService)
         verifyNoInteractions(mockActiveInactiveService)
-        verifyNoInteractions(mockUserToLandlordService)
         verifyNoInteractions(mockSession)
     }
 
@@ -155,7 +148,6 @@ class PropertyReactivationServiceTests {
         // Arrange
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
@@ -170,11 +162,9 @@ class PropertyReactivationServiceTests {
     @Test
     fun `reactivatePropertyIfAddressAvailable stores that the landlord was reactivated when the current landlord was inactive`() {
         // Arrange
-        val inactiveLandlord = MockLandlordData.createIndividualLandlord()
-        inactiveLandlord.deactivate(LocalDate.of(2026, 1, 1))
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(inactiveLandlord)
+        whenever(mockActiveInactiveService.isCurrentLandlordInactive()).thenReturn(true)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
