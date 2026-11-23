@@ -73,10 +73,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -1481,8 +1483,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1513,8 +1514,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1540,8 +1540,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateLicensing(
                     propertyOwnership.id,
-                    LicensingType.HMO_MANDATORY_LICENCE,
-                    "newLicenceNumber",
+                    LicensingDetailsDataModel(LicensingType.HMO_MANDATORY_LICENCE, "newLicenceNumber"),
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
@@ -1550,6 +1549,57 @@ class PropertyOwnershipServiceTests {
             "The property ownership record has been updated since this update session started.",
             exception.message,
         )
+    }
+
+    @Test
+    fun `saveReactivationLicensing sets the property's licence and clears licenseProvideLater`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, license = null, licenseProvideLater = true)
+        val updatedLicence = License(LicensingType.SELECTIVE_LICENCE, "SL-123")
+        whenever(mockLicenseService.updateLicence(null, LicensingType.SELECTIVE_LICENCE, "SL-123")).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.saveReactivationLicensing(
+            propertyOwnership,
+            LicensingDetailsDataModel(LicensingType.SELECTIVE_LICENCE, "SL-123"),
+        )
+
+        // Assert
+        assertEquals(updatedLicence, propertyOwnership.license)
+        assertEquals(false, propertyOwnership.licenseProvideLater)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+    }
+
+    @Test
+    fun `saveReactivationTenancyDetails sets the property's tenancy details and clears tenancyProvideLater`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, tenancyProvideLater = true)
+        val tenancyDetails =
+            TenancyDetailsDataModel(
+                numberOfHouseholds = 2,
+                numberOfPeople = 4,
+                billsIncludedList = "GAS",
+                customBillsIncluded = "Internet",
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.OTHER,
+                customRentFrequency = "Fortnightly",
+                rentAmount = BigDecimal("400.50"),
+            )
+
+        // Act
+        propertyOwnershipService.saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
+
+        // Assert
+        assertEquals(2, propertyOwnership.currentNumHouseholds)
+        assertEquals(4, propertyOwnership.currentNumTenants)
+        assertEquals("GAS", propertyOwnership.billsIncludedList)
+        assertEquals("Internet", propertyOwnership.customBillsIncluded)
+        assertEquals(FurnishedStatus.FURNISHED, propertyOwnership.furnishedStatus)
+        assertEquals(RentFrequency.OTHER, propertyOwnership.rentFrequency)
+        assertEquals("Fortnightly", propertyOwnership.customRentFrequency)
+        assertEquals(BigDecimal("400.50"), propertyOwnership.rentAmount)
+        assertEquals(false, propertyOwnership.tenancyProvideLater)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
     }
 
     // TODO PDJB-2019: drop the beforePdjb955 half of this test along with the legacy column.

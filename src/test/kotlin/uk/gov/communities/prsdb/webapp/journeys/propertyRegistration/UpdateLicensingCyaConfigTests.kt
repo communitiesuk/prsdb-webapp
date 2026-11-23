@@ -6,23 +6,21 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import java.time.Instant
 
 @ExtendWith(MockitoExtension::class)
 class UpdateLicensingCyaConfigTests {
@@ -33,21 +31,20 @@ class UpdateLicensingCyaConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    private lateinit var mockLicensingAndTenancyDetailsDataModelFactory: LicensingAndTenancyDetailsDataModelFactory
+
+    @Mock
     private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateLicensingJourneyState
 
     @Mock
-    private lateinit var mockLicensingTypeStep: LicensingTypeStep
-
-    @Mock
     private lateinit var mockLicensingTask: LicensingTask
 
-    @Mock
-    private lateinit var mockLicensingTypeFormModel: LicensingTypeFormModel
-
     private val propertyId = 123L
+    private val initialLastModifiedDate = Instant.parse("2024-01-01T00:00:00Z")
+    private val licensing = LicensingDetailsDataModel(LicensingType.SELECTIVE_LICENCE, "SL-123")
 
     @Mock
     private lateinit var stepConfig: UpdateLicensingCyaConfig
@@ -58,18 +55,23 @@ class UpdateLicensingCyaConfigTests {
             UpdateLicensingCyaConfig(
                 licensingDetailsHelper = mockLicensingDetailsHelper,
                 propertyOwnershipService = mockPropertyOwnershipService,
+                licensingAndTenancyDetailsDataModelFactory = mockLicensingAndTenancyDetailsDataModelFactory,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.urlPath = UpdateLicensingCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
         whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
-        whenever(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
-        whenever(mockLicensingTypeStep.formModel).thenReturn(mockLicensingTypeFormModel)
-        whenever(mockLicensingTypeFormModel.licensingType).thenReturn(LicensingType.NO_LICENSING)
-        whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockLicensingAndTenancyDetailsDataModelFactory.fromLicensingState(mockLicensingTask)).thenReturn(licensing)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded calls updateLicensing with the licensing details from the journey`() {
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockPropertyOwnershipService).updateLicensing(propertyId, licensing, initialLastModifiedDate)
     }
 
     @Test
@@ -82,7 +84,7 @@ class UpdateLicensingCyaConfigTests {
     @Test
     fun `afterStepDataIsAdded deletes the journey and rethrows when an UpdateConflictException is thrown`() {
         whenever(
-            mockPropertyOwnershipService.updateLicensing(any(), any(), anyOrNull(), any()),
+            mockPropertyOwnershipService.updateLicensing(propertyId, licensing, initialLastModifiedDate),
         ).thenThrow(UpdateConflictException::class.java)
 
         assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
