@@ -203,11 +203,11 @@ object NftDataFaker {
             )
         }
 
-    // Assumption: roughly 5% of seeded landlords are organisations. This is a rough estimate not backed by real-world
+    // Assumption: roughly 10% of seeded landlords are organisations. This is a rough estimate not backed by real-world
     // data, documented here as agreed, and can be adjusted if a more accurate ratio becomes available.
     fun generateLandlordType(): LandlordType =
         if (generateBoolean(
-                probabilityTrue = 0.05,
+                probabilityTrue = 0.10,
             )
         ) {
             LandlordType.ORGANISATION
@@ -928,6 +928,7 @@ object NftDataFaker {
     data class FreeholderDetails(
         val name: String?,
         val email: String?,
+        // Contacted by post. The address itself isn't stored.
         val hasAddress: Boolean,
     )
 
@@ -935,6 +936,7 @@ object NftDataFaker {
     data class SuperiorLandlordDetails(
         val name: String?,
         val email: String?,
+        // Contacted by post. The address itself isn't stored.
         val hasAddress: Boolean,
     )
 

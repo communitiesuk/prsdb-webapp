@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -18,6 +20,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -36,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
@@ -59,6 +64,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @Mock
     lateinit var mockOtherLandlordEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedOtherLandlordEmail>
+
+    @Mock
+    lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
@@ -190,6 +198,23 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         )
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `afterStepDataIsAdded stores whether the landlord was reactivated in session`(landlordWasInactive: Boolean) {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val landlord = setupValidTokenWithLandlord()
+        if (landlordWasInactive) {
+            landlord.deactivate(LocalDate.now())
+        }
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockInvitationService).setLandlordReactivatedByLastAcceptance(landlordWasInactive)
+    }
+
     @Test
     fun `afterStepDataIsAdded sends accepted email to the authenticated user's email and name`() {
         // Arrange
@@ -215,6 +240,57 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
             email.propertyRegistrationNumber,
         )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends accepted email saying the landlord was reactivated when they were inactive`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val landlord = setupValidTokenWithLandlord()
+        landlord.deactivate(LocalDate.now())
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
+        verify(mockAcceptedEmailSender).sendEmail(any(), emailCaptor.capture())
+        assertTrue(emailCaptor.firstValue.landlordReactivated)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends accepted email not saying the landlord was reactivated when they were already active`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        setupValidTokenWithLandlord()
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
+        verify(mockAcceptedEmailSender).sendEmail(any(), emailCaptor.capture())
+        assertFalse(emailCaptor.firstValue.landlordReactivated)
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `afterStepDataIsAdded sends accepted email not saying the landlord was reactivated when active inactive is disabled`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val landlord = setupValidTokenWithLandlord()
+        landlord.deactivate(LocalDate.now())
+        whenever(mockFeatureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
+        verify(mockAcceptedEmailSender).sendEmail(any(), emailCaptor.capture())
+        assertFalse(emailCaptor.firstValue.landlordReactivated)
     }
 
     @Test
@@ -364,6 +440,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
             mockAbsoluteUrlProvider,
             mockAcceptedEmailSender,
             mockOtherLandlordEmailSender,
+            mockFeatureFlagManager,
         )
 
     private fun setupTokenValidation(tokenIsValid: Boolean) {

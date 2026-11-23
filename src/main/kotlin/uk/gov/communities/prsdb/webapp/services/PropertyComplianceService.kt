@@ -26,6 +26,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDetailsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GasSafetyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
@@ -47,7 +50,7 @@ class PropertyComplianceService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val currentUserService: CurrentUserService,
     private val eicDateService: EicDateService,
-    // TODO: PDJB-1926: Remove featureFlagManager
+    // TODO: PDJB-1926 / PDJB-1679: Remove featureFlagManager once both the 14 month gas expiry and EIC_ISSUE_DATE flags are removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
@@ -135,7 +138,8 @@ class PropertyComplianceService(
     fun getComplianceStatus(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
         ComplianceStatusDataModel.fromPropertyCompliance(
             propertyCompliance = propertyCompliance,
-            eicIssueDate = null,
+            // TODO PDJB-1679: Remove the EIC_ISSUE_DATE check when the flag is removed
+            eicIssueDate = if (featureFlagManager.checkFeature(EIC_ISSUE_DATE)) eicDateService.issueDateFrom(propertyCompliance) else null,
             electricalSafetyExpiryDate = getElectricalSafetyExpiryDate(propertyCompliance, eicDateService),
             isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY),
         )
@@ -215,6 +219,66 @@ class PropertyComplianceService(
             electricalCertType = electricalCertType,
         )
     }
+
+    @Transactional
+    fun saveReactivationComplianceData(
+        propertyOwnership: PropertyOwnership,
+        gasSafety: GasSafetyDetailsDataModel?,
+        electricalSafety: ElectricalSafetyDetailsDataModel?,
+        epc: EpcDetailsDataModel?,
+    ) {
+        val record = getComplianceForProperty(propertyOwnership.id)
+        gasSafety?.let { setGasSafety(record, it) }
+        electricalSafety?.let { setElectricalSafety(record, it) }
+        epc?.let { setEpc(record, it) }
+        propertyComplianceRepository.save(record)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnership.id,
+            gasSafetyCertUploadIds = gasSafety?.uploadIds ?: emptyList(),
+            electricalSafetyCertUploadIds = electricalSafety?.uploadIds ?: emptyList(),
+            electricalCertType = electricalSafety?.certType,
+        )
+    }
+
+    private fun setGasSafety(
+        record: PropertyCompliance,
+        gasSafety: GasSafetyDetailsDataModel,
+    ) = populateGasSafetyFields(
+        record = record,
+        hasGasSupply = gasSafety.hasGasSupply,
+        gasSafetyCertIssueDate = gasSafety.issueDate,
+        gasSafetyFileUploadIds = gasSafety.uploadIds,
+        gasSafetyCertProvideLater = false,
+    )
+
+    private fun setElectricalSafety(
+        record: PropertyCompliance,
+        electricalSafety: ElectricalSafetyDetailsDataModel,
+    ) = populateElectricalSafetyFields(
+        record = record,
+        electricalSafetyFileUploadIds = electricalSafety.uploadIds,
+        eicrExpiryDate = electricalSafety.eicrExpiryDate,
+        eicIssueDate = electricalSafety.eicIssueDate,
+        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
+        eicExpiryDate = electricalSafety.eicExpiryDate,
+        electricalCertType = electricalSafety.certType,
+        electricalSafetyCertProvideLater = false,
+    )
+
+    private fun setEpc(
+        record: PropertyCompliance,
+        epc: EpcDetailsDataModel,
+    ) = populateEpcFields(
+        record = record,
+        epcCertificateUrl = epc.certificateUrl,
+        epcExpiryDate = epc.expiryDate,
+        epcEnergyRating = epc.energyRating,
+        tenancyStartedBeforeEpcExpiry = epc.tenancyStartedBeforeExpiry,
+        epcExemptionReason = epc.exemptionReason,
+        epcMeesExemptionReason = epc.meesExemptionReason,
+        epcProvideLater = false,
+    )
 
     private fun populateGasSafetyFields(
         record: PropertyCompliance,
@@ -366,30 +430,21 @@ class PropertyComplianceService(
     fun updateGasSafety(
         propertyOwnershipId: Long,
         initialLastModifiedDate: Instant,
-        hasGasSupply: Boolean,
-        gasSafetyCertIssueDate: LocalDate? = null,
-        gasSafetyCertUploadIds: List<Long> = listOf(),
+        gasSafety: GasSafetyDetailsDataModel,
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
 
-        propertyCompliance.apply {
-            populateGasSafetyFields(
-                record = this,
-                hasGasSupply = hasGasSupply,
-                gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-                gasSafetyFileUploadIds = gasSafetyCertUploadIds,
-            )
-        }
+        setGasSafety(propertyCompliance, gasSafety)
 
         propertyComplianceRepository.save(propertyCompliance)
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnershipId,
-            gasSafetyCertUploadIds = gasSafetyCertUploadIds,
+            gasSafetyCertUploadIds = gasSafety.uploadIds,
         )
 
-        if (gasSafetyCertIssueDate != null) {
+        if (gasSafety.issueDate != null) {
             // TODO: PDJB-1926: Remove isGas14MonthExpiryEnabled and use the isGasSafetyCertExpired and gasSafetyCertExpiryDate vals again
             val isGas14MonthExpiryEnabled = featureFlagManager.checkFeature(GAS_CERTIFICATE_14_MONTH_EXPIRY)
             sendCertificateUpdateEmail(
@@ -406,40 +461,25 @@ class PropertyComplianceService(
     fun updateElectricalSafety(
         propertyOwnershipId: Long,
         initialLastModifiedDate: Instant,
-        electricalCertType: CertificateType? = null,
-        eicrExpiryDate: LocalDate? = null,
-        electricalSafetyCertUploadIds: List<Long> = listOf(),
-        eicIssueDate: LocalDate? = null,
-        // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
-        eicExpiryDate: LocalDate? = null,
+        electricalSafety: ElectricalSafetyDetailsDataModel,
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
 
-        propertyCompliance.apply {
-            populateElectricalSafetyFields(
-                record = this,
-                electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
-                eicrExpiryDate = eicrExpiryDate,
-                eicIssueDate = eicIssueDate,
-                // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
-                eicExpiryDate = eicExpiryDate,
-                electricalCertType = electricalCertType,
-            )
-        }
+        setElectricalSafety(propertyCompliance, electricalSafety)
 
         propertyComplianceRepository.save(propertyCompliance)
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnershipId,
             gasSafetyCertUploadIds = emptyList(),
-            electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
-            electricalCertType = electricalCertType,
+            electricalSafetyCertUploadIds = electricalSafety.uploadIds,
+            electricalCertType = electricalSafety.certType,
         )
 
         // TODO PDJB-1679: Remove the eicExpiryDate check when the EIC_ISSUE_DATE flag is removed
-        if (eicrExpiryDate != null || eicIssueDate != null || eicExpiryDate != null) {
-            val isEic = requireNotNull(electricalCertType) == CertificateType.Eic
+        if (electricalSafety.eicrExpiryDate != null || electricalSafety.eicIssueDate != null || electricalSafety.eicExpiryDate != null) {
+            val isEic = requireNotNull(electricalSafety.certType) == CertificateType.Eic
             // TODO PDJB-1679: Remove the flag check when the EIC_ISSUE_DATE flag is removed
             val showEicIssueDate = isEic && featureFlagManager.checkFeature(EIC_ISSUE_DATE)
             sendCertificateUpdateEmail(
@@ -468,31 +508,16 @@ class PropertyComplianceService(
     fun updateEpc(
         propertyOwnershipId: Long,
         initialLastModifiedDate: Instant,
-        epcCertificateUrl: String? = null,
-        epcExpiryDate: LocalDate? = null,
-        epcEnergyRating: String? = null,
-        tenancyStartedBeforeEpcExpiry: Boolean? = null,
-        epcExemptionReason: EpcExemptionReason? = null,
-        epcMeesExemptionReason: MeesExemptionReason? = null,
+        epc: EpcDetailsDataModel,
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
 
-        propertyCompliance.apply {
-            populateEpcFields(
-                record = this,
-                epcCertificateUrl = epcCertificateUrl,
-                epcExpiryDate = epcExpiryDate,
-                epcEnergyRating = epcEnergyRating,
-                tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
-                epcExemptionReason = epcExemptionReason,
-                epcMeesExemptionReason = epcMeesExemptionReason,
-            )
-        }
+        setEpc(propertyCompliance, epc)
 
         propertyComplianceRepository.save(propertyCompliance)
 
-        if (epcCertificateUrl != null) {
+        if (epc.certificateUrl != null) {
             sendCertificateUpdateEmail(
                 propertyCompliance,
                 isExpired = propertyCompliance.isEpcExpired == true,

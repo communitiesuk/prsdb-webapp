@@ -12,11 +12,11 @@ class HmoMandatoryLicenceFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.hmoMandatoryLicence.error.missing",
+                messageKey = "licensing.hmoMandatoryLicence.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.licenceNumber.error.tooLong",
+                messageKey = "licensing.licenceNumber.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
                 validatorArgs = arrayOf("0", "255"),
             ),

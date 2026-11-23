@@ -199,6 +199,45 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         }
     }
 
+    @Nested
+    inner class InactiveOrgAdmin : NestedIntegrationTestWithImmutableData(
+        listOf("data-mockuser-org-landlord-trust.sql", "data-overlay-org-landlord-is-inactive.sql"),
+    ) {
+        // TODO PDJB-1828: Remove the MULTI_USER_ORGANISATIONS setup when the flag is removed
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE setup when the flag is removed
+        @BeforeEach
+        fun enableFeatures() {
+            featureFlagManager.enableFeature(MULTI_USER_ORGANISATIONS)
+            featureFlagManager.enableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Test
+        fun `an inactive org admin sees the organisation inactive banner and no organisation details change links`() {
+            val detailsPage = navigator.goToOrgLandlordDetails()
+
+            assertThat(detailsPage.inactiveLandlordNotificationBanner.content.heading)
+                .hasText("Your organisation’s landlord account has been deactivated. To reactivate it, register a property.")
+            assertThat(detailsPage.organisationNameChangeLink).isHidden()
+            assertThat(detailsPage.organisationAddressChangeLink).isHidden()
+            assertThat(detailsPage.organisationEmailChangeLink).isHidden()
+            assertThat(detailsPage.organisationPhoneNumberChangeLink).isHidden()
+            assertThat(detailsPage.organisationTypeChangeLink).isHidden()
+            assertThat(detailsPage.organisationCharityChangeLink).isHidden()
+            assertThat(detailsPage.companiesHouseChangeLink).isHidden()
+        }
+
+        @Test
+        fun `an inactive org admin sees no contacts change links`() {
+            val detailsPage = navigator.goToOrgLandlordDetails()
+
+            detailsPage.tabs.goToOrganisationContacts()
+
+            assertThat(detailsPage.mainContactCard.getAction("Change")).isHidden()
+            assertThat(detailsPage.leadTrusteeCard.getAction("Change")).isHidden()
+            assertThat(detailsPage.governingBodyMembersLink).isHidden()
+        }
+    }
+
     // TODO PDJB-1828: Remove this nested class when the MULTI_USER_ORGANISATIONS feature flag is removed
     // With the flag off no editors can exist in practice (invitations are flag-gated and the role column
     // defaults to ADMIN), so this only asserts that the flag-off path is a no-op for the view.

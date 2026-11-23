@@ -11,19 +11,15 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.helpers.CertificateExpiryHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
-import uk.gov.communities.prsdb.webapp.services.BeforePdjb1666EicDateService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -43,7 +39,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource, mock(), mock())
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource)
             .fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
     }
 
@@ -63,14 +59,13 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity shows the EIC issue date when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity shows the EIC issue date when the compliance status has an EIC issue date`() {
         // Arrange
         val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(1)
         val propertyCompliance = eicWithIssueDate(issueDate)
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows = electricalSafetyViewModelFactory.fromEntity(propertyCompliance, complianceStatusWithEicIssueDate(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -91,14 +86,13 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity shows an EIC as expired more than five years after its issue date when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity shows an EIC as expired more than five years after its issue date`() {
         // Arrange
         val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(5).minusDays(1)
         val propertyCompliance = eicWithIssueDate(issueDate)
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows = electricalSafetyViewModelFactory.fromEntity(propertyCompliance, complianceStatusWithEicIssueDate(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -119,15 +113,16 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         )
     }
 
+    // TODO PDJB-1679: Remove this test when the EIC_ISSUE_DATE flag is removed
     @Test
-    fun `fromEntity continues to show an EIC expiry date when EIC_ISSUE_DATE is disabled`() {
+    fun `fromEntity shows the EIC expiry date when the compliance status has no EIC issue date`() {
         // Arrange
         val issueDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusYears(1)
         val propertyCompliance = eicWithIssueDate(issueDate)
-        val factory = createFactory(eicIssueDateEnabled = false)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows =
+            electricalSafetyViewModelFactory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -137,7 +132,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity continues to show an EICR expiry date when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity continues to show an EICR expiry date`() {
         // Arrange
         val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).plusYears(1)
         val propertyCompliance =
@@ -145,10 +140,10 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 .withPropertyOwnership()
                 .withElectricalSafety(expiryDate = expiryDate, certType = CertificateType.Eicr)
                 .build()
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows =
+            electricalSafetyViewModelFactory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -161,17 +156,17 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity does not add a date row for a missing EIC when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity does not add a date row for a missing EIC`() {
         // Arrange
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(false)
                 .withElectricalCertType(CertificateType.Eic)
                 .build()
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows =
+            electricalSafetyViewModelFactory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
 
         // Assert
         assertEquals(1, rows.size)
@@ -179,7 +174,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity retains an expired EICR expiry date when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity retains an expired EICR expiry date`() {
         // Arrange
         val expiryDate = LocalDate.now(DateTimeHelper.UK_ZONE).minusDays(1)
         val propertyCompliance =
@@ -187,10 +182,10 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 .withPropertyOwnership()
                 .withElectricalSafetyExpiryDate(expiryDate, CertificateType.Eicr)
                 .build()
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows =
+            electricalSafetyViewModelFactory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -200,7 +195,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     }
 
     @Test
-    fun `fromEntity does not add a date row for a provide later EIC when EIC_ISSUE_DATE is enabled`() {
+    fun `fromEntity does not add a date row for a provide later EIC`() {
         // Arrange
         val propertyCompliance =
             PropertyComplianceBuilder()
@@ -208,10 +203,10 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 .withElectricalCertType(CertificateType.Eic)
                 .withElectricalSafetyCertProvideLater()
                 .build()
-        val factory = createFactory(eicIssueDateEnabled = true)
 
         // Act
-        val rows = factory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
+        val rows =
+            electricalSafetyViewModelFactory.fromEntity(propertyCompliance, statusDerivingService.getComplianceStatus(propertyCompliance))
 
         // Assert
         assertEquals(
@@ -225,30 +220,22 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         )
     }
 
-    // TODO PDJB-1673: Use issue-date-backed fixtures when EIC issue dates are stored directly.
     private fun eicWithIssueDate(issueDate: LocalDate): PropertyCompliance =
         PropertyComplianceBuilder()
             .withPropertyOwnership()
-            .withElectricalSafety(expiryDate = CertificateExpiryHelper.getEicExpiryDate(issueDate), certType = CertificateType.Eic)
+            .withElectricalSafety(certType = CertificateType.Eic)
+            .withEicIssueDate(issueDate)
             .build()
-            .also { BeforePdjb1666EicDateService().applyIssueDate(it, issueDate) }
 
-    private fun createFactory(eicIssueDateEnabled: Boolean): ElectricalSafetyViewModelFactory {
-        val featureFlagManager = mock<FeatureFlagManager>()
-        whenever(featureFlagManager.checkFeature(EIC_ISSUE_DATE)).thenReturn(eicIssueDateEnabled)
-        return ElectricalSafetyViewModelFactory(
-            mockUploadService,
-            mockMessageSource,
-            BeforePdjb1666EicDateService(),
-            featureFlagManager,
-        )
-    }
+    // statusDerivingService has EIC_ISSUE_DATE off, so add the issue date the service sets when the flag is on
+    private fun complianceStatusWithEicIssueDate(propertyCompliance: PropertyCompliance) =
+        statusDerivingService.getComplianceStatus(propertyCompliance).copy(eicIssueDate = propertyCompliance.eicIssueDate)
 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
         private val electricalSafetyViewModelFactory =
-            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource, mock(), mock())
+            ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 

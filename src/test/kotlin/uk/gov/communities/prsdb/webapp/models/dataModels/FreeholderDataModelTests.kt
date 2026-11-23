@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Freeholder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -34,17 +33,17 @@ class FreeholderDataModelTests {
     }
 
     @Test
-    fun `fromFreeholder maps a postal address freeholder`() {
+    fun `fromFreeholder maps a postal freeholder with only their name`() {
         // Arrange
-        val address = Address(AddressDataModel("1 Example Road, EG1 2AB"))
-        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), name = "Bob Freeholder", address = address)
+        val freeholder = Freeholder(MockLandlordData.createPropertyOwnership(), name = "Bob Freeholder")
 
         // Act
         val dataModel = FreeholderDataModel.fromFreeholder(freeholder)
 
         // Assert
-        assertEquals("1 Example Road, EG1 2AB", dataModel.address?.singleLineAddress)
+        assertTrue(dataModel.detailsKnown)
         assertNull(dataModel.email)
+        assertNull(dataModel.address)
     }
 
     @Test

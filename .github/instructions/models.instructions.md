@@ -39,7 +39,7 @@ class RentAmountFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.rentAmount.error",
+                messageKey = "tenancyDetails.rentAmount.error",
                 validatorType = PositiveBigDecimalValidator::class,
             ),
         ],

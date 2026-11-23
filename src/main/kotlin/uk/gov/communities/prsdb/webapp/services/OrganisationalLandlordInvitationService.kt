@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.helpers.EmailHelper.Companion.sendEmailAndLogFailures
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
@@ -86,7 +86,7 @@ class OrganisationalLandlordInvitationService(
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             )
         runAfterTransactionCommits {
-            sendEmailAndLogFailures("the organisational landlord invitation acceptance confirmation email") {
+            sendNotificationAndLogFailures("the organisational landlord invitation acceptance confirmation email") {
                 acceptedEmailSender.sendEmail(email, confirmationEmail)
             }
         }

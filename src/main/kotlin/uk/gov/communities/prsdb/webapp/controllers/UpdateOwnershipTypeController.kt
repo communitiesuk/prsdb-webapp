@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.owne
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
+// TODO PDJB-2016: delete with the ASSOCIATED_PARTIES flag; UpdateOwnershipController replaces it.
 @PrsdbController
 @RequestMapping(UPDATE_OWNERSHIP_TYPE_ROUTE)
 @AllowIfLandlord

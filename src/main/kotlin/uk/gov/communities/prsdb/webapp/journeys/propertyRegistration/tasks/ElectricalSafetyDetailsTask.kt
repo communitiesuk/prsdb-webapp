@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.EIC_ISSUE_DATE
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.SingleParent
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.ElectricalCertExpiryStatus
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
 @JourneyFrameworkComponent("propertyRegistrationElectricalSafetyDetailsTask")
 class ElectricalSafetyDetailsTask(
@@ -141,6 +143,15 @@ class ElectricalSafetyDetailsTask(
                 routeSegment(CheckEicUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadEicStep.isComplete() }
                 nextStep { exitStep }
+                backDestination {
+                    val cyaState = dependencies as? CheckYourAnswersJourneyState
+                    if (cyaState?.checkingAnswersFor == CheckEicUploadsStep.ROUTE_SEGMENT) {
+                        cyaState.returnToCyaPageDestination
+                    } else {
+                        // TODO PDJB-1679: Always use the EIC issue date step when the EIC_ISSUE_DATE flag is removed
+                        Destination(if (journey.isEicIssueDateEnabled) journey.eicIssueDateStep else journey.eicExpiryDateStep)
+                    }
+                }
                 savable()
             }
             step(journey.removeEicUploadStep) {
@@ -200,6 +211,14 @@ class ElectricalSafetyDetailsTask(
                 routeSegment(CheckEicrUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadEicrStep.isComplete() }
                 nextStep { exitStep }
+                backDestination {
+                    val cyaState = dependencies as? CheckYourAnswersJourneyState
+                    if (cyaState?.checkingAnswersFor == CheckEicrUploadsStep.ROUTE_SEGMENT) {
+                        cyaState.returnToCyaPageDestination
+                    } else {
+                        Destination(journey.eicrExpiryDateStep)
+                    }
+                }
                 savable()
             }
             step(journey.removeEicrUploadStep) {
