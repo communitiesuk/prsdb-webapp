@@ -1,13 +1,11 @@
-banner:
-  heading: New passphrase
-  body: The passphrase is
-paragraph:
-  one: This passphrase helps you to authenticate a landlord over the phone.
-  two: >
-    Prefer authenticating by email where possible, or SMS as a second choice. Use post only as a last resort. To authenticate a landlord
-    by email or SMS, send this passphrase to their stored contact details, ask them to repeat it to you (over the phone), and check it
-    matches. Always generate a new passphrase for every authentication attempt.
-  three: >
-    For postal-only landlords, send this passphrase by post and record it against their customer record. When they later call the
-    contact centre and you need them to authenticate, ask them to repeat their passphrase to you and check it matches their customer record.
+heading: New passphrase
+passphrase:
+  label: The passphrase is
+  review: Check this passphrase before sending it. If it could be interpreted as offensive or inappropriate, generate another passphrase.
+letter:
+  heading: Use this passphrase in a letter
+  body: >
+    Include this passphrase in a letter to the landlord and record it against their customer record.
+    This is a long-lived secret: when they call the contact centre in future, ask them to repeat it
+    and check it matches their customer record.
 generateAnother: Generate another passphrase
