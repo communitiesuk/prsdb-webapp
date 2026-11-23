@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
-import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -16,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendAddedToPropertyNotifications
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper.Companion.sendNotificationAndLogFailures
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
@@ -180,11 +180,15 @@ class PropertyRegistrationService(
             sendConfirmationEmail(registrationData, landlord, propertyOwnership, landlordReactivated)
         }
 
-        sendAddedToPropertyNotifications("freeholder", registrationData.freeholders.orEmpty(), propertyOwnership) { freeholder ->
+        sendAddedToPropertyNotifications("freeholder", registrationData.freeholders.orEmpty(), propertyOwnership.id) { freeholder ->
             associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
         }
 
-        sendAddedToPropertyNotifications("superior landlord", registrationData.superiorLandlords, propertyOwnership) { superiorLandlord ->
+        sendAddedToPropertyNotifications(
+            "superior landlord",
+            registrationData.superiorLandlords,
+            propertyOwnership.id,
+        ) { superiorLandlord ->
             associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
         }
 
@@ -209,28 +213,6 @@ class PropertyRegistrationService(
                     propertyOwnership,
                     landlord,
                 )
-            }
-        }
-    }
-
-    private fun <T> sendAddedToPropertyNotifications(
-        partyDescription: String,
-        parties: List<T>,
-        propertyOwnership: PropertyOwnership,
-        sendNotification: (T) -> AssociatedPartyNotificationOutcome?,
-    ) {
-        parties.forEachIndexed { index, party ->
-            val partyLabel = "$partyDescription ${index + 1}"
-            sendNotificationAndLogFailures(
-                "the $partyLabel added-to-property notification for property ownership ${propertyOwnership.id}",
-            ) {
-                if (sendNotification(party) == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
-                    println(
-                        "Not sending $partyLabel added-to-property notification " +
-                            "for property ownership ${propertyOwnership.id}: " +
-                            "details are fully redacted",
-                    )
-                }
             }
         }
     }
