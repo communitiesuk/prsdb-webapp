@@ -58,11 +58,11 @@ confirmLandlordForProperty:
 rejectionConfirmation:
   pageTitle: Joint landlord invitation rejected
   banner:
-    heading: Invite rejected
-    body: "You’ve told us that you’re not a landlord for {0}"
+    heading: Invitation rejected
   paragraph:
-    one: We’ve emailed this property’s landlords to let them know you rejected this invite.
-    two: There’s nothing else you need to do.
+    one: "You’ve told us that you’re not a landlord for:"
+    two: We’ve emailed the property’s landlords to let them know you rejected this invitation.
+    three: There’s nothing else you need to do.
 confirmation:
   banner:
     heading: Added as joint landlord

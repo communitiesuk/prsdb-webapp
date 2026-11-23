@@ -111,7 +111,7 @@ class AcceptOrRejectJointLandlordInvitationController(
                 ?: throw PrsdbWebException("No joint landlord invitation rejection data found in this session")
 
         val modelAndView = ModelAndView("invitationRejectedConfirmation")
-        modelAndView.addObject("propertyAddress", propertyAddress)
+        modelAndView.addObject("addressParts", propertyAddress.split("\n"))
         return modelAndView
     }
 

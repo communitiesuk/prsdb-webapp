@@ -372,14 +372,14 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @Test
         fun `getRejectionConfirmation is accessible without authentication and returns 200 with session data`() {
             whenever(invitationService.getRejectedPropertyAddressFromSession())
-                .thenReturn("Flat 1, 11 Elm Drive, London, NW8 2DK")
+                .thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
 
             mvc
                 .get(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("propertyAddress", "Flat 1, 11 Elm Drive, London, NW8 2DK")
+                        attribute("addressParts", listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"))
                     }
                     view { name("invitationRejectedConfirmation") }
                 }
