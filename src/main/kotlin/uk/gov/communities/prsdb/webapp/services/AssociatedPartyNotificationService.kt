@@ -26,6 +26,8 @@ class AssociatedPartyNotificationService(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
     ): AssociatedPartyNotificationOutcome =
+        // TODO PDJB-1989: Remove this check once the superior landlord email is implemented
+        // and the shared helper returns a non-nullable outcome.
         checkNotNull(
             sendNotificationToAssociatedParty(
                 name = freeholder.name,
