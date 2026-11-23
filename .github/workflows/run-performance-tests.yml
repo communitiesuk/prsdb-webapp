@@ -93,7 +93,7 @@ jobs:
     env:
       NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition }}
       EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
-      NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: ${{ secrets.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION }}
+      NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: ${{ vars.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION || secrets.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION }}
       NFT_RESET_COMPATIBLE_APP_SHA: ${{ vars.NFT_RESET_COMPATIBLE_APP_SHA }}
     permissions:
       contents: read
@@ -1067,6 +1067,8 @@ jobs:
         with:
           mode: qa
       - name: Restore NFT orchestrator credentials for private recovery checkpoints
+        id: restore_orchestrator_credentials
+        if: always()
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
@@ -1078,7 +1080,7 @@ jobs:
           NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
         run: node scripts/performance-tests/nft-vpc-restore.mjs mark-qa-verified
       - name: Store post-reset QA checkpoint privately
-        if: always()
+        if: always() && steps.restore_orchestrator_credentials.outcome == 'success'
         run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
 
   restore-async-after-database-reset:
@@ -1167,16 +1169,21 @@ jobs:
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
       needs.restore-maintenance-schedules.result != 'success' &&
-      !(needs.restore-dataset.result != 'success' && needs.stop-writers-for-reset.result == 'success')
+      needs.restore-dataset.outputs.restore-task-definition != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require operator recovery
+        env:
+          NFT_RESTORE_OUTCOME: ${{ needs.restore-dataset.result }}
         run: |
           {
             echo '### NFT maintenance recovery required'
             echo 'The seven maintenance schedules were not verified in their exact original states. If database reset, app QA, or async recovery failed, leave any paused schedules disabled.'
             echo 'Use this run’s private recovery checkpoint and the NFT recovery procedure; do not enable schedules against an unverified schema.'
+            if [ "$NFT_RESTORE_OUTCOME" != 'success' ]; then
+              echo 'The NFT seed restore failed, so the QA database reset was not run and the database state is unverified. Do not restart the app or async worker, or re-enable paused schedules, until manual recovery verifies the database. Use the private checkpoint and NFT recovery procedure before restarting writers.'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
           echo '::error::NFT maintenance schedule recovery is incomplete; operator action is required.'
           exit 1

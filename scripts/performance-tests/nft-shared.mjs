@@ -29,7 +29,7 @@ export function environment(container) {
   return Object.fromEntries((container.environment ?? []).map(({name, value}) => [name, value]));
 }
 
-function registrationCopy(task) {
+export function registrationCopy(task) {
   const copy = structuredClone(task);
   for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
     'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];

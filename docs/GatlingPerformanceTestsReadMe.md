@@ -121,18 +121,97 @@ properties and organisations, two-second pauses, a five-minute ramp and a fiftee
 It requires zero request failures and exact journey completions. Insufficient or overlapping fixture
 pools fail closed; randomized seed eligibility is not assumed to guarantee capacity.
 
-The workflow records non-secret ownership and recovery metadata for the exact run, workers, services
+The workflow records ownership and recovery metadata for the exact run, workers, services
 and simulator state. It records the async service's original task definition and desired count before
 stopping it, verifies its recorded tasks have stopped, and keeps it stopped through the QA reset.
 Cleanup independently attempts worker and readiness recovery, stops actual
 writers before the QA reset and fails closed if required recovery state is missing. It then resets QA,
 restarts the app and verifies the required QA properties and links. A separate recovery job restores
-the recorded async desired count after a successful reset even when app recovery or QA verification
-fails. If reset fails or ownership state is unavailable, the async worker remains stopped for manual
-reconciliation to avoid writing to a potentially incomplete database. Preserve recovery artifacts and
-investigate a failed or missing-state cleanup before retrying; do not fabricate state. The manual
+the recorded async revision and desired count only after the reset, app recovery and QA verification
+succeed. If they fail or ownership state is unavailable, the async worker remains stopped for manual
+reconciliation to avoid writing to a potentially incomplete database. Preserve private recovery
+checkpoints and investigate a failed or missing-state cleanup before retrying; do not fabricate state. The manual
 **Reset Database - NFT** workflow can instead verify the existing QA baseline with `verify-only`.
 No unattended restoration of modified environment settings is claimed.
+
+Recovery checkpoints are stored in the private NFT seed bucket under
+`performance-recovery/<run-id>/<attempt>/` for seven days, not in GitHub artifacts. Gatling stdout,
+stderr and the report archive are also uploaded privately. Public output contains only bounded
+progress and workflow summaries; the workflow summary provides the authorised operator's command to
+download the private report. Do not attach checkpoints, raw logs or reports to public issues, pull
+requests or artifacts. Raw Gatling logs are captured in mode-0600 runner-temporary files; private
+upload failure fails the job.
+
+### Scan-result worker gate
+
+The workflow records the original async task revision and desired count, including zero, and requires
+an active baseline revision. It stops actual worker tasks during database replacement. A nonempty or
+unverified scan-result queue blocks replacement; the scripts do not purge, receive or delete messages.
+
+Before correctness and load stages, `start-async` clones the original worker task, retaining its roles
+and NFT destinations, enables only the scan-result worker profile and pins the running candidate app's
+image digest. It does not activate the web server or email consumer. The gate checks queue identity,
+ECS rollout and the actual worker task and image. These checks do not prove the real listener or
+scanning path works: an approved live upload canary remains necessary.
+
+Candidate ownership and partial failures are retained in the private worker checkpoint. Cleanup drains
+and stops candidate tasks, restores the baseline revision at zero, and retires only an unreferenced
+run-owned candidate. Ambiguous ownership, unexpected service references or draining tasks block reset.
+The normal compatibility path requires the workflow/reset SHA to match the deployed app image and
+checks the app and worker images. An explicit differing `expected-app-sha` requires the compatibility
+task-definition variable (or legacy secret) and app-SHA variable; missing or mismatched evidence
+fails closed. Never restart an old image against an unverified schema.
+
+Before schedules or writers change, the workflow discovers and checkpoints the exact active managed
+restore task revision and immutable dump identity. Its environment must declare `NFT_DUMP_VERSION`,
+`NFT_DUMP_BYTES` and `NFT_DUMP_SHA256` independently of `NFT_CERTIFICATE_KEY`,
+`NFT_CERTIFICATE_VERSION`, `NFT_CERTIFICATE_DUMP_VERSION`, `NFT_CERTIFICATE_DUMP_BYTES` and
+`NFT_CERTIFICATE_DUMP_SHA256`. The three certificate-bound dump fields must exactly match the restore
+dump fields. The certificate key must be `seeding/certificate_template.png` or
+`seeding/certificate-references/<positive-run-id>-<positive-attempt>.png`. The workflow checks the
+exact certificate version in `prsdb-uploaded-files-nft` before schedule changes and again before
+launch; unavailable or mismatched identities stop the run. The optional `restore-task-definition`
+input is an exceptional override.
+
+The seed generator copies the versioned template to a run-owned key and publishes a private,
+versioned manifest binding that copy to the exact dump upload. Deploy an application version that
+accepts the per-run key before deploying or running the new seed task. For a new baseline, an
+authorised operator must retrieve the exact manifest version recorded in that seed task's private
+dump log, use its dump and certificate fields together to update the managed restore task and its
+scoped policy, and deploy those changes separately. Do not select the latest dump or manifest by key.
+The existing baseline uses a historically verified legacy certificate identity; local tests do not
+establish that version's current availability.
+
+The 700-day retention period starts when a certificate version becomes noncurrent, not when its dump
+is restored. If the pinned version has expired or is inaccessible, verify access and regenerate the
+seed with matching published metadata when necessary; do not substitute the latest object. The
+NFT-only orchestrator policy extension requires separate approval and application; local mocks do not
+prove live queue, listener or access readiness.
+An approved operator must check the exclusive test window, absence of incoming or unowned work, and
+queue/DLQ health before a live run.
+
+### Retry or inspect recovery
+
+Rerun a failed recovery job in the same workflow run, or use `gh run rerun <run-id> --failed`.
+The recovery selector retrieves that run's checkpoints and chooses the latest valid attempt. Do not
+retry the workload or dataset restore in the same run: start a fresh run for those.
+
+For private inspection, use an already-approved NFT operator profile with access to the recovery
+prefix and its KMS key. Substitute the run and attempt values from GitHub Actions:
+
+```sh
+export AWS_PROFILE='<approved NFT profile>'
+export AWS_REGION=eu-west-2
+export GITHUB_RUN_ID=123456
+export GITHUB_RUN_ATTEMPT=2
+export RUNNER_TEMP="$HOME/.cache/prsdb-nft-recovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+mkdir -p -m 700 "$RUNNER_TEMP"
+node scripts/performance-tests/nft-recovery-state.mjs download
+node scripts/performance-tests/nft-recovery-state.mjs select
+```
+
+The selected state remains under `RUNNER_TEMP`. The workflow role is GitHub-OIDC-only; it does not
+grant direct operator-profile access.
 
 Large datasets can require additional app startup time; ensure the environment's startup readiness
 configuration is appropriate before an approved run. Run

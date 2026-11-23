@@ -4,15 +4,20 @@ import {pathToFileURL} from 'node:url';
 import {dirname, join} from 'node:path';
 import {isDeepStrictEqual} from 'node:util';
 import {
-  account, appName, awsCommand, cloneForScanWorker, cluster, region, requireCondition, scanQueueArn,
-  scanQueueName, scanQueueUrl, servicesFactory, stable, taskPrefix, waitFactory,
+  account, appName, awsCommand, cluster, region, servicesFactory, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
+import {cloneForScanWorker, scanQueueArn, scanQueueName, scanQueueUrl} from './nft-scan-worker.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
-import {recoveryOwner, requireFreshAttempt, uploadRecoveryCheckpoints} from './nft-recovery-state.mjs';
+import {recoveryOwner, requireFreshAttempt, SafeRecoveryError, uploadRecoveryCheckpoints} from './nft-recovery-state.mjs';
+
+function requireCondition(condition, message) {
+  if (!condition) throw new SafeRecoveryError(message);
+}
 
 const asyncName = 'nft-async-worker';
 const restoreTaskFamily = 'prsdb-nft-vpc-restore-performance';
 const restoreContainerName = 'nft-vpc-restore';
+const certificateBucket = 'prsdb-uploaded-files-nft';
 const maintenanceGroup = 'nft-scheduled-tasks-group';
 const scheduledCluster = 'nft-scheduled-tasks';
 const scheduledClusterArn = `arn:aws:ecs:${region}:${account}:cluster/${scheduledCluster}`;
@@ -40,6 +45,11 @@ function validate(config) {
   requireCondition(/^\d+-\d+$/.test(config.runId ?? ''), 'Expected GitHub run ID and attempt');
 }
 
+function immutableVersion(value) {
+  return typeof value === 'string' && value.length > 0 && value === value.trim() &&
+    !/^(?:null|none|undefined)$/i.test(value) && !/[\x00-\x1f\x7f]/.test(value);
+}
+
 function restoreDefinitionIdentity(taskDefinition, taskDefinitionArn) {
   requireCondition(taskDefinition?.taskDefinitionArn === taskDefinitionArn &&
     taskDefinition.family === restoreTaskFamily && taskDefinition.status === 'ACTIVE' &&
@@ -56,11 +66,49 @@ function restoreDefinitionIdentity(taskDefinition, taskDefinitionArn) {
   const dumpBytesValue = environment.NFT_DUMP_BYTES;
   const dumpBytes = Number(dumpBytesValue);
   const dumpSha256 = environment.NFT_DUMP_SHA256;
-  requireCondition(typeof dumpVersion === 'string' && dumpVersion.trim() !== '' &&
+  requireCondition(immutableVersion(dumpVersion) &&
     /^\d+$/.test(dumpBytesValue ?? '') && Number.isSafeInteger(dumpBytes) && dumpBytes > 0 &&
     /^[a-f0-9]{64}$/.test(dumpSha256 ?? ''),
   'Managed NFT restore task dump identity is invalid');
-  return {taskDefinitionArn, dumpVersion, dumpBytes, dumpSha256};
+  const certificateKey = environment.NFT_CERTIFICATE_KEY;
+  const certificateVersion = environment.NFT_CERTIFICATE_VERSION;
+  requireCondition(typeof certificateKey === 'string' &&
+    (certificateKey === 'seeding/certificate_template.png' ||
+      /^seeding\/certificate-references\/[1-9][0-9]*-[1-9][0-9]*\.png$/.test(certificateKey)) &&
+    immutableVersion(certificateVersion) &&
+    environment.NFT_CERTIFICATE_DUMP_VERSION === dumpVersion &&
+    environment.NFT_CERTIFICATE_DUMP_BYTES === dumpBytesValue &&
+    environment.NFT_CERTIFICATE_DUMP_SHA256 === dumpSha256,
+  'Managed NFT restore certificate identity or dump binding is invalid; publish matching immutable seed metadata');
+  return {taskDefinitionArn, dumpVersion, dumpBytes, dumpSha256, certificateKey, certificateVersion};
+}
+
+async function checkCertificate(aws, definition) {
+  let object;
+  try {
+    object = await aws('s3api', 'head-object', {
+      Bucket: certificateBucket, Key: definition.certificateKey, VersionId: definition.certificateVersion,
+    });
+  } catch {
+    throw new SafeRecoveryError('Pinned NFT certificate version is unavailable or inaccessible; verify access or regenerate the seed and publish matching metadata');
+  }
+  requireCondition(object?.VersionId === definition.certificateVersion &&
+    Number.isSafeInteger(object.ContentLength) && object.ContentLength > 0 &&
+    (object.DeleteMarker === undefined || object.DeleteMarker === false),
+  'Pinned NFT certificate version is missing, empty, or invalid; verify the seed or regenerate it and publish matching metadata');
+}
+
+function requireCertificateCheckpoint(state, config) {
+  const definition = state.restoreDefinition;
+  requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition &&
+    definition?.taskDefinitionArn === config.taskDefinition &&
+    typeof definition.certificateKey === 'string' &&
+    (definition.certificateKey === 'seeding/certificate_template.png' ||
+      /^seeding\/certificate-references\/[1-9][0-9]*-[1-9][0-9]*\.png$/.test(definition.certificateKey)) &&
+    immutableVersion(definition.certificateVersion) && immutableVersion(definition.dumpVersion) &&
+    Number.isSafeInteger(definition.dumpBytes) && definition.dumpBytes > 0 &&
+    /^[a-f0-9]{64}$/.test(definition.dumpSha256 ?? ''),
+  'NFT certificate preflight checkpoint is missing or invalid; resolve the pinned restore task before mutation');
 }
 
 export async function resolveRestoreTaskDefinition(config, overrides = {}) {
@@ -68,7 +116,9 @@ export async function resolveRestoreTaskDefinition(config, overrides = {}) {
   const deps = runtime(overrides);
   const {aws, state, persist} = deps;
   await identity(aws);
-  let taskDefinitionArn = config.taskDefinition;
+  requireCondition(state.runId === undefined || state.runId === config.runId,
+    'NFT recovery checkpoint belongs to another workflow');
+  let taskDefinitionArn = config.taskDefinition ?? state.taskDefinition;
   if (!taskDefinitionArn) {
     const listed = await aws('ecs', 'list-task-definitions', {
       familyPrefix: restoreTaskFamily, status: 'ACTIVE', sort: 'DESC', maxResults: 100,
@@ -90,7 +140,8 @@ export async function resolveRestoreTaskDefinition(config, overrides = {}) {
     'NFT recovery checkpoint belongs to another restore task revision');
   requireCondition(state.restoreDefinition === undefined ||
     isDeepStrictEqual(state.restoreDefinition, restoreDefinition),
-  'NFT recovery checkpoint has a different immutable dump identity');
+  'NFT recovery checkpoint has a different immutable dump or certificate identity');
+  await checkCertificate(aws, restoreDefinition);
   state.taskDefinition = taskDefinitionArn;
   state.restoreDefinition = restoreDefinition;
   state.runId = config.runId;
@@ -201,6 +252,7 @@ export async function pauseMaintenanceSchedules(config, overrides = {}) {
   const deps = runtime(overrides);
   const {aws, state, log} = deps;
   await identity(aws);
+  requireCertificateCheckpoint(state, config);
   requireCondition(state.runId === config.runId && state.taskDefinition === config.taskDefinition &&
     Array.isArray(state.maintenanceScheduleSnapshot) && state.maintenanceScheduleSnapshot.length === maintenanceSchedules.size,
   'NFT maintenance schedule snapshot is missing or belongs to another workflow');
@@ -540,6 +592,7 @@ export async function stopNftWriters(config, overrides = {}) {
   requireCondition(state.maintenancePaused === true,
     'NFT maintenance schedules must be paused and drained before stopping writers');
   await identity(aws);
+  requireCertificateCheckpoint(state, config);
   await noScheduledWriters(aws);
   const {app, simulator} = await servicesFactory(aws)();
   const asyncWorker = await asyncService(aws);
@@ -549,8 +602,8 @@ export async function stopNftWriters(config, overrides = {}) {
   const restoreDefinition = restoreDefinitionIdentity(restoreTask, config.taskDefinition);
   requireCondition(state.taskDefinition === undefined || state.taskDefinition === config.taskDefinition,
     'NFT recovery checkpoint belongs to another restore task revision');
-  requireCondition(state.restoreDefinition === undefined || isDeepStrictEqual(state.restoreDefinition, restoreDefinition),
-    'NFT recovery checkpoint has a different immutable dump identity');
+  requireCondition(isDeepStrictEqual(state.restoreDefinition, restoreDefinition),
+    'NFT recovery checkpoint has a different immutable dump or certificate identity');
   state.taskDefinition = config.taskDefinition;
   state.restoreDefinition = restoreDefinition;
   state.runId = config.runId;
@@ -742,7 +795,7 @@ export async function restoreInVpc(config, overrides = {}) {
   const restoreDefinition = restoreDefinitionIdentity(taskDefinition, config.taskDefinition);
   requireCondition(state.restoreDefinition !== undefined &&
     isDeepStrictEqual(state.restoreDefinition, restoreDefinition),
-  'NFT restore task or immutable dump identity changed after compatibility checks');
+  'NFT restore task or immutable dump or certificate identity changed after compatibility checks');
   const essential = taskDefinition.containerDefinitions.filter(container => container.essential !== false);
   requireCondition(taskDefinition.containerDefinitions.length === 1 &&
     essential.length === 1 && essential[0].name === 'nft-vpc-restore',
@@ -753,6 +806,7 @@ export async function restoreInVpc(config, overrides = {}) {
     streamPrefix: worker.logConfiguration?.options?.['awslogs-stream-prefix'],
   };
   requireCondition(!state.launchAttempted, 'Restore already launched; use cleanup, not another restore');
+  await checkCertificate(aws, state.restoreDefinition);
   state.startedBy = `nft-restore-${config.runId}`;
   state.clientToken = randomUUID();
   state.launchAttempted = true;
@@ -1003,7 +1057,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     };
     const state = await readFile(path, 'utf8').then(JSON.parse).catch(error => {
       if (['resolve-task-definition', 'snapshot-maintenance', 'stop'].includes(command) && error.code === 'ENOENT') return {};
-      throw new Error('NFT restore state is missing or unreadable; manual recovery required');
+      throw new SafeRecoveryError('NFT restore state is missing or unreadable; manual recovery required');
     });
     if (command === 'start-async') config.taskDefinition = state.taskDefinition;
     if (['cleanup', 'pause-maintenance', 'restore-maintenance', 'mark-qa-verified', 'start-after-reset', 'restore-async'].includes(command)) {
@@ -1051,12 +1105,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       await cleanupNftEnvironment(config, async () => {
         return await readFile(readinessPath, 'utf8').then(JSON.parse).catch(error => {
           if (error.code === 'ENOENT' && process.env.READINESS_STATE_REQUIRED !== 'true' && !state.readinessAttempted) return null;
-          throw new Error('Readiness state cannot be read safely');
+          throw new SafeRecoveryError('Readiness state cannot be read safely');
         });
       }, deps);
-    } else throw new Error('Unknown NFT VPC lifecycle operation');
+    } else throw new SafeRecoveryError('Unknown NFT VPC lifecycle operation');
   } catch (error) {
-    console.log(`NFT VPC restore details: ${error.message}`);
+    if (error instanceof SafeRecoveryError) console.log(`NFT VPC restore details: ${error.message}`);
     console.error('NFT VPC operation failed; keep the app stopped until recovery succeeds.');
     process.exitCode = 1;
   } finally {

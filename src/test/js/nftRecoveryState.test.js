@@ -50,7 +50,7 @@ function runRecovery(setupResult, args, extraEnv = {}) {
       GITHUB_RUN_ID: '123',
       GITHUB_RUN_ATTEMPT: '2',
       AWS_ACCESS_KEY_ID: 'dummy',
-      AWS_SECRET_ACCESS_KEY: 'dummy',
+      AWS_SECRET_ACCESS_KEY: 'dummy', // pragma: allowlist secret
       AWS_SESSION_TOKEN: 'dummy',
       AWS_EC2_METADATA_DISABLED: 'true',
       AWS_ENDPOINT_URL: 'http://127.0.0.1:9',
@@ -134,6 +134,20 @@ test('failed private checkpoint upload sanitizes AWS output and errors', async t
   assert.match(result.stderr, /operator recovery may be required/);
 });
 
+test('recovery CLI reports safe validation details but hides unexpected filesystem paths', async t => {
+  const state = await setup(t);
+  const validation = runRecovery(state, ['require-fresh-attempt']);
+  assert.equal(validation.status, 1);
+  assert.match(validation.stderr, /fresh workflow run and seed restore/);
+
+  const unexpected = runRecovery(state, ['select'], {
+    RUNNER_TEMP: join(state.directory, 'private-payload-canary'),
+  });
+  assert.equal(unexpected.status, 1);
+  assert.match(unexpected.stderr, /operator recovery may be required/);
+  assert.doesNotMatch(unexpected.stdout + unexpected.stderr, /private-payload-canary/);
+});
+
 test('failed private checkpoint retrieval sanitizes AWS output and errors', async t => {
   const state = await setup(t);
 
@@ -187,4 +201,56 @@ test('private retrieval selects only this run and validated prior attempts', asy
     args.includes('prsdb-seed-data-nft') && args.includes('performance-recovery/123/')));
   assert.equal(calls.some(args => args.some(value => value.includes('/123/3/'))), false);
   assert.equal(calls.some(args => args.some(value => value.includes('/999/'))), false);
+});
+
+function workflowJob(workflow, name) {
+  return workflow.split(/(?=^  [\w-]+:\s*$)/m)
+    .find(job => new RegExp(`^  ${name}:\\s*$`, 'm').test(job));
+}
+
+function workflowStep(job, name) {
+  return job.split(/(?=^      - (?:name|uses):)/m)
+    .find(step => new RegExp(`^      - name: ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'm').test(step));
+}
+
+test('failed seed restore requires actionable operator recovery without restarting writers', async () => {
+  const workflow = await readFile(workflowPath, 'utf8');
+  const recoveryJob = workflowJob(workflow, 'maintenance-recovery-required');
+  const recoveryCondition = /^    if: >-\n((?:      .*\n)+)/m.exec(recoveryJob)?.[1];
+  const recoveryStep = workflowStep(recoveryJob, 'Require operator recovery');
+
+  assert.ok(recoveryCondition, 'operator recovery must have an explicit job condition');
+  assert.match(recoveryCondition, /needs\.restore-dataset\.outputs\.restore-task-definition != ''/,
+    'recovery warning should be limited to restore attempts that resolved their owned task');
+  assert.match(recoveryCondition, /needs\.restore-maintenance-schedules\.result != 'success'/);
+  assert.doesNotMatch(recoveryCondition,
+    /!\(needs\.restore-dataset\.result != 'success' && needs\.stop-writers-for-reset\.result == 'success'\)/,
+    'a successful stop-writer cleanup must not suppress the recovery warning after restore failure');
+  assert.match(recoveryStep, /NFT seed restore failed.*QA database reset was not run/);
+  assert.match(recoveryStep, /database state is unverified\. Do not restart/);
+
+  assert.match(workflowJob(workflow, 'reset-database'), /needs\.restore-dataset\.result == 'success'/,
+    'QA reset must remain gated on a verified seed restore');
+  assert.match(workflowJob(workflow, 'restore-app-after-database-reset'), /needs\.reset-database\.result == 'success'/,
+    'the app must not restart unless QA reset succeeds');
+  assert.match(workflowJob(workflow, 'restore-async-after-database-reset'), /needs\.reset-database\.result == 'success'/,
+    'the async worker must not restart unless QA reset succeeds');
+  assert.match(workflowJob(workflow, 'restore-maintenance-schedules'), /needs\.restore-dataset\.result == 'success'/,
+    'maintenance schedules must not resume unless the database recovery is verified');
+});
+
+test('QA checkpoint upload refreshes orchestrator credentials even after verification failure and requires successful assumption', async () => {
+  const workflow = await readFile(workflowPath, 'utf8');
+  const qaJob = workflowJob(workflow, 'restore-app-after-database-reset');
+  const refresh = workflowStep(qaJob, 'Restore NFT orchestrator credentials for private recovery checkpoints');
+  const upload = workflowStep(qaJob, 'Store post-reset QA checkpoint privately');
+
+  assert.match(refresh, /^        if: always\(\)$/m,
+    'credential refresh must run even when QA verification fails');
+  assert.match(refresh, /^        id: restore_orchestrator_credentials$/m);
+  assert.ok(qaJob.indexOf(refresh) > qaJob.indexOf('name: Verify the exact QA properties'),
+    'credential refresh must follow QA verification');
+  assert.match(refresh, /role-to-assume: arn:aws:iam::448120078528:role\/nft-performance-test-orchestrator-access/);
+  assert.match(upload, /^        if: always\(\) && steps\.restore_orchestrator_credentials\.outcome == 'success'$/m,
+    'checkpoint upload must not run unless orchestrator credentials were successfully assumed');
 });

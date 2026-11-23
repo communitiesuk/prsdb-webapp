@@ -13,6 +13,8 @@ const prefix = 'arn:aws:ecs:eu-west-2:448120078528:';
 const appArn = `${prefix}task-definition/prsdb-webapp-nft:95`;
 const restoreFamily = 'prsdb-nft-vpc-restore-performance';
 const workerArn = `${prefix}task-definition/${restoreFamily}:3`;
+const certificateKey = 'seeding/certificate-references/123-1.png';
+const certificateVersion = 'certificate-v1';
 const asyncArn = `${prefix}task-definition/prsdb-async-worker-nft:4`;
 const taskArn = `${prefix}task/nft-app/worker`;
 const imageDigest = `sha256:${'c'.repeat(64)}`;
@@ -57,6 +59,11 @@ function managedRestoreDefinition(revision, overrides = {}) {
     NFT_DUMP_VERSION: 'seed-v1',
     NFT_DUMP_BYTES: '123456',
     NFT_DUMP_SHA256: 'a'.repeat(64),
+    NFT_CERTIFICATE_KEY: certificateKey,
+    NFT_CERTIFICATE_VERSION: certificateVersion,
+    NFT_CERTIFICATE_DUMP_VERSION: 'seed-v1',
+    NFT_CERTIFICATE_DUMP_BYTES: '123456',
+    NFT_CERTIFICATE_DUMP_SHA256: 'a'.repeat(64),
     ...overrides,
   };
   return {
@@ -82,7 +89,11 @@ const asyncWorker = () => ({
 
 function dependencies(overrides = {}) {
   const calls = [];
-  const state = {maintenancePaused: true};
+  const state = overrides.state ?? {
+    maintenancePaused: true, runId: config.runId, taskDefinition: workerArn,
+    restoreDefinition: {taskDefinitionArn: workerArn, dumpVersion: 'seed-v1', dumpBytes: 123456,
+      dumpSha256: 'a'.repeat(64), certificateKey, certificateVersion},
+  };
   const schedules = new Map(maintenanceScheduleDefinitions.map(([name, taskDefinition]) =>
     [name, maintenanceSchedule(name, taskDefinition)]));
   let stopping = false;
@@ -98,6 +109,7 @@ function dependencies(overrides = {}) {
     aws: async (service, operation, input = {}) => {
       calls.push([operation, structuredClone(input)]);
       if (operation === 'get-caller-identity') return {Account: '448120078528'};
+      if (service === 's3api' && operation === 'head-object') return {VersionId: certificateVersion, ContentLength: 42};
       if (service === 'scheduler' && operation === 'list-schedules') {
         return {Schedules: [...schedules.values()].map(({Arn, Name, GroupName, State}) => ({Arn, Name, GroupName, State}))};
       }
@@ -152,6 +164,10 @@ function dependencies(overrides = {}) {
     },
     ...overrides,
   };
+}
+
+function freshDependencies() {
+  return dependencies({state: {maintenancePaused: true}});
 }
 
 function deployedCompatibilityDependencies({sha = 'b'.repeat(40), appDigest = imageDigest, workerDigest = imageDigest,
@@ -211,7 +227,7 @@ function markQaVerified(deps) {
 }
 
 test('resolves and checkpoints the newest active managed restore task and immutable dump identity', async () => {
-  const deps = dependencies();
+  const deps = freshDependencies();
   const definitions = [managedRestoreDefinition(2), managedRestoreDefinition(11), managedRestoreDefinition(9)];
   deps.aws = async (service, operation, input = {}) => {
     deps.calls.push([operation, structuredClone(input)]);
@@ -223,6 +239,7 @@ test('resolves and checkpoints the newest active managed restore task and immuta
     if (operation === 'describe-task-definition') {
       return {taskDefinition: definitions.find(value => value.taskDefinitionArn === input.taskDefinition)};
     }
+    if (service === 's3api' && operation === 'head-object') return {VersionId: certificateVersion, ContentLength: 42};
     throw new Error(`Unexpected ${service} ${operation}`);
   };
 
@@ -235,17 +252,123 @@ test('resolves and checkpoints the newest active managed restore task and immuta
     dumpVersion: 'seed-v1',
     dumpBytes: 123456,
     dumpSha256: 'a'.repeat(64),
+    certificateKey,
+    certificateVersion,
+  });
+  assert.deepEqual(deps.calls.find(([operation]) => operation === 'head-object')[1], {
+    Bucket: 'prsdb-uploaded-files-nft', Key: certificateKey, VersionId: certificateVersion,
   });
   assert.equal(deps.state.runId, config.runId);
+});
+
+test('certificate preflight rejects invalid or mismatched bindings before NFT mutations', async t => {
+  const cases = [
+    {NFT_CERTIFICATE_KEY: undefined}, {NFT_CERTIFICATE_KEY: 'seeding/certificate-references/0-1.png'},
+    {NFT_CERTIFICATE_KEY: 'seeding/certificate-references/1-0.png'}, {NFT_CERTIFICATE_KEY: 'seeding/certificate-references/1-1.png/other'},
+    {NFT_CERTIFICATE_VERSION: undefined}, {NFT_CERTIFICATE_VERSION: 'null'}, {NFT_CERTIFICATE_VERSION: 'None'}, {NFT_CERTIFICATE_VERSION: 'undefined'},
+    {NFT_CERTIFICATE_VERSION: '  '},
+    {NFT_CERTIFICATE_DUMP_VERSION: 'other'}, {NFT_CERTIFICATE_DUMP_BYTES: '123457'},
+    {NFT_CERTIFICATE_DUMP_SHA256: 'b'.repeat(64)}, {NFT_CERTIFICATE_DUMP_VERSION: undefined},
+    {NFT_CERTIFICATE_DUMP_BYTES: undefined}, {NFT_CERTIFICATE_DUMP_SHA256: undefined},
+  ];
+  for (const metadata of cases) await t.test(JSON.stringify(metadata), async () => {
+    const deps = freshDependencies();
+    const original = deps.aws;
+    deps.aws = async (service, operation, input) => operation === 'describe-task-definition'
+      ? {taskDefinition: managedRestoreDefinition(3, metadata)} : original(service, operation, input);
+    await assert.rejects(resolveRestoreTaskDefinition(config, deps), /certificate/i);
+    assert.equal(deps.state.restoreDefinition, undefined);
+    assert.equal(deps.calls.some(([op]) => op === 'head-object'), false);
+    assert.equal(deps.calls.some(([op]) => ['update-schedule', 'update-service', 'run-task'].includes(op)), false);
+  });
+});
+
+test('certificate preflight rejects unavailable or invalid exact object versions safely', async t => {
+  for (const result of [new Error('secret AWS access denied'), null, {}, {VersionId: 'other', ContentLength: 4},
+    {VersionId: certificateVersion, ContentLength: 0}, {VersionId: certificateVersion, ContentLength: '4'},
+    {VersionId: certificateVersion, ContentLength: 4, DeleteMarker: true}]) {
+    await t.test(result instanceof Error ? 'access error' : JSON.stringify(result), async () => {
+      const deps = freshDependencies();
+      const original = deps.aws;
+      deps.aws = async (service, operation, input) => {
+        if (operation === 'head-object') {
+          deps.calls.push([operation, input]);
+          if (result instanceof Error) throw result;
+          return result;
+        }
+        return original(service, operation, input);
+      };
+      await assert.rejects(resolveRestoreTaskDefinition(config, deps), error => {
+        assert.match(error.message, /certificate/i);
+        assert.doesNotMatch(error.message, /secret AWS/);
+        return true;
+      });
+      assert.equal(deps.state.restoreDefinition, undefined);
+      assert.equal(deps.calls.some(([op]) => ['update-schedule', 'update-service', 'run-task'].includes(op)), false);
+    });
+  }
+});
+
+test('certificate preflight accepts the legacy seed certificate key', async () => {
+  const deps = freshDependencies();
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) => operation === 'describe-task-definition'
+    ? {taskDefinition: managedRestoreDefinition(3, {NFT_CERTIFICATE_KEY: 'seeding/certificate_template.png'})}
+    : original(service, operation, input);
+  await resolveRestoreTaskDefinition(config, deps);
+  assert.equal(deps.state.restoreDefinition.certificateKey, 'seeding/certificate_template.png');
+  assert.equal(deps.calls.find(([operation]) => operation === 'head-object')[1].Key, 'seeding/certificate_template.png');
+});
+
+test('certificate preflight checkpoint is required before pausing schedules or stopping writers', async () => {
+  const deps = freshDependencies();
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  await assert.rejects(lifecycle.pauseMaintenanceSchedules(config, deps), /certificate.*checkpoint/i);
+  deps.state.maintenancePaused = true;
+  await assert.rejects(stopNftWriters(config, deps), /certificate.*checkpoint/i);
+  assert.equal(deps.calls.some(([op]) => ['update-schedule', 'update-service', 'run-task'].includes(op)), false);
+});
+
+test('certificate preflight retry uses the checkpointed revision and rejects changed identity', async () => {
+  const deps = freshDependencies();
+  await resolveRestoreTaskDefinition(config, deps);
+  const saved = structuredClone(deps.state.restoreDefinition);
+  await resolveRestoreTaskDefinition({runId: config.runId}, deps);
+  assert.equal(deps.calls.some(([op]) => op === 'list-task-definitions'), false);
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) => operation === 'describe-task-definition'
+    ? {taskDefinition: managedRestoreDefinition(3, {NFT_CERTIFICATE_VERSION: 'another-version'})}
+    : original(service, operation, input);
+  await assert.rejects(resolveRestoreTaskDefinition(config, deps), /different immutable dump or certificate identity/);
+  assert.deepEqual(deps.state.restoreDefinition, saved);
+});
+
+test('certificate preflight precedes schedule changes and is repeated before worker launch', async () => {
+  const deps = freshDependencies();
+  await resolveRestoreTaskDefinition(config, deps);
+  await lifecycle.snapshotMaintenanceSchedules(config, deps);
+  await lifecycle.pauseMaintenanceSchedules(config, deps);
+  await stopNftWriters(config, deps);
+  await restoreInVpc(config, deps);
+  const firstHead = deps.calls.findIndex(([op]) => op === 'head-object');
+  const firstUpdate = deps.calls.findIndex(([op]) => op === 'update-schedule');
+  const lastHead = deps.calls.findLastIndex(([op]) => op === 'head-object');
+  const launch = deps.calls.findIndex(([op]) => op === 'run-task');
+  assert.ok(firstHead < firstUpdate && firstUpdate < lastHead && lastHead < launch);
+  assert.deepEqual(deps.calls[firstHead][1], deps.calls[lastHead][1]);
+  assert.equal(deps.calls.filter(([op]) => op === 'head-object').length, 2);
+  assert.ok(deps.calls.some(([op, state]) => op === 'checkpoint' &&
+    state.restoreDefinition?.certificateVersion === certificateVersion));
 });
 
 test('restore task resolution rejects missing or malformed immutable dump metadata', async t => {
   for (const metadata of [
     {NFT_DUMP_VERSION: '', NFT_DUMP_BYTES: '123456', NFT_DUMP_SHA256: 'a'.repeat(64)},
+    {NFT_DUMP_VERSION: 'null', NFT_DUMP_BYTES: '123456', NFT_DUMP_SHA256: 'a'.repeat(64)},
     {NFT_DUMP_VERSION: 'seed-v1', NFT_DUMP_BYTES: '0', NFT_DUMP_SHA256: 'a'.repeat(64)},
     {NFT_DUMP_VERSION: 'seed-v1', NFT_DUMP_BYTES: '123456', NFT_DUMP_SHA256: 'not-a-digest'},
   ]) await t.test(JSON.stringify(metadata), async () => {
-    const deps = dependencies();
+    const deps = freshDependencies();
     const definition = managedRestoreDefinition(11, metadata);
     deps.aws = async (service, operation, input = {}) => {
       if (operation === 'get-caller-identity') return {Account: '448120078528'};
@@ -612,7 +735,11 @@ test('workflow gates every upload phase on candidate worker readiness and checkp
   assert.ok(worker > job.indexOf('nft-vpc-restore.mjs start'));
   assert.ok(worker < job.indexOf('nft-prepare.mjs'));
   assert.match(job, /if: always\(\)\s+run: node scripts\/performance-tests\/nft-recovery-state\.mjs upload worker-state/);
-  assert.match(workflow, /NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: \$\{\{ secrets\.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION \}\}/);
+});
+
+test('compatibility task definition uses a variable with a legacy secret fallback', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION: \$\{\{ vars\.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION \|\| secrets\.NFT_RESET_COMPATIBLE_ASYNC_TASK_DEFINITION \}\}/);
 });
 
 test('candidate scan worker cannot start from an unverified restore or silently resume the old image', async () => {
@@ -905,13 +1032,14 @@ test('rejects scheduled writers before stopping the app', async () => {
 
 test('rejects a retired restore worker before stopping the healthy app', async () => {
   const deps = dependencies();
+  const initialState = structuredClone(deps.state);
   const original = deps.aws;
   deps.aws = async (service, operation, input) => operation === 'describe-task-definition' && input.taskDefinition === workerArn
     ? {taskDefinition: {taskDefinitionArn: workerArn, status: 'INACTIVE'}}
     : original(service, operation, input);
   await assert.rejects(stopNftWriters(config, deps), /active managed NFT restore task definition/);
   assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
-  assert.deepEqual(deps.state, {maintenancePaused: true});
+  assert.deepEqual(deps.state, initialState);
 });
 
 test('rejects a workflow SHA that is not deployed before app shutdown', async () => {
@@ -973,6 +1101,26 @@ test('launches one private worker only after shutdown and persists its ARN befor
   assert.equal(deps.calls[launchIndex + 1][0], 'persist');
   assert.equal(deps.calls[launchIndex + 1][1].taskArn, taskArn);
   assert.equal(deps.state.restorePassed, true);
+});
+
+test('certificate preflight rechecks the pinned version immediately before launch and fails closed', async () => {
+  const deps = dependencies();
+  await resolveRestoreTaskDefinition(config, deps);
+  await stopNftWriters(config, deps);
+  const original = deps.aws;
+  deps.aws = async (service, operation, input) => {
+    if (operation === 'head-object') {
+      deps.calls.push([operation, structuredClone(input)]);
+      return {VersionId: 'other', ContentLength: 42};
+    }
+    return original(service, operation, input);
+  };
+  await assert.rejects(restoreInVpc(config, deps), /certificate/i);
+  assert.equal(deps.state.launchAttempted, undefined);
+  assert.equal(deps.calls.some(([operation]) => operation === 'run-task'), false);
+  const heads = deps.calls.filter(([operation]) => operation === 'head-object');
+  assert.equal(heads.length, 2);
+  assert.deepEqual(heads[0][1], heads[1][1]);
 });
 
 test('rejects failed or missing essential container exit codes', async () => {
@@ -1178,6 +1326,46 @@ test('new restore attempts fail before state lookup or AWS while recovery remain
   });
   assert.equal(result.status, 1);
   assert.match(result.stdout, /fresh workflow run/i);
+});
+
+test('CLI reports controlled validation failures without exposing unexpected filesystem errors', async () => {
+  const script = fileURLToPath(new URL('../../../scripts/performance-tests/nft-vpc-restore.mjs', import.meta.url));
+  const validation = spawnSync(process.execPath, [script, 'stop'], {
+    encoding: 'utf8',
+    env: {PATH: process.env.PATH, GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '1'},
+  });
+  assert.equal(validation.status, 1);
+  assert.match(validation.stdout, /NFT_RESTORE_STATE_PATH is required/);
+
+  const root = await mkdtemp(join(tmpdir(), 'restore-cli-'));
+  try {
+    const bin = join(root, 'bin');
+    await mkdir(bin);
+    await writeFile(join(bin, 'aws'), `#!/usr/bin/env node
+const response = process.argv[2] === 'sts'
+  ? {Account: '448120078528'}
+  : process.argv[2] === 's3api'
+    ? {VersionId: '${certificateVersion}', ContentLength: 42}
+    : {taskDefinition: ${JSON.stringify(managedRestoreDefinition(3))}};
+console.log(JSON.stringify(response));
+`, {mode: 0o755});
+    const unexpected = spawnSync(process.execPath, [script, 'resolve-task-definition'], {
+      encoding: 'utf8',
+      env: {
+        PATH: `${bin}:${process.env.PATH}`,
+        GITHUB_RUN_ID: '123',
+        GITHUB_RUN_ATTEMPT: '1',
+        NFT_RESTORE_STATE_PATH: join(root, 'state.json'),
+        NFT_RESTORE_TASK_DEFINITION: workerArn,
+        GITHUB_OUTPUT: join(root, 'private-payload-canary', 'output'),
+      },
+    });
+    assert.equal(unexpected.status, 1);
+    assert.match(unexpected.stderr, /manual|recovery/i);
+    assert.doesNotMatch(unexpected.stdout + unexpected.stderr, /private-payload-canary/);
+  } finally {
+    await rm(root, {recursive: true, force: true});
+  }
 });
 
 test('cleanup rejects a non-boolean restoration flag as proof of completed recovery', async () => {

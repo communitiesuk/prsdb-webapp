@@ -2,7 +2,12 @@ import {execFileSync} from 'node:child_process';
 import {mkdir, readFile, readdir, rename, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {requireCondition} from './nft-shared.mjs';
+
+export class SafeRecoveryError extends Error {}
+
+function requireCondition(condition, message) {
+  if (!condition) throw new SafeRecoveryError(message);
+}
 
 const recoveryPrefix = 'performance-recovery';
 const defaultBucket = 'prsdb-seed-data-nft';
@@ -38,7 +43,7 @@ function runAws(args, runner) {
   try {
     return runner('aws', args, {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
   } catch {
-    throw new Error('Private recovery checkpoint operation failed');
+    throw new SafeRecoveryError('Private recovery checkpoint operation failed');
   }
 }
 
@@ -72,7 +77,7 @@ async function json(path) {
   try {
     return JSON.parse(await readFile(path, 'utf8'));
   } catch {
-    throw new Error('Recovery checkpoint is missing or malformed');
+    throw new SafeRecoveryError('Recovery checkpoint is missing or malformed');
   }
 }
 
@@ -113,12 +118,12 @@ export async function downloadRecoveryCheckpoints(directory, options, runner = e
   try {
     keys = JSON.parse(output || '[]');
   } catch {
-    throw new Error('Private recovery checkpoint listing was invalid');
+    throw new SafeRecoveryError('Private recovery checkpoint listing was invalid');
   }
   if (keys === null) keys = [];
   requireCondition(Array.isArray(keys), 'Private recovery checkpoint listing was invalid');
   for (const key of keys) {
-    if (typeof key !== 'string') throw new Error('Private recovery checkpoint listing was invalid');
+    if (typeof key !== 'string') throw new SafeRecoveryError('Private recovery checkpoint listing was invalid');
     const [root, ownerRunId, rawAttempt, phase, file, ...extra] = key.split('/');
     const parsedAttempt = Number(rawAttempt);
     if (root !== recoveryPrefix || ownerRunId !== runId || extra.length ||
@@ -159,7 +164,7 @@ export async function selectRecoveryState(directory, {runId, attempt, outputDire
       await readFile(path);
     } catch (error) {
       if (error.code === 'ENOENT' && candidate.phase === 'cleanup-state') continue;
-      throw new Error('Readiness checkpoint is missing or unreadable');
+      throw new SafeRecoveryError('Readiness checkpoint is missing or unreadable');
     }
     readiness = await json(path);
     readinessFound = true;
@@ -192,9 +197,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         await selectRecoveryState(join(directory, 'nft-recovery-artifacts'), {
           ...current, outputDirectory: directory,
         });
-      } else throw new Error('Unknown recovery operation');
+      } else throw new SafeRecoveryError('Unknown recovery operation');
     }
-  } catch {
+  } catch (error) {
+    if (error instanceof SafeRecoveryError) console.error(`NFT recovery details: ${error.message}`);
     console.error('NFT recovery checkpoint validation failed; operator recovery may be required.');
     process.exitCode = 1;
   }
