@@ -14,7 +14,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         fun `Submitting with no rent included option selected returns an error`(page: Page) {
             val rentIncludesBillsPage = navigator.skipToTenancyDetailsRentIncludesBillsPage()
             rentIncludesBillsPage.form.submit()
-            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select whether the rent includes bills")
+            assertThat(rentIncludesBillsPage.form.getErrorMessage()).containsText("Select if the rent includes any bills")
         }
     }
 
@@ -24,7 +24,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
         fun `Submitting with no bills included selected returns an error`() {
             val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
             billsIncludedPage.form.submit()
-            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select what you include in the rent")
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select which bills you include in the rent")
         }
 
         @Test
@@ -42,7 +42,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             billsIncludedPage.selectGasElectricityWater()
             billsIncludedPage.selectSomethingElseCheckbox()
             billsIncludedPage.form.submit()
-            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the bills and services you include in the rent")
+            assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Enter the other bills you include in the rent")
         }
 
         @Test
@@ -71,7 +71,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
             furnishedStatusPage.form.submit()
             assertThat(
                 furnishedStatusPage.form.getErrorMessage(),
-            ).containsText("Select whether the property is furnished, partly furnished or unfurnished")
+            ).containsText("Select how the property is furnished")
         }
 
         @Test
@@ -156,12 +156,12 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("What is the weekly rent?")
-                val rentLabel = "Weekly rent"
+                    .containsText("Rent charged each week")
+                val rentLabel = "How much is the weekly rent, in pounds?"
                 BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
-                    .containsText("The amount you enter must be the total weekly rent agreed with the tenant.")
+                    .containsText("Enter the total weekly rent agreed with the tenant.")
                 assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
@@ -170,12 +170,12 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.FOUR_WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("What is the 4-weekly rent?")
-                val rentLabel = "4-weekly rent"
+                    .containsText("Rent charged every 4 weeks")
+                val rentLabel = "How much is the rent every 4 weeks, in pounds?"
                 BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
-                    .containsText("The amount you enter must be the total 4-weekly rent agreed with the tenant.")
+                    .containsText("Enter the total 4-weekly rent agreed with the tenant.")
                 assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
@@ -184,12 +184,12 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.MONTHLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("What is the monthly rent?")
-                val rentLabel = "Monthly rent"
+                    .containsText("Rent charged each month")
+                val rentLabel = "How much is the monthly rent, in pounds?"
                 BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
-                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                    .containsText("Enter the total monthly rent agreed with the tenant.")
                 assertThat(rentAmountPage.rentCalculationDetails).isHidden()
             }
 
@@ -203,7 +203,7 @@ class PropertyRegistrationRentAndBillsSinglePageTests : IntegrationTestWithImmut
                 BaseComponent.assertThat(rentAmountPage.form.rentAmountInputWithLabel(rentLabel)).isVisible()
                 BaseComponent
                     .assertThat(rentAmountPage.billsExplanationForRentFrequency)
-                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                    .containsText("Enter the total monthly rent agreed with the tenant.")
                 assertThat(rentAmountPage.rentCalculationDetails).isVisible()
             }
         }

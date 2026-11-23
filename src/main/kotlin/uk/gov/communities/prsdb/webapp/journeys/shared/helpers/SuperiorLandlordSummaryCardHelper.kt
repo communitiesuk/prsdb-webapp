@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.database.entity.SuperiorLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -18,12 +19,14 @@ class SuperiorLandlordSummaryCardHelper {
             .map { (superiorLandlordId, superiorLandlord) ->
                 val actions = getActions(superiorLandlordId)
                 if (superiorLandlord.detailsKnown) {
+                    val contactRows = getContactRows(superiorLandlord)
                     SummaryCardViewModel(
                         title =
                             superiorLandlord.name
                                 ?: throw PrsdbWebException("Superior landlord $superiorLandlordId has known details but no name"),
-                        summaryList = getContactRows(superiorLandlord),
+                        summaryList = contactRows,
                         actions = actions,
+                        bodyTextKey = if (superiorLandlord.hasUnstoredPostalAddress()) POSTAL_ADDRESS_NOTE_KEY else null,
                     )
                 } else {
                     SummaryCardViewModel(
@@ -34,6 +37,14 @@ class SuperiorLandlordSummaryCardHelper {
                     )
                 }
             }
+
+    fun getSummaryCards(superiorLandlords: Collection<SuperiorLandlord>): List<SummaryCardViewModel> =
+        getSummaryCards(
+            superiorLandlords
+                .sortedBy { it.id }
+                .withIndex()
+                .associate { (index, superiorLandlord) -> index to SuperiorLandlordDataModel.fromSuperiorLandlord(superiorLandlord) },
+        )
 
     private fun getContactRows(superiorLandlord: SuperiorLandlordDataModel): List<SummaryListRowViewModel> =
         listOfNotNull(
@@ -46,5 +57,9 @@ class SuperiorLandlordSummaryCardHelper {
                     fieldValue = it.toMultiLineAddress().split("\n"),
                 )
             },
-        ).ifEmpty { throw PrsdbWebException("Superior landlord has known details but no email or postal address") }
+        )
+
+    companion object {
+        const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
+    }
 }

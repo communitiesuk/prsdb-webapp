@@ -202,13 +202,12 @@ countryOfResidence:
 selectLocalCouncil:
   error:
     missing: Select a local council to continue
-  fieldSetHeading: What local council area is your property in?
-  fieldSetHint: Select the local council that your property falls under.
+  fieldSetHeading: What local council area is this property in?
+  subHeading: Find this property’s local council
   paragraph:
-    one:
-      beforeLink: You can
-      linkText: find your local council by searching using the property postcode (opens in new tab)
-      afterLink: .
+    beforeLink: You can
+    linkText: find your local council by searching using the property postcode (opens in new tab)
+    afterLink: .
   select:
     label: Select a local council
 date:
@@ -317,222 +316,18 @@ occupancy:
     option:
       'yes':
         hint: Includes if the property is let, but tenants have not moved in yet
-  fieldSetHeading: Is your property occupied by tenants?
-  fieldSetHint: What you choose here decides which compliance and rent details you need to add.
-numberOfHouseholds:
-  heading: Households in your property
-  questionHeading: How many households are in your property?
-  paragraph:
-    one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.
-    two: 'A household is one person living alone or a family living together. A family includes people who are:'
-    three: Unrelated adults (who are not a couple) are separate households.
-  bullet:
-    point:
-      one: married
-      two: related (like aunts or cousins)
-      three: living together as a couple
-  label: Enter how many households live in your property
-  input:
-    error: 'Enter how many separate households, like 1 or 2'
-numberOfPeople:
-  input:
-    error:
-      invalidFormat: 'Enter how many people, like 2 or 5'
-      invalidNumber: The number of people in the property must be the same as or higher than the number of households in the property
-  fieldSetHeading: How many people live in your property?
-  fieldSetHint: Include everyone who lives there permanently, even if they are not related. You must include children and babies.
-  paragraph: 'Do not include anyone staying temporarily, such as:'
-  bullet:
-    one: guests staying for less than 90 days
-    two: people on holiday
-    three: people who have another main home elsewhere
-  label: Enter the number of people living in your property
-  details:
-    summary: Why do I need to declare this?
-    text: Your council may use this information to check your property is not overcrowded.
+  fieldSetHeading: Is this property occupied by tenants?
+  fieldSetHint: This changes what details are required for this registration
 numberOfBedrooms:
   input:
     error: 'Enter the number of bedrooms, like 3 or 8'
-  heading: How many bedrooms in your property?
+  heading: Number of bedrooms
   paragraph:
-    one: A bedroom is any room built or converted for sleeping, even if it is currently being used for another purpose (such as an office).
-    two: In an HMO, a bedroom is any room built or converted for sleeping. To be counted, a room must meet the minimum floor area and natural light requirements set by your local council and be for the tenant’s exclusive use.
-    three: 'Do not include:'
+    one: 'Include:'
   bullet:
-    one: kitchens or bathrooms
-    two: landings and hallways
-    three: any room smaller than 4.64 square metres
-  details:
-    summary: Where to find this information
-    text: If your property is an HMO with an active licence, you may find it helpful to consult your licence documentation. This will confirm the maximum number of bedrooms and occupants permitted for the property.
-  label: Enter the number of bedrooms
-rentIncludesBills:
-  radios:
-    error:
-      missing: Select whether the rent includes bills
-  fieldSetHeading: Does the rent include bills?
-  fieldSetHint: 'This could include gas, electricity, water, broadband, Council Tax or cleaning.'
-billsIncluded:
-  error:
-    missing: Select what you include in the rent
-    somethingElse:
-      missing: Enter the bills and services you include in the rent
-      tooLong: The description of other bills and services must be 200 characters or fewer
-  fieldSetHeading: Which of these do you include in the rent?
-  fieldSetHint: Select the bills and services included.
-  checkbox:
-    gas: Gas
-    electricity: Electricity
-    water: Water
-    councilTax: Council Tax
-    landline: Landline
-    broadband: Broadband
-    tvLicence: TV licence
-    cableSatelliteTV: Cable or satellite TV
-    parking: Parking
-    gardening: Gardening
-    communalAreasCleaner: Cleaner for communal areas
-    somethingElse: Something else
-    'somethingElse.label': Add the bills and services included in the rent
-furnishedStatus:
-  radios:
-    error:
-      missing: Select whether the property is furnished, partly furnished or unfurnished
-    options:
-      furnished:
-        label: Furnished
-        hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and a dining table)
-      partFurnished:
-        label: Partly furnished
-        hint: The property includes all flooring and window coverings. It may include white goods, but only some furniture
-      unfurnished:
-        label: Unfurnished
-        hint: The property includes flooring and window coverings, but no furniture or white goods (like a fridge or washing machine)
-  fieldSetHeading: Is the property furnished?
-  fieldSetHint: Select the option that best describes what is provided with the property.
-rentFrequency:
-  heading: How often do you charge rent?
-  details:
-    summary: Help with rent in advance
-    paragraph:
-      one: You can no longer ask for tenants to pay for multiple months of rent in advance.
-      two: 'You can only ask for:'
-      three: You can only ask for this rent in advance during the ‘pre-tenancy period’. This is the time between signing the tenancy agreement and starting the tenancy.
-    bullet:
-      one: 1 month of rent, if rent will be paid monthly
-      two: 28 days of rent, if rent will be paid at any other interval (for example, weekly)
-  radios:
-    option:
-      monthly:
-        label: Monthly
-        hint: You collect rent on the same date each month
-      fourWeekly:
-        label: 4 weekly
-        hint: You collect rent every 28 days
-      weekly:
-        label: Weekly
-      other:
-        label: Other
-        input:
-          label: How often do you charge rent?
-          error:
-            missing: Enter how often you charge rent
-    error:
-      missing: Select how often you charge rent
-rentAmount:
-  heading:
-    weekly: What is the weekly rent?
-    fourWeekly: What is the 4-weekly rent?
-    monthly: What is the monthly rent?
-    other: Equivalent monthly rent
-  subheading:
-    weekly: Weekly rent
-    fourWeekly: 4-weekly rent
-    monthly: Monthly rent
-    other:
-      one: What to include
-      two: What is the rent, as a monthly figure in pounds?
-  paragraph:
-    one:
-      weekly: The amount you enter must be the total weekly rent agreed with the tenant.
-      fourWeekly: The amount you enter must be the total 4-weekly rent agreed with the tenant.
-      monthly: The amount you enter must be the total monthly rent agreed with the tenant.
-      other: The amount you enter must be the total monthly rent agreed with the tenant.
-    two: 'You must include:'
-    three: 'Do not include:'
-    four: Enter the amount in pounds. For example, 705 or 705.50
-    five: Tell us how much rent you charge, converted into a monthly figure.
-  bullet:
-    one: the agreed rent
-    two: the rent for the whole property (if the property is an HMO, do not enter the price per room)
-    three: any bills or services included in the rent, such as gas, electricity or cleaning
-    four: rent arrears
-    five: rent in advance payments
-  details:
-    summary: How to calculate a monthly figure
-    subheading:
-      one: If you charge rent every 2 weeks
-      two: Other rent periods
-    paragraph:
-      one: Multiply the rent by 26, then divide it by 12.
-      two: Calculate how much the rent is per year, then divide it by 12.
-  fieldSetHint:
-    default: Do not use the £ sign or commas.
-    other: For example, 650.50
-  error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
-licensingType:
-  fieldSetHeading: Select the type of licence you have for your property
-  fieldSetHint: Select which type of property licence applies to this property
-  radios:
-    error:
-      missing: Select the type of licensing for the property
-    option:
-      selectiveLicence:
-        label: Selective licence
-        hint: Some local councils require this licence for any privately rented homes in specific areas.
-      hmoMandatory:
-        label: HMO mandatory licence
-        hint: A House in Multiple Occupation (HMO) must have a licence if it’s occupied by 5 or more people who form more than 1 household.
-      hmoAdditional:
-        label: HMO additional licence
-        hint: Some local councils require a licence for smaller HMOs that are not covered by the mandatory licensing licence.
-      noLicensing:
-        label: This property does not need a licence
-licenceNumber:
-  error:
-    tooLong: The licensing number is too long
-selectiveLicence:
-  error:
-    missing: Enter the selective licence number
-  fieldSetHeading: What is your selective licence number?
-  label: Enter the selective licence number
-  detail:
-    summary: What is selective licensing?
-    text: Some local councils issue a selective licensing number for privately rented housing in a local area.
-hmoMandatoryLicence:
-  error:
-    missing: Enter the HMO Mandatory licence number
-  fieldSetHeading: What is your HMO mandatory licence number?
-  label: Enter the HMO mandatory licence number
-  detail:
-    summary: What is a House in Multiple Occupation (HMO) licence?
-    paragraph:
-      two: 'If you want to rent out your property as a house in multiple occupation in England or Wales, you must contact your council to check if you need a licence.'
-      three: 'You must have a HMO licence if you’re renting out a large HMO, which means:'
-    bullet:
-      one: it’s rented to 5 or more people who form more than 1 household
-      two: 'some or all tenants share toilet, bathroom or kitchen facilities'
-      three: at least 1 tenant pays rent (or their employer pays it for them)
-hmoAdditionalLicence:
-  error:
-    missing: Enter the HMO additional licence number
-  fieldSetHeading: What is your HMO additional licence number?
-  label: Enter the HMO additional licence number
-  detail:
-    summary: What’s a HMO additional licence?
-    paragraph:
-      two: Some local council areas require licensing on different types of HMOs in its area which are not subject to mandatory licensing.
-      three: Contact the local council your property is in to understand whether your property needs an HMO additional licence.
+    one: rooms built as bedrooms that are being used for another purpose, such as a home office
+    two: living rooms or other rooms that have been converted into a bedroom
+  label: How many bedrooms does this property have?
 hmoShared:
   detail:
     paragraph:
@@ -554,11 +349,6 @@ checkPropertyAnswers:
     localCouncil: Local council
     type: Property type
     bedrooms: Number of bedrooms
-    licensingType: Licensing type
-    noLicensing: None
-    noLicensingRequired: This property does not need a licence
-    licensingProvideLater: Provide this later
-    licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
     heading: Ownership and landlords
   peopleResponsibleForThisProperty:
@@ -576,24 +366,10 @@ checkPropertyAnswers:
     question: Is this property occupied by tenants?
   rentedOut:
     heading: How your property’s rented out
-    licensing:
-      heading: Tell us if the property needs a license
-  tenancyDetails:
-    heading: Tenancy details
-    tenancyDetailsRow: Tenancy details
-    occupied: Occupied by tenants
-    households: Number of households
-    provideLater: Provide this later
-    unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
-    people: Number of tenants
-    rentIncludesBills: Rent includes bills
-    billsIncluded: Which bills are included
-    furnishedStatus: Furniture provided
-    rentFrequency: When rent is paid
-    rentAmount: Rent amount
-    customFrequencyRentAmountSuffix: per month
   jointLandlordsDetails:
+    heading: Joint landlords
     invitations: Invitations
+    # TODO PDJB-2016: Remove jointLandlordInvitations when ASSOCIATED_PARTIES is removed
     jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?
     noJointLandlords: No, I am the only landlord for this property
@@ -630,9 +406,9 @@ update:
     fieldSetHeading: Update your date of birth
   ownershipType:
     fieldSetHeading: Update the ownership type for your property
+  freeholders:
+    notificationInset: We’ll notify anyone you add.
   occupancy:
-    occupied:
-      fieldSetHeading: Update whether your property is occupied by tenants
     lettingAgentInterruption:
       heading: Are you sure you want to change this?
       pageTitle: Are you sure you want to change this property to unoccupied?
@@ -640,31 +416,11 @@ update:
         one: You’ve changed this property to being unoccupied.
         two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
         three: You can go back to undo this change.
-  numberOfHouseholds:
-    fieldSetHeading: Update how many households live in your property
-  numberOfPeople:
-    fieldSetHeading: Update how many people live in your property
-  numberOfBedrooms:
-    heading: Update how many bedrooms are in your property
-  rentIncludesBills:
-    fieldSetHeading: Update whether the rent includes bills
-  billsIncluded:
-    fieldSetHeading: Update which of these you include in the rent
-  furnishedStatus:
-    fieldSetHeading: Update is the property furnished
-  rentFrequency:
-    heading: Update when you charge rent
-  rentAmount:
-    weekly:
-      fieldSetHeading: Update your weekly rent
-    fourWeekly:
-      fieldSetHeading: Update your 4-weekly rent
-    monthly:
-      fieldSetHeading: Update your monthly rent
-    other:
-      fieldSetHeading: Update your monthly rent
-  licensingType:
-    fieldSetHeading: Update the type of licensing you have for your property
+  propertyManager:
+    check:
+      insetText: We’ll notify anyone you add.
+    remove:
+      insetText: If you’ve given this property manager access, you’ll need to remove this on the property registration page.
   checkCharity:
     summaryName: Charity details
     pageTitle: Check your charity answers
@@ -688,6 +444,13 @@ update:
     notOccupied:
       summaryName: You have updated whether the property is occupied by tenants
       pageTitle: Check your occupancy answers
+  checkPropertyManager:
+    pageTitle: Check your property manager answers
+    summaryName: You have updated the property manager
+  checkOwnership:
+    pageTitle: Check your ownership answers
+    subheading: You’ve updated the property’s ownership
+    insetText: We’ll notify anyone you add.
   checkHouseholdsAndTenants:
     pageTitle: Check your households and tenants answers
   checkRentIncludesBills:

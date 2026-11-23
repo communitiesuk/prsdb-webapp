@@ -15,26 +15,26 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
 
     override fun getStepSpecificContent(state: RentFrequencyAndAmountState) =
         mapOf(
-            "heading" to "forms.rentFrequency.heading",
+            "heading" to "tenancyDetails.rentFrequency.heading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = RentFrequency.MONTHLY,
-                        labelMsgKey = "forms.rentFrequency.radios.option.monthly.label",
-                        hintMsgKey = "forms.rentFrequency.radios.option.monthly.hint",
+                        labelMsgKey = "tenancyDetails.rentFrequency.radios.option.monthly.label",
+                        hintMsgKey = "tenancyDetails.rentFrequency.radios.option.monthly.hint",
                     ),
                     RadiosButtonViewModel(
                         value = RentFrequency.FOUR_WEEKLY,
-                        labelMsgKey = "forms.rentFrequency.radios.option.fourWeekly.label",
-                        hintMsgKey = "forms.rentFrequency.radios.option.fourWeekly.hint",
+                        labelMsgKey = "tenancyDetails.rentFrequency.radios.option.fourWeekly.label",
+                        hintMsgKey = "tenancyDetails.rentFrequency.radios.option.fourWeekly.hint",
                     ),
                     RadiosButtonViewModel(
                         value = RentFrequency.WEEKLY,
-                        labelMsgKey = "forms.rentFrequency.radios.option.weekly.label",
+                        labelMsgKey = "tenancyDetails.rentFrequency.radios.option.weekly.label",
                     ),
                     RadiosButtonViewModel(
                         value = RentFrequency.OTHER,
-                        labelMsgKey = "forms.rentFrequency.radios.option.other.label",
+                        labelMsgKey = "tenancyDetails.rentFrequency.radios.option.other.label",
                         conditionalFragment = "customRentFrequencyInput",
                     ),
                 ),

@@ -11,8 +11,8 @@ If more PRs remain:
 - Create the new branch based on the previous PR's branch.
 - **If using worktrees**: create a new worktree using `using-git-worktrees`
   and launch IntelliJ.
-- **If using current workspace**: switch to the new branch with
-  `git checkout -b <branch>`.
+- **If using current workspace or a Copilot app worktree session**: switch to
+  the new branch with `git checkout -b <branch>`.
 - Return to Phase 4.
 - When changes to an earlier branch are needed, rebase downstream branches.
 
@@ -33,4 +33,5 @@ If more PRs remain:
   }
   ```
 - When resumed: read state, create new worktree from latest main (or switch
-  branch if not using worktrees), return to Phase 4.
+  branch if not using worktrees, or in a Copilot app worktree session), return
+  to Phase 4.

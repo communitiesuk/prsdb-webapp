@@ -43,16 +43,16 @@ class NotifyLetterNotificationServiceTests {
     ) : LetterTemplateModel {
         override fun toHashMap(): HashMap<String, String> = hashMap
 
-        constructor() : this(hashMapOf(), LetterTemplate.EXAMPLE_LETTER)
+        constructor() : this(hashMapOf(), LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER)
     }
 
     @Test
     fun `sendLetter sends a matching letter using the notification client`() {
         // Arrange
-        val letter = TestLetterTemplate(hashMapOf("heading" to "Example heading"), LetterTemplate.EXAMPLE_LETTER)
+        val letter = TestLetterTemplate(hashMapOf("heading" to "Example heading"), LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER)
         val expectedNotifyIdValue = "some id value"
 
-        whenever(notifyIdService.getNotifyIdValue(LetterTemplate.EXAMPLE_LETTER)).thenReturn(expectedNotifyIdValue)
+        whenever(notifyIdService.getNotifyIdValue(LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER)).thenReturn(expectedNotifyIdValue)
 
         // Act
         letterNotificationService.sendLetter(recipientAddress, letter)
@@ -91,7 +91,7 @@ class NotifyLetterNotificationServiceTests {
     )
     fun `sendLetter rejects letter personalisation that would replace or extend the recipient address`(key: String) {
         // Arrange
-        val letter = TestLetterTemplate(hashMapOf(key to "Another address"), LetterTemplate.EXAMPLE_LETTER)
+        val letter = TestLetterTemplate(hashMapOf(key to "Another address"), LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER)
 
         // Act & Assert
         assertThrows<IllegalArgumentException> { letterNotificationService.sendLetter(recipientAddress, letter) }
@@ -102,7 +102,7 @@ class NotifyLetterNotificationServiceTests {
     @ValueSource(strings = ["address", "postcode area", "address line", "property address line 1", "postcode_1"])
     fun `sendLetter allows letter personalisation keys that only resemble the recipient address keys`(key: String) {
         // Arrange
-        val letter = TestLetterTemplate(hashMapOf(key to "Some value"), LetterTemplate.EXAMPLE_LETTER)
+        val letter = TestLetterTemplate(hashMapOf(key to "Some value"), LetterTemplate.FREEHOLDER_ADDED_TO_PROPERTY_LETTER)
 
         // Act
         letterNotificationService.sendLetter(recipientAddress, letter)

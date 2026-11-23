@@ -281,6 +281,7 @@ class NotificationBannerViewModelServiceTests {
             val propertyCompliance =
                 PropertyComplianceBuilder()
                     .withOccupiedPropertyOwnership()
+                    .withHasGasSupply()
                     .withExpiredGasSafetyCert()
                     .withElectricalCertType()
                     .withEpc()

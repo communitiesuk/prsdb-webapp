@@ -1,9 +1,11 @@
 <div th:fragment="peopleResponsibleTabContent" th:remove="tag">
                     <h2 class="govuk-heading-m" th:text="#{${propertyDetails.peopleResponsibleTabHeadingKey}}">propertyDetails.peopleResponsible.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
-                    <th:block th:each="card : ${landlordSummaryCards}">
-                        <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
-                    </th:block>
+                    <div id="landlord-summary-cards">
+                        <th:block th:each="card : ${landlordSummaryCards}">
+                            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+                        </th:block>
+                    </div>
                     <th:block th:if="${switchToIndividualLink != null}">
                         <div class="govuk-inset-text">
                             <span th:remove="tag" th:text="#{propertyDetails.landlordDetails.switchToIndividual.beforeLink}">propertyDetails.landlordDetails.switchToIndividual.beforeLink</span>
@@ -105,5 +107,52 @@
                         <th:block th:if="${propertyDetails.showPeopleResponsibleOwnership}">
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.peopleResponsibleOwnershipHeadingKey}}">propertyDetails.peopleResponsible.ownership.heading</h3>
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.peopleResponsibleOwnershipSection})}"></dl>
+                            <div th:if="${propertyDetails.showFreeholderSection}" id="freeholder-section">
+                                <h3 class="govuk-heading-s" th:text="#{${propertyDetails.freeholderSectionHeadingKey}}">registerProperty.freeholders.checkAnswers.heading</h3>
+                                <p th:if="${propertyDetails.showFreeholderSectionUpdateLink}" class="govuk-body">
+                                    <a id="freeholder-update-link" class="govuk-link"
+                                       th:href="@{${propertyDetails.freeholderSectionUpdateUrl}}"
+                                       th:text="#{${propertyDetails.freeholderSectionLinkTextKey}}">registerProperty.freeholders.checkAnswers.changeLink</a>
+                                </p>
+                                <div id="freeholder-cards">
+                                    <th:block th:each="card : ${freeholderSummaryCards}">
+                                        <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h4', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
+                                    </th:block>
+                                </div>
+                            </div>
+                            <div th:if="${propertyDetails.showSuperiorLandlordSection}" id="superior-landlord-section">
+                                <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading}">forms.checkPropertyAnswers.peopleResponsibleForThisProperty.otherPeopleInOwnershipChain.heading</h3>
+                                <th:block th:if="${propertyDetails.hasSuperiorLandlords}">
+                                    <p th:if="${propertyDetails.showSuperiorLandlordSectionUpdateLink}" class="govuk-body">
+                                        <a id="superior-landlord-update-link" class="govuk-link"
+                                           th:href="@{${propertyDetails.superiorLandlordSectionUpdateUrl}}"
+                                           th:text="#{registerProperty.superiorLandlords.checkAnswers.changeLink}">registerProperty.superiorLandlords.checkAnswers.changeLink</a>
+                                    </p>
+                                    <div id="superior-landlord-cards">
+                                        <th:block th:each="card : ${superiorLandlordSummaryCards}">
+                                            <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevelAndAdditionalContent(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList}, 'h4', ~{fragments/summaryCardBodyText :: summaryCardBodyTextWithHtml(${card.bodyTextKey})})}"></div>
+                                        </th:block>
+                                    </div>
+                                </th:block>
+                                <th:block th:unless="${propertyDetails.hasSuperiorLandlords}">
+                                    <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.superiorLandlordNotUsedRows})}"></dl>
+                                </th:block>
+                            </div>
                         </th:block>
+
+                        <!-- TODO PDJB-2016: remove this th:if along with the ASSOCIATED_PARTIES flag -->
+                        <div th:if="${propertyDetails.showPropertyManagerSection}" id="property-manager-section">
+                            <h3 class="govuk-heading-s" th:text="#{registerProperty.propertyManager.usingPropertyManager.heading}">registerProperty.propertyManager.usingPropertyManager.heading</h3>
+                            <th:block th:if="${propertyDetails.hasPropertyManager}">
+                                <p th:if="${propertyDetails.showPropertyManagerUpdateLink}" class="govuk-body">
+                                    <a id="property-manager-update-link" class="govuk-link"
+                                       th:href="@{${propertyDetails.propertyManagerUpdateUrl}}"
+                                       th:text="#{registerProperty.propertyManager.checkAnswers.changeLink}">registerProperty.propertyManager.checkAnswers.changeLink</a>
+                                </p>
+                                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(${propertyManagerSummaryCard.title}, ${propertyManagerSummaryCard.cardNumber}, ${propertyManagerSummaryCard.actions}, ${propertyManagerSummaryCard.summaryList}, 'h4')}"></div>
+                            </th:block>
+                            <th:block th:unless="${propertyDetails.hasPropertyManager}">
+                                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyManagerNotUsedRows})}"></dl>
+                            </th:block>
+                        </div>
 </div>

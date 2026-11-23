@@ -72,6 +72,21 @@ class ComplianceActionsPageTests : IntegrationTest() {
     }
 
     @Nested
+    inner class LandlordWithExpiredEic :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-landlord-with-compliance-actions.sql", "data-overlay-expired-eic-outstanding-actions.sql"),
+        ) {
+        @Test
+        fun `electrical safety row shows the issue date for an expired EIC`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.findSummaryCard("7 Mythical Drive")
+            val expectedIssueDate = LocalDate.of(2000, 6, 1).format(DATE_FORMATTER)
+
+            assertThat(card.summaryList.electricalSafetyRow).containsText("Expired (issued on $expectedIssueDate)")
+        }
+    }
+
+    @Nested
     inner class LandlordsWithComplianceActions :
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @Test

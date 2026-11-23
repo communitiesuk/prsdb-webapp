@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -9,6 +11,25 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordU
 import java.util.UUID
 
 class AbsoluteUrlProviderTests {
+    @ParameterizedTest
+    @ValueSource(strings = ["https://example.test", "https://example.test/landlord"])
+    fun `buildLandlordPrivacyNoticeUri uses the landlord host and public landlord privacy notice route`(landlordBaseUrl: String) {
+        val provider = createProvider(landlordBaseUrl = landlordBaseUrl)
+
+        val uri = provider.buildLandlordPrivacyNoticeUri()
+
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/privacy-notice")
+    }
+
+    @Test
+    fun `buildLandlordPrivacyNoticeDisplayUrl strips the scheme and www prefix for the letter copy`() {
+        val provider = createProvider(landlordBaseUrl = "https://www.example.test/landlord")
+
+        val url = provider.buildLandlordPrivacyNoticeDisplayUrl()
+
+        assertThat(url).isEqualTo("example.test/landlord/privacy-notice")
+    }
+
     @Test
     fun `buildLandlordDashboardUri prepends https when configured base URL has no scheme`() {
         val provider = createProvider(landlordBaseUrl = "example.test/landlord")

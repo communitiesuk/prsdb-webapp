@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.PERSONAL_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
@@ -107,9 +109,8 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
     @Nested
     inner class LandlordDetailsPropertiesTabs : NestedIntegrationTestWithImmutableData("data-local.sql") {
-        // TODO PDJB-2035: Update this test to check the addresses link to the deactivated property record
         @Test
-        fun `the deactivated properties tab shows the landlord's deactivated properties without links`() {
+        fun `the deactivated properties tab links to deactivated property records and back returns to it`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
             assertThat(detailsPage.tabs.deactivatedPropertiesTab).containsText("Deactivated properties (3)")
@@ -121,8 +122,17 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("6 Mythical Place")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("Inactive House, PRSDB Road, IN1 1AA")
             assertThat(detailsPage.deactivatedPropertiesTable).containsText("3 Fake Way")
-            assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(0)
+            assertThat(detailsPage.deactivatedPropertiesLinks).hasCount(3)
             assertThat(detailsPage.noDeactivatedPropertiesMessage).isHidden()
+
+            detailsPage.getPropertyAddressLink("Inactive House, PRSDB Road, IN1 1AA").clickAndWait()
+            val propertyDetailsView =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "52"))
+            assertThat(propertyDetailsView.caption).hasText("Deactivated property")
+
+            propertyDetailsView.backLink.clickAndWait()
+            val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
+            assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
@@ -308,6 +318,81 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             assertThat(detailsPage.leadTrusteeCard.getAction("Change")).isHidden()
             assertThat(detailsPage.governingBodyMembersLink).isHidden()
+        }
+    }
+
+    @Nested
+    inner class InactiveLandlordRecord {
+        // TODO PDJB-2149: Remove this setup when the ACTIVE_INACTIVE flag is removed
+        @BeforeEach
+        fun enableActiveInactiveFlag() {
+            featureFlagManager.enableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Nested
+        inner class WithNoDeactivatedOrIncompleteProperties :
+            NestedIntegrationTestWithImmutableData("data-mockuser-inactive-landlord.sql") {
+            @Test
+            fun `the record shows the single sentence inactive banner and no change links`() {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.title).containsText("Important")
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.content.heading)
+                    .hasText("Your landlord account has been deactivated. To reactivate it, register a property.")
+                assertThat(detailsPage.personalDetailsSummaryList.emailRow.actions.firstActionLink).isHidden()
+                assertThat(detailsPage.personalDetailsSummaryList.phoneNumberRow.actions.firstActionLink).isHidden()
+                assertThat(detailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink).isHidden()
+            }
+
+            @Test
+            fun `the banner register a property link goes to the property registration start page`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                detailsPage.inactiveLandlordNotificationBanner.registerAPropertyLink.clickAndWait()
+
+                assertPageIs(page, RegisterPropertyStartPage::class)
+            }
+        }
+
+        @Nested
+        inner class WithDeactivatedAndIncompleteProperties :
+            NestedIntegrationTestWithImmutableData(
+                listOf(
+                    "data-mockuser-inactive-landlord.sql",
+                    "data-overlay-inactive-landlord-has-deactivated-property.sql",
+                    "data-overlay-inactive-landlord-has-incomplete-property.sql",
+                ),
+            ) {
+            @Test
+            fun `the record shows the inactive banner with all reactivation options`() {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.content.heading)
+                    .hasText("Your landlord account has been deactivated.")
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.content).containsText("To reactivate it:")
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.reactivateAPropertyLink).isVisible()
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.completeADraftLink).isVisible()
+                assertThat(detailsPage.inactiveLandlordNotificationBanner.registerAPropertyLink).isVisible()
+            }
+
+            @Test
+            fun `the reactivate a property link opens the deactivated properties tab`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                detailsPage.inactiveLandlordNotificationBanner.reactivateAPropertyLink.clickAndWait()
+
+                assertThat(page.locator("#$DEACTIVATED_PROPERTIES_FRAGMENT")).isVisible()
+                assertEquals(DEACTIVATED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+            }
+
+            @Test
+            fun `the complete a draft link goes to the incomplete properties page`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+
+                detailsPage.inactiveLandlordNotificationBanner.completeADraftLink.clickAndWait()
+
+                assertPageIs(page, LandlordIncompletePropertiesPage::class)
+            }
         }
     }
 }
