@@ -408,6 +408,8 @@ update:
     fieldSetHeading: Update the ownership type for your property
   freeholders:
     notificationInset: We’ll notify anyone you add.
+  superiorLandlords:
+    notificationInset: We’ll notify anyone you add.
   occupancy:
     lettingAgentInterruption:
       heading: Are you sure you want to change this?
@@ -418,7 +420,7 @@ update:
         three: You can go back to undo this change.
   propertyManager:
     check:
-      insetText: We’ll notify anyone you add or remove.
+      insetText: We’ll notify anyone you add.
     remove:
       insetText: If you’ve given this property manager access, you’ll need to remove this on the property registration page.
   checkCharity:
@@ -447,6 +449,9 @@ update:
   checkPropertyManager:
     pageTitle: Check your property manager answers
     summaryName: You have updated the property manager
+  checkSuperiorLandlords:
+    pageTitle: Check your ownership chain answers
+    summaryName: You have updated the other people in the property chain
   checkOwnership:
     pageTitle: Check your ownership answers
     subheading: You’ve updated the property’s ownership

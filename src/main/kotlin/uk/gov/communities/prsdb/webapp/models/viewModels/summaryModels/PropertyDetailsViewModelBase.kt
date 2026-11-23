@@ -470,9 +470,6 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     companion object {
-        // TODO PDJB-1994: remove once the superior landlord section links to its real update route.
-        protected const val PLACEHOLDER_ACTION_LINK = "#"
-
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }

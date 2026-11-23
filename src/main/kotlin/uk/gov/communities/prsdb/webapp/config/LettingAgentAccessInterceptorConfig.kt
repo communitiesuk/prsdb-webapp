@@ -9,14 +9,16 @@ import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfi
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 
 @PrsdbWebConfiguration
 class LettingAgentAccessInterceptorConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry
-            .addInterceptor(LettingAgentAccessInterceptor(lettingAgentAccessService))
+            .addInterceptor(LettingAgentAccessInterceptor(lettingAgentAccessService, lettingAgentSessionService))
             .addPathPatterns(LETTING_AGENT_ROUTES_PATTERN)
             .order(InterceptorOrder.REDIRECT.value)
             // The bare invitation entry validates its own token query parameter and redirects, and the

@@ -10,13 +10,9 @@ spring:
     hikari:
       connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.7;
 
-    jpa:
-      hibernate:
-        ddl-auto: validate
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-      defer-datasource-initialization: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
   flyway:
     enabled: false
@@ -213,6 +209,9 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-1878-international-addresses"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-sms"
       enabled: false
       expiry-date: "2027-01-01"
 

@@ -9,11 +9,13 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.Can
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class RemoveDelegationStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentSessionService: LettingAgentSessionService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
 ) : AbstractInternalStepConfig<Complete, CancelLettingAgentDelegationJourneyState>() {
@@ -28,7 +30,7 @@ class RemoveDelegationStepConfig(
                 )
         val lettingAgentEmail = lettingAgentAccess.invitedEmail
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(state.propertyOwnershipId)
-        lettingAgentAccessService.addRemovedLettingAgentToSession(state.propertyOwnershipId, lettingAgentEmail)
+        lettingAgentSessionService.addRemovedLettingAgentToSession(state.propertyOwnershipId, lettingAgentEmail)
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         delegateToLettingAgentEmailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
     }
