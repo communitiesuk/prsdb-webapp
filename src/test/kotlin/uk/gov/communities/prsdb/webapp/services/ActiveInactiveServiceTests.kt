@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -16,6 +16,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
@@ -62,8 +63,22 @@ class ActiveInactiveServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @InjectMocks
     private lateinit var activeInactiveService: ActiveInactiveService
+
+    @BeforeEach
+    fun setUp() {
+        activeInactiveService =
+            ActiveInactiveService(
+                propertyOwnershipRepository,
+                landlordRepository,
+                lettingAgentAccessService,
+                userToLandlordService,
+                featureFlagManager,
+                landlordDeactivatedEmailSender,
+                lettingAgentDeactivatedEmailSender,
+                absoluteUrlProvider,
+            )
+    }
 
     @Test
     fun `deactivateLandlord marks an active landlord inactive and saves it without emailing them when ACTIVE_INACTIVE is disabled`() {
@@ -259,6 +274,30 @@ class ActiveInactiveServiceTests {
                 singleLineAddress = property.address.singleLineAddress,
             ),
         )
+    }
+
+    @Test
+    fun `deactivateProperty only emails the letting agent after the transaction commits`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val delegation =
+            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            activeInactiveService.deactivateProperty(PROPERTY_ID)
+
+            verifyNoInteractions(lettingAgentDeactivatedEmailSender)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(lettingAgentDeactivatedEmailSender).sendEmail(any(), any())
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     @Test

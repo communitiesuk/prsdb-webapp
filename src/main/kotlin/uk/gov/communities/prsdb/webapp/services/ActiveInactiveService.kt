@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
@@ -147,16 +148,18 @@ class ActiveInactiveService(
         lettingAgentEmail: String,
         propertyOwnership: PropertyOwnership,
     ) {
-        NotificationHelper.sendNotificationAndLogFailures(
-            "the letting agent property deactivated email for property ownership ${propertyOwnership.id}",
-        ) {
-            lettingAgentDeactivatedEmailSender.sendEmail(
-                lettingAgentEmail,
-                LettingAgentPropertyDeactivatedNotificationEmail(
-                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    singleLineAddress = propertyOwnership.address.singleLineAddress,
-                ),
-            )
+        TransactionHelper.runAfterTransactionCommits {
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the letting agent property deactivated email for property ownership ${propertyOwnership.id}",
+            ) {
+                lettingAgentDeactivatedEmailSender.sendEmail(
+                    lettingAgentEmail,
+                    LettingAgentPropertyDeactivatedNotificationEmail(
+                        propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                        singleLineAddress = propertyOwnership.address.singleLineAddress,
+                    ),
+                )
+            }
         }
     }
 }
