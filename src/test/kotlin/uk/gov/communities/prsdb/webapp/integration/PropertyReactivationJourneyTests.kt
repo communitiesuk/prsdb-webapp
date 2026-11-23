@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -74,9 +75,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadEicrFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.UploadGasCertFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReactivationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.math.BigDecimal
 import java.nio.file.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
@@ -91,6 +97,9 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
+
+    @MockitoBean
+    private lateinit var confirmationEmailSender: EmailNotificationService<PropertyReactivationConfirmationEmail>
 
     @BeforeEach
     fun stubEpcLookup() {
@@ -142,6 +151,29 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
+
+        val savedPropertyOwnership =
+            jdbcTemplate.queryForMap(
+                "SELECT license_provide_later, license_id, tenancy_provide_later, rent_amount FROM property_ownership WHERE id = ?",
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            )
+        assertEquals(false, savedPropertyOwnership["license_provide_later"])
+        assertNull(savedPropertyOwnership["license_id"])
+        assertEquals(false, savedPropertyOwnership["tenancy_provide_later"])
+        assertEquals(0, BigDecimal("400").compareTo(savedPropertyOwnership["rent_amount"] as BigDecimal))
+
+        val savedCompliance =
+            jdbcTemplate.queryForMap(
+                "SELECT has_gas_supply, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later, epc_url " +
+                    "FROM property_compliance WHERE property_ownership_id = ?",
+                INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER,
+            )
+        assertEquals(false, savedCompliance["has_gas_supply"])
+        assertEquals(false, savedCompliance["gas_safety_cert_provide_later"])
+        assertEquals(false, savedCompliance["electrical_safety_cert_provide_later"])
+        assertEquals(false, savedCompliance["epc_provide_later"])
+        assertNotNull(savedCompliance["epc_url"])
+        verify(confirmationEmailSender).sendEmail(any(), any())
     }
 
     @Test
@@ -308,6 +340,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
+        verify(confirmationEmailSender).sendEmail(any(), argThat { !landlordReactivated && paymentDetails == null })
     }
 
     @Test
@@ -426,6 +459,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
         assertEquals(false, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
+        verify(confirmationEmailSender, never()).sendEmail(any(), any())
     }
 
     @Test

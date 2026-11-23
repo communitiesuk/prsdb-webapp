@@ -5,7 +5,8 @@ import com.microsoft.playwright.Page
 
 open class Form(
     parentLocator: Locator,
-) : BaseComponent(parentLocator.locator("form")) {
+    formSelector: String = "form",
+) : BaseComponent(parentLocator.locator(formSelector)) {
     constructor(page: Page) : this(page.locator("html"))
 
     fun getErrorMessage(fieldName: String? = null): Locator =

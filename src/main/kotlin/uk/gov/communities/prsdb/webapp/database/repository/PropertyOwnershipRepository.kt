@@ -23,6 +23,18 @@ interface PropertyOwnershipRepository :
 
     fun findByIdAndIsActiveFalse(id: Long): PropertyOwnership?
 
+    @Query(
+        "SELECT po.id FROM PropertyOwnership po " +
+            "LEFT JOIN po.propertyCompliance pc " +
+            "WHERE po.isActive AND po.createdDate < :cutoff " +
+            "AND (po.licenseProvideLater OR po.tenancyProvideLater " +
+            "OR pc.gasSafetyCertProvideLater OR pc.electricalSafetyCertProvideLater " +
+            "OR pc.epcProvideLater)",
+    )
+    fun findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(
+        @Param("cutoff") cutoff: Instant,
+    ): List<Long>
+
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): Boolean
 
     fun existsByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlordId: Long): Boolean

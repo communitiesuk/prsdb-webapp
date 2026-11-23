@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmationPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmationAccountDeactivated
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import kotlin.test.assertEquals
 
@@ -34,7 +34,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
     private lateinit var landlordRepository: LandlordRepository
 
     @Autowired
-    private lateinit var activeInactiveService: ActiveInactiveService
+    private lateinit var deactivationService: DeactivationService
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>
@@ -82,7 +82,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
     @Test
     fun `leaving the last active property deactivates the landlord and sends the account deactivated email`(page: Page) {
         featureFlagManager.enable(ACTIVE_INACTIVE)
-        activeInactiveService.deactivateProperty(solePropertyOwnershipId)
+        deactivationService.deactivateProperty(solePropertyOwnershipId)
 
         val confirmPage = navigator.goToLeavePropertyConfirmPage(jointPropertyOwnershipId)
         confirmPage.submitConfirm()

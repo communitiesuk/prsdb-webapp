@@ -11,7 +11,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.services.ActiveInactiveService
+import uk.gov.communities.prsdb.webapp.services.LandlordActiveStatusService
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -23,21 +23,21 @@ class InactiveLandlordInterceptorTests {
     private lateinit var mockResponse: HttpServletResponse
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockLandlordActiveStatusService: LandlordActiveStatusService
 
     @InjectMocks
     private lateinit var interceptor: InactiveLandlordInterceptor
 
     @Test
     fun `preHandle allows the request when the current landlord is not inactive`() {
-        whenever(mockActiveInactiveService.isCurrentLandlordInactive()).thenReturn(false)
+        whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(false)
 
         assertTrue(interceptor.preHandle(mockRequest, mockResponse, handler = Any()))
     }
 
     @Test
     fun `preHandle throws a 403 when the current landlord is inactive`() {
-        whenever(mockActiveInactiveService.isCurrentLandlordInactive()).thenReturn(true)
+        whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
 
         val exception =
             assertThrows<ResponseStatusException> {

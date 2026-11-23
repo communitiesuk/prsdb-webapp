@@ -34,8 +34,10 @@ class NgdAddressLoaderDao(
                     postcode,
                     local_council_id,
                     is_active,
+                    country,
+                    gss,
                     created_date
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)
                 ON CONFLICT (uprn) DO UPDATE SET
                     single_line_address = EXCLUDED.single_line_address,
                     organisation        = EXCLUDED.organisation,
@@ -48,6 +50,8 @@ class NgdAddressLoaderDao(
                     postcode            = EXCLUDED.postcode,
                     local_council_id    = EXCLUDED.local_council_id,
                     is_active           = EXCLUDED.is_active,
+                    country             = EXCLUDED.country,
+                    gss                 = EXCLUDED.gss,
                     last_modified_date  = current_timestamp
             """
         return connection.prepareStatement(query)

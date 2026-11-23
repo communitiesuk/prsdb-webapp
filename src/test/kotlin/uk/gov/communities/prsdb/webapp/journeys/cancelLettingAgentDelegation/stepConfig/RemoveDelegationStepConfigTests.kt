@@ -18,12 +18,16 @@ import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.Can
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentSessionService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @ExtendWith(MockitoExtension::class)
 class RemoveDelegationStepConfigTests {
     @Mock
     lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+
+    @Mock
+    lateinit var mockLettingAgentSessionService: LettingAgentSessionService
 
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
@@ -43,6 +47,7 @@ class RemoveDelegationStepConfigTests {
     private fun createStepConfig() =
         RemoveDelegationStepConfig(
             mockLettingAgentAccessService,
+            mockLettingAgentSessionService,
             mockPropertyOwnershipService,
             mockDelegateToLettingAgentEmailService,
         )
@@ -65,9 +70,14 @@ class RemoveDelegationStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        val inOrder: InOrder = inOrder(mockLettingAgentAccessService, mockDelegateToLettingAgentEmailService)
+        val inOrder: InOrder =
+            inOrder(
+                mockLettingAgentAccessService,
+                mockLettingAgentSessionService,
+                mockDelegateToLettingAgentEmailService,
+            )
         inOrder.verify(mockLettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID)
-        inOrder.verify(mockLettingAgentAccessService).addRemovedLettingAgentToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
+        inOrder.verify(mockLettingAgentSessionService).addRemovedLettingAgentToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
         inOrder
             .verify(mockDelegateToLettingAgentEmailService)
             .sendCancellationEmails(mockPropertyOwnership, "agent@example.com")

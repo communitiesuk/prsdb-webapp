@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -325,7 +326,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the superior landlord section has a placeholder update url when there are superior landlords`() {
+    fun `the superior landlord section links to the update journey when there are superior landlords`() {
         val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
         propertyOwnership.superiorLandlords.add(createSuperiorLandlord(propertyOwnership, name = "Sam Superior"))
 
@@ -333,15 +334,18 @@ class PropertyDetailsViewModelTests {
             PropertyDetailsViewModel(propertyOwnership, viewType = PropertyDetailsViewType.LANDLORD, messageSource = mockMessageSource)
 
         assertTrue(viewModel.hasSuperiorLandlords)
-        // TODO PDJB-1994: update this assertion when the superior landlord update journey route is added
-        assertEquals("#", viewModel.superiorLandlordSectionUpdateUrl)
+        assertEquals(
+            UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(propertyOwnership.id),
+            viewModel.superiorLandlordSectionUpdateUrl,
+        )
     }
 
     @Test
     fun `the superior landlord not used rows show a no answer with a change link in the landlord view`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
         val viewModel =
             PropertyDetailsViewModel(
-                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                propertyOwnership,
                 viewType = PropertyDetailsViewType.LANDLORD,
                 messageSource = mockMessageSource,
             )
@@ -349,8 +353,15 @@ class PropertyDetailsViewModelTests {
         val row = viewModel.superiorLandlordNotUsedRows.single()
         assertEquals("registerProperty.superiorLandlords.checkAnswers.anyoneInOwnershipChain", row.fieldHeading)
         assertEquals("commonText.no", row.fieldValue)
-        // TODO PDJB-1994: update this URL when the superior landlord update journey route is added
-        assertEquals(listOf(SummaryListRowActionsViewModel("forms.links.change", "#")), row.actions)
+        assertEquals(
+            listOf(
+                SummaryListRowActionsViewModel(
+                    "forms.links.change",
+                    UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(propertyOwnership.id),
+                ),
+            ),
+            row.actions,
+        )
     }
 
     // TODO PDJB-1999: update or remove this test when superior landlords are shown in the local council view

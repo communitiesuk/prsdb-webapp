@@ -73,10 +73,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.LicensingDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.OutstandingActionsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -128,7 +130,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
-    private lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+    private lateinit var mockLettingAgentSessionService: LettingAgentSessionService
 
     @Mock
     private lateinit var mockLettingAgentAccessRepository: LettingAgentAccessRepository
@@ -140,7 +142,7 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockActiveInactiveService: ActiveInactiveService
+    private lateinit var mockActivationService: ActivationService
 
     // TODO: PDJB-1926: Remove mockFeatureFlagManager
     @Mock
@@ -1094,7 +1096,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
-            whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
+            whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
@@ -1109,7 +1111,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
             whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
-            whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
+            whenever(mockLettingAgentSessionService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
@@ -1481,8 +1483,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1513,8 +1514,7 @@ class PropertyOwnershipServiceTests {
         // Act
         propertyOwnershipService.updateLicensing(
             propertyOwnership.id,
-            newLicensingType,
-            newLicenceNumber,
+            LicensingDetailsDataModel(newLicensingType, newLicenceNumber),
             propertyOwnership.getMostRecentlyUpdated(),
         )
 
@@ -1540,8 +1540,7 @@ class PropertyOwnershipServiceTests {
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateLicensing(
                     propertyOwnership.id,
-                    LicensingType.HMO_MANDATORY_LICENCE,
-                    "newLicenceNumber",
+                    LicensingDetailsDataModel(LicensingType.HMO_MANDATORY_LICENCE, "newLicenceNumber"),
                     initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                 )
             }
@@ -1550,6 +1549,57 @@ class PropertyOwnershipServiceTests {
             "The property ownership record has been updated since this update session started.",
             exception.message,
         )
+    }
+
+    @Test
+    fun `saveReactivationLicensing sets the property's licence and clears licenseProvideLater`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, license = null, licenseProvideLater = true)
+        val updatedLicence = License(LicensingType.SELECTIVE_LICENCE, "SL-123")
+        whenever(mockLicenseService.updateLicence(null, LicensingType.SELECTIVE_LICENCE, "SL-123")).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.saveReactivationLicensing(
+            propertyOwnership,
+            LicensingDetailsDataModel(LicensingType.SELECTIVE_LICENCE, "SL-123"),
+        )
+
+        // Assert
+        assertEquals(updatedLicence, propertyOwnership.license)
+        assertEquals(false, propertyOwnership.licenseProvideLater)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+    }
+
+    @Test
+    fun `saveReactivationTenancyDetails sets the property's tenancy details and clears tenancyProvideLater`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false, tenancyProvideLater = true)
+        val tenancyDetails =
+            TenancyDetailsDataModel(
+                numberOfHouseholds = 2,
+                numberOfPeople = 4,
+                billsIncludedList = "GAS",
+                customBillsIncluded = "Internet",
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.OTHER,
+                customRentFrequency = "Fortnightly",
+                rentAmount = BigDecimal("400.50"),
+            )
+
+        // Act
+        propertyOwnershipService.saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
+
+        // Assert
+        assertEquals(2, propertyOwnership.currentNumHouseholds)
+        assertEquals(4, propertyOwnership.currentNumTenants)
+        assertEquals("GAS", propertyOwnership.billsIncludedList)
+        assertEquals("Internet", propertyOwnership.customBillsIncluded)
+        assertEquals(FurnishedStatus.FURNISHED, propertyOwnership.furnishedStatus)
+        assertEquals(RentFrequency.OTHER, propertyOwnership.rentFrequency)
+        assertEquals("Fortnightly", propertyOwnership.customRentFrequency)
+        assertEquals(BigDecimal("400.50"), propertyOwnership.rentAmount)
+        assertEquals(false, propertyOwnership.tenancyProvideLater)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
     }
 
     // TODO PDJB-2019: drop the beforePdjb955 half of this test along with the legacy column.
@@ -2309,6 +2359,97 @@ class PropertyOwnershipServiceTests {
                 exception.message,
             )
             verifyNoInteractions(mockFreeholderService)
+        }
+
+        private fun stubPropertyOwnership(propertyOwnership: PropertyOwnership) {
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
+                .thenReturn(propertyOwnership)
+        }
+    }
+
+    @Nested
+    inner class UpdateSuperiorLandlords {
+        private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1, ownershipType = OwnershipType.LEASEHOLD_ONLY)
+        private val superiorLandlord = SuperiorLandlordDataModel(databaseId = 2, detailsKnown = true, name = "Superior")
+
+        @Test
+        fun `updateSuperiorLandlords updates the superior landlords and returns the added ones`() {
+            // Arrange
+            stubPropertyOwnership(propertyOwnership)
+            val newSuperiorLandlord = SuperiorLandlordDataModel(detailsKnown = true, name = "New superior")
+            whenever(
+                mockSuperiorLandlordService.updateSuperiorLandlords(propertyOwnership, listOf(superiorLandlord, newSuperiorLandlord)),
+            ).thenReturn(listOf(newSuperiorLandlord))
+
+            // Act
+            val result =
+                propertyOwnershipService.updateSuperiorLandlords(
+                    propertyOwnership.id,
+                    listOf(superiorLandlord, newSuperiorLandlord),
+                    propertyOwnership.getOwnershipStructureMostRecentlyUpdated(),
+                )
+
+            // Assert
+            assertEquals(listOf(newSuperiorLandlord), result)
+        }
+
+        @Test
+        fun `updateSuperiorLandlords clears the superior landlords when none are given`() {
+            // Arrange
+            stubPropertyOwnership(propertyOwnership)
+
+            // Act
+            val result =
+                propertyOwnershipService.updateSuperiorLandlords(
+                    propertyOwnership.id,
+                    emptyList(),
+                    propertyOwnership.getOwnershipStructureMostRecentlyUpdated(),
+                )
+
+            // Assert
+            verify(mockSuperiorLandlordService).clearSuperiorLandlords(propertyOwnership)
+            verify(mockSuperiorLandlordService, never()).updateSuperiorLandlords(any(), any())
+            assertEquals(emptyList<SuperiorLandlordDataModel>(), result)
+        }
+
+        @Test
+        fun `updateSuperiorLandlords throws when ownership type does not require superior landlord info`() {
+            // Arrange
+            val soleFreehold = MockLandlordData.createPropertyOwnership(id = 2, ownershipType = OwnershipType.SOLE_FREEHOLD)
+            stubPropertyOwnership(soleFreehold)
+
+            // Act & Assert
+            assertThrows<IllegalArgumentException> {
+                propertyOwnershipService.updateSuperiorLandlords(
+                    soleFreehold.id,
+                    listOf(superiorLandlord),
+                    soleFreehold.getOwnershipStructureMostRecentlyUpdated(),
+                )
+            }
+            verifyNoInteractions(mockSuperiorLandlordService)
+        }
+
+        @Test
+        fun `updateSuperiorLandlords throws UpdateConflictException when a superior landlord changed since the journey started`() {
+            // Arrange
+            stubPropertyOwnership(propertyOwnership)
+            val journeyStartDate = Instant.parse("2025-01-01T00:00:00Z")
+            ReflectionTestUtils.setField(propertyOwnership, "createdDate", journeyStartDate)
+            propertyOwnership.superiorLandlords.add(
+                MockLandlordData.createSuperiorLandlord(propertyOwnership).withCreatedDate("2025-02-01T00:00:00Z"),
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateSuperiorLandlords(propertyOwnership.id, listOf(superiorLandlord), journeyStartDate)
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+            verifyNoInteractions(mockSuperiorLandlordService)
         }
 
         private fun stubPropertyOwnership(propertyOwnership: PropertyOwnership) {
@@ -3252,7 +3393,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
 
             // Assert
-            verify(mockActiveInactiveService).reactivateLandlordIfInactive(newLandlord)
+            verify(mockActivationService).reactivateLandlordIfInactive(newLandlord)
         }
     }
 

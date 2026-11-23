@@ -49,12 +49,8 @@ class CompleteFreeholdersUpdateStepConfig(
         if (addedFreeholders.isEmpty()) return
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
-        addedFreeholders.forEachIndexed { index, freeholder ->
-            NotificationHelper.sendNotificationAndLogFailures(
-                "the freeholder ${index + 1} added-to-property notification for property ownership $propertyId",
-            ) {
-                associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
-            }
+        NotificationHelper.sendAddedToPropertyNotifications("freeholder", addedFreeholders, propertyId) { freeholder ->
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership)
         }
     }
 
