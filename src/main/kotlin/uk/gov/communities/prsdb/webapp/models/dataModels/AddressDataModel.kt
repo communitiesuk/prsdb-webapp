@@ -19,6 +19,7 @@ data class AddressDataModel(
     val postcode: String? = null,
     val country: String = ENGLAND,
     val gss: String? = null,
+    val isInternational: Boolean = false,
 ) {
     fun toMultiLineAddress(): String {
         val multiLineFromComponents = buildMultiLineAddressFromComponents()
