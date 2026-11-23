@@ -30,7 +30,7 @@ const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
 
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
 
-const val PASSPHRASE_FOR_SMS = "passphraseForSms"
+const val PENDING_PASSPHRASE = "pendingPassphrase"
 
 const val SUBMITTED_PASSCODE = "submittedPasscode"
 

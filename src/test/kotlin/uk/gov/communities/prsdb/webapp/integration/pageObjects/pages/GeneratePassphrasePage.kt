@@ -15,6 +15,7 @@ class GeneratePassphrasePage(
 ) : BasePage(page, "generate-passphrase") {
     val heading = Heading(page.locator("main h1"))
     val generateAnotherButton = Button.byText(page, "Generate another passphrase")
+    val emailForm = EmailForm(page.locator("main"))
     val smsForm = SmsForm(page.locator("main"))
     val errorSummary = ErrorSummary(page)
     val notificationStatus: Locator = page.locator("[role='status']")
@@ -24,9 +25,16 @@ class GeneratePassphrasePage(
     val passphrase: String
         get() = page.locator("#passphrase-preview strong").textContent()
 
+    class EmailForm(
+        parentLocator: Locator,
+    ) : PostForm(parentLocator, "form:has(input[name='channel'][value='email'])") {
+        val emailAddress = TextInput.emailByFieldName(locator, "emailAddress")
+        val passphraseToken = TextInput.hiddenByFieldName(locator, "passphraseToken")
+    }
+
     class SmsForm(
         parentLocator: Locator,
-    ) : PostForm(parentLocator) {
+    ) : PostForm(parentLocator, "form:has(input[name='channel'][value='sms'])") {
         val phoneNumber = TextInput.textByFieldName(locator, "phoneNumber")
         val passphraseToken = TextInput.hiddenByFieldName(locator, "passphraseToken")
     }

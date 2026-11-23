@@ -9,11 +9,14 @@ import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.EmailNotifyResponseException
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -31,6 +34,7 @@ class NotifyEmailDeliveryServiceTests {
     fun setup() {
         notifyClient = mock()
         notifyIdService = mock()
+        whenever(notifyIdService.getNotifyIdValue(org.mockito.kotlin.any<EmailTemplate>())).thenReturn("template-id")
 
         emailDeliveryService = NotifyEmailDeliveryService(notifyClient, notifyIdService, false)
     }
@@ -42,6 +46,17 @@ class NotifyEmailDeliveryServiceTests {
         override fun toHashMap(): HashMap<String, String> = hashMap
 
         constructor() : this(hashMapOf(), EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL)
+    }
+
+    @Test
+    fun `DeliverEmail rejects an unconfigured template without calling Notify`() {
+        whenever(notifyIdService.getNotifyIdValue(EmailTemplate.LOCAL_COUNCIL_INVITATION_EMAIL)).thenReturn("")
+
+        val exception =
+            assertThrows<PersistentEmailSendException> { emailDeliveryService.deliverEmail("recipient@example.com", TestEmailTemplate()) }
+
+        assertEquals(NotificationSendFailureReason.TECHNICAL, exception.reason)
+        Mockito.verifyNoInteractions(notifyClient)
     }
 
     @Test
@@ -147,7 +162,68 @@ class NotifyEmailDeliveryServiceTests {
         assertThrows<SerializationException> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
     }
 
+    @Test
+    fun `an empty Notify error list produces an uncertain email failure`() {
+        val cause = NotificationClientException("""Status code: 400 {"errors":[],"status_code":400}""")
+        Mockito.doThrow(cause).whenever(notifyClient).sendEmail(any(), any(), any(), any())
+
+        val exception =
+            assertThrows<TransientEmailSentException> { emailDeliveryService.deliverEmail("recipient@example.com", TestEmailTemplate()) }
+
+        assertEquals(NotificationSendFailureReason.UNKNOWN, exception.reason)
+        assertEquals(cause, exception.cause)
+    }
+
+    @ParameterizedTest
+    @MethodSource("emailFailureReasons")
+    fun `Notify errors carry a conservative submission outcome`(
+        statusCode: Int,
+        errors: String,
+        expectedReason: NotificationSendFailureReason,
+    ) {
+        val innerException =
+            NotificationClientException("Status code: $statusCode {\"errors\":[$errors],\"status_code\":$statusCode}")
+        Mockito.doThrow(innerException).whenever(notifyClient).sendEmail(any(), any(), any(), any())
+
+        val exception = assertThrows<Exception> { emailDeliveryService.deliverEmail("", TestEmailTemplate()) }
+        val reason =
+            when (exception) {
+                is PersistentEmailSendException -> exception.reason
+                is TransientEmailSentException -> exception.reason
+                is EmailNotifyResponseException -> exception.reason
+                else -> throw exception
+            }
+        assertEquals(expectedReason, reason)
+        assertEquals(innerException, exception.cause)
+    }
+
     companion object {
+        @JvmStatic
+        fun emailFailureReasons(): List<Arguments> =
+            listOf(
+                Arguments.of(403, """{"error":"AuthError","message":"bad credentials"}""", NotificationSendFailureReason.TECHNICAL),
+                Arguments.of(400, """{"error":"BadRequestError","message":"bad request"}""", NotificationSendFailureReason.INVALID_REQUEST),
+                Arguments.of(400, """{"error":"ValidationError","message":"bad email"}""", NotificationSendFailureReason.INVALID_REQUEST),
+                Arguments.of(
+                    429,
+                    """{"error":"TooManyRequestsError","message":"daily limit"}""",
+                    NotificationSendFailureReason.DAILY_LIMIT,
+                ),
+                Arguments.of(429, """{"error":"RateLimitError","message":"minute limit"}""", NotificationSendFailureReason.MINUTE_LIMIT),
+                Arguments.of(500, """{"error":"Exception","message":"server error"}""", NotificationSendFailureReason.UNKNOWN),
+                Arguments.of(500, """{"error":"BadRequestError","message":"server error"}""", NotificationSendFailureReason.UNKNOWN),
+                Arguments.of(
+                    400,
+                    """{"error":"AuthError","message":"auth"},{"error":"ValidationError","message":"bad email"}""",
+                    NotificationSendFailureReason.TECHNICAL,
+                ),
+                Arguments.of(
+                    429,
+                    """{"error":"RateLimitError","message":"rate"},{"error":"Exception","message":"server"}""",
+                    NotificationSendFailureReason.UNKNOWN,
+                ),
+            )
+
         @JvmStatic
         fun getAllowlistExceptionMessages(): List<Named<String>> =
             listOf(

@@ -483,5 +483,12 @@
     "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
     "subject": "Landlord account deactivated",
     "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
+  },
+  {
+    "test_id": "fdfc9429-ea11-4042-a681-10c42201e1e7",
+    "prod_id": "89ad7bb0-4c8f-4461-9c7e-24266791e4ca",
+    "enumName": "PASSPHRASE_EMAIL",
+    "subject": "Your passphrase to speak with us",
+    "bodyLocation": "/emails/Passphrase.md"
   }
 ]

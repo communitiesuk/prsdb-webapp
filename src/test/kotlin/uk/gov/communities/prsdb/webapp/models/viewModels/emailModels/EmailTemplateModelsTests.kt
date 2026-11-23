@@ -651,6 +651,10 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/RemoveOrgTeamMemberNotification.md",
                 ),
+                EmailTemplateTestData(
+                    PassphraseEmail("time anything costume"),
+                    "/emails/Passphrase.md",
+                ),
             )
     }
 
