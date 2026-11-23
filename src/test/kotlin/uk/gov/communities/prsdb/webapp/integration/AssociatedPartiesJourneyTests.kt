@@ -293,6 +293,20 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
+        fun `Editing an unknown freeholder leaves the contact type unselected`(page: Page) {
+            val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            val unknownFreeholderCard = freeholdersListPage.getSummaryCard(2)
+            assertThat(unknownFreeholderCard.title).hasText("Unknown freeholder")
+            unknownFreeholderCard.getAction("Change").link.clickAndWait()
+
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Freeholder With Details")
+
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(null, contactTypePage.form.radios.selectedValue)
+        }
+
+        @Test
         fun `Changing a freeholder with a postal address does not preselect a contact type but pre-fills their address`(page: Page) {
             val freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
