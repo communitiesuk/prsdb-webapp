@@ -35,3 +35,7 @@ Phone: 0303 444 7000
 Monday to Friday, 9am to 6pm
 
 Email: registerrentalproperty@communities.gov.uk
+
+---
+
+This is an automated email – do not reply.
