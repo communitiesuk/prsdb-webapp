@@ -78,7 +78,7 @@ class StartSuperiorLandlordsUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached only marks the state as initialised when the property has no superior landlords`() {
+    fun `afterStepIsReached when the property has no superior landlords marks the state as initialised only`() {
         whenever(mockState.superiorLandlordsInitialised).thenReturn(null)
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId))

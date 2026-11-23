@@ -88,7 +88,7 @@ class StartPropertyManagerUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached only marks the state as initialised when the property has no property manager`() {
+    fun `afterStepIsReached when the property has no property manager marks the state as initialised only`() {
         whenever(mockState.propertyManagerInitialised).thenReturn(null)
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId))
