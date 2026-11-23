@@ -32,7 +32,7 @@ class NoAddressFoundStepConfigTests {
 
     @ParameterizedTest
     @CsvSource(
-        "ENGLAND_WITH_LOCAL_COUNCIL, englandPropertyDetails",
+        "WITH_ENGLISH_LOCAL_COUNCIL, englandPropertyDetails",
         "ENGLAND_AND_WALES, englandOrWales",
         "UK, uk",
     )
@@ -67,7 +67,7 @@ class NoAddressFoundStepConfigTests {
 
     @ParameterizedTest
     @CsvSource(
-        "ENGLAND_WITH_LOCAL_COUNCIL, englandPropertyDetails, englandPropertyDetails",
+        "WITH_ENGLISH_LOCAL_COUNCIL, englandPropertyDetails, englandPropertyDetails",
         "ENGLAND_AND_WALES, englandOrWales, legacy",
         "UK, englandOrWales, legacy",
     )

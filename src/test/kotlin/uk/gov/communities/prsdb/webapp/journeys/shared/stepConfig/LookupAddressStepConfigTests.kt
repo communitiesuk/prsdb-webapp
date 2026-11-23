@@ -127,11 +127,11 @@ class LookupAddressStepConfigTests {
 
         @ParameterizedTest
         @CsvSource(
-            "ENGLAND_WITH_LOCAL_COUNCIL, ENGLAND_WITH_LOCAL_COUNCIL",
+            "WITH_ENGLISH_LOCAL_COUNCIL, WITH_ENGLISH_LOCAL_COUNCIL",
             "ENGLAND_AND_WALES, UK",
             "UK, UK",
         )
-        fun `searches England with local council or the whole UK when international addresses are disabled`(
+        fun `searches addresses with an English local council or the whole UK when international addresses are disabled`(
             configuredRegion: AddressSearchRegion,
             searchedRegion: AddressSearchRegion,
         ) {

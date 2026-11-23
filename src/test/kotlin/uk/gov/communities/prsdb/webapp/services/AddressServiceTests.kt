@@ -96,10 +96,10 @@ class AddressServiceTests {
         private val expectedResults = matchingAddresses.map { AddressDataModel.fromAddress(it) }
 
         @Test
-        fun `searchForAddresses searches England with local council addresses for that region`() {
-            whenever(mockAddressRepository.searchInEnglandWithLocalCouncil(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
+        fun `searchForAddresses searches addresses with an English local council for that region`() {
+            whenever(mockAddressRepository.searchWithEnglishLocalCouncil(houseNameOrNumber, postcode)).thenReturn(matchingAddresses)
 
-            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
+            val results = addressService.searchForAddresses(houseNameOrNumber, postcode, AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL)
 
             assertEquals(expectedResults, results)
         }

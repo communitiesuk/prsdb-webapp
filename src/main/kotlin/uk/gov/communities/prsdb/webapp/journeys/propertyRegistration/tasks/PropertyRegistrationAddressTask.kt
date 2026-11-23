@@ -49,7 +49,7 @@ class PropertyRegistrationAddressTask(
                     }
                 }
                 stepSpecificInitialisation {
-                    restrictToRegion(AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
+                    restrictToRegion(AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL)
                 }
                 withAdditionalContentProperties {
                     mapOf(
@@ -74,7 +74,7 @@ class PropertyRegistrationAddressTask(
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
                 stepSpecificInitialisation {
-                    restrictToRegion(AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL)
+                    restrictToRegion(AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL)
                 }
             }
             step(journey.manualAddressStep) {

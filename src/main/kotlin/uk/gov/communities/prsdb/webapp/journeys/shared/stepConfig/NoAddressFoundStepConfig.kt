@@ -47,12 +47,12 @@ class NoAddressFoundStepConfig(
     private fun messageKeys(): Map<String, String> {
         val regionKey =
             when (region) {
-                AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL -> "englandPropertyDetails"
+                AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL -> "englandPropertyDetails"
                 AddressSearchRegion.ENGLAND_AND_WALES -> "englandOrWales"
                 AddressSearchRegion.UK -> "uk"
             }
         // TODO: PDJB-2259: Remove this legacy copy when INTERNATIONAL_ADDRESSES is removed
-        if (!featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES) && region != AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL) {
+        if (!featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES) && region != AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL) {
             return mapOf(
                 "headingKey" to "$MESSAGE_KEY_PREFIX.heading.englandOrWales",
                 "paragraphOneBeforeLinkKey" to "$MESSAGE_KEY_PREFIX.paragraph.one.beforeLink.legacy",

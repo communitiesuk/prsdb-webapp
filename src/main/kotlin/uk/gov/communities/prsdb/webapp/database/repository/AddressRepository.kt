@@ -14,7 +14,7 @@ interface AddressRepository : JpaRepository<Address, Long> {
             SEARCH_ORDER_AND_LIMIT,
         nativeQuery = true,
     )
-    fun searchInEnglandWithLocalCouncil(
+    fun searchWithEnglishLocalCouncil(
         houseNameOrNumber: String,
         postcode: String,
     ): List<Address>

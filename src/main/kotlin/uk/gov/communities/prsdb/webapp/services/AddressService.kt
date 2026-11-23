@@ -30,10 +30,17 @@ class AddressService(
     ): List<AddressDataModel> {
         val addresses =
             when (region) {
-                AddressSearchRegion.ENGLAND_WITH_LOCAL_COUNCIL ->
-                    addressRepository.searchInEnglandWithLocalCouncil(houseNameOrNumber, postcode)
-                AddressSearchRegion.ENGLAND_AND_WALES -> addressRepository.searchInEnglandAndWales(houseNameOrNumber, postcode)
-                AddressSearchRegion.UK -> addressRepository.searchInUk(houseNameOrNumber, postcode)
+                AddressSearchRegion.WITH_ENGLISH_LOCAL_COUNCIL -> {
+                    addressRepository.searchWithEnglishLocalCouncil(houseNameOrNumber, postcode)
+                }
+
+                AddressSearchRegion.ENGLAND_AND_WALES -> {
+                    addressRepository.searchInEnglandAndWales(houseNameOrNumber, postcode)
+                }
+
+                AddressSearchRegion.UK -> {
+                    addressRepository.searchInUk(houseNameOrNumber, postcode)
+                }
             }
         return addresses.map { AddressDataModel.fromAddress(it) }
     }
