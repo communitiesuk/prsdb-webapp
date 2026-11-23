@@ -25,8 +25,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Super
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
+import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
 import kotlin.test.assertSame
 
@@ -37,6 +39,9 @@ class CompleteOwnershipUpdateStepConfigTests {
 
     @Mock
     private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
+
+    @Mock
+    private lateinit var mockAssociatedPartyNotificationService: AssociatedPartyNotificationService
 
     @Mock
     private lateinit var mockState: UpdateOwnershipJourneyState
@@ -68,7 +73,12 @@ class CompleteOwnershipUpdateStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteOwnershipUpdateStepConfig(mockPropertyOwnershipService, mockPropertyUpdateEmailService)
+        stepConfig =
+            CompleteOwnershipUpdateStepConfig(
+                mockPropertyOwnershipService,
+                mockPropertyUpdateEmailService,
+                mockAssociatedPartyNotificationService,
+            )
         lenient().`when`(mockState.propertyId).thenReturn(propertyId)
         lenient().`when`(mockState.lastModifiedDate).thenReturn(lastModifiedDate)
         lenient().`when`(mockState.ownershipStructureTask).thenReturn(mockOwnershipStructureTask)
@@ -206,6 +216,42 @@ class CompleteOwnershipUpdateStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached notifies each added freeholder and superior landlord, continuing if a notification fails`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+        whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.LEASEHOLD_ONLY)
+        stubAnyoneInOwnershipChain(true)
+        whenever(mockPropertyOwnershipService.updateOwnershipStructure(any(), any(), any(), any(), any()))
+            .thenReturn(Pair(listOf(firstFreeholder, secondFreeholder), listOf(superiorLandlord)))
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(firstFreeholder, propertyOwnership))
+            .thenThrow(RuntimeException("Notify failed"))
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockAssociatedPartyNotificationService).sendNotificationToFreeholderAddedToProperty(firstFreeholder, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService).sendNotificationToFreeholderAddedToProperty(secondFreeholder, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, listOf("The property’s ownership"))
+    }
+
+    @Test
+    fun `afterStepIsReached sends no added-to-property notifications when nobody was added`() {
+        // Arrange
+        whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.JOINT_TENANTS)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyOwnershipService, never()).getPropertyOwnership(any())
+        verifyNoInteractions(mockAssociatedPartyNotificationService)
+    }
+
+    @Test
     fun `afterStepIsReached deletes the journey and rethrows without sending emails when an UpdateConflictException is thrown`() {
         // Arrange
         whenever(mockOwnershipTypeTask.ownershipType).thenReturn(OwnershipType.SOLE_FREEHOLD)
@@ -216,6 +262,7 @@ class CompleteOwnershipUpdateStepConfigTests {
         assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
         verify(mockState).deleteJourney()
         verify(mockPropertyUpdateEmailService, never()).sendUpdateEmails(any(), any())
+        verifyNoInteractions(mockAssociatedPartyNotificationService)
     }
 
     @Test

@@ -62,12 +62,8 @@ class CompleteSuperiorLandlordsUpdateStepConfig(
         if (addedSuperiorLandlords.isEmpty()) return
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
-        addedSuperiorLandlords.forEachIndexed { index, superiorLandlord ->
-            NotificationHelper.sendNotificationAndLogFailures(
-                "the superior landlord ${index + 1} added-to-property notification for property ownership $propertyId",
-            ) {
-                associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
-            }
+        NotificationHelper.sendAddedToPropertyNotifications("superior landlord", addedSuperiorLandlords, propertyId) { superiorLandlord ->
+            associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
         }
     }
 
