@@ -114,7 +114,8 @@ truncated. `IntegrationTestHelperTests` covers this.
 ### Audited Entities (Envers)
 
 Landlord and property record entities are annotated `@Audited` (Hibernate Envers). Each has a `<table>_aud` table
-holding one row per revision, linked to `audit_revision` (time, One Login subject identifier, letting agent access id).
+holding one row per revision, linked to `audit_revision` (time, One Login subject identifier, letting agent access id,
+scheduled task name).
 
 - When adding, renaming or retyping a column on an audited table, make the same change to its `_aud` table in the
   same migration. Schema validation (`ddl-auto: validate`) fails at startup if they diverge.
