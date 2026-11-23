@@ -27,6 +27,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
@@ -36,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.database.dao.NgdAddressLoaderDao
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.BATCH_SIZE
-import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAME
+import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_FILE_NAMES
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_ID
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.UPRN_BATCH_SIZE
@@ -106,6 +107,17 @@ class NgdAddressLoaderTests {
             }
     }
 
+    private fun stubDataPackageVersionFiles(
+        versionId: String,
+        gbFixture: String,
+        islFixture: String,
+    ) {
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, versionId, "$GB_FILE.zip"))
+            .thenReturn(getNgdFileInputStream(gbFixture))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, versionId, "$ISL_FILE.zip"))
+            .thenReturn(getNgdFileInputStream(islFixture))
+    }
+
     @AfterEach
     fun tearDown() {
         if (::ngdAddressLoaderDaoMockConstructor.isInitialized) {
@@ -121,8 +133,7 @@ class NgdAddressLoaderTests {
             whenever(mock.findCommentOnAddressTable()).thenReturn(commentOnAddressTable)
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionHistory(DATA_PACKAGE_ID)).thenReturn(versionHistory)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, INITIAL_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(INITIAL_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetailsWithoutNext)
 
@@ -156,13 +167,11 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(SECOND_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
             .thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID))
             .thenReturn(thirdVersionDetails)
@@ -172,7 +181,7 @@ class NgdAddressLoaderTests {
 
         // Assert
         val commentCaptor = argumentCaptor<String>()
-        verify(mockNgdAddressLoaderDao, times(4)).saveCommentOnAddressTable(commentCaptor.capture())
+        verify(mockNgdAddressLoaderDao, times(6)).saveCommentOnAddressTable(commentCaptor.capture())
         val savedVersionIds =
             commentCaptor.allValues.map { it.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX).substringBefore(";") }.toSet()
         assertEquals(setOf(SECOND_VERSION_ID, THIRD_VERSION_ID), savedVersionIds)
@@ -197,19 +206,18 @@ class NgdAddressLoaderTests {
             whenever(mock.findCommentOnAddressTable()).thenReturn(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionHistory(DATA_PACKAGE_ID)).thenReturn(versionHistory)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, INITIAL_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(INITIAL_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .thenReturn(getNgdFileInputStream("invalidChangeTypeCsv.zip"))
 
         // Act & Assert
         assertThrows<Exception> { ngdAddressLoader.loadNewDataPackageVersions() }
-        verify(mockTransaction, times(3)).commit() // marker + csv for initial version, marker for second
-        verify(mockTransaction).rollback() // csv for second version
-        verify(mockSession, times(4)).beginTransaction() // marker + csv for each version
+        verify(mockTransaction, times(4)).commit() // marker + GB csv + ISL csv for initial version, marker for second
+        verify(mockTransaction).rollback() // GB csv for second version
+        verify(mockSession, times(5)).beginTransaction() // marker + each csv for initial version, marker + GB csv for second
     }
 
     @ParameterizedTest(name = "due to {0}")
@@ -237,8 +245,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("veryLargeCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "veryLargeCsv.zip", islFixture = "emptyIslCsv.zip")
 
         val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
@@ -261,8 +268,7 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID))
             .thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
         // Act
@@ -280,7 +286,7 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .doAnswer { throw HttpException() }
 
         // Act & Assert
@@ -295,7 +301,7 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .thenAnswer { getNgdFileInputStream("missingCsv.zip") }
 
         // Act & Assert
@@ -303,15 +309,14 @@ class NgdAddressLoaderTests {
     }
 
     @Test
-    fun `loadNewDataPackageVersions handles (deactivates, upserts or ignores) each record in a data package version accordingly`() {
+    fun `loadNewDataPackageVersions handles (deactivates or upserts) each record in a data package version accordingly`() {
         // Arrange
         setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("validCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "validCsv.zip", islFixture = "emptyIslCsv.zip")
 
         val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
@@ -323,32 +328,90 @@ class NgdAddressLoaderTests {
 
         // Assert
         val uprnCaptor = argumentCaptor<Long>()
-        verify(mockPreparedStatement, times(3)).setLong(eq(1), uprnCaptor.capture())
+        verify(mockPreparedStatement, times(4)).setLong(eq(1), uprnCaptor.capture())
 
         val localCouncilIndex = 11
 
         val isActiveCaptor = argumentCaptor<Boolean>()
-        verify(mockPreparedStatement, times(3)).setBoolean(eq(12), isActiveCaptor.capture())
+        verify(mockPreparedStatement, times(4)).setBoolean(eq(12), isActiveCaptor.capture())
 
         // 'Delete' change type and OS custodian code - deactivate
         assertEquals(10000490106, uprnCaptor.firstValue)
         verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.firstValue)
 
-        // 'Upsert' change type and invalid country - deactivate
+        // 'Upsert' change type and invalid country (Channel Islands) - deactivate
         assertEquals(10000067954, uprnCaptor.secondValue)
         verify(mockPreparedStatement, times(2)).setNull(localCouncilIndex, java.sql.Types.INTEGER)
         assertFalse(isActiveCaptor.secondValue)
 
         // 'Upsert' change type - upsert
         assertEquals(10000071648, uprnCaptor.thirdValue)
-        verify(mockPreparedStatement).setInt(localCouncilIndex, localCouncils.first().id)
+        verify(mockPreparedStatement, times(2)).setInt(localCouncilIndex, localCouncils.first().id)
         assertTrue(isActiveCaptor.thirdValue)
 
-        // 'No' change type - ignore (fourth record isn't processed)
-        verify(mockPreparedStatement, times(3)).addBatch()
+        // 'Modified Geometry' change type - upsert. We used to ignore this.
+        assertEquals(10000811064, uprnCaptor.allValues[3])
+        assertTrue(isActiveCaptor.allValues[3])
+
+        verify(mockPreparedStatement, times(4)).addBatch()
 
         verify(mockNgdAddressLoaderDao).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID")
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions sets the country and GSS code of each record`() {
+        // Arrange
+        setUpMockNgdAddressLoaderDao { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "validCsv.zip", islFixture = "validIslCsv.zip")
+
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        val countryCaptor = argumentCaptor<String>()
+        verify(mockPreparedStatement, times(5)).setString(eq(13), countryCaptor.capture())
+        assertEquals(listOf("England", "Channel Islands", "England", "England", "Northern Ireland"), countryCaptor.allValues)
+
+        verify(mockPreparedStatement).setString(14, "E07000043")
+        verify(mockPreparedStatement, times(2)).setString(14, "E07000116")
+        verify(mockPreparedStatement).setString(14, "E09000028")
+        // The Northern Ireland record has no GSS code
+        verify(mockPreparedStatement).setNull(14, java.sql.Types.VARCHAR)
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions only marks addresses in valid countries as active`() {
+        // Arrange
+        setUpMockNgdAddressLoaderDao { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "ukCountriesCsv.zip", islFixture = "emptyIslCsv.zip")
+
+        val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
+        whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
+
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        val isActiveCaptor = argumentCaptor<Boolean>()
+        verify(mockPreparedStatement, times(7)).setBoolean(eq(12), isActiveCaptor.capture())
+        // England, Wales, Scotland, Northern Ireland, Unassigned, Channel Islands, Isle of Man
+        assertEquals(listOf(true, true, true, true, true, false, false), isActiveCaptor.allValues)
     }
 
     @Test
@@ -359,8 +422,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("largeCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "largeCsv.zip", islFixture = "emptyIslCsv.zip")
 
         val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
@@ -383,8 +445,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("veryLargeCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "veryLargeCsv.zip", islFixture = "emptyIslCsv.zip")
 
         val localCouncils = listOf(MockLocalCouncilData.createLocalCouncil(custodianCode = "1"))
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(localCouncils)
@@ -398,8 +459,10 @@ class NgdAddressLoaderTests {
         val expectedUprnBatchCommits = (VERY_LARGE_CSV_LINE_COUNT / UPRN_BATCH_SIZE).toInt()
         val markerCommit = 1
         val finalCommit = 1
+        val islFinalCommit = 1
         val deleteInactiveCommit = 1
-        verify(mockTransaction, times(markerCommit + expectedUprnBatchCommits + finalCommit + deleteInactiveCommit)).commit()
+        verify(mockTransaction, times(markerCommit + expectedUprnBatchCommits + finalCommit + islFinalCommit + deleteInactiveCommit))
+            .commit()
     }
 
     @Test
@@ -410,8 +473,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
         // Act
@@ -431,7 +493,7 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .thenReturn(getNgdFileInputStream("invalidChangeTypeCsv.zip"))
 
         // Act & Assert
@@ -449,7 +511,7 @@ class NgdAddressLoaderTests {
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .thenReturn(getNgdFileInputStream("validCsv.zip"))
 
         whenever(mockLocalCouncilRepository.findAll()).thenReturn(emptyList())
@@ -466,7 +528,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip"))
             .thenAnswer { throw java.io.IOException("Stream closed") }
 
         // Act & Assert
@@ -474,7 +536,7 @@ class NgdAddressLoaderTests {
 
         // Verify it tried MAX_STREAM_RETRIES + 1 times (initial + retries)
         verify(mockOsDownloadsClient, times(NgdAddressLoader.MAX_STREAM_RETRIES + 1))
-            .getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip")
+            .getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
     }
 
     @Test
@@ -485,7 +547,7 @@ class NgdAddressLoaderTests {
         }
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip"))
             .thenAnswer {
                 throw IllegalStateException(
                     "IOException reading next record: java.io.IOException: closed",
@@ -498,7 +560,7 @@ class NgdAddressLoaderTests {
         assertTrue(thrown.cause is java.io.IOException)
 
         verify(mockOsDownloadsClient, times(NgdAddressLoader.MAX_STREAM_RETRIES + 1))
-            .getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip")
+            .getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
     }
 
     @Test
@@ -509,7 +571,7 @@ class NgdAddressLoaderTests {
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, INITIAL_VERSION_ID))
             .thenReturn(initialVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip"))
             .thenReturn(getNgdFileInputStream("invalidChangeTypeCsv.zip"))
 
         // Act & Assert
@@ -517,7 +579,7 @@ class NgdAddressLoaderTests {
 
         // Only called once — no retry
         verify(mockOsDownloadsClient, times(1))
-            .getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip")
+            .getDataPackageVersionFile(DATA_PACKAGE_ID, SECOND_VERSION_ID, "$GB_FILE.zip")
     }
 
     @Test
@@ -525,11 +587,10 @@ class NgdAddressLoaderTests {
         // Arrange
         setUpMockNgdAddressLoaderDao { mock ->
             whenever(mock.findCommentOnAddressTable())
-                .thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;rowOffset=5000")
+                .thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$GB_FILE;rowOffset=5000")
         }
 
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
 
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
@@ -537,7 +598,7 @@ class NgdAddressLoaderTests {
         ngdAddressLoader.loadNewDataPackageVersions()
 
         // Assert - it loaded the in-progress version (not the next one)
-        verify(mockOsDownloadsClient).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip")
+        verify(mockOsDownloadsClient).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
         verify(mockNgdAddressLoaderDao, atLeast(1)).saveCommentOnAddressTable("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID")
     }
 
@@ -548,8 +609,7 @@ class NgdAddressLoaderTests {
             whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
         }
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
-        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$DATA_PACKAGE_FILE_NAME.zip"))
-            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
         whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
 
         // Act
@@ -558,7 +618,90 @@ class NgdAddressLoaderTests {
         // Assert - first save should be in-progress, last should be complete
         val commentCaptor = argumentCaptor<String>()
         verify(mockNgdAddressLoaderDao, atLeast(2)).saveCommentOnAddressTable(commentCaptor.capture())
-        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;rowOffset=0", commentCaptor.firstValue)
+        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$GB_FILE;rowOffset=0", commentCaptor.firstValue)
+        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID", commentCaptor.lastValue)
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions loads the GB then the islands file for each version`() {
+        // Arrange
+        setUpMockNgdAddressLoaderDao { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID")
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        stubDataPackageVersionFiles(THIRD_VERSION_ID, gbFixture = "emptyCsv.zip", islFixture = "emptyIslCsv.zip")
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        val inOrder = inOrder(mockOsDownloadsClient)
+        inOrder.verify(mockOsDownloadsClient).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
+        inOrder.verify(mockOsDownloadsClient).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$ISL_FILE.zip")
+
+        val commentCaptor = argumentCaptor<String>()
+        verify(mockNgdAddressLoaderDao, times(3)).saveCommentOnAddressTable(commentCaptor.capture())
+        assertEquals(
+            listOf(
+                "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$GB_FILE;rowOffset=0",
+                "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$ISL_FILE;rowOffset=0",
+                "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID",
+            ),
+            commentCaptor.allValues,
+        )
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions resumes in-progress version from the stored file without reloading earlier files`() {
+        // Arrange
+        setUpMockNgdAddressLoaderDao { mock ->
+            whenever(mock.findCommentOnAddressTable())
+                .thenReturn("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$ISL_FILE;rowOffset=0")
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$ISL_FILE.zip"))
+            .thenReturn(getNgdFileInputStream("emptyIslCsv.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        verify(mockOsDownloadsClient, never()).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
+        verify(mockOsDownloadsClient).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$ISL_FILE.zip")
+
+        val commentCaptor = argumentCaptor<String>()
+        verify(mockNgdAddressLoaderDao, atLeast(1)).saveCommentOnAddressTable(commentCaptor.capture())
+        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID", commentCaptor.lastValue)
+        assertTrue(commentCaptor.allValues.none { it.contains("fileName=$GB_FILE") })
+    }
+
+    @Test
+    fun `loadNewDataPackageVersions retries only the islands file on a stream error in the islands file`() {
+        // Arrange
+        setUpMockNgdAddressLoaderDao { mock ->
+            whenever(mock.findCommentOnAddressTable()).thenReturn(
+                "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID",
+                "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID;fileName=$ISL_FILE;rowOffset=0",
+            )
+        }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, SECOND_VERSION_ID)).thenReturn(secondVersionDetails)
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip"))
+            .thenReturn(getNgdFileInputStream("emptyCsv.zip"))
+        whenever(mockOsDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$ISL_FILE.zip"))
+            .thenAnswer { throw java.io.IOException("Stream closed") }
+            .thenAnswer { getNgdFileInputStream("emptyIslCsv.zip") }
+        whenever(mockOsDownloadsClient.getDataPackageVersionDetails(DATA_PACKAGE_ID, THIRD_VERSION_ID)).thenReturn(thirdVersionDetails)
+
+        // Act
+        ngdAddressLoader.loadNewDataPackageVersions()
+
+        // Assert
+        verify(mockOsDownloadsClient, times(1)).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$GB_FILE.zip")
+        verify(mockOsDownloadsClient, times(2)).getDataPackageVersionFile(DATA_PACKAGE_ID, THIRD_VERSION_ID, "$ISL_FILE.zip")
+
+        val commentCaptor = argumentCaptor<String>()
+        verify(mockNgdAddressLoaderDao, atLeast(1)).saveCommentOnAddressTable(commentCaptor.capture())
         assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID", commentCaptor.lastValue)
     }
 
@@ -570,15 +713,27 @@ class NgdAddressLoaderTests {
             assertEquals("110012", progress!!.dataPackageVersionId)
             assertEquals(0, progress.rowOffset)
             assertTrue(progress.isComplete)
+            assertEquals(DATA_PACKAGE_FILE_NAMES.first(), progress.fileName)
         }
 
         @Test
-        fun `parseDataPackageProgress parses comment with row offset`() {
-            val comment = "dataPackageVersionId=110012;rowOffset=340000"
+        fun `parseDataPackageProgress parses comment with file name and row offset`() {
+            val comment = "dataPackageVersionId=110012;fileName=add_isl_builtaddress;rowOffset=340000"
             val progress = NgdAddressLoader.parseDataPackageProgress(comment)
             assertEquals("110012", progress!!.dataPackageVersionId)
+            assertEquals("add_isl_builtaddress", progress.fileName)
             assertEquals(340000, progress.rowOffset)
             assertFalse(progress.isComplete)
+        }
+
+        @Test
+        fun `parseDataPackageProgress returns null for comment with row offset but no file name`() {
+            assertNull(NgdAddressLoader.parseDataPackageProgress("dataPackageVersionId=110012;rowOffset=340000"))
+        }
+
+        @Test
+        fun `parseDataPackageProgress returns null for comment with file name but no row offset`() {
+            assertNull(NgdAddressLoader.parseDataPackageProgress("dataPackageVersionId=110012;fileName=add_isl_builtaddress"))
         }
 
         @Test
@@ -598,9 +753,21 @@ class NgdAddressLoaderTests {
         }
 
         @Test
-        fun `formatProgressComment includes row offset when in-progress`() {
+        fun `formatProgressComment includes default file name and row offset when in-progress`() {
             val progress = DataPackageProgress("110012", 340000, isComplete = false)
-            assertEquals("dataPackageVersionId=110012;rowOffset=340000", NgdAddressLoader.formatProgressComment(progress))
+            assertEquals(
+                "dataPackageVersionId=110012;fileName=add_gb_builtaddress;rowOffset=340000",
+                NgdAddressLoader.formatProgressComment(progress),
+            )
+        }
+
+        @Test
+        fun `formatProgressComment includes file name and row offset when in-progress`() {
+            val progress = DataPackageProgress("110012", 340000, isComplete = false, fileName = "add_isl_builtaddress")
+            assertEquals(
+                "dataPackageVersionId=110012;fileName=add_isl_builtaddress;rowOffset=340000",
+                NgdAddressLoader.formatProgressComment(progress),
+            )
         }
 
         @Test
@@ -629,6 +796,9 @@ class NgdAddressLoaderTests {
         private const val INITIAL_VERSION_ID = "110011"
         private const val SECOND_VERSION_ID = "110012"
         private const val THIRD_VERSION_ID = "110013"
+
+        private val GB_FILE = DATA_PACKAGE_FILE_NAMES[0]
+        private val ISL_FILE = DATA_PACKAGE_FILE_NAMES[1]
 
         private val versionHistory =
             """
