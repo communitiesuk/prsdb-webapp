@@ -104,7 +104,6 @@ class DeactivationService(
             }
         if (!landlord.isActive || propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)) return false
 
-        // The same reason applies whether the landlord never registered a property or has no active properties left
         deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
         return true
     }
