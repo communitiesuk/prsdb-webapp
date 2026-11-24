@@ -4,13 +4,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -55,7 +52,6 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
 
     @Test
     fun `deactivateInactiveLandlords deactivates only the landlords that are due and is idempotent`() {
-        val featureFlagManager = mock<FeatureFlagManager> { on { checkFeature(ACTIVE_INACTIVE) } doReturn true }
         val taskLogic =
             DeactivateInactiveLandlordsTaskLogic(
                 DeactivationService(
@@ -65,10 +61,9 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
                     mock(),
                     mock(),
                     transactionTemplate,
-                    featureFlagManager,
+                    mock(),
                     mock(),
                 ),
-                featureFlagManager,
             )
 
         assertEquals(0, taskLogic.deactivateInactiveLandlords())

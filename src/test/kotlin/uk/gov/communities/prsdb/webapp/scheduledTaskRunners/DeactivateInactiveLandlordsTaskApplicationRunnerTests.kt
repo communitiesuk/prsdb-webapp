@@ -5,14 +5,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 
 @ExtendWith(MockitoExtension::class)
@@ -20,26 +17,11 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
     @Mock
     private lateinit var deactivationService: DeactivationService
 
-    @Mock
-    private lateinit var featureFlagManager: FeatureFlagManager
-
     @InjectMocks
     private lateinit var taskLogic: DeactivateInactiveLandlordsTaskLogic
 
-    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
-    @Test
-    fun `deactivateInactiveLandlords does nothing and returns zero when the active inactive flag is off`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
-
-        val failureCount = taskLogic.deactivateInactiveLandlords()
-
-        assertEquals(0, failureCount)
-        verifyNoInteractions(deactivationService)
-    }
-
     @Test
     fun `deactivateInactiveLandlords deactivates each candidate from both rules once and returns zero`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
         whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(2L, 3L))
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenReturn(true)
@@ -56,7 +38,6 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
 
     @Test
     fun `deactivateInactiveLandlords carries on after a failure and returns the number of failures`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
         whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(3L))
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenThrow(RuntimeException("DB error"))

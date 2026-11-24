@@ -6,8 +6,6 @@ import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import kotlin.system.exitProcess
@@ -34,15 +32,8 @@ class DeactivateInactiveLandlordsTaskApplicationRunner(
 @PrsdbTaskService
 class DeactivateInactiveLandlordsTaskLogic(
     private val deactivationService: DeactivationService,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun deactivateInactiveLandlords(): Int {
-        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
-        if (!featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
-            println("The active/inactive feature is disabled. No landlords were deactivated.")
-            return 0
-        }
-
         val neverRegisteredIds = deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()
         val noActivePropertiesIds = deactivationService.getIdsOfLandlordsWithNoActiveProperties()
         println(
