@@ -1,3 +1,4 @@
+-- TODO PDJB-1360: Remove when the migrations are re-baselined
 DO
 $$
     DECLARE

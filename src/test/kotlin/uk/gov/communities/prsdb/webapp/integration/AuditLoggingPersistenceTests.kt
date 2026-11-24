@@ -25,7 +25,9 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.util.UUID
 
@@ -59,6 +61,12 @@ class AuditLoggingPersistenceTests : IntegrationTestWithMutableData("data-local.
 
     @Autowired
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
+
+    @Autowired
+    private lateinit var deactivationService: DeactivationService
+
+    @Autowired
+    private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     private val transactionTemplate by lazy { TransactionTemplate(transactionManager) }
 
@@ -127,6 +135,26 @@ class AuditLoggingPersistenceTests : IntegrationTestWithMutableData("data-local.
                 "SELECT invited_email FROM letting_agent_access_aud WHERE property_ownership_id = 1 AND revtype = 2",
             )
         assertEquals("letting.agent.one@example.com", lettingAgent["invited_email"])
+    }
+
+    @Test
+    fun `deactivating a property records the change and the removal of its letting agent`() {
+        deactivationService.deactivateProperty(1L)
+
+        assertEquals(
+            false,
+            jdbcTemplate.queryForObject(
+                "SELECT is_active FROM property_ownership_aud WHERE id = 1 AND revtype = 1 ORDER BY rev DESC LIMIT 1",
+                Boolean::class.java,
+            ),
+        )
+        assertEquals(
+            "letting.agent.one@example.com",
+            jdbcTemplate.queryForObject(
+                "SELECT invited_email FROM letting_agent_access_aud WHERE property_ownership_id = 1 AND revtype = 2",
+                String::class.java,
+            ),
+        )
     }
 
     @Test
@@ -207,5 +235,25 @@ class AuditLoggingPersistenceTests : IntegrationTestWithMutableData("data-local.
             )
         assertTrue(invitationRows > 0)
         assertEquals(invitationRows, invitationDeletes)
+    }
+
+    @Test
+    fun `removing an organisational landlord user records their final details`() {
+        val userId =
+            jdbcTemplate.queryForObject(
+                "SELECT id FROM organisational_landlord_user WHERE email = 'carl.editor@example.com'",
+                Long::class.java,
+            )!!
+
+        organisationalLandlordUserService.removeOrganisationalLandlordUser(userId)
+
+        assertEquals(
+            "carl.editor@example.com",
+            jdbcTemplate.queryForObject(
+                "SELECT email FROM organisational_landlord_user_aud WHERE id = ? AND revtype = 2",
+                String::class.java,
+                userId,
+            ),
+        )
     }
 }
