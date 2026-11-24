@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
@@ -67,12 +69,26 @@ class SuperiorLandlordsListStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached clears the superior landlord being edited`() {
+    fun `afterStepIsReached clears the superior landlord being edited and unfinished form data`() {
         val stepConfig = SuperiorLandlordsListStepConfig(urlParameterService, SuperiorLandlordSummaryCardHelper())
+        val nameStep = mock<SuperiorLandlordNameStep>()
+        val contactTypeStep = mock<SuperiorLandlordContactTypeStep>()
+        val emailStep = mock<SuperiorLandlordEmailStep>()
+        val addressTask = mock<SuperiorLandlordAddressTask>()
+        whenever(mockState.superiorLandlordProvideDetailsStep).thenReturn(superiorLandlordProvideDetailsStep)
+        whenever(mockState.superiorLandlordNameStep).thenReturn(nameStep)
+        whenever(mockState.superiorLandlordContactTypeStep).thenReturn(contactTypeStep)
+        whenever(mockState.superiorLandlordEmailStep).thenReturn(emailStep)
+        whenever(mockState.superiorLandlordAddressTask).thenReturn(addressTask)
 
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockState).editingSuperiorLandlordId = null
+        verify(superiorLandlordProvideDetailsStep).clearFormData()
+        verify(nameStep).clearFormData()
+        verify(contactTypeStep).clearFormData()
+        verify(emailStep).clearFormData()
+        verify(addressTask).clearFormData()
     }
 
     @Suppress("UNCHECKED_CAST")

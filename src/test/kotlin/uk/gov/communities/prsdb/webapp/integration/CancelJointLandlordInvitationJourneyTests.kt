@@ -47,8 +47,9 @@ class CancelJointLandlordInvitationJourneyTests :
         areYouSurePage.submitWantsToProceed()
 
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelJointLandlordInvitation::class)
-        assertThat(confirmationPage.confirmationBanner).containsText("pending@example.com")
-        confirmationPage.goBackToPropertyRecordLink.clickAndWait()
+        assertThat(confirmationPage.confirmationBanner.body).hasCount(0)
+        assertThat(confirmationPage.cancelledInvitationMessage).containsText("pending@example.com")
+        confirmationPage.goBackToPropertyRegistrationLink.clickAndWait()
 
         var propertyDetailsPage =
             assertPageIs(
@@ -78,8 +79,9 @@ class JointLandlordInvitationOrgLandlordJourneyTests : IntegrationTestWithMutabl
         areYouSurePage.submitWantsToProceed()
 
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelJointLandlordInvitation::class)
-        assertThat(confirmationPage.confirmationBanner).containsText(invitedEmail)
-        confirmationPage.goBackToPropertyRecordLink.clickAndWait()
+        assertThat(confirmationPage.confirmationBanner.body).hasCount(0)
+        assertThat(confirmationPage.cancelledInvitationMessage).containsText(invitedEmail)
+        confirmationPage.goBackToPropertyRegistrationLink.clickAndWait()
 
         val propertyDetailsPage =
             assertPageIs(

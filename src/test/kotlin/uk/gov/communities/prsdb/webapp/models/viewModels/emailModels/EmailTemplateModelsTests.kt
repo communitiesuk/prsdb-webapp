@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -152,6 +153,18 @@ class EmailTemplateModelsTests {
                             ),
                     ),
                     "/emails/PropertyRegistrationConfirmationWithPayment.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    AutomatedPropertyDeactivationEmail(
+                        landlordName = "James",
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNE1 2EB",
+                        prn = "P-XXX-YYY",
+                        reactivationUrl = "https://example.test/landlord/reactivate",
+                        reasons = listOf(ReactivationTaskType.GAS_SAFETY),
+                        landlordDeactivated = true,
+                    ),
+                    "/emails/AutomatedPropertyDeactivation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
@@ -650,6 +663,17 @@ class EmailTemplateModelsTests {
                         organisationName = "Keystone Living Group",
                     ),
                     "/emails/RemoveOrgTeamMemberNotification.md",
+                ),
+                EmailTemplateTestData(
+                    FreeholderAddedToPropertyEmail(
+                        freeholderName = "Sarah Thompson",
+                        freeholderEmail = "sarah@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/FreeholderAddedToPropertyEmail.md",
                 ),
                 EmailTemplateTestData(
                     PassphraseEmail("time anything costume"),

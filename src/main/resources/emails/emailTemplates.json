@@ -1,5 +1,12 @@
 [
   {
+    "test_id": "7b9404c0-e507-48ad-833e-4ae107026632",
+    "prod_id": "9342ce96-2d49-45c5-887d-2f99010d6343",
+    "enumName": "AUTOMATED_PROPERTY_DEACTIVATION",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/AutomatedPropertyDeactivation.md"
+  },
+  {
     "test_id": "6a9b40c1-ede1-4851-b10b-5bc40026813f",
     "prod_id": "0012a96e-9ad9-48b8-99dd-d19baebda534",
     "enumName": "LOCAL_COUNCIL_INVITATION_EMAIL",
@@ -483,6 +490,13 @@
     "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
     "subject": "Landlord account deactivated",
     "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
+  },
+  {
+    "test_id": "c756832d-a680-4167-af65-dc4a3cc8e903",
+    "prod_id": "20bef3a0-ce93-4eca-b22c-158ab5b94333",
+    "enumName": "FREEHOLDER_ADDED_TO_PROPERTY_EMAIL",
+    "subject": "You’ve been listed as a freeholder of a rental property",
+    "bodyLocation": "/emails/FreeholderAddedToPropertyEmail.md"
   },
   {
     "test_id": "fdfc9429-ea11-4042-a681-10c42201e1e7",

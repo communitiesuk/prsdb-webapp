@@ -7,6 +7,8 @@
 <!--/*@thymesVar id="townOrCityLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="countyLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="postcodeLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="countryLabel" type="java.lang.String"*/-->
+<!--/*@thymesVar id="isInternationalAddressesEnabled" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
@@ -22,6 +24,10 @@
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${townOrCityLabel}}, 'townOrCity', null, 20)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${countyLabel}}, 'county', null, 20)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', null, 10)}"></div>
+        <!--/* TODO: PDJB-2259: Remove this condition and always show */-->
+        <th:block th:if="${isInternationalAddressesEnabled}">
+            <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${countryLabel}}, 'country', null, 10)}"></div>
+        </th:block>
     </th:block>
     <th:block th:if="${showCorrespondenceInset}">
         <h2 class="govuk-heading-m" th:text="#{addressForms.manualAddress.correspondence.preSubmitHeading}">addressForms.manualAddress.correspondence.preSubmitHeading</h2>

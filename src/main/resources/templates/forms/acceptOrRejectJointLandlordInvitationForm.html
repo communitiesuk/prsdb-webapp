@@ -17,10 +17,11 @@
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.mustAccept}"></p>
     <details id="details" th:replace="~{fragments/details :: details(#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.summary}, ~{::#details/content()})}">
         <div class="govuk-details__text">
-            <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.paragraph.one}"></p>
-            <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.paragraph.two}"></p>
+            <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.paragraph}"></p>
             <p class="govuk-body">
-                <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.link}" rel="noreferrer noopener" target="_blank"></a>
+                <span th:remove="tag" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.beforeLink}"></span>
+                <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.link}" rel="noreferrer noopener" target="_blank">
+                </a><span th:remove="tag" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.afterLink}"></span>
             </p>
         </div>
     </details>

@@ -6,9 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
@@ -116,15 +118,29 @@ class FreeholdersListStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached clears the freeholder being edited`() {
+    fun `afterStepIsReached clears the freeholder being edited and unfinished form data`() {
         // Arrange
         val stepConfig = FreeholdersListStepConfig(urlParameterService, FreeholderSummaryCardHelper())
+        val nameStep = mock<FreeholderNameStep>()
+        val contactTypeStep = mock<FreeholderContactTypeStep>()
+        val emailStep = mock<FreeholderEmailStep>()
+        val addressTask = mock<FreeholderAddressTask>()
+        whenever(mockState.freeholderProvideDetailsStep).thenReturn(freeholderProvideDetailsStep)
+        whenever(mockState.freeholderNameStep).thenReturn(nameStep)
+        whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
+        whenever(mockState.freeholderEmailStep).thenReturn(emailStep)
+        whenever(mockState.freeholderAddressTask).thenReturn(addressTask)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
         verify(mockState).editingFreeholderId = null
+        verify(freeholderProvideDetailsStep).clearFormData()
+        verify(nameStep).clearFormData()
+        verify(contactTypeStep).clearFormData()
+        verify(emailStep).clearFormData()
+        verify(addressTask).clearFormData()
     }
 
     @Suppress("UNCHECKED_CAST")

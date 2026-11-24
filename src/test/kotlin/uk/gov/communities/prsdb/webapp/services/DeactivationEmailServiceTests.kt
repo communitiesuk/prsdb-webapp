@@ -6,12 +6,15 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.AutomatedPropertyDeactivationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -26,10 +29,19 @@ class DeactivationEmailServiceTests {
     private lateinit var mockLandlordEmailSender: EmailNotificationService<LandlordDeactivatedEmail>
 
     @Mock
+    private lateinit var mockPropertyEmailSender: EmailNotificationService<AutomatedPropertyDeactivationEmail>
+
+    @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private val deactivationEmailService: DeactivationEmailService
-        get() = DeactivationEmailService(mockLettingAgentEmailSender, mockLandlordEmailSender, absoluteUrlProvider)
+        get() =
+            DeactivationEmailService(
+                mockLettingAgentEmailSender,
+                mockLandlordEmailSender,
+                mockPropertyEmailSender,
+                absoluteUrlProvider,
+            )
 
     @Test
     fun `sendLettingAgentPropertyDeactivatedEmail sends the property deactivated email to the letting agent`() {
@@ -92,6 +104,65 @@ class DeactivationEmailServiceTests {
         deactivationEmailService.sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
 
         verify(mockLandlordEmailSender).sendEmailToLandlord(any(), any())
+    }
+
+    @Test
+    fun `sendPropertyDeactivatedEmail sends each landlord an email with their account status`() {
+        val individual = MockLandlordData.createIndividualLandlord(name = "Individual", email = "individual@example.com")
+        val organisation = MockLandlordData.createOrgLandlord(name = "Organisation")
+        val property = MockLandlordData.createPropertyOwnership(id = 42L, landlords = mutableSetOf(individual, organisation))
+
+        val reasons = mutableListOf(ReactivationTaskType.GAS_SAFETY, ReactivationTaskType.TENANCY_DETAILS)
+
+        val reactivationUrl = "https://example.test/landlord/reactivate/42"
+        whenever(absoluteUrlProvider.buildPropertyReactivationUri(42L)).thenReturn(URI(reactivationUrl))
+
+        deactivationEmailService.sendPropertyDeactivatedEmail(property, listOf(individual to true, organisation to false), reasons)
+
+        verify(mockPropertyEmailSender).sendEmailToLandlord(
+            individual,
+            AutomatedPropertyDeactivationEmail(
+                landlordName = individual.name,
+                multiLineAddress = property.address.toMultiLineAddress(),
+                prn = RegistrationNumberDataModel.fromRegistrationNumber(property.registrationNumber).toString(),
+                reactivationUrl = reactivationUrl,
+                reasons = reasons,
+                landlordDeactivated = true,
+            ),
+        )
+        verify(mockPropertyEmailSender).sendEmailToLandlord(
+            organisation,
+            AutomatedPropertyDeactivationEmail(
+                landlordName = organisation.name,
+                multiLineAddress = property.address.toMultiLineAddress(),
+                prn = RegistrationNumberDataModel.fromRegistrationNumber(property.registrationNumber).toString(),
+                reactivationUrl = reactivationUrl,
+                reasons = reasons,
+                landlordDeactivated = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `sendPropertyDeactivatedEmail continues notifying other landlords when one notification fails`() {
+        val firstLandlord = MockLandlordData.createIndividualLandlord(name = "First")
+        val secondLandlord = MockLandlordData.createIndividualLandlord(name = "Second")
+        val property = MockLandlordData.createPropertyOwnership(id = 42L, landlords = mutableSetOf(firstLandlord, secondLandlord))
+
+        whenever(absoluteUrlProvider.buildPropertyReactivationUri(42L)).thenReturn(URI("https://example.test/landlord/reactivate/42"))
+
+        doThrow(IllegalStateException("delivery failed"))
+            .whenever(mockPropertyEmailSender)
+            .sendEmailToLandlord(eq(firstLandlord), any())
+
+        deactivationEmailService
+            .sendPropertyDeactivatedEmail(
+                property,
+                listOf(firstLandlord to true, secondLandlord to false),
+                listOf(ReactivationTaskType.TENANCY_DETAILS),
+            )
+
+        verify(mockPropertyEmailSender).sendEmailToLandlord(eq(secondLandlord), any())
     }
 
     companion object {

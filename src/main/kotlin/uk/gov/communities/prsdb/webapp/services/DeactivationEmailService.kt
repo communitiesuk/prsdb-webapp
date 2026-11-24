@@ -2,10 +2,12 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.AutomatedPropertyDeactivationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 
@@ -13,8 +15,33 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgen
 class DeactivationEmailService(
     private val lettingAgentEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
     private val landlordEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
+    private val propertyDeactivationEmailSender: EmailNotificationService<AutomatedPropertyDeactivationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
+    fun sendPropertyDeactivatedEmail(
+        property: PropertyOwnership,
+        landlordDeactivationStatuses: Collection<Pair<Landlord, Boolean>>,
+        reasons: List<ReactivationTaskType>,
+    ) {
+        landlordDeactivationStatuses.forEach { (landlord, landlordDeactivated) ->
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the property deactivation email for property ${property.id} and landlord ${landlord.id}",
+            ) {
+                val email =
+                    AutomatedPropertyDeactivationEmail(
+                        landlordName = landlord.name,
+                        multiLineAddress = property.address.toMultiLineAddress(),
+                        prn = RegistrationNumberDataModel.fromRegistrationNumber(property.registrationNumber).toString(),
+                        reactivationUrl = absoluteUrlProvider.buildPropertyReactivationUri(property.id).toString(),
+                        reasons = reasons,
+                        landlordDeactivated = landlordDeactivated,
+                    )
+
+                propertyDeactivationEmailSender.sendEmailToLandlord(landlord, email)
+            }
+        }
+    }
+
     fun sendLandlordDeactivatedEmail(
         landlord: Landlord,
         reason: LandlordDeactivationReason,

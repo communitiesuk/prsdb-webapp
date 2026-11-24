@@ -23,10 +23,10 @@ acceptOrReject:
   mustAccept: You must accept this invitation if you act as a landlord for this property.
   details:
     summary: Who counts as a landlord
-    paragraph:
-      one: A landlord is anyone who operates an assured or regulated tenancy.
-      two: "If you’re unsure, a legal adviser can help."
-    link: Find legal advice and information (opens in new tab)
+    paragraph: Landlords include anyone who’s entitled to possession of the property, even if they’re not named on the tenancy agreement as a landlord.
+    beforeLink: If you’re unsure, you may need to
+    link: find a legal adviser (opens in a new tab)
+    afterLink: .
   ifYes:
     heading: "If you select ‘Yes’"
     paragraph:
@@ -54,28 +54,29 @@ confirmLandlordForProperty:
   successBanner:
     title: Success
     heading: Account created
-    body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."
+    body: "Your landlord number is <strong>{0}</strong>. We’ve sent this to you in an email."
 rejectionConfirmation:
   pageTitle: Joint landlord invitation rejected
   banner:
-    heading: Invite rejected
-    body: "You’ve told us that you’re not a landlord for {0}"
+    heading: Invitation rejected
   paragraph:
-    one: We’ve emailed this property’s landlords to let them know you rejected this invite.
-    two: There’s nothing else you need to do.
+    one: "You’ve told us that you’re not a landlord for:"
+    two: We’ve emailed the property’s landlords to let them know you rejected this invitation.
+    three: There’s nothing else you need to do.
 confirmation:
   banner:
-    heading: Registered as a joint landlord
+    heading: Added as joint landlord
+    body:
+      beforeRegistrationNumber: Rental property number
+  jointLandlordFor: "You are a joint landlord for:"
   emailSent: We have sent you a confirmation email.
-  whatThisMeans:
-    heading: What this means
+  whatYouNeedToDo:
+    heading: What you need to do
     paragraph:
-      one: "You’ve successfully told us that you’re a landlord for this property."
-      two: "This means you’re now responsible for keeping the property’s details up to date. If something changes (for example, how much rent you charge), you’ll need to update the property record."
+      one: You now share responsibility for keeping this property’s details up to date.
+      two: If something changes (for example, how much rent you charge), you’ll need to update the property registration.
+    goToPropertyRegistration: Go to property registration
   landlordAccount:
     heading: Your landlord account
     individual: Your landlord account is now active.
     organisation: Your organisation’s landlord account is now active.
-  feedback:
-    body: 'Answer a few short questions about <strong>landlord registration</strong>.'
-  viewPropertyRecord: View property record

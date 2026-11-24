@@ -3,21 +3,24 @@
 <main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <div class="govuk-panel govuk-panel--confirmation">
-            <h1 class="govuk-panel__title"
-                th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading}">acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading</h1>
-            <div class="govuk-panel__body"
-                 th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.body(${propertyAddress})}">
-                acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.body
-            </div>
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading}, null)}">
         </div>
+
         <p class="govuk-body"
            th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.one}">
             acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.one
         </p>
+        <p class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+        </p>
         <p class="govuk-body"
            th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.two}">
             acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.two
+        </p>
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.three}">
+            acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.three
         </p>
     </div>
 </main>

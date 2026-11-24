@@ -180,6 +180,7 @@ class FreeholdersDetailsTask(
                                 ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingFreeholder.manualTownOrCity,
                                 ManualAddressStepConfig.PREFILL_COUNTY to editingFreeholder.manualCounty,
                                 ManualAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.manualPostcode,
+                                ManualAddressStepConfig.PREFILL_COUNTRY to editingFreeholder.manualCountry,
                             )
                         } else {
                             emptyMap()
