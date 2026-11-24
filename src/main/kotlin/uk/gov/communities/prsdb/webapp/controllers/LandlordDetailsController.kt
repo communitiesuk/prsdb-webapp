@@ -21,8 +21,10 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
@@ -190,6 +192,19 @@ class LandlordDetailsController(
     fun getLandlordDetails(
         @PathVariable id: Long,
         model: Model,
+    ): String = getLocalCouncilViewOfLandlordDetails(id, model, isSystemOperatorView = false)
+
+    @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
+    @GetMapping(LANDLORD_DETAILS_FOR_SYSTEM_OPERATOR_ROUTE)
+    fun getLandlordDetailsAsSystemOperator(
+        @PathVariable id: Long,
+        model: Model,
+    ): String = getLocalCouncilViewOfLandlordDetails(id, model, isSystemOperatorView = true)
+
+    private fun getLocalCouncilViewOfLandlordDetails(
+        id: Long,
+        model: Model,
+        isSystemOperatorView: Boolean,
     ): String {
         val landlord =
             landlordService.retrieveLandlordById(id)
@@ -197,11 +212,11 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                getLocalCouncilOrgLandlordDetails(landlord, model)
+                getLocalCouncilOrgLandlordDetails(landlord, model, isSystemOperatorView)
             }
 
             is IndividualLandlord -> {
-                getLocalCouncilIndividualLandlordDetails(landlord, model)
+                getLocalCouncilIndividualLandlordDetails(landlord, model, isSystemOperatorView)
             }
 
             else -> {
@@ -213,13 +228,14 @@ class LandlordDetailsController(
     private fun getLocalCouncilIndividualLandlordDetails(
         landlord: IndividualLandlord,
         model: Model,
+        isSystemOperatorView: Boolean,
     ): String {
         val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", LandlordViewModel(landlord, withChangeLinks = false))
 
-        addLocalCouncilLandlordDetailsSharedAttributes(landlord.id, model)
+        addLocalCouncilLandlordDetailsSharedAttributes(landlord.id, model, isSystemOperatorView)
 
         return "localCouncilLandlordDetailsView"
     }
@@ -227,6 +243,7 @@ class LandlordDetailsController(
     private fun getLocalCouncilOrgLandlordDetails(
         orgLandlord: OrganisationalLandlord,
         model: Model,
+        isSystemOperatorView: Boolean,
     ): String {
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = false))
         model.addAttribute(
@@ -237,7 +254,7 @@ class LandlordDetailsController(
         model.addAttribute("showDeleteLandlordRecordLink", false)
         model.addAttribute("title", "landlordDetails.localCouncilView.pageTitle")
 
-        addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
+        addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model, isSystemOperatorView)
 
         return "orgLandlordDetailsView"
     }
@@ -245,6 +262,7 @@ class LandlordDetailsController(
     private fun addLocalCouncilLandlordDetailsSharedAttributes(
         landlordId: Long,
         model: Model,
+        isSystemOperatorView: Boolean,
     ) {
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
 
@@ -256,18 +274,30 @@ class LandlordDetailsController(
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
-        model.addAttribute("backUrl", "/")
+        // TODO PDJB-1909: Link property addresses to the system operator view of the property record
+        model.addAttribute("showPropertyRecordLinks", !isSystemOperatorView)
+
+        // TODO PDJB-1910: Return system operators to the landlord search results
+        val backUrl = if (isSystemOperatorView) SYSTEM_OPERATOR_DASHBOARD_URL else "/"
+        model.addAttribute("backUrl", backUrl)
     }
 
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
         const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE =
             "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val LANDLORD_DETAILS_FOR_SYSTEM_OPERATOR_ROUTE =
+            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val ORGANISATION_CONTACTS_FRAGMENT = "organisation-contacts"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
         fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =
             UriTemplate(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
+                .expand(mapOf("id" to landlordId))
+                .toASCIIString()
+
+        fun getLandlordDetailsForSystemOperatorPath(landlordId: Long): String =
+            UriTemplate(LANDLORD_DETAILS_FOR_SYSTEM_OPERATOR_ROUTE)
                 .expand(mapOf("id" to landlordId))
                 .toASCIIString()
     }
