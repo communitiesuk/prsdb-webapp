@@ -279,6 +279,7 @@ CREATE TABLE letting_agent_access_aud
     created_date          TIMESTAMPTZ(6),
     invited_email         VARCHAR(255),
     property_ownership_id BIGINT,
+    password_set_date     TIMESTAMPTZ(6),
     CONSTRAINT pk_letting_agent_access_aud PRIMARY KEY (id, rev),
     CONSTRAINT fk_letting_agent_access_aud_on_audit_revision FOREIGN KEY (rev) REFERENCES audit_revision (id)
 );

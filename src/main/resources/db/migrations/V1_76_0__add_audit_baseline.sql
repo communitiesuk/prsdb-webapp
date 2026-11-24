@@ -161,8 +161,8 @@ $$
         FROM joint_landlord_invitation;
 
         INSERT INTO letting_agent_access_aud (id, rev, revtype, created_date, invited_email,
-                                              property_ownership_id)
-        SELECT id, baseline_rev, 0, created_date, invited_email, property_ownership_id
+                                              property_ownership_id, password_set_date)
+        SELECT id, baseline_rev, 0, created_date, invited_email, property_ownership_id, password_set_date
         FROM letting_agent_access;
     END
 $$;

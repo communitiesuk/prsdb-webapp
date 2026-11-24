@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentPasswordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationalLandlordUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.util.UUID
@@ -67,6 +69,9 @@ class AuditLoggingPersistenceTests : IntegrationTestWithMutableData("data-local.
 
     @Autowired
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
+
+    @Autowired
+    private lateinit var lettingAgentPasswordService: LettingAgentPasswordService
 
     private val transactionTemplate by lazy { TransactionTemplate(transactionManager) }
 
@@ -155,6 +160,18 @@ class AuditLoggingPersistenceTests : IntegrationTestWithMutableData("data-local.
                 String::class.java,
             ),
         )
+    }
+
+    @Test
+    fun `setting a letting agent password records when it was set`() {
+        lettingAgentPasswordService.setPassword(1L, "Password123!")
+
+        val row =
+            jdbcTemplate.queryForMap(
+                "SELECT revtype, password_set_date FROM letting_agent_access_aud WHERE id = 1 ORDER BY rev DESC LIMIT 1",
+            )
+        assertEquals(1, (row["revtype"] as Number).toInt())
+        assertNotNull(row["password_set_date"])
     }
 
     @Test
