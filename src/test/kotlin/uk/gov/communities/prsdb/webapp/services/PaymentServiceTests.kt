@@ -5,7 +5,6 @@ import jakarta.persistence.EntityManager
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -522,7 +521,6 @@ class PaymentServiceTests {
             // Assert
             // c = 46, g = 0, d = 366 -> 251.36
             assertEquals(251, quote.amountInPence)
-            assertTrue(quote.isPaymentRequired)
             assertEquals(quoteDate, quote.quoteDate)
             assertEquals(quoteDate, quote.paymentStartDate)
             assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
@@ -572,7 +570,6 @@ class PaymentServiceTests {
 
             // Assert
             assertEquals(0, quote.amountInPence)
-            assertFalse(quote.isPaymentRequired)
             assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
         }
 
@@ -628,6 +625,46 @@ class PaymentServiceTests {
             // Assert
             assertEquals(0, quote.amountInPence)
             assertEquals(paidForUntil, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing for an unpaid gap when the renewal date is unchanged`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = renewalDate,
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = LocalDate.of(2028, 2, 1),
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges an unpaid gap from paidForUntil when the renewal date moves later`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 2, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 3, 1),
+                anniversary = MonthDay.of(Month.JUNE, 15),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // c = 135, g = 0, d = 366 -> 737.70
+            assertEquals(737, quote.amountInPence)
+            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
         }
 
         @Test

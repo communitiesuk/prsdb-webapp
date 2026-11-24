@@ -13,7 +13,4 @@ data class PropertyPaymentQuote(
     val renewalDate: LocalDate,
     @Serializable(with = LocalDateSerializer::class)
     val paymentStartDate: LocalDate = quoteDate,
-) {
-    val isPaymentRequired: Boolean
-        get() = amountInPence > 0
-}
+)
