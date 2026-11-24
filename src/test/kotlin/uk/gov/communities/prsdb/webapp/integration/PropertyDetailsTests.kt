@@ -675,6 +675,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
                 assertEquals("Pat Manager", detailsPage.propertyManagerCard.title.getText())
+                assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasCount(0)
             }
