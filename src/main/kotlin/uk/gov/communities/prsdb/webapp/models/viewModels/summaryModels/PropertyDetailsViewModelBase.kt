@@ -99,7 +99,7 @@ abstract class PropertyDetailsViewModelBase(
         )
 
     // TODO PDJB-2016: delete this row along with the ASSOCIATED_PARTIES flag. It is only still shown
-    //  with the flag off, and on the local council view until PDJB-1999.
+    //  with the flag off.
     protected fun ownershipTypeRowBeforePdjb955(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.ownership.ownershipType",

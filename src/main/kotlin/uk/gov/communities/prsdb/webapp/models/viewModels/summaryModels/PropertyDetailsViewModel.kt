@@ -26,15 +26,11 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    // The landlord's ownership information moves from the property record tab to the people
-    // responsible tab when the flag is on.
-    // TODO PDJB-1999: give the local council view its own ownership section on the people
-    //  responsible tab. Until then it keeps the single legacy row on the property record tab.
+    // The ownership information moves from the property record tab to the people responsible tab
+    // when the flag is on.
     // TODO PDJB-2016: remove this property, showOwnershipSectionOnPropertyDetailsTab and the
-    //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
-    //  Once PDJB-1999 is done both views always use the flag-on version.
-    val showPeopleResponsibleOwnership: Boolean =
-        viewType.isLandlordView && associatedPartiesEnabled
+    //  th:if blocks they drive in propertyDetailsView.html and fragments/peopleResponsible.html.
+    val showPeopleResponsibleOwnership: Boolean = associatedPartiesEnabled
 
     val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
@@ -84,7 +80,6 @@ class PropertyDetailsViewModel(
             ),
         )
 
-    // TODO PDJB-1999: show the property manager on the local council view's people responsible tab.
     // TODO PDJB-2016: Remove showPropertyManagerSection, its guard in PropertyDetailsController and the th:if it
     //  drives in fragments/peopleResponsible.html when the ASSOCIATED_PARTIES flag is removed.
     val showPropertyManagerSection: Boolean = showPeopleResponsibleOwnership

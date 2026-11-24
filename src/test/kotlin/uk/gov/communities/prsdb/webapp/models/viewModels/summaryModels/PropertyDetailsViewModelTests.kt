@@ -282,18 +282,35 @@ class PropertyDetailsViewModelTests {
         }
     }
 
-    // TODO PDJB-1999: update or remove this test when freeholders are shown in the local council view
     @Test
-    fun `the freeholder section is hidden in the local council view`() {
+    fun `the local council view shows the ownership answers without change links`() {
+        // Arrange & Act
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_JOINT_TENANTS),
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
+                messageSource = mockMessageSource,
+            )
+
+        // Assert
+        assertTrue(viewModel.showPeopleResponsibleOwnership)
+        assertEquals(3, viewModel.peopleResponsibleOwnershipSection.size)
+        assertTrue(viewModel.peopleResponsibleOwnershipSection.all { it.actions.isEmpty() })
+    }
+
+    @Test
+    fun `the freeholder section is shown in the local council view without an update link`() {
+        // Arrange & Act
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
                 viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showFreeholderSection)
+        // Assert
+        assertTrue(viewModel.showFreeholderSection)
+        assertFalse(viewModel.showFreeholderSectionUpdateLink)
     }
 
     @Test
@@ -364,18 +381,20 @@ class PropertyDetailsViewModelTests {
         )
     }
 
-    // TODO PDJB-1999: update or remove this test when superior landlords are shown in the local council view
     @Test
-    fun `the superior landlord section is hidden in the local council view`() {
+    fun `the superior landlord section is shown in the local council view without change links`() {
+        // Arrange & Act
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
                 viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = mockMessageSource,
-                associatedPartiesEnabled = true,
             )
 
-        assertFalse(viewModel.showSuperiorLandlordSection)
+        // Assert
+        assertTrue(viewModel.showSuperiorLandlordSection)
+        assertFalse(viewModel.showSuperiorLandlordSectionUpdateLink)
+        assertTrue(viewModel.superiorLandlordNotUsedRows.single().actions.isEmpty())
     }
 
     @Test
@@ -482,9 +501,9 @@ class PropertyDetailsViewModelTests {
             }
     }
 
-    // TODO PDJB-1999: update or remove this test when the property manager is shown in the local council view
     @Test
-    fun `the property manager section is not shown in the local council view`() {
+    fun `the property manager section is shown in the local council view without change links`() {
+        // Arrange & Act
         val viewModel =
             PropertyDetailsViewModel(
                 createOccupiedPropertyOwnership(),
@@ -492,8 +511,10 @@ class PropertyDetailsViewModelTests {
                 messageSource = mockMessageSource,
             )
 
-        assertFalse(viewModel.showPropertyManagerSection)
-        assertTrue(viewModel.propertyManagerNotUsedRows.isEmpty())
+        // Assert
+        assertTrue(viewModel.showPropertyManagerSection)
+        assertFalse(viewModel.showPropertyManagerUpdateLink)
+        assertTrue(viewModel.propertyManagerNotUsedRows.single().actions.isEmpty())
     }
 
     // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
@@ -515,8 +536,7 @@ class PropertyDetailsViewModelTests {
     }
 
     // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. It covers the single
-    //  legacy ownership row on the property record tab, which goes with the flag (PDJB-1999 moves the
-    //  local council view onto the people responsible tab first).
+    //  legacy ownership row on the property record tab, which goes with the flag.
     @Nested
     inner class OwnershipBeforePdjb955 {
         @Test
@@ -560,7 +580,7 @@ class PropertyDetailsViewModelTests {
         }
 
         @Test
-        fun `the local council keeps the legacy ownership section when associated parties is enabled`() {
+        fun `the local council's legacy ownership section is hidden when associated parties is enabled`() {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
@@ -569,12 +589,8 @@ class PropertyDetailsViewModelTests {
                     associatedPartiesEnabled = true,
                 )
 
-            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
-            assertEquals(
-                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
-                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
-            )
-            assertFalse(viewModel.showPeopleResponsibleOwnership)
+            assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
         }
 
         @Test
@@ -595,6 +611,27 @@ class PropertyDetailsViewModelTests {
             assertFalse(viewModel.showPeopleResponsibleOwnership)
             assertTrue(viewModel.peopleResponsibleOwnershipSection.isEmpty())
             assertEquals("propertyDetails.landlordDetails.heading", viewModel.peopleResponsibleTabHeadingKey)
+        }
+
+        @Test
+        fun `the local council view keeps the legacy ownership section and hides associated parties when disabled`() {
+            val viewModel =
+                PropertyDetailsViewModel(
+                    createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                    viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
+                    messageSource = mockMessageSource,
+                    associatedPartiesEnabled = false,
+                )
+
+            assertTrue(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+            assertEquals(
+                listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
+                viewModel.ownershipSectionBeforePdjb955.map { it.fieldHeading },
+            )
+            assertFalse(viewModel.showPeopleResponsibleOwnership)
+            assertFalse(viewModel.showFreeholderSection)
+            assertFalse(viewModel.showSuperiorLandlordSection)
+            assertFalse(viewModel.showPropertyManagerSection)
         }
     }
 
