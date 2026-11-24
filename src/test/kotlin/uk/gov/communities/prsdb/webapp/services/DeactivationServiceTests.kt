@@ -28,12 +28,16 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.function.Consumer
 
@@ -50,6 +54,9 @@ class DeactivationServiceTests {
 
     @Mock
     private lateinit var deactivationEmailService: DeactivationEmailService
+
+    @Mock
+    private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @Mock
     private lateinit var transactionTemplate: TransactionTemplate
@@ -161,6 +168,35 @@ class DeactivationServiceTests {
         assertEquals(today(), property.lastDeactivatedDate)
         verify(propertyOwnershipRepository).save(property)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+    }
+
+    @Test
+    fun `deactivateProperty deletes all joint landlord invitations for the property`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val invitations =
+            listOf(
+                MockJointLandlordData.createJointLandlordInvitation(id = 1, propertyOwnership = property),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 2,
+                    propertyOwnership = property,
+                    createdDate = Instant.now().minus(30, ChronoUnit.DAYS),
+                ),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 3,
+                    propertyOwnership = property,
+                    createdDate = Instant.now().minus(30, ChronoUnit.DAYS),
+                    isHidden = true,
+                ),
+            )
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(jointLandlordInvitationRepository.findByRegisteredOwnership_Id(PROPERTY_ID)).thenReturn(invitations)
+
+        deactivationService.deactivateProperty(PROPERTY_ID)
+
+        verify(jointLandlordInvitationRepository).deleteAll(invitations)
     }
 
     @Test
@@ -326,7 +362,7 @@ class DeactivationServiceTests {
         assertNull(property.lastDeactivatedDate)
         assertTrue(landlord.isActive)
         verify(propertyOwnershipRepository, never()).save(any())
-        verifyNoInteractions(lettingAgentAccessService, landlordRepository)
+        verifyNoInteractions(lettingAgentAccessService, landlordRepository, jointLandlordInvitationRepository)
     }
 
     @Test
