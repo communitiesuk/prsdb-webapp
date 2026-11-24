@@ -166,7 +166,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 228, g = 167, d = 365 -> 334.25
+            // chargeable days = 228, gratis days = 167, days in year = 365 -> 334.25
             assertEquals(334, fee)
         }
 
@@ -180,7 +180,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 79, g = 1, d = 365 -> 427.40
+            // chargeable days = 79, gratis days = 1, days in year = 365 -> 427.40
             assertEquals(427, fee)
         }
 
@@ -194,7 +194,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 78, g = 0, d = 365 -> 427.40
+            // chargeable days = 78, gratis days = 0, days in year = 365 -> 427.40
             assertEquals(427, fee)
         }
 
@@ -208,7 +208,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 182, g = 349, d = 365 -> negative, clamped to 0
+            // chargeable days = 182, gratis days = 349, days in year = 365 -> negative, clamped to 0
             assertEquals(0, fee)
         }
 
@@ -222,7 +222,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 365, d = 365 -> 0
+            // chargeable days = 365, gratis days = 365, days in year = 365 -> 0
             assertEquals(0, fee)
         }
 
@@ -236,7 +236,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 183, g = 0, d = 366 -> 1000.00 (would be 1002 with d = 365)
+            // chargeable days = 183, gratis days = 0, days in year = 366 -> 1000.00 (would be 1002 with days in year = 365)
             assertEquals(1000, fee)
         }
 
@@ -250,7 +250,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 90, g = 0, d = 365 -> 493.15 (would be 491 with d = 366)
+            // chargeable days = 90, gratis days = 0, days in year = 365 -> 493.15 (would be 491 with days in year = 366)
             assertEquals(493, fee)
         }
 
@@ -264,7 +264,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 307, g = 0, d = 366 -> 1677.60 (would be 1682 with d = 365)
+            // chargeable days = 307, gratis days = 0, days in year = 366 -> 1677.60 (would be 1682 with days in year = 365)
             assertEquals(1677, fee)
         }
 
@@ -278,7 +278,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 152, g = 45, d = 366 -> 584.70 (would be 586 with d = 365)
+            // chargeable days = 152, gratis days = 45, days in year = 366 -> 584.70 (would be 586 with days in year = 365)
             assertEquals(584, fee)
         }
 
@@ -292,7 +292,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 0, d = 365 -> 2000
+            // chargeable days = 365, gratis days = 0, days in year = 365 -> 2000
             assertEquals(2000, fee)
         }
 
@@ -306,7 +306,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 366, g = 0, d = 366 -> 2000
+            // chargeable days = 366, gratis days = 0, days in year = 366 -> 2000
             assertEquals(2000, fee)
         }
 
@@ -320,7 +320,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 1, g = 0, d = 365 -> 5.48
+            // chargeable days = 1, gratis days = 0, days in year = 365 -> 5.48
             assertEquals(5, fee)
         }
 
@@ -334,7 +334,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 1, g = 1, d = 365 -> 0
+            // chargeable days = 1, gratis days = 1, days in year = 365 -> 0
             assertEquals(0, fee)
         }
 
@@ -372,7 +372,7 @@ class PaymentServiceTests {
             val fee = paymentServiceWithEarlierGratisPeriod.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 31, d = 365 -> 1830.14
+            // chargeable days = 365, gratis days = 31, days in year = 365 -> 1830.14
             assertEquals(1830, fee)
         }
     }
@@ -519,7 +519,7 @@ class PaymentServiceTests {
             val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
 
             // Assert
-            // c = 46, g = 0, d = 366 -> 251.36
+            // chargeable days = 46, gratis days = 0, days in year = 366 -> 251.36
             assertEquals(251, quote.amountInPence)
             assertEquals(quoteDate, quote.quoteDate)
             assertEquals(quoteDate, quote.paymentStartDate)
@@ -538,7 +538,7 @@ class PaymentServiceTests {
             val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
 
             // Assert
-            // c = 135, g = 0, d = 366 -> 737.70
+            // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
             assertEquals(737, quote.amountInPence)
             assertEquals(paidForUntil, quote.paymentStartDate)
             assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
@@ -554,7 +554,7 @@ class PaymentServiceTests {
             val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
 
             // Assert
-            // payment start 2027-08-01, renewal 2028-01-15: c = 167, g = 106, d = 365 -> 334.25
+            // payment start 2027-08-01, renewal 2028-01-15: chargeable days = 167, gratis days = 106, days in year = 365 -> 334.25
             assertEquals(334, quote.amountInPence)
             assertEquals(LocalDate.of(2028, 1, 15), quote.renewalDate)
         }
@@ -661,7 +661,7 @@ class PaymentServiceTests {
             val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
 
             // Assert
-            // c = 135, g = 0, d = 366 -> 737.70
+            // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
             assertEquals(737, quote.amountInPence)
             assertEquals(paidForUntil, quote.paymentStartDate)
             assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
@@ -1678,11 +1678,11 @@ class PaymentServiceTests {
         @JvmStatic
         fun provideWorkedExamples() =
             listOf(
-                // c = 365, g = 335, d = 365 -> 534.25
+                // chargeable days = 365, gratis days = 335, days in year = 365 -> 534.25
                 Arguments.of(6500, LocalDate.of(2026, 12, 15), LocalDate.of(2027, 12, 15), 534),
-                // c = 365, g = 288, d = 365 -> 1371.23
+                // chargeable days = 365, gratis days = 288, days in year = 365 -> 1371.23
                 Arguments.of(6500, LocalDate.of(2027, 1, 31), LocalDate.of(2028, 1, 31), 1371),
-                // c = 366, g = 143, d = 366 -> 3960.38
+                // chargeable days = 366, gratis days = 143, days in year = 366 -> 3960.38
                 Arguments.of(6500, LocalDate.of(2027, 6, 25), LocalDate.of(2028, 6, 25), 3960),
             )
 

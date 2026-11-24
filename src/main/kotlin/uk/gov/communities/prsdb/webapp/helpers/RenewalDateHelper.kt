@@ -21,15 +21,15 @@ class RenewalDateHelper {
             anniversary: MonthDay,
         ): Boolean = date == getLeapAdjustedAnniversaryDate(anniversary, date.year)
 
-        fun getRenewalDateOnReactivation(
+        fun getRenewalDateAlignedToAnniversary(
             currentRenewalDate: LocalDate,
-            reactivatingLandlordAnniversary: MonthDay,
+            anniversary: MonthDay,
             currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
         ): LocalDate =
-            if (isOnAnniversary(currentRenewalDate, reactivatingLandlordAnniversary)) {
+            if (isOnAnniversary(currentRenewalDate, anniversary)) {
                 currentRenewalDate
             } else {
-                getRenewalDate(reactivatingLandlordAnniversary, currentDate)
+                getRenewalDate(anniversary, currentDate)
             }
 
         private fun getLeapAdjustedAnniversaryDate(

@@ -79,14 +79,14 @@ class PaymentService(
         val anniversary =
             checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
 
-        val renewalDate = RenewalDateHelper.getRenewalDateOnReactivation(propertyOwnership.renewalDate, anniversary, quoteDate)
+        val newRenewalDate = RenewalDateHelper.getRenewalDateAlignedToAnniversary(propertyOwnership.renewalDate, anniversary, quoteDate)
         val paymentStartDate = maxOf(quoteDate, propertyOwnership.paidForUntil)
-        val isUnpaidPeriodAdded = renewalDate.isAfter(propertyOwnership.renewalDate) && renewalDate.isAfter(paymentStartDate)
+        val isUnpaidPeriodAdded = newRenewalDate.isAfter(propertyOwnership.renewalDate) && newRenewalDate.isAfter(paymentStartDate)
 
         return PropertyPaymentQuote(
-            amountInPence = if (isUnpaidPeriodAdded) calculateProRatedFeeInPence(renewalDate, paymentStartDate) else 0,
+            amountInPence = if (isUnpaidPeriodAdded) calculateProRatedFeeInPence(newRenewalDate, paymentStartDate) else 0,
             quoteDate = quoteDate,
-            renewalDate = renewalDate,
+            renewalDate = newRenewalDate,
             paymentStartDate = paymentStartDate,
         )
     }

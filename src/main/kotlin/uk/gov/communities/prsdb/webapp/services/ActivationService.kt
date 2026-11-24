@@ -28,7 +28,7 @@ class ActivationService(
         propertyOwnership.reactivate()
         // TODO PDJB-2076: Use the renewal date from the payment quote, so reactivating on a later day can't move it past what was paid for
         propertyOwnership.updateRenewalDate(
-            RenewalDateHelper.getRenewalDateOnReactivation(propertyOwnership.renewalDate, reactivatingLandlordAnniversary),
+            RenewalDateHelper.getRenewalDateAlignedToAnniversary(propertyOwnership.renewalDate, reactivatingLandlordAnniversary),
         )
         propertyOwnershipRepository.save(propertyOwnership)
 

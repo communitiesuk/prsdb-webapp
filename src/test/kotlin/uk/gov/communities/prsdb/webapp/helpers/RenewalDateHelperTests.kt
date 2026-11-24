@@ -77,18 +77,18 @@ class RenewalDateHelperTests {
     }
 
     @Test
-    fun `getRenewalDateOnReactivation keeps the current renewal date when it is on the anniversary, even if it has passed`() {
+    fun `getRenewalDateAlignedToAnniversary keeps the current renewal date when it is on the anniversary, even if it has passed`() {
         assertEquals(
             LocalDate.of(2020, 6, 15),
-            RenewalDateHelper.getRenewalDateOnReactivation(LocalDate.of(2020, 6, 15), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
+            RenewalDateHelper.getRenewalDateAlignedToAnniversary(LocalDate.of(2020, 6, 15), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
         )
     }
 
     @Test
-    fun `getRenewalDateOnReactivation moves to the next anniversary after the current date when the current renewal date is not on it`() {
+    fun `getRenewalDateAlignedToAnniversary moves to the next anniversary after the current date if the renewal date is not on it`() {
         assertEquals(
             LocalDate.of(2027, 6, 15),
-            RenewalDateHelper.getRenewalDateOnReactivation(LocalDate.of(2026, 1, 1), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
+            RenewalDateHelper.getRenewalDateAlignedToAnniversary(LocalDate.of(2026, 1, 1), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
         )
     }
 }
