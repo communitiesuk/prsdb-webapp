@@ -53,6 +53,7 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
         val failureCount = taskLogic.deactivateInactiveLandlords()
 
         assertEquals(1, failureCount)
+        verify(deactivationService).deactivateLandlordIfNoActiveProperties(1L)
         verify(deactivationService).deactivateLandlordIfNoActiveProperties(2L)
         verify(deactivationService).deactivateLandlordIfNoActiveProperties(3L)
     }
