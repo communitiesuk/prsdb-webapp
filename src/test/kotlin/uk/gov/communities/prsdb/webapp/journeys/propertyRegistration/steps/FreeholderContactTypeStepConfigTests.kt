@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -117,7 +117,10 @@ class FreeholderContactTypeStepConfigTests {
 
     @ParameterizedTest
     @MethodSource("provideEditedFreeholders")
-    fun `resolvePageContent does not preselect a contact type when editing a freeholder`(editedFreeholder: FreeholderDataModel) {
+    fun `resolvePageContent preselects contact type only when contact details are available`(
+        editedFreeholder: FreeholderDataModel,
+        expectedContactType: FreeholderContactType?,
+    ) {
         // Arrange
         lenient().`when`(mockJourneyState.editingFreeholder).thenReturn(editedFreeholder)
 
@@ -127,7 +130,7 @@ class FreeholderContactTypeStepConfigTests {
                 .resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to FreeholderContactTypeFormModel()))
 
         // Assert
-        assertNull((result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
+        assertEquals(expectedContactType, (result[FORM_MODEL_ATTR_NAME] as FreeholderContactTypeFormModel).contactType)
     }
 
     companion object {
@@ -136,17 +139,23 @@ class FreeholderContactTypeStepConfigTests {
         @JvmStatic
         fun provideEditedFreeholders() =
             listOf(
-                named(
-                    "freeholder with a postal address",
-                    FreeholderDataModel(
-                        detailsKnown = true,
-                        name = FREEHOLDER_NAME,
-                        address = AddressDataModel.fromManualAddressData("1 Street", "Town", "AB1 2CD"),
+                Arguments.of(
+                    named(
+                        "freeholder with a postal address",
+                        FreeholderDataModel(
+                            detailsKnown = true,
+                            name = FREEHOLDER_NAME,
+                            address = AddressDataModel.fromManualAddressData("1 Street", "Town", "AB1 2CD"),
+                        ),
                     ),
+                    FreeholderContactType.POSTAL_ADDRESS,
                 ),
-                named(
-                    "saved freeholder without a stored address",
-                    FreeholderDataModel(databaseId = 1, detailsKnown = true, name = FREEHOLDER_NAME),
+                Arguments.of(
+                    named(
+                        "saved freeholder without a stored address",
+                        FreeholderDataModel(databaseId = 1, detailsKnown = true, name = FREEHOLDER_NAME),
+                    ),
+                    null,
                 ),
             )
     }

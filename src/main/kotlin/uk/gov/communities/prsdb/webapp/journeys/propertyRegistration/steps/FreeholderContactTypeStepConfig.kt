@@ -40,10 +40,18 @@ class FreeholderContactTypeStepConfig :
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? FreeholderContactTypeFormModel
-        if (formModel?.contactType != null || state.editingFreeholder?.email == null) return defaultContent
+        if (formModel?.contactType != null) return defaultContent
+
+        val editingFreeholder = state.editingFreeholder ?: return defaultContent
+        val contactType =
+            when {
+                editingFreeholder.email != null -> FreeholderContactType.EMAIL
+                editingFreeholder.address != null -> FreeholderContactType.POSTAL_ADDRESS
+                else -> return defaultContent
+            }
 
         val prepopulatedFormModel = formModel ?: FreeholderContactTypeFormModel()
-        prepopulatedFormModel.contactType = FreeholderContactType.EMAIL
+        prepopulatedFormModel.contactType = contactType
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 

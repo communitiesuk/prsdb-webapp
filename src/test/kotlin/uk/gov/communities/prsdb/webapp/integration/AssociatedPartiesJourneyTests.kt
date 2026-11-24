@@ -307,7 +307,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `editing a registration freeholder leaves contact type blank and pre-fills postal address after selection`(page: Page) {
+        fun `editing a registration freeholder preselects postal contact type and pre-fills their address`(page: Page) {
             val freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
                     freeholders =
@@ -338,8 +338,8 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).form.submit()
             val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-            assertEquals(null, contactTypePage.form.radios.selectedValue)
-            contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+            assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
 
             val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
             assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
