@@ -16,5 +16,6 @@ class ConfirmationPageLeaveProperty(
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)
+    val propertyAddress = page.locator("#property-address")
     val goToDashboardLink = Link.byText(page, "Go to dashboard")
 }

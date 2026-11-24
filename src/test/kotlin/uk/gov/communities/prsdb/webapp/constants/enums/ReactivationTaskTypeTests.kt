@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation
+package uk.gov.communities.prsdb.webapp.constants.enums
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
