@@ -723,3 +723,16 @@ SELECT po.id
 FROM property_ownership po
 WHERE po.ownership_type IN (0, 1, 3, 4, 7, 8)
   AND NOT EXISTS (SELECT 1 FROM freeholder f WHERE f.property_ownership_id = po.id);
+
+-- Every landlord linked to a property has an anniversary: the date they were first linked to one
+UPDATE landlord l
+SET anniversary_day = EXTRACT(DAY FROM sub.first_link_date)::int,
+    anniversary_month = EXTRACT(MONTH FROM sub.first_link_date)::int
+FROM (
+    SELECT ol.landlord_id,
+           MIN((ol.created_date AT TIME ZONE 'Europe/London')::date) AS first_link_date
+    FROM ownership_link ol
+    GROUP BY ol.landlord_id
+) sub
+WHERE l.id = sub.landlord_id
+  AND l.anniversary_day IS NULL;

@@ -273,4 +273,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     fun updatePaidForUntil(newPaidForUntil: LocalDate) {
         paidForUntil = newPaidForUntil
     }
+
+    fun updateRenewalDate(newRenewalDate: LocalDate) {
+        renewalDate = newRenewalDate
+    }
 }

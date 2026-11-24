@@ -19,6 +19,7 @@ class PropertyReactivationService(
     private val landlordActiveStatusService: LandlordActiveStatusService,
     private val propertyReactivationEmailService: PropertyReactivationEmailService,
     private val session: HttpSession,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @Transactional
     fun reactivatePropertyIfAddressAvailable(
@@ -36,7 +37,7 @@ class PropertyReactivationService(
         val landlordWillBeReactivated = landlordActiveStatusService.isCurrentLandlordInactive()
 
         saveReactivationData(propertyOwnershipId, reactivationData)
-        activationService.reactivateProperty(propertyOwnershipId)
+        activationService.reactivateProperty(propertyOwnershipId, userToLandlordService.getCurrentLandlordForUser())
         runAfterTransactionCommits {
             session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
             session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, landlordWillBeReactivated)

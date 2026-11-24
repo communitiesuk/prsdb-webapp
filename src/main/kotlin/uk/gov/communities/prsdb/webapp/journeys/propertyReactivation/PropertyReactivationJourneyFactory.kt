@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -361,6 +363,7 @@ class PropertyReactivationJourneyFactory(
             state.requiredTaskTypes = ReactivationTaskType.requiredFor(propertyOwnership)
             state.isOccupied = propertyOwnership.isOccupied
             state.uprn = propertyOwnership.address.uprn
+            state.previousRenewalDate = propertyOwnership.renewalDate.toKotlinLocalDate()
         }
         return state.initialiseFromPropertyOwnershipId(propertyOwnershipId)
     }
@@ -438,6 +441,7 @@ class PropertyReactivationJourney(
     override var requiredTaskTypes: List<ReactivationTaskType> by delegateProvider.requiredImmutableDelegate("requiredTaskTypes")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
+    override var previousRenewalDate: LocalDate by delegateProvider.requiredImmutableDelegate("previousRenewalDate")
     override val allowProvideCertificateLaterRoute: Boolean = false
     override val allowProvideTenancyDetailsLaterRoute: Boolean = false
     override val allowProvideLicensingLaterRoute: Boolean = false
@@ -485,4 +489,5 @@ interface PropertyReactivationJourneyState :
     override var isOccupied: Boolean
     override var uprn: Long?
     var isPropertyAlreadyRegistered: Boolean?
+    var previousRenewalDate: LocalDate
 }
