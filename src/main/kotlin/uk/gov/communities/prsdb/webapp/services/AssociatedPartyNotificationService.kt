@@ -156,9 +156,10 @@ class AssociatedPartyNotificationService(
         name: String,
         address: AddressDataModel,
     ): LetterAddressDataModel {
+        // TODO PDJB-2280: Decide how country should appear in letter addresses (Notify's last-line and seven-line rules)
         val addressLines = listOf(name) + address.toMultiLineAddress().lines()
 
-        // Notify accepts at most seven lines; condense the middle while keeping the final postcode line separate.
+        // Notify accepts at most seven lines; condense the middle while keeping the final line separate.
         if (addressLines.size <= LetterAddressDataModel.MAX_ADDRESS_LINES) {
             return LetterAddressDataModel(addressLines)
         }
