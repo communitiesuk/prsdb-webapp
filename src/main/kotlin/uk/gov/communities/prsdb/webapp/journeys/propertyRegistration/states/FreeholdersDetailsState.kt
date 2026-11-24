@@ -29,6 +29,14 @@ interface FreeholdersDetailsState :
     val isJointFreeholder: Boolean
 }
 
+fun FreeholdersDetailsState.clearFreeholderFormData() {
+    freeholderProvideDetailsStep.clearFormData()
+    freeholderNameStep.clearFormData()
+    freeholderContactTypeStep.clearFormData()
+    freeholderEmailStep.clearFormData()
+    freeholderAddressTask.clearFormData()
+}
+
 class FreeholdersDetailsDependencies(
     // The state slice that owns the collected freeholders. The reusable members task reads and writes the
     // freeholders list through this, so the list can live in the enclosing outer task or journey.

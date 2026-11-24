@@ -217,6 +217,9 @@ features:
     - name: "pdjb-2227-passphrase-email"
       enabled: false
       expiry-date: "2027-01-01"
+    - name: "pdjb-1899-act-as-landlord"
+      enabled: false
+      expiry-date: "2027-01-01"
 
 ---
 

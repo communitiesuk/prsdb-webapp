@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.clearFreeholderFormData
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -61,6 +62,7 @@ class FreeholdersListStepConfig(
         // Ensure that if you ever get to this page we reset any state that is used by one of the buttons.
         // This means we can be certain all the buttons will always work even if you use the browser back buttons.
         state.editingFreeholderId = null
+        state.clearFreeholderFormData()
     }
 }
 
