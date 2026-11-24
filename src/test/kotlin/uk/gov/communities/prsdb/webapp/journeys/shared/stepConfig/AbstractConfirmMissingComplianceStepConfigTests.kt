@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -9,16 +9,16 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ReactivationConfirmMissingComplianceFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class ConfirmMissingComplianceStepConfigTests {
+class AbstractConfirmMissingComplianceStepConfigTests {
     @Mock
-    lateinit var mockState: PropertyRegistrationJourneyState
+    lateinit var mockState: MissingComplianceState
 
-    private val routeSegment = ConfirmMissingComplianceStep.ROUTE_SEGMENT
+    private val routeSegment = "confirm-missing-compliance"
 
     @Test
     fun `mode returns null when form model is not present`() {
@@ -99,8 +99,8 @@ class ConfirmMissingComplianceStepConfigTests {
         assertEquals(true, content["isGasMissing"])
         assertEquals(false, content["isElectricalMissing"])
         assertEquals(true, content["isEpcMissing"])
-        assertEquals("registerProperty.confirmMissingCompliance.areYouSure.heading", content["areYouSureHeading"])
-        assertEquals("registerProperty.confirmMissingCompliance.button", content["submitButtonText"])
+        assertEquals("test.areYouSure.heading", content["areYouSureHeading"])
+        assertEquals("test.button", content["submitButtonText"])
     }
 
     @Test
@@ -113,8 +113,13 @@ class ConfirmMissingComplianceStepConfigTests {
         assertThrows<CyaDataHasChangedException> { stepConfig.afterStepIsReached(mockState) }
     }
 
-    private fun setupStepConfig(): ConfirmMissingComplianceStepConfig {
-        val stepConfig = ConfirmMissingComplianceStepConfig()
+    private fun setupStepConfig(): AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel> {
+        val stepConfig =
+            object : AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel>() {
+                override val formModelClass = ReactivationConfirmMissingComplianceFormModel::class
+                override val areYouSureHeadingKey = "test.areYouSure.heading"
+                override val submitButtonKey = "test.button"
+            }
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
