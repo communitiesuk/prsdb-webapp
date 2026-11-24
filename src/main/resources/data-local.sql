@@ -721,6 +721,15 @@ FROM (VALUES ('Sam Superior', 'superior.landlord@example.com', 57),
              ('Sam Superior', 'superior.landlord@example.com', 55)) AS v(name, email, property_ownership_id)
 WHERE NOT EXISTS (SELECT 1 FROM superior_landlord s WHERE s.property_ownership_id = v.property_ownership_id);
 
+-- Searchable addresses sharing postcode UK1 1AA in England (with and without a local council), Wales and Scotland,
+-- for testing address search region restrictions
+INSERT INTO address (id, created_date, uprn, single_line_address, local_council_id, postcode, building_number, street_name, country)
+VALUES (67, current_timestamp, 990000000001, '1 English Council Road, UK1 1AA', 1, 'UK1 1AA', '1', 'English Council Road', 'England'),
+       (68, current_timestamp, 990000000002, '2 English No Council Road, UK1 1AA', NULL, 'UK1 1AA', '2', 'English No Council Road', 'England'),
+       (69, current_timestamp, 990000000003, '3 Welsh Road, UK1 1AA', NULL, 'UK1 1AA', '3', 'Welsh Road', 'Wales'),
+       (70, current_timestamp, 990000000004, '4 Scottish Road, UK1 1AA', NULL, 'UK1 1AA', '4', 'Scottish Road', 'Scotland')
+ON CONFLICT DO NOTHING;
+
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
