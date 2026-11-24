@@ -4,11 +4,17 @@ import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -16,7 +22,17 @@ class ActiveInactiveService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val userToLandlordService: UserToLandlordService,
+    private val featureFlagManager: FeatureFlagManager,
+    private val landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
+    fun isCurrentLandlordInactive(): Boolean =
+        userToLandlordService.getCurrentLandlordForUserOrNull()?.let { isLandlordInactive(it) } ?: false
+
+    // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+    fun isLandlordInactive(landlord: Landlord): Boolean = featureFlagManager.checkFeature(ACTIVE_INACTIVE) && !landlord.isActive
+
     // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
     fun deactivateProperty(propertyOwnershipId: Long) {
@@ -30,9 +46,15 @@ class ActiveInactiveService(
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
 
         propertyOwnership.landlords
-            .filterNot { propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(it.id, propertyOwnershipId) }
+            .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
             .forEach { markLandlordAsInactive(it, deactivationDate) }
     }
+
+    fun landlordHasOtherActiveProperties(
+        landlordId: Long,
+        excludingPropertyOwnershipId: Long,
+    ): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlordId, excludingPropertyOwnershipId)
 
     @Transactional
     fun reactivateProperty(propertyOwnershipId: Long) {
@@ -46,12 +68,27 @@ class ActiveInactiveService(
     }
 
     @Transactional
-    fun deactivateLandlord(landlord: Landlord) {
+    fun deactivateLandlord(
+        landlord: Landlord,
+        reason: LandlordDeactivationReason,
+    ) {
         check(landlord.isActive) { "Landlord ${landlord.id} is already inactive" }
         check(!propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
             "Landlord ${landlord.id} cannot be deactivated while they have active properties"
         }
         markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
+
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            sendLandlordDeactivatedEmail(landlord, reason)
+        }
+    }
+
+    @Transactional
+    fun deactivateLandlordIfNoActiveProperties(landlord: Landlord) {
+        if (landlord.isActive && !propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
+            markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
+        }
     }
 
     @Transactional
@@ -75,6 +112,23 @@ class ActiveInactiveService(
 
         landlord.deactivate(deactivationDate)
         landlordRepository.save(landlord)
+    }
+
+    private fun sendLandlordDeactivatedEmail(
+        landlord: Landlord,
+        reason: LandlordDeactivationReason,
+    ) {
+        NotificationHelper.sendNotificationAndLogFailures("the landlord deactivated email for landlord ${landlord.id}") {
+            landlordDeactivatedEmailSender.sendEmailToLandlord(
+                landlord,
+                LandlordDeactivatedEmail(
+                    recipientName = landlord.name,
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                    reason = reason,
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                ),
+            )
+        }
     }
 
     private fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =

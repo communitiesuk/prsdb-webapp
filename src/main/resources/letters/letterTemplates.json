@@ -1,9 +1,16 @@
 [
   {
-    "test_id": "fbe67906-5f26-4020-807b-54dcff9a2eac",
-    "prod_id": "ce7b9767-8254-4775-a2b5-f5984418eb3e",
-    "enumName": "EXAMPLE_LETTER",
-    "subject": "This is an example",
-    "bodyLocation": "/letters/ExampleLetter.md"
+    "test_id": "58eb3457-d5eb-4adf-8346-172dbec2299e",
+    "prod_id": "c4a0e9db-8156-4bec-a881-e802e94a5a10",
+    "enumName": "FREEHOLDER_ADDED_TO_PROPERTY_LETTER",
+    "subject": "Check these details are correct",
+    "bodyLocation": "/letters/FreeholderAddedToPropertyLetter.md"
+  },
+  {
+    "test_id": "17654692-4f36-4bc5-a36c-20fc6577dabb",
+    "prod_id": "f3e2f94c-3433-4501-ba4a-f950fef25712",
+    "enumName": "SUPERIOR_LANDLORD_ADDED_TO_PROPERTY_LETTER",
+    "subject": "Check these details are correct",
+    "bodyLocation": "/letters/SuperiorLandlordAddedToPropertyLetter.md"
   }
 ]

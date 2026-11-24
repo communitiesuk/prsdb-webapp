@@ -17,7 +17,7 @@
             </span>
             <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{addressForms.noAddressFound.paragraph.one.linkText}">
                 addressForms.noAddressFound.paragraph.one.linkText
-            </a>
+            </a><span th:remove="tag" th:text="#{addressForms.noAddressFound.paragraph.one.afterLink}">addressForms.noAddressFound.paragraph.one.afterLink</span>
         </p>
         <p class="govuk-body" th:text="#{${#bools.isTrue(restrictToEngland) ? 'addressForms.noAddressFound.english.paragraph.two' : 'addressForms.noAddressFound.paragraph.two'}}">addressForms.noAddressFound.(english.)paragraph.two</p>
     </th:block>

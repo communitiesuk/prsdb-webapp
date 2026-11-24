@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -19,21 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
 class CheckYourAnswersJourneyStateTests {
-    @Nested
-    inner class IsCheckingAnswers {
-        @Test
-        fun `returns true when checkingAnswersFor is not null`() {
-            val state = createTestState(checkingAnswersFor = "some-step")
-            assertTrue(state.isCheckingAnswers)
-        }
-
-        @Test
-        fun `returns false when checkingAnswersFor is null`() {
-            val state = createTestState(checkingAnswersFor = null)
-            assertFalse(state.isCheckingAnswers)
-        }
-    }
-
     @Nested
     inner class BaseJourneyId {
         @Test

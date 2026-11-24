@@ -6,9 +6,13 @@ const val LOCAL_COUNCIL_USER_ID = "local-council-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
+const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION = "landlordReactivatedByLastPropertyRegistration"
+
 const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDeregisteredThisSessionWithAddresses"
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
+
+const val REACTIVATED_PROPERTY_OWNERSHIP_ID = "reactivatedPropertyOwnershipId"
 
 const val PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION = "propertiesDelegatedToLettingAgentThisSession"
 
@@ -47,6 +51,8 @@ const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEm
 const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"
 
 const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
+
+const val LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE = "landlordReactivatedByLastJointLandlordInvitationAcceptance"
 
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 

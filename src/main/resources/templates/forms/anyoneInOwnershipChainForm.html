@@ -23,6 +23,7 @@
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'anyoneInOwnershipChain', #{registerProperty.superiorLandlords.anyoneInOwnershipChain.radios.heading}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'anyoneInOwnershipChain', null, ${radioOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </th:block>
 </html>

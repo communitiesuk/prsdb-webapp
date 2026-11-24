@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -26,13 +27,14 @@ class NftDataSeederDao(
             }
         }
 
+    // TODO: PDJB-2262: Seed a bigger variety of countries
     fun prepareAddressStatement(): PreparedStatement {
         val query =
             """
             INSERT INTO address 
             (created_date, last_modified_date, uprn, single_line_address, building_number, street_name, town_name, 
-            postcode, local_council_id, is_active) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+            postcode, local_council_id, is_active, country) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, true, '$ENGLAND')
             """
         return connection.prepareStatement(query)
     }
@@ -182,8 +184,8 @@ class NftDataSeederDao(
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
              license_id, property_build_type, address_id, num_bedrooms,
-             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, ownership_type_before_pdjb955, property_manager_id, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, ownership_type_before_pdjb955, property_manager_id, paid_for_until, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }
@@ -192,8 +194,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO freeholder 
-            (created_date, property_ownership_id, name, email, address_id) 
-            VALUES (?, ?, ?, ?, ?)
+            (created_date, property_ownership_id, name, email) 
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -202,8 +204,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO superior_landlord 
-            (created_date, property_ownership_id, name, email, address_id) 
-            VALUES (?, ?, ?, ?, ?)
+            (created_date, property_ownership_id, name, email) 
+            VALUES (?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -324,19 +326,20 @@ class NftDataSeederDao(
         limit: Int,
         afterId: Long,
     ): List<Address> =
-        session.createNativeQuery(
-            """
-            SELECT a.* FROM address a
-            WHERE a.id > :afterId
-              AND a.local_council_id IS NOT NULL AND a.is_active AND a.uprn IS NOT NULL
-              AND a.id NOT BETWEEN 9100000001 AND 9100000005
-              AND NOT EXISTS (SELECT 1 FROM property_ownership p WHERE p.is_active AND p.address_id = a.id)
-              AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id)
-            ORDER BY a.id
-            LIMIT :limit
-            """.trimIndent(),
-            Address::class.java,
-        ).setParameter("afterId", afterId)
+        session
+            .createNativeQuery(
+                """
+                SELECT a.* FROM address a
+                WHERE a.id > :afterId
+                  AND a.local_council_id IS NOT NULL AND a.is_active AND a.uprn IS NOT NULL
+                  AND a.id NOT BETWEEN $FIRST_RESERVED_ADDRESS_ID AND $LAST_RESERVED_ADDRESS_ID
+                  AND NOT EXISTS (SELECT 1 FROM property_ownership p WHERE p.is_active AND p.address_id = a.id)
+                  AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id)
+                ORDER BY a.id
+                LIMIT :limit
+                """.trimIndent(),
+                Address::class.java,
+            ).setParameter("afterId", afterId)
             .setParameter("limit", limit)
             .resultList
 
@@ -369,7 +372,7 @@ class NftDataSeederDao(
             WHERE a.local_council_id IS NOT NULL
             AND (
                 NOT ?
-                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN 9100000001 AND 9100000005
+                OR (a.is_active AND a.uprn IS NOT NULL AND a.id NOT BETWEEN $FIRST_RESERVED_ADDRESS_ID AND $LAST_RESERVED_ADDRESS_ID
                     AND NOT EXISTS (SELECT 1 FROM nft_seed_incomplete_addresses i WHERE i.id = a.id))
             )
             AND (
@@ -415,6 +418,9 @@ class NftDataSeederDao(
     }
 
     private companion object {
+        const val FIRST_RESERVED_ADDRESS_ID = 9100000001L
+        const val LAST_RESERVED_ADDRESS_ID = 9100000005L
+
         val EXPLICIT_ID_TABLES =
             listOf(
                 "registration_number",

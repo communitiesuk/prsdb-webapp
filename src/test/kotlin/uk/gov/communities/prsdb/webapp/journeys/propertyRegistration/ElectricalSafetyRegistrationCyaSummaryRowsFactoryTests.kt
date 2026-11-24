@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.DateTimeUnit.Companion.YEAR
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -47,6 +48,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
     private val mockCheckEicrUploadsStep: CheckEicrUploadsStep = mock()
     private val mockUploadService: UploadService = mock()
     private val inDateExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR)
+    private val inDateIssueDate = DateTimeHelper().getCurrentDateInUK().minus(1, YEAR)
 
     private fun fileUploadWithStatus(status: FileUploadStatus): FileUpload =
         mock<FileUpload>().also { whenever(it.status).thenReturn(status) }
@@ -72,12 +74,13 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
         whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
         whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
         whenever(mockState.isEicIssueDateEnabled).thenReturn(isEicIssueDateEnabled)
         if (isEicIssueDateEnabled) {
+            whenever(mockState.getEicIssueDateIfReachable()).thenReturn(inDateIssueDate)
             whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
             whenever(mockEicIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
         } else {
+            whenever(mockState.getEicExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
             whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
             whenever(mockEicExpiryDateStep.currentJourneyId).thenReturn("test-journey-id")
         }
@@ -97,7 +100,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
 
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
+            whenever(mockState.getEicExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
             whenever(mockState.isEicIssueDateEnabled).thenReturn(false)
 
             whenever(mockState.eicExpiryDateStep).thenReturn(mockEicExpiryDateStep)
@@ -143,11 +146,12 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
         }
 
         @Test
-        fun `factory links the EIC date row to the EIC issue date step with a blank value when the EIC issue date flag is enabled`() {
+        fun `factory links the EIC date row to the EIC issue date step and shows the issue date when the EIC issue date flag is enabled`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
+            whenever(mockState.getEicIssueDateIfReachable()).thenReturn(inDateIssueDate)
             // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
             whenever(mockState.isEicIssueDateEnabled).thenReturn(true)
             whenever(mockState.eicIssueDateStep).thenReturn(mockEicIssueDateStep)
@@ -164,7 +168,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
 
             val rows = factory.createRows()
             assertEquals(listOf(mockHasElectricalCertStep, mockEicIssueDateStep, mockCheckEicUploadsStep), requestedSteps)
-            assertEquals("", rows[1].fieldValue)
+            assertEquals(inDateIssueDate, rows[1].fieldValue)
         }
 
         @Test
@@ -198,7 +202,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactoryTests {
             // TODO PDJB-1679: Remove this when the EIC_ISSUE_DATE flag is removed
             lenient().`when`(mockState.isEicIssueDateEnabled).thenReturn(true)
 
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
+            whenever(mockState.getEicrExpiryDateIfReachable()).thenReturn(inDateExpiryDate)
 
             whenever(mockState.eicrExpiryDateStep).thenReturn(mockEicrExpiryDateStep)
             whenever(mockState.checkEicrUploadsStep).thenReturn(mockCheckEicrUploadsStep)

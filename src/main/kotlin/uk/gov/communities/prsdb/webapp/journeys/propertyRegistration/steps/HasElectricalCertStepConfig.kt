@@ -20,7 +20,6 @@ class HasElectricalCertStepConfig :
     override fun getStepSpecificContent(state: ElectricalSafetyDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.electricalSafetyTask.electricalCert.heading",
-            "fieldSetHint" to "propertyCompliance.electricalSafetyTask.electricalCert.hint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
