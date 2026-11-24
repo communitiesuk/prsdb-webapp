@@ -1,17 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -44,6 +47,8 @@ abstract class AddressTask(
 
     protected open val lookupAddressTemplate: String = LookupAddressStepConfig.DEFAULT_TEMPLATE
 
+    protected open val searchRegion: AddressSearchRegion = AddressSearchRegion.UK
+
     override val taskState get() = this
 
     fun clearFormData() {
@@ -66,7 +71,10 @@ abstract class AddressTask(
                         LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noAddressFoundStep
                     }
                 }
-                stepSpecificInitialisation { withTemplate(lookupAddressTemplate) }
+                stepSpecificInitialisation {
+                    withTemplate(lookupAddressTemplate)
+                    restrictToRegion(searchRegion)
+                }
                 withAdditionalContentProperties { lookupAddressContentProperties }
             }
             step(journey.selectAddressStep) {
@@ -80,10 +88,11 @@ abstract class AddressTask(
                 }
                 withAdditionalContentProperties { selectAddressContentProperties }
             }
-            step(journey.noAddressFoundStep) {
+            step<Complete, NoAddressFoundStepConfig>(journey.noAddressFoundStep) {
                 routeSegment(NoAddressFoundStep.ROUTE_SEGMENT)
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
+                stepSpecificInitialisation { restrictToRegion(searchRegion) }
             }
             step(journey.manualAddressStep) {
                 routeSegment(ManualAddressStep.ROUTE_SEGMENT)
