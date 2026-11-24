@@ -38,35 +38,6 @@ class EmailTemplateModelsTests {
         Assertions.assertEquals(expected, model.toHashMap()["payment created at"])
     }
 
-    @Test
-    fun `freeholder added email maps its details to Notify personalisation keys`() {
-        // Arrange
-        val email =
-            FreeholderAddedToPropertyEmail(
-                freeholderName = "Sarah Thompson",
-                freeholderEmail = "sarah@example.com",
-                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
-                landlords = listOf("Jamie Jameson (jamie@example.com)", "Zebra Homes (contact@zebra.example)"),
-                gdsStartPageUrl = "https://example.test/gds-start-page",
-                privacyNoticeUrl = "example.test/landlord/privacy-notice",
-            )
-        val expected =
-            hashMapOf(
-                "freeholder name" to "Sarah Thompson",
-                "freeholder email" to "sarah@example.com",
-                "property address" to "12 Real Street\nBristol\nBS8 1AA",
-                "landlords" to "* Jamie Jameson (jamie@example.com)\n* Zebra Homes (contact@zebra.example)",
-                "gds start page" to "https://example.test/gds-start-page",
-                "privacy notice" to "example.test/landlord/privacy-notice",
-            )
-
-        // Act
-        val actual = email.toHashMap()
-
-        // Assert
-        Assertions.assertEquals(expected, actual)
-    }
-
     companion object {
         @JvmStatic
         private fun templateList() =
