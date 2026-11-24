@@ -1,15 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESSES
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
-class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
+class ManualAddressStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
     override val formModelClass = ManualAddressFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
@@ -20,10 +25,23 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
             "townOrCityLabel" to "addressForms.manualAddress.townOrCity.label",
             "countyLabel" to "addressForms.manualAddress.county.label",
             "postcodeLabel" to "addressForms.manualAddress.postcode.label",
+            "countryLabel" to "addressForms.manualAddress.country.label",
+            "isInternationalAddressesEnabled" to featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES),
             "submitButtonText" to "forms.buttons.continue",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/manualAddressForm"
+
+    override fun enrichSubmittedDataBeforeValidation(
+        state: JourneyState,
+        formData: FormData,
+    ): FormData {
+        val isInternationalAddressesEnabled = featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES)
+        val enrichedData =
+            super.enrichSubmittedDataBeforeValidation(state, formData) +
+                (ManualAddressFormModel::isInternationalAddressesEnabled.name to isInternationalAddressesEnabled)
+        return if (isInternationalAddressesEnabled) enrichedData else enrichedData - ManualAddressFormModel::country.name
+    }
 
     override fun resolvePageContent(
         state: JourneyState,
@@ -37,6 +55,7 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
         formModel.townOrCity = defaultContent[PREFILL_TOWN_OR_CITY] as? String
         formModel.county = defaultContent[PREFILL_COUNTY] as? String
         formModel.postcode = defaultContent[PREFILL_POSTCODE] as? String
+        formModel.country = defaultContent[PREFILL_COUNTRY] as? String
         return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
     }
 
@@ -46,6 +65,7 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
         const val PREFILL_TOWN_OR_CITY = "manualPrefillTownOrCity"
         const val PREFILL_COUNTY = "manualPrefillCounty"
         const val PREFILL_POSTCODE = "manualPrefillPostcode"
+        const val PREFILL_COUNTRY = "manualPrefillCountry"
     }
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }

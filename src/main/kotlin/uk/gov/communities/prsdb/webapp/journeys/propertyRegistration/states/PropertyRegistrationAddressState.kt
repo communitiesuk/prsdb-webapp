@@ -22,6 +22,7 @@ interface PropertyRegistrationAddressState : AddressState {
                     county = manualAddressData.county,
                     postcode = manualAddressData.notNullValue(ManualAddressFormModel::postcode),
                     localCouncilId = localCouncilData.notNullValue(SelectLocalCouncilFormModel::localCouncilId),
+                    country = manualAddressData.country,
                 )
             }
         }
