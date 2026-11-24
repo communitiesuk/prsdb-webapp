@@ -16,7 +16,7 @@ class IntegrationTestHelper {
         // repeat them. They must be idempotent, since they also run over data a seed script has already set
         // up, and order matters: each runs after the scripts a test named. Anything added here must also be
         // added to spring.sql.init.data-locations in application-local.yml. See docs/IntegrationTestReadMe.md.
-        private val ALWAYS_APPENDED_SCRIPTS = listOf("data-placeholder-freeholders.sql")
+        private val ALWAYS_APPENDED_SCRIPTS = listOf("data-placeholder-freeholders.sql", "data-landlord-anniversaries.sql")
 
         fun resetAndSeedDatabase(
             scripts: List<String>,

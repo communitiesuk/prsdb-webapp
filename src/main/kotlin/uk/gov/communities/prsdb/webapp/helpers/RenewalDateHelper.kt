@@ -16,6 +16,11 @@ class RenewalDateHelper {
             getLeapAdjustedAnniversaryDate(anniversary, currentDate.year).takeIf { it.isAfter(currentDate) }
                 ?: getLeapAdjustedAnniversaryDate(anniversary, currentDate.year + 1)
 
+        fun isOnAnniversary(
+            date: LocalDate,
+            anniversary: MonthDay,
+        ): Boolean = date == getLeapAdjustedAnniversaryDate(anniversary, date.year)
+
         private fun getLeapAdjustedAnniversaryDate(
             anniversary: MonthDay,
             year: Int,

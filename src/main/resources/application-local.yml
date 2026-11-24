@@ -26,6 +26,7 @@ spring:
         - classpath:data-local.sql
         - classpath:data-metrics-local.sql
         - classpath:data-placeholder-freeholders.sql
+        - classpath:data-landlord-anniversaries.sql
       continue-on-error: true
 
   data:

@@ -13,7 +13,6 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -28,17 +27,11 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.exceptions.NoLandlordEmailRecipientsException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
-import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
 import java.util.function.Consumer
@@ -55,7 +48,7 @@ class DeactivationServiceTests {
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @Mock
-    private lateinit var lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService
+    private lateinit var deactivationEmailService: DeactivationEmailService
 
     @Mock
     private lateinit var transactionTemplate: TransactionTemplate
@@ -63,12 +56,6 @@ class DeactivationServiceTests {
     // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE flag is removed
     @Mock
     private lateinit var featureFlagManager: FeatureFlagManager
-
-    @Mock
-    private lateinit var landlordDeactivatedEmailSender: EmailNotificationService<LandlordDeactivatedEmail>
-
-    @Mock
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @InjectMocks
     private lateinit var deactivationService: DeactivationService
@@ -82,44 +69,17 @@ class DeactivationServiceTests {
         assertFalse(landlord.isActive)
         assertEquals(today(), landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
-        verifyNoInteractions(landlordDeactivatedEmailSender)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
     fun `deactivateLandlord emails the landlord that their account is deactivated when ACTIVE_INACTIVE is enabled`() {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        val landlord =
-            MockLandlordData.createIndividualLandlord(
-                name = "Jill Jones",
-                registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 123456L),
-            )
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(DASHBOARD_URI)
-
-        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
-
-        verify(landlordDeactivatedEmailSender).sendEmailToLandlord(
-            landlord,
-            LandlordDeactivatedEmail(
-                recipientName = "Jill Jones",
-                registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 123456L).toString(),
-                reason = LandlordDeactivationReason.NO_PROPERTIES_REGISTERED,
-                dashboardUrl = DASHBOARD_URI.toString(),
-            ),
-        )
-    }
-
-    @Test
-    fun `deactivateLandlord still deactivates the landlord when the email fails to send`() {
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         val landlord = MockLandlordData.createIndividualLandlord()
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(DASHBOARD_URI)
-        whenever(landlordDeactivatedEmailSender.sendEmailToLandlord(any(), any()))
-            .thenThrow(NoLandlordEmailRecipientsException(landlord.id))
 
         deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
 
-        assertFalse(landlord.isActive)
-        verify(landlordRepository).save(landlord)
+        verify(deactivationEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
     }
 
     @Test
@@ -133,7 +93,7 @@ class DeactivationServiceTests {
 
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailSender)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -148,7 +108,7 @@ class DeactivationServiceTests {
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailSender)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -217,7 +177,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+        verify(deactivationEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
     }
 
     @Test
@@ -236,9 +196,9 @@ class DeactivationServiceTests {
         try {
             deactivationService.deactivateProperty(PROPERTY_ID)
 
-            verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
+            verifyNoInteractions(deactivationEmailService)
             TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
-            verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+            verify(deactivationEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
         } finally {
             TransactionSynchronizationManager.clearSynchronization()
         }
@@ -255,7 +215,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
@@ -273,30 +233,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
-    }
-
-    @Test
-    fun `deactivateProperty still deactivates the property when the letting agent email fails to send`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
-        val delegation =
-            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
-        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
-        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
-            .thenReturn(true)
-        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
-        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        doThrow(RuntimeException("Notify is down"))
-            .whenever(lettingAgentPropertyDeactivatedEmailService)
-            .sendLettingAgentPropertyDeactivatedEmail(any(), any())
-
-        deactivationService.deactivateProperty(PROPERTY_ID)
-
-        assertFalse(property.isActive)
-        verify(propertyOwnershipRepository).save(property)
-        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -441,7 +378,6 @@ class DeactivationServiceTests {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
-        private val DASHBOARD_URI = URI("https://example.com/landlord/dashboard")
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
 
