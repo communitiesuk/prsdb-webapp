@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import com.github.dockerjava.zerodep.shaded.org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder
 import jakarta.servlet.http.Cookie
-import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verifyNoInteractions
@@ -26,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATE_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationBasePath
 import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController.Companion.getPropertyReactivationPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
@@ -35,9 +35,11 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.PropertyReactivationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
@@ -60,8 +62,13 @@ class ReactivatePropertyControllerTests(
     @MockitoBean
     private lateinit var propertyReactivationService: PropertyReactivationService
 
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
+
     private val propertyOwnershipId = 1L
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
+
+    private val confirmationPath = "${getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT"
 
     private val uploadGasCertPath =
         "${getPropertyReactivationBasePath(propertyOwnershipId)}/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=any-id"
@@ -245,13 +252,87 @@ class ReactivatePropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `getConfirmation returns the placeholder confirmation page when the property was reactivated this session`() {
+    fun `getConfirmation returns the reactivation confirmation page when the property was reactivated this session`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
-        mvc.get("${getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
+        // Act, Assert
+        mvc.get(confirmationPath).andExpect {
             status { isOk() }
-            view { name("forms/todoConfirmation") }
-            model { attribute("todoComment", containsString("PDJB-2044")) }
+            view { name("reactivatePropertyConfirmation") }
+            model {
+                attribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
+                attribute("prn", RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString())
+                attribute("hasJointLandlords", false)
+                attribute("landlordReactivated", false)
+                attribute("isOrganisationLandlord", false)
+                attribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+                attribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+                attributeExists("paymentSummaryViewModel")
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation shows joint landlords when the property has more than one landlord`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = propertyOwnershipId,
+                landlords = mutableSetOf(MockLandlordData.createIndividualLandlord(), MockLandlordData.createIndividualLandlord()),
+            )
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+
+        // Act, Assert
+        mvc.get(confirmationPath).andExpect {
+            status { isOk() }
+            model { attribute("hasJointLandlords", true) }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation shows an individual landlord that their account was reactivated`() {
+        // Arrange
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyReactivationService.wasLandlordReactivatedByLastReactivation()).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+
+        // Act, Assert
+        mvc.get(confirmationPath).andExpect {
+            status { isOk() }
+            model {
+                attribute("landlordReactivated", true)
+                attribute("isOrganisationLandlord", false)
+            }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["ORG_ADMIN"])
+    fun `getConfirmation shows an organisation landlord that their organisation's account was reactivated`() {
+        // Arrange
+        whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId)
+        whenever(propertyReactivationService.wasLandlordReactivatedByLastReactivation()).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
+
+        // Act, Assert
+        mvc.get(confirmationPath).andExpect {
+            status { isOk() }
+            model {
+                attribute("landlordReactivated", true)
+                attribute("isOrganisationLandlord", true)
+            }
         }
     }
 
@@ -260,7 +341,7 @@ class ReactivatePropertyControllerTests(
     fun `getConfirmation returns 404 when the property was not the last one reactivated this session`() {
         whenever(propertyReactivationService.getLastPropertyOwnershipIdReactivatedThisSession()).thenReturn(propertyOwnershipId + 1)
 
-        mvc.get("${getPropertyReactivationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
+        mvc.get(confirmationPath).andExpect {
             status { isNotFound() }
         }
     }

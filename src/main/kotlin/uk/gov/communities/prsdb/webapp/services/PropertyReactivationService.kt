@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
@@ -38,6 +39,7 @@ class PropertyReactivationService(
         activationService.reactivateProperty(propertyOwnershipId)
         runAfterTransactionCommits {
             session.setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+            session.setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, landlordWillBeReactivated)
 
             NotificationHelper.sendNotificationAndLogFailures(
                 "the property reactivation confirmation email for property ownership $propertyOwnershipId",
@@ -48,6 +50,9 @@ class PropertyReactivationService(
     }
 
     fun getLastPropertyOwnershipIdReactivatedThisSession(): Long? = session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID) as? Long
+
+    fun wasLandlordReactivatedByLastReactivation(): Boolean =
+        session.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION) == true
 
     private fun saveReactivationData(
         propertyOwnershipId: Long,

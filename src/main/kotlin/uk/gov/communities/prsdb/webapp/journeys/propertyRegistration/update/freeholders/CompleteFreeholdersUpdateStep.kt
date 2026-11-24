@@ -13,11 +13,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class CompleteFreeholdersUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val associatedPartyNotificationService: AssociatedPartyNotificationService,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateFreeholdersJourneyState>() {
     override fun mode(state: UpdateFreeholdersJourneyState): Complete = Complete.COMPLETE
 
@@ -39,6 +41,7 @@ class CompleteFreeholdersUpdateStepConfig(
             }
 
         sendAddedFreeholderNotifications(state.propertyId, addedFreeholders)
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The freeholders"))
     }
 
     // Use the submitted details for notifications: postal addresses aren't saved and can't be retrieved from the database.

@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.PAYMENTS
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -48,7 +49,7 @@ class PropertyRegistrationTaskListStepConfig(
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
             numberSections = false,
-            backUrl = backUrlFromState,
+            backUrl = backUrlFromState ?: LANDLORD_DASHBOARD_URL,
         )
     }
 
