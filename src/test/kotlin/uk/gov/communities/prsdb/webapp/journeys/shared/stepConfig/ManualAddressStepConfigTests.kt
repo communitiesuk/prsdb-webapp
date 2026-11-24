@@ -25,6 +25,7 @@ class ManualAddressStepConfigTests {
     @Mock
     lateinit var mockFeatureFlagManager: FeatureFlagManager
 
+    // TODO: PDJB-2259: Remove this test
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
     fun `getStepSpecificContent shows the country input only when international addresses is enabled`(isEnabled: Boolean) {
@@ -40,7 +41,7 @@ class ManualAddressStepConfigTests {
         assertEquals("addressForms.manualAddress.country.label", content["countryLabel"])
     }
 
-    // TODO: PDJB-2259: Remove the part of this test around keeping country, since the hiding code will be removed.
+    // TODO: PDJB-2259: Remove this test
     @Test
     fun `enrichSubmittedDataBeforeValidation requires and keeps country when international addresses is enabled`() {
         // Arrange
