@@ -594,6 +594,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.peopleResponsibleChangeLinks).hasCount(0)
         }
 
+        // TODO PDJB-2016: delete this test with the flag, once the legacy ownership row is gone
+        @Test
+        fun `the property record tab does not show the ownership section`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+            assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow).isHidden()
+        }
+
         @Test
         fun `the property details page loads with the property details tab selected by default`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
@@ -875,12 +884,16 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     @Nested
     // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag.
     inner class OwnershipBeforePdjb955 {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
-        fun `local council view hides the ownership section and row on the property record tab when associated parties is enabled`() {
+        fun `local council view keeps the ownership row on the property record`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
-            assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
-            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow).isHidden()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
         }
     }
 

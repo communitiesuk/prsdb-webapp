@@ -580,21 +580,7 @@ class PropertyDetailsViewModelTests {
         }
 
         @Test
-        fun `the local council's legacy ownership section is hidden when associated parties is enabled`() {
-            val viewModel =
-                PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(),
-                    viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
-                    messageSource = mockMessageSource,
-                    associatedPartiesEnabled = true,
-                )
-
-            assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
-            assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
-        }
-
-        @Test
-        fun `the legacy ownership section and tab name are kept when associated parties is disabled`() {
+        fun `the legacy ownership section and tab name are displayed when associated parties is disabled`() {
             val viewModel =
                 PropertyDetailsViewModel(
                     createOccupiedPropertyOwnership(),
