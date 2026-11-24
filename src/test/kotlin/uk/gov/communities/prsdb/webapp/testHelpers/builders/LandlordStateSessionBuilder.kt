@@ -33,13 +33,15 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AddressInUkFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GoverningBodyMemberNameFormModel
@@ -106,8 +108,16 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgAddressInUk(addressInUk: Boolean = true): LandlordStateSessionBuilder {
+        withSubmittedValue(
+            "${OrgInternationalAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { this.addressInUk = addressInUk },
+        )
+        return self()
+    }
+
     fun withOrgAddress(): LandlordStateSessionBuilder {
-        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
+        val routePrefix = OrgInternationalAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",
@@ -128,7 +138,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgManualAddressSelected(): LandlordStateSessionBuilder {
-        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
+        val routePrefix = OrgInternationalAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",
@@ -373,7 +383,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgName() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
-        fun beforeOrgAddress() = beforeOrgName().withOrgName()
+        fun beforeOrgAddressInUk() = beforeOrgName().withOrgName()
+
+        fun beforeOrgAddress() = beforeOrgAddressInUk().withOrgAddressInUk()
 
         fun beforeOrgManualAddress() = beforeOrgAddress().withOrgManualAddressSelected()
 
