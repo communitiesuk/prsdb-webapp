@@ -289,6 +289,28 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         @Test
+        fun `getConfirmation returns 200 for an org landlord user`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(propertyOwnershipService.getPropertyOwnership(1L)).thenReturn(MockLandlordData.createPropertyOwnership())
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("isOrganisationLandlord", true)
+                    }
+                }
+        }
+
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        @Test
         fun `getConfirmation shows landlord reactivated when the landlord was reactivated`() {
             whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
                 Pair(

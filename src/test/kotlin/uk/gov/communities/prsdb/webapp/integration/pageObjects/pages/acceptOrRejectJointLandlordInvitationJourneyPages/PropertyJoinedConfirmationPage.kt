@@ -11,5 +11,7 @@ class PropertyJoinedConfirmationPage(
 ) : BasePage(page, JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE) {
     val heading = Heading(page.locator("main h1"))
     val confirmationBanner = ConfirmationBanner(page)
-    val propertyDetails = page.locator("main")
+    val propertyAddress = page.locator("#property-address")
+    val registrationNumberText: String
+        get() = confirmationBanner.body.locator("strong").innerText()
 }

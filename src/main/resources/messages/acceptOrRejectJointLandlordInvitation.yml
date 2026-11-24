@@ -23,9 +23,9 @@ acceptOrReject:
   mustAccept: You must accept this invitation if you act as a landlord for this property.
   details:
     summary: Who counts as a landlord
-    paragraph: "Landlords include anyone who’s entitled to possession of the property, even if they’re not named on the tenancy agreement as a landlord."
-    beforeLink: "If you’re unsure, you may need to"
-    link: find a legal adviser
+    paragraph: Landlords include anyone who’s entitled to possession of the property, even if they’re not named on the tenancy agreement as a landlord.
+    beforeLink: If you’re unsure, you may need to
+    link: find a legal adviser (opens in a new tab)
     afterLink: .
   ifYes:
     heading: "If you select ‘Yes’"
@@ -73,8 +73,8 @@ confirmation:
   whatYouNeedToDo:
     heading: What you need to do
     paragraph:
-      one: "You now share responsibility for keeping this property’s details up to date."
-      two: "If something changes (for example, how much rent you charge), you’ll need to update the property registration."
+      one: You now share responsibility for keeping this property’s details up to date.
+      two: If something changes (for example, how much rent you charge), you’ll need to update the property registration.
     goToPropertyRegistration: Go to property registration
   landlordAccount:
     heading: Your landlord account
