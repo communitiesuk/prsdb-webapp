@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
 
 class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -89,7 +89,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
 
                 detailsPage.registerPropertyLink.clickAndWait()
-                assertPageIs(page, RegisterPropertyStartPage::class)
+                assertPageIs(page, TaskListPagePropertyRegistration::class)
             }
 
             // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
@@ -99,7 +99,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 val detailsPage = navigator.goToLandlordDetails()
                 detailsPage.tabs.goToRegisteredProperties()
                 detailsPage.registerPropertyLink.clickAndWait()
-                val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+                val startPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
                 assertEquals(REGISTERED_PROPERTIES_FRAGMENT, returnedDetailsPage.tabs.activeTabPanelId)
@@ -172,7 +172,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 assertThat(detailsPage.noActivePropertiesMessage).containsText("You have no active properties.")
 
                 detailsPage.registerPropertyLink.clickAndWait()
-                val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+                val startPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
                 assertEquals(ACTIVE_PROPERTIES_FRAGMENT, returnedDetailsPage.tabs.activeTabPanelId)
@@ -345,12 +345,12 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             }
 
             @Test
-            fun `the banner register a property link goes to the property registration start page`(page: Page) {
+            fun `the banner register a property link goes to the property registration task list`(page: Page) {
                 val detailsPage = navigator.goToLandlordDetails()
 
                 detailsPage.inactiveLandlordNotificationBanner.registerAPropertyLink.clickAndWait()
 
-                assertPageIs(page, RegisterPropertyStartPage::class)
+                assertPageIs(page, TaskListPagePropertyRegistration::class)
             }
         }
 

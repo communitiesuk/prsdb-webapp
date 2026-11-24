@@ -10,7 +10,7 @@ abstract class LettingAgentAccessControllerTest(
 ) : ControllerTest(context) {
     @BeforeEach
     fun allowPastLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
+        whenever(lettingAgentAccessService.getAccessIdForTokenOrNull(any())).thenReturn(1L)
         whenever(lettingAgentSessionService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 }

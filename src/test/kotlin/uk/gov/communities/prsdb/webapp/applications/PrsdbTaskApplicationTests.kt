@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlipStrategyFactory
 import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlipStrategyFactory
+import uk.gov.communities.prsdb.webapp.database.audit.AuditTaskNameRecorder
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailDeliveryStubService
@@ -41,16 +42,15 @@ import uk.gov.communities.prsdb.webapp.local.services.LocalQuarantinedFileDelete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
+import uk.gov.communities.prsdb.webapp.services.DeactivationEmailService
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EmailQueueService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
-import uk.gov.communities.prsdb.webapp.services.LandlordDeactivatedEmailService
 import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
-import uk.gov.communities.prsdb.webapp.services.LettingAgentPropertyDeactivatedEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailDeliveryService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -116,10 +116,11 @@ class PrsdbTaskApplicationTests {
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
                 DeactivationService::class.simpleBeanName,
-                LettingAgentPropertyDeactivatedEmailService::class.simpleBeanName,
+                DeactivationEmailService::class.simpleBeanName,
                 LettingAgentAccessService::class.simpleBeanName,
                 UserToLandlordService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
+                AuditTaskNameRecorder::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
                 JointLandlordInvitationDeletionService::class.simpleBeanName,
                 SwapToIndividualNudgeEmailService::class.simpleBeanName,
@@ -135,7 +136,6 @@ class PrsdbTaskApplicationTests {
                 GovUkPayClient::class.simpleBeanName,
                 PaymentReconciliationService::class.simpleBeanName,
                 ReconcilePaymentsTaskLogic::class.simpleBeanName,
-                LandlordDeactivatedEmailService::class.simpleBeanName,
                 DeactivateInactiveLandlordsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 

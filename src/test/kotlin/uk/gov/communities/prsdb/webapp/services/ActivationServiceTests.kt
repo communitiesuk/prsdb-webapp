@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -17,8 +18,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
+import java.time.MonthDay
 import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
@@ -81,7 +84,7 @@ class ActivationServiceTests {
         property.deactivate(ORIGINAL_DATE)
         whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
 
-        activationService.reactivateProperty(PROPERTY_ID)
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord())
 
         assertTrue(property.isActive)
         assertNull(property.lastDeactivatedDate)
@@ -96,7 +99,7 @@ class ActivationServiceTests {
         property.deactivate(ORIGINAL_DATE)
         whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
 
-        activationService.reactivateProperty(PROPERTY_ID)
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord())
 
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
@@ -116,7 +119,7 @@ class ActivationServiceTests {
         property.deactivate(ORIGINAL_DATE)
         whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
 
-        activationService.reactivateProperty(PROPERTY_ID)
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord())
 
         assertTrue(activeLandlord.isActive)
         assertTrue(inactiveLandlord.isActive)
@@ -129,7 +132,7 @@ class ActivationServiceTests {
         val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, isActive = true)
         whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
 
-        assertThrows<IllegalStateException> { activationService.reactivateProperty(PROPERTY_ID) }
+        assertThrows<IllegalStateException> { activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord()) }
 
         verify(propertyOwnershipRepository, never()).save(any())
     }
@@ -138,13 +141,70 @@ class ActivationServiceTests {
     fun `reactivateProperty throws NOT_FOUND for an unknown property`() {
         whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.empty())
 
-        val exception = assertThrows<ResponseStatusException> { activationService.reactivateProperty(PROPERTY_ID) }
+        val exception =
+            assertThrows<ResponseStatusException> {
+                activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord())
+            }
 
         assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+    }
+
+    @Test
+    fun `reactivateProperty moves the renewal date to the next occurrence of the landlord's anniversary when they differ`() {
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, renewalDate = LocalDate.of(2027, 1, 1))
+        property.deactivate(ORIGINAL_DATE)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        val reactivatingLandlordAnniversary = MonthDay.of(6, 15)
+
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord(reactivatingLandlordAnniversary))
+
+        assertEquals(RenewalDateHelper.getRenewalDate(reactivatingLandlordAnniversary), property.renewalDate)
+        verify(propertyOwnershipRepository).save(property)
+    }
+
+    @Test
+    fun `reactivateProperty leaves the renewal date unchanged when it is on the landlord's anniversary, even if it has passed`() {
+        val pastRenewalDate = LocalDate.of(2020, 6, 15)
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, renewalDate = pastRenewalDate)
+        property.deactivate(ORIGINAL_DATE)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord(MonthDay.of(6, 15)))
+
+        assertEquals(pastRenewalDate, property.renewalDate)
+    }
+
+    @Test
+    fun `reactivateProperty does not change paidForUntil when it updates the renewal date`() {
+        val paidForUntil = LocalDate.of(2027, 1, 1)
+        val property =
+            MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, renewalDate = paidForUntil, paidForUntil = paidForUntil)
+        property.deactivate(ORIGINAL_DATE)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+
+        activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord(MonthDay.of(6, 15)))
+
+        assertEquals(paidForUntil, property.paidForUntil)
+    }
+
+    @Test
+    fun `reactivateProperty throws and makes no change when the reactivating landlord has no anniversary`() {
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID)
+        property.deactivate(ORIGINAL_DATE)
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+
+        assertThrows<IllegalStateException> { activationService.reactivateProperty(PROPERTY_ID, reactivatingLandlord(null)) }
+
+        assertFalse(property.isActive)
+        verify(propertyOwnershipRepository, never()).save(any())
     }
 
     companion object {
         private const val PROPERTY_ID = 1L
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
+
+        // Matches the default mock renewal date of 1 Jan, so reactivation leaves it unchanged unless a test says otherwise
+        private fun reactivatingLandlord(anniversary: MonthDay? = MonthDay.of(1, 1)) =
+            MockLandlordData.createIndividualLandlord().apply { anniversary?.let { setAnniversaryIfAbsent(it) } }
     }
 }

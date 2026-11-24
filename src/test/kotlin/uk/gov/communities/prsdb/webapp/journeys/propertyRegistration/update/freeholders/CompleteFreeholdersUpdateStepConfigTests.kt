@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.Instant
 
@@ -30,6 +31,9 @@ class CompleteFreeholdersUpdateStepConfigTests {
     private lateinit var associatedPartyNotificationService: AssociatedPartyNotificationService
 
     @Mock
+    private lateinit var propertyUpdateEmailService: PropertyUpdateEmailService
+
+    @Mock
     private lateinit var journeyState: UpdateFreeholdersJourneyState
 
     private val propertyId = 123L
@@ -37,12 +41,19 @@ class CompleteFreeholdersUpdateStepConfigTests {
     private val freeholder = FreeholderDataModel(detailsKnown = true, name = "New Freeholder", email = "freeholder@example.com")
 
     @Test
-    fun `afterStepIsReached updates the freeholders with the journey's last modified date`() {
+    fun `afterStepIsReached emails the landlords even when no freeholders are added`() {
         // Arrange
         whenever(journeyState.propertyId).thenReturn(propertyId)
         whenever(journeyState.lastModifiedDate).thenReturn(lastModifiedDate.toString())
         whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to freeholder))
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService, associatedPartyNotificationService)
+        whenever(propertyOwnershipService.updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate))
+            .thenReturn(emptyList())
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
 
         // Act
         stepConfig.afterStepIsReached(journeyState)
@@ -51,6 +62,31 @@ class CompleteFreeholdersUpdateStepConfigTests {
         verify(propertyOwnershipService).updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate)
         verify(propertyOwnershipService, never()).getPropertyOwnership(any())
         verifyNoInteractions(associatedPartyNotificationService)
+        verify(propertyUpdateEmailService).sendUpdateEmails(propertyId, listOf("The freeholders"))
+    }
+
+    @Test
+    fun `afterStepIsReached sends a property update summary when the freeholder journey is completed`() {
+        // Arrange
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+        whenever(journeyState.propertyId).thenReturn(propertyId)
+        whenever(journeyState.lastModifiedDate).thenReturn(lastModifiedDate.toString())
+        whenever(journeyState.freeholdersMap).thenReturn(mapOf(1 to freeholder))
+        whenever(propertyOwnershipService.updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate))
+            .thenReturn(listOf(freeholder))
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
+
+        // Act
+        stepConfig.afterStepIsReached(journeyState)
+
+        // Assert
+        verify(propertyUpdateEmailService).sendUpdateEmails(propertyId, listOf("The freeholders"))
     }
 
     @Test
@@ -66,7 +102,12 @@ class CompleteFreeholdersUpdateStepConfigTests {
         whenever(propertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(freeholder, propertyOwnership))
             .thenThrow(RuntimeException("Notify failed"))
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService, associatedPartyNotificationService)
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
 
         // Act
         stepConfig.afterStepIsReached(journeyState)
@@ -81,7 +122,12 @@ class CompleteFreeholdersUpdateStepConfigTests {
         // Arrange
         whenever(journeyState.freeholdersMap).thenReturn(null)
         whenever(journeyState.journeyId).thenReturn("journey-id")
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService, associatedPartyNotificationService)
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
 
         // Act & Assert
         assertThrows(UnrecoverableJourneyStateException::class.java) {
@@ -99,7 +145,12 @@ class CompleteFreeholdersUpdateStepConfigTests {
         doThrow(UpdateConflictException("Conflict"))
             .whenever(propertyOwnershipService)
             .updateFreeholders(propertyId, listOf(freeholder), lastModifiedDate)
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService, associatedPartyNotificationService)
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
 
         // Act & Assert
         assertThrows(UpdateConflictException::class.java) {
@@ -107,12 +158,18 @@ class CompleteFreeholdersUpdateStepConfigTests {
         }
         verify(journeyState).deleteJourney()
         verifyNoInteractions(associatedPartyNotificationService)
+        verifyNoInteractions(propertyUpdateEmailService)
     }
 
     @Test
     fun `resolveNextDestination deletes the journey and returns the default destination`() {
         // Arrange
-        val stepConfig = CompleteFreeholdersUpdateStepConfig(propertyOwnershipService, associatedPartyNotificationService)
+        val stepConfig =
+            CompleteFreeholdersUpdateStepConfig(
+                propertyOwnershipService,
+                associatedPartyNotificationService,
+                propertyUpdateEmailService,
+            )
         val defaultDestination = Destination.ExternalUrl("/landlord/property-details/1#people-responsible")
 
         // Act

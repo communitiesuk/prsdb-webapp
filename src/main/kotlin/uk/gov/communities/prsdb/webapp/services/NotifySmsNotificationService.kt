@@ -4,8 +4,8 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.json.JSONException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.dataModels.NotifyErrorType
 import uk.gov.communities.prsdb.webapp.models.dataModels.NotifyErrorsDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
@@ -25,7 +25,7 @@ class NotifySmsNotificationService<SmsModel : SmsTemplateModel>(
         val idValue = notifyIdService.getNotifyIdValue(sms.template)
         if (idValue.isBlank()) {
             throw SmsSendException(
-                SmsSendFailureReason.TECHNICAL,
+                NotificationSendFailureReason.TECHNICAL,
                 "No Notify template ID is configured for ${sms.template}. No SMS was sent.",
             )
         }
@@ -34,9 +34,9 @@ class NotifySmsNotificationService<SmsModel : SmsTemplateModel>(
         } catch (notifyException: NotificationClientException) {
             throwSmsSendException(notifyException)
         } catch (exception: JSONException) {
-            throw SmsSendException(SmsSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, exception)
+            throw SmsSendException(NotificationSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, exception)
         } catch (exception: IllegalArgumentException) {
-            throw SmsSendException(SmsSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, exception)
+            throw SmsSendException(NotificationSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, exception)
         }
     }
 
@@ -45,23 +45,23 @@ class NotifySmsNotificationService<SmsModel : SmsTemplateModel>(
     private fun throwSmsSendException(notifyException: NotificationClientException): Nothing {
         val response =
             parseNotifyExceptionErrors(notifyException.message ?: "")
-                ?: throw SmsSendException(SmsSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, notifyException)
+                ?: throw SmsSendException(NotificationSendFailureReason.UNKNOWN, UNKNOWN_OUTCOME_MESSAGE, notifyException)
         val errorTypes = response.errors.map { it.error }
         val reason =
             when {
                 response.statusCode !in 400..499 ||
                     errorTypes.isEmpty() ||
                     NotifyErrorType.UNKNOWN in errorTypes ||
-                    NotifyErrorType.EXCEPTION in errorTypes -> SmsSendFailureReason.UNKNOWN
-                NotifyErrorType.AUTH in errorTypes -> SmsSendFailureReason.TECHNICAL
-                NotifyErrorType.TOO_MANY_REQUESTS in errorTypes -> SmsSendFailureReason.DAILY_LIMIT
+                    NotifyErrorType.EXCEPTION in errorTypes -> NotificationSendFailureReason.UNKNOWN
+                NotifyErrorType.AUTH in errorTypes -> NotificationSendFailureReason.TECHNICAL
+                NotifyErrorType.TOO_MANY_REQUESTS in errorTypes -> NotificationSendFailureReason.DAILY_LIMIT
                 NotifyErrorType.BAD_REQUEST in errorTypes || NotifyErrorType.VALIDATION in errorTypes ->
-                    SmsSendFailureReason.INVALID_REQUEST
-                NotifyErrorType.RATE_LIMIT in errorTypes -> SmsSendFailureReason.MINUTE_LIMIT
-                else -> SmsSendFailureReason.UNKNOWN
+                    NotificationSendFailureReason.INVALID_REQUEST
+                NotifyErrorType.RATE_LIMIT in errorTypes -> NotificationSendFailureReason.MINUTE_LIMIT
+                else -> NotificationSendFailureReason.UNKNOWN
             }
         val message =
-            if (reason == SmsSendFailureReason.UNKNOWN) UNKNOWN_OUTCOME_MESSAGE else "Notify rejected the SMS request: $reason."
+            if (reason == NotificationSendFailureReason.UNKNOWN) UNKNOWN_OUTCOME_MESSAGE else "Notify rejected the SMS request: $reason."
         throw SmsSendException(reason, message, notifyException)
     }
 

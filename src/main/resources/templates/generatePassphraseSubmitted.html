@@ -6,7 +6,7 @@
         <th:block th:with="isSuccess=true">
             <div id="success-banner"
                  th:replace="~{fragments/banners/notificationBanner :: notificationBanner(#{generatePassphrase.successBanner.title}, ~{::#success-banner/content()})}">
-                <p class="govuk-notification-banner__heading" th:text="#{${smsStatus}(${recipient})}">smsStatus</p>
+                <p class="govuk-notification-banner__heading" th:text="#{${status}(${recipient})}">status</p>
             </div>
         </th:block>
         <div id="passphrase-preview" class="govuk-inset-text">

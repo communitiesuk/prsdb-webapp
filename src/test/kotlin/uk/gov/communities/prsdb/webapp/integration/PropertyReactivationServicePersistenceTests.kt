@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpSession
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -96,6 +97,7 @@ class PropertyReactivationServicePersistenceTests : IntegrationTestWithMutableDa
             ),
         )
         assertNull(session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID))
+        assertNull(session.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION))
     }
 
     companion object {

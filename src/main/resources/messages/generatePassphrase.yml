@@ -14,6 +14,22 @@ letter:
     This is a long-lived secret: when they call the contact centre in future, ask them to repeat it
     and check it matches their customer record.
 generateAnother: Generate another passphrase
+expired: That passphrase is no longer available to send. A new passphrase has been generated.
+email:
+  heading: Send this passphrase by email
+  emailAddress:
+    label: Email address
+    hint: Enter the email address from the landlord’s stored contact details.
+    error:
+      missing: Enter an email address
+      invalid: Enter a valid email address
+  send: Send email
+  accepted: The email has been submitted to {0,,recipient}.
+  invalid: The email was not submitted. Check the email address. If it is correct, contact support.
+  technical: The email was not submitted because of a technical problem. Contact support.
+  dailyLimit: The email was not submitted. The daily email limit has been reached. Emails can be sent again tomorrow.
+  minuteLimit: The email was not submitted. Wait a short time, then generate a new passphrase before trying again.
+  unknown: We could not confirm whether the email was submitted. Ask the landlord if it arrives. If it does not arrive after a short wait, generate a new passphrase and try again. If an earlier message arrives later, use only the newest passphrase.
 sms:
   heading: Send this passphrase by text message
   phoneNumber:
@@ -29,4 +45,3 @@ sms:
   dailyLimit: The text message was not submitted. The daily text message limit has been reached. Text messages can be sent again tomorrow.
   minuteLimit: The text message was not submitted. Wait a short time, then generate a new passphrase before trying again.
   unknown: We could not confirm whether the text message was submitted. Ask the landlord if it arrives. If it does not arrive after a short wait, generate a new passphrase and try again. If an earlier message arrives later, use only the newest passphrase.
-  expired: That passphrase is no longer available to send. A new passphrase has been generated.

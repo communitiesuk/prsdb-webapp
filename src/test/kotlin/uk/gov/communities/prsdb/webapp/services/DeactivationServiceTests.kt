@@ -13,7 +13,6 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -50,7 +49,7 @@ class DeactivationServiceTests {
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @Mock
-    private lateinit var lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService
+    private lateinit var deactivationEmailService: DeactivationEmailService
 
     @Mock
     private lateinit var transactionTemplate: TransactionTemplate
@@ -58,9 +57,6 @@ class DeactivationServiceTests {
     // TODO PDJB-2149: Remove this mock when the ACTIVE_INACTIVE flag is removed
     @Mock
     private lateinit var featureFlagManager: FeatureFlagManager
-
-    @Mock
-    private lateinit var landlordDeactivatedEmailService: LandlordDeactivatedEmailService
 
     @InjectMocks
     private lateinit var deactivationService: DeactivationService
@@ -74,7 +70,7 @@ class DeactivationServiceTests {
         assertFalse(landlord.isActive)
         assertEquals(today(), landlord.lastDeactivatedDate)
         verify(landlordRepository).save(landlord)
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -84,7 +80,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
 
-        verify(landlordDeactivatedEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        verify(deactivationEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
     }
 
     @Test
@@ -95,7 +91,7 @@ class DeactivationServiceTests {
         deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = false)
 
         assertFalse(landlord.isActive)
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -109,7 +105,7 @@ class DeactivationServiceTests {
 
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -124,7 +120,7 @@ class DeactivationServiceTests {
         assertTrue(landlord.isActive)
         assertNull(landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -193,7 +189,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+        verify(deactivationEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
     }
 
     @Test
@@ -212,9 +208,9 @@ class DeactivationServiceTests {
         try {
             deactivationService.deactivateProperty(PROPERTY_ID)
 
-            verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
+            verifyNoInteractions(deactivationEmailService)
             TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
-            verify(lettingAgentPropertyDeactivatedEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
+            verify(deactivationEmailService).sendLettingAgentPropertyDeactivatedEmail(property, LETTING_AGENT_EMAIL)
         } finally {
             TransactionSynchronizationManager.clearSynchronization()
         }
@@ -231,7 +227,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
@@ -249,30 +245,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateProperty(PROPERTY_ID)
 
-        verifyNoInteractions(lettingAgentPropertyDeactivatedEmailService)
-    }
-
-    @Test
-    fun `deactivateProperty still deactivates the property when the letting agent email fails to send`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
-        val delegation =
-            MockLettingAgentData.createLettingAgentAccess(invitedEmail = LETTING_AGENT_EMAIL, propertyOwnership = property)
-        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
-        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
-            .thenReturn(true)
-        whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
-        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
-        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
-        doThrow(RuntimeException("Notify is down"))
-            .whenever(lettingAgentPropertyDeactivatedEmailService)
-            .sendLettingAgentPropertyDeactivatedEmail(any(), any())
-
-        deactivationService.deactivateProperty(PROPERTY_ID)
-
-        assertFalse(property.isActive)
-        verify(propertyOwnershipRepository).save(property)
-        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -414,12 +387,15 @@ class DeactivationServiceTests {
     }
 
     @Test
-    fun `getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago as the cutoff`() {
+    fun `getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago`() {
         val landlords = listOf(MockLandlordData.createIndividualLandlord(), MockLandlordData.createIndividualLandlord())
         whenever(landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(landlordCutoff()))
             .thenReturn(landlords)
 
-        assertEquals(landlords.map { it.id }, deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty())
+        assertEquals(
+            landlords.map { it.id },
+            deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty(),
+        )
     }
 
     @Test
@@ -445,7 +421,7 @@ class DeactivationServiceTests {
 
         deactivationService.deactivateLandlordIfNoActiveProperties(landlord.id)
 
-        verify(landlordDeactivatedEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        verify(deactivationEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
     }
 
     @Test
@@ -459,7 +435,7 @@ class DeactivationServiceTests {
         assertFalse(wasDeactivated)
         assertTrue(landlord.isActive)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     @Test
@@ -473,7 +449,7 @@ class DeactivationServiceTests {
         assertFalse(wasDeactivated)
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
         verify(landlordRepository, never()).save(any())
-        verifyNoInteractions(landlordDeactivatedEmailService)
+        verifyNoInteractions(deactivationEmailService)
     }
 
     companion object {
