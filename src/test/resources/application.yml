@@ -153,3 +153,6 @@ features:
     - name: "pdjb-2227-passphrase-sms"
       enabled: false
       expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-email"
+      enabled: false
+      expiry-date: "2027-01-01"

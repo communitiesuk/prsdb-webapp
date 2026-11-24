@@ -691,6 +691,10 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/FreeholderAddedToPropertyEmail.md",
                 ),
+                EmailTemplateTestData(
+                    PassphraseEmail("time anything costume"),
+                    "/emails/Passphrase.md",
+                ),
             )
     }
 
