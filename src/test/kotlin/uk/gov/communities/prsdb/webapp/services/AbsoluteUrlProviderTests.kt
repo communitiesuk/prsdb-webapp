@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrganisationalLandlordUserInvitationController.Companion.ACCEPT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import java.util.UUID
 
 class AbsoluteUrlProviderTests {
@@ -133,6 +134,17 @@ class AbsoluteUrlProviderTests {
             .isEqualTo(
                 "https://example.test/landlord/register-property/payment-return?journeyId=journey-123&paymentReference=payment-reference",
             )
+    }
+
+    @Test
+    fun `buildPropertyReactivationUri returns the property specific reactivation URL`() {
+        val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildPropertyReactivationUri(42L)
+
+        assertThat(uri.toString()).isEqualTo(
+            "https://example.test" + ReactivatePropertyController.getPropertyReactivationPath(42L),
+        )
     }
 
     private fun createProvider(
