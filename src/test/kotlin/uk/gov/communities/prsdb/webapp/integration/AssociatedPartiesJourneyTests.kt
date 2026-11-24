@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as assertThatLocator
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -303,7 +304,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Freeholder With Details")
 
             val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
-            assertEquals(null, contactTypePage.form.radios.selectedValue)
+            assertNull(contactTypePage.form.radios.selectedValue)
         }
 
         @Test

@@ -571,7 +571,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals("Postal Freeholder", namePage.form.nameInput.locator.inputValue())
         namePage.form.submit()
         contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(null, contactTypePage.form.radios.selectedValue)
+        assertNull(contactTypePage.form.radios.selectedValue)
         contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
 
         page.navigate(listUrl)
