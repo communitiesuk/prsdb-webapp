@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReaso
 import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -25,11 +26,11 @@ class DeactivationService(
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val deactivationEmailService: DeactivationEmailService,
+    private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
     private val transactionTemplate: TransactionTemplate,
     // TODO PDJB-2149: Remove the feature flag manager when the ACTIVE_INACTIVE flag is removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
     fun deactivateProperty(propertyOwnershipId: Long) {
         deactivatePropertyReturningLandlordDeactivationStatuses(propertyOwnershipId)
@@ -42,12 +43,15 @@ class DeactivationService(
         val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
         propertyOwnershipRepository.save(propertyOwnership)
-        val delegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
+        val lettingAgentDelegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
+        val jointLandlordInvitations = jointLandlordInvitationRepository.findByRegisteredOwnership_Id(propertyOwnershipId)
+        jointLandlordInvitationRepository.deleteAll(jointLandlordInvitations)
+        // TODO PDJB-2169: Email the invitees of the pending invitations cancelled here, only when ACTIVE_INACTIVE is enabled
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
-        if (delegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+        if (lettingAgentDelegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             TransactionHelper.runAfterTransactionCommits {
-                deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, delegation.invitedEmail)
+                deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, lettingAgentDelegation.invitedEmail)
             }
         }
 
