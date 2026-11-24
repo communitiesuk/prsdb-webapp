@@ -168,18 +168,6 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    AutomatedPropertyDeactivationEmail(
-                        landlordName = "James",
-                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNE1 2EB",
-                        prn = "P-XXX-YYY",
-                        reactivationUrl = "https://example.test/landlord/reactivate",
-                        reasons = listOf(ReactivationTaskType.TENANCY_DETAILS),
-                        landlordDeactivated = false,
-                    ),
-                    "/emails/AutomatedPropertyDeactivation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
                     PropertyDeregistrationConfirmationEmail("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
                     "/emails/PropertyDeregistrationConfirmation.md",
                 ),
