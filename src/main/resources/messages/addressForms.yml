@@ -6,6 +6,12 @@ nonEnglandOrWalesAddress:
       beforeLink: 'If you made a mistake, '
       linkText: go back
       afterLink: .
+addressInUk:
+  organisationLandlordRegistration:
+    fieldSetHeading: Is your organisation based in the UK?
+    radios:
+      error:
+        missing: Select if you live in the UK
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?
