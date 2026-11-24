@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as assertThatLocator
 
 class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -264,7 +265,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder updates their details in the list`(page: Page) {
+        fun `Changing a freeholder with an email preselects email and updates their details in the list`(page: Page) {
             val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Freeholder With Email")
 
@@ -293,7 +294,73 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder with a postal address pre-fills their address answers`(page: Page) {
+        fun `editing another freeholder after abandoning an edit uses that freeholder's details`(page: Page) {
+            var freeholdersListPage =
+                navigator.skipToPropertyRegistrationFreeholdersListPage(
+                    freeholders =
+                        mapOf(
+                            1 to FreeholderDataModel(detailsKnown = true, name = "Email Freeholder", email = "existing@example.com"),
+                            2 to
+                                FreeholderDataModel(
+                                    detailsKnown = true,
+                                    name = "Postal Freeholder",
+                                    address = AddressDataModel.fromManualAddressData("1 Street", "Town", "AB1 2CD"),
+                                ),
+                        ),
+                )
+            val listUrl = page.url()
+            freeholdersListPage.getSummaryCard(0).getAction("Change").link.clickAndWait()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            var namePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(namePage.form.nameInput).hasValue("Email Freeholder")
+            namePage.submitName("Abandoned Name")
+            var contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
+
+            page.navigate(listUrl)
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.getSummaryCard(1).getAction("Change").link.clickAndWait()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            namePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(namePage.form.nameInput).hasValue("Postal Freeholder")
+            namePage.form.submit()
+            contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
+
+            page.navigate(listUrl)
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            freeholdersListPage.getSummaryCard(0).getAction("Change").link.clickAndWait()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            namePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
+            assertThat(namePage.form.nameInput).hasValue("Email Freeholder")
+            namePage.form.submit()
+            contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
+            val emailPage = assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class)
+            assertThat(emailPage.form.emailInput).hasValue("existing@example.com")
+        }
+
+        @Test
+        fun `Editing an unknown freeholder leaves the contact type unselected`(page: Page) {
+            val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            val unknownFreeholderCard = freeholdersListPage.getSummaryCard(2)
+            assertThat(unknownFreeholderCard.title).hasText("Unknown freeholder")
+            unknownFreeholderCard.getAction("Change").link.clickAndWait()
+
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Freeholder With Details")
+
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertNull(contactTypePage.form.radios.selectedValue)
+        }
+
+        @Test
+        fun `editing a freeholder whose address we have in the state preselects postal contact type and pre-fills their address`(
+            page: Page,
+        ) {
             val freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
                     freeholders =
@@ -323,7 +390,9 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .clickAndWait()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).form.submit()
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).form.submit()
+            val contactTypePage = assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
+            contactTypePage.form.submit()
 
             val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
             assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
