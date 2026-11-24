@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
@@ -167,14 +168,22 @@ class RegisterPropertyController(
                 "Landlord ${principal.name} has no property ownerships at confirmation",
             )
         }
+        val isOrganisationLandlord = landlord.landlordType == LandlordType.ORGANISATION
         val surveyUrl =
-            if (landlord.landlordType == LandlordType.ORGANISATION) {
+            if (isOrganisationLandlord) {
                 ORG_PROPERTY_REGISTRATION_SURVEY_URL
             } else {
                 INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
             }
         model.addAttribute("propertyRegistrationSurveyUrl", surveyUrl)
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
+        val showLandlordReactivated =
+            featureFlagManager.checkFeature(ACTIVE_INACTIVE) &&
+                propertyRegistrationConfirmationService.wasLandlordReactivatedByLastRegistration()
+        model.addAttribute("landlordReactivated", showLandlordReactivated)
+        model.addAttribute("isOrganisationLandlord", isOrganisationLandlord)
 
         return "registerPropertyConfirmation"
     }
@@ -186,7 +195,7 @@ class RegisterPropertyController(
         isOccupied &&
             (
                 propertyCompliance == null ||
-                    propertyCompliance.isGasSafetyCertMissing ||
+                    propertyCompliance.isGasSafetyCertMissing == true ||
                     propertyComplianceService.isElectricalSafetyMissing(propertyCompliance) ||
                     propertyCompliance.epcHasFaults
             )

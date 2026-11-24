@@ -6,28 +6,28 @@
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${fieldSetHeading}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
     <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}">
-        forms.numberOfPeople.fieldSetHeading
+        tenancyDetails.numberOfPeople.fieldSetHeading
     </h1>
-    <p class="govuk-hint" th:text="#{forms.numberOfPeople.fieldSetHint}">
-        forms.numberOfPeople.fieldSetHint
-    </p>
-    <p class="govuk-body" th:text="#{forms.numberOfPeople.paragraph}">
-        forms.numberOfPeople.paragraph
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{forms.numberOfPeople.bullet.one}">forms.numberOfPeople.bullet.one</li>
-        <li th:text="#{forms.numberOfPeople.bullet.two}">forms.numberOfPeople.bullet.two</li>
-        <li th:text="#{forms.numberOfPeople.bullet.three}">forms.numberOfPeople.bullet.three</li>
-    </ul>
+    <details id="details" th:replace="~{fragments/details :: details(#{tenancyDetails.numberOfPeople.details.summary}, ~{::#details/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{tenancyDetails.numberOfPeople.details.paragraph.one}">
+                tenancyDetails.numberOfPeople.details.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{tenancyDetails.numberOfPeople.details.paragraph.two}">
+                tenancyDetails.numberOfPeople.details.paragraph.two
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{tenancyDetails.numberOfPeople.details.bullet.one}">tenancyDetails.numberOfPeople.details.bullet.one</li>
+                <li th:text="#{tenancyDetails.numberOfPeople.details.bullet.two}">tenancyDetails.numberOfPeople.details.bullet.two</li>
+            </ul>
+        </div>
+    </details>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfPeople', null, null)}">
-        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfPeople', null, 2)}"></div>
+        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfPeople', null, 2)}"></div>
     </th:block>
-    <details  id="details" th:replace="~{fragments/details :: details(#{forms.numberOfPeople.details.summary}, ~{::#details/content()})}" >
-        <div class="govuk-details__text" th:text="#{forms.numberOfPeople.details.text}"></div>
-    </details>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </th:block>
 

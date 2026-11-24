@@ -35,7 +35,9 @@
             reactivateProperty.info.insetText
         </div>
         <form th:action="@{''}" method="post" novalidate>
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+            <button th:replace="${isTransaction}
+                ? ~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.continue})}
+                : ~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
         </form>
     </div>
 </main>

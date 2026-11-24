@@ -30,7 +30,7 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-1894-gas-certificate-14-month-expiry"
-      enabled: false
+      enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-955-associated-parties"
       enabled: false
@@ -42,6 +42,9 @@ features:
       enabled: false
       expiry-date: "2027-01-01"
     - name: "pdjb-844-active-inactive"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1878-international-addresses"
       enabled: false
       expiry-date: "2027-01-01"
 

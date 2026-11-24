@@ -3,20 +3,20 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{registerProperty.provideLicensingLater.occupied.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{licensing.provideLicensingLater.occupied.heading}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
-            <h1 class="govuk-heading-l" th:text="#{registerProperty.provideLicensingLater.occupied.heading}">registerProperty.provideLicensingLater.occupied.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{licensing.provideLicensingLater.occupied.heading}">licensing.provideLicensingLater.occupied.heading</h1>
         </header>
         <section>
-            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.occupied.paragraph.one}">registerProperty.provideLicensingLater.occupied.paragraph.one</p>
-            <h2 class="govuk-heading-m" th:text="#{registerProperty.provideLicensingLater.occupied.whenToAdd.heading}">registerProperty.provideLicensingLater.occupied.whenToAdd.heading</h2>
-            <div class="govuk-inset-text" th:text="#{registerProperty.provideLicensingLater.occupied.whenToAdd.insetText}">registerProperty.provideLicensingLater.occupied.whenToAdd.insetText</div>
-            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.occupied.whenToAdd.paragraph}">registerProperty.provideLicensingLater.occupied.whenToAdd.paragraph</p>
-            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.weWillNeedToKnow.intro}">registerProperty.provideLicensingLater.weWillNeedToKnow.intro</p>
+            <p class="govuk-body" th:text="#{licensing.provideLicensingLater.occupied.paragraph.one}">licensing.provideLicensingLater.occupied.paragraph.one</p>
+            <h2 class="govuk-heading-m" th:text="#{licensing.provideLicensingLater.occupied.whenToAdd.heading}">licensing.provideLicensingLater.occupied.whenToAdd.heading</h2>
+            <div class="govuk-inset-text" th:text="#{licensing.provideLicensingLater.occupied.whenToAdd.insetText}">licensing.provideLicensingLater.occupied.whenToAdd.insetText</div>
+            <p class="govuk-body" th:text="#{licensing.provideLicensingLater.occupied.whenToAdd.paragraph}">licensing.provideLicensingLater.occupied.whenToAdd.paragraph</p>
+            <p class="govuk-body" th:text="#{licensing.provideLicensingLater.weWillNeedToKnow.intro}">licensing.provideLicensingLater.weWillNeedToKnow.intro</p>
             <ul class="govuk-list govuk-list--bullet">
-                <li th:text="#{registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.one}">registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.one</li>
-                <li th:text="#{registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.two}">registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.two</li>
+                <li th:text="#{licensing.provideLicensingLater.weWillNeedToKnow.bullet.one}">licensing.provideLicensingLater.weWillNeedToKnow.bullet.one</li>
+                <li th:text="#{licensing.provideLicensingLater.weWillNeedToKnow.bullet.two}">licensing.provideLicensingLater.weWillNeedToKnow.bullet.two</li>
             </ul>
         </section>
     </th:block>

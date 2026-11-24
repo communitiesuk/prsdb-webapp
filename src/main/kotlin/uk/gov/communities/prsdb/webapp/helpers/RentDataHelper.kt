@@ -15,7 +15,7 @@ class RentDataHelper {
             var formattedRentAmount = "£$rentAmount"
             if (hasCustomRentFrequency(rentFrequency)) {
                 val perMonthSuffix =
-                    messageSource.getMessageForKey("forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix")
+                    messageSource.getMessageForKey("tenancyDetails.checkAnswers.customFrequencyRentAmountSuffix")
                 formattedRentAmount += " $perMonthSuffix"
             }
             return formattedRentAmount
@@ -33,13 +33,5 @@ class RentDataHelper {
         }
 
         fun hasCustomRentFrequency(rentFrequency: RentFrequency): Boolean = rentFrequency == RentFrequency.OTHER
-
-        fun getUpdateRentAmountHeading(rentFrequency: RentFrequency): String =
-            when (rentFrequency) {
-                RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
-                RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
-                RentFrequency.OTHER -> "forms.update.rentAmount.other.fieldSetHeading"
-                else -> "forms.update.rentAmount.monthly.fieldSetHeading"
-            }
     }
 }

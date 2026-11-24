@@ -8,7 +8,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 
 /**
- * A freeholder of the property. A row with no name, email or address means "no details known".
+ * A freeholder of the property. A row with no name means "no details known". A row with a name but no email
+ * means they gave a postal address, which is used to notify them but not stored.
  */
 @Entity
 class Freeholder() : ModifiableAuditableEntity() {
@@ -20,10 +21,6 @@ class Freeholder() : ModifiableAuditableEntity() {
 
     var email: String? = null
 
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    var address: Address? = null
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "property_ownership_id", nullable = false)
     lateinit var propertyOwnership: PropertyOwnership
@@ -33,14 +30,11 @@ class Freeholder() : ModifiableAuditableEntity() {
         propertyOwnership: PropertyOwnership,
         name: String? = null,
         email: String? = null,
-        address: Address? = null,
     ) : this() {
         this.propertyOwnership = propertyOwnership
         this.name = name
         this.email = email
-        this.address = address
     }
 
-    // TODO PDJB-960: use this on the property record
     fun detailsKnown(): Boolean = name != null
 }

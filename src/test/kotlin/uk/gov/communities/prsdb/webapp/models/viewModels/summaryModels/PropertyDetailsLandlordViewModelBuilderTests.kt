@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -103,6 +105,31 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             assertEquals("propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle", cards[0].title)
             assertEquals("ACME Properties Ltd", cards[0].cardNumber)
             assertEquals("John Smith", cards[1].title)
+        }
+
+        @Test
+        fun `read only cards have no remove me action even when there are multiple landlords`() {
+            val landlordList =
+                setOf(
+                    MockLandlordData.createIndividualLandlord(
+                        baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                        name = "Alice Band",
+                    ),
+                    loggedInLandlord,
+                )
+
+            val editableCards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(landlordList, loggedInLandlord, 1L)
+            val readOnlyCards =
+                PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                    landlordList,
+                    loggedInLandlord,
+                    1L,
+                    isReadOnly = true,
+                )
+
+            assertNotNull(editableCards[0].actions)
+            assertEquals(2, readOnlyCards.size)
+            assertTrue(readOnlyCards.all { it.actions == null })
         }
     }
 

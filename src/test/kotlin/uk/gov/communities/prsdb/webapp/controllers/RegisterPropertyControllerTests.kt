@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
@@ -230,7 +231,7 @@ class RegisterPropertyControllerTests(
             )
         val compliance =
             mock<PropertyCompliance> {
-                on { isGasSafetyCertMissing } doReturn false
+                on { isGasSafetyCertMissing } doReturn null
                 on { epcHasFaults } doReturn false
                 on { gasSafetyCertProvideLater } doReturn true
                 on { electricalSafetyCertProvideLater } doReturn true
@@ -293,8 +294,7 @@ class RegisterPropertyControllerTests(
                 MockMvcRequestBuilders
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
-            )
-            .andExpect(MockMvcResultMatchers.status().isOk)
+            ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
     }
@@ -487,6 +487,115 @@ class RegisterPropertyControllerTests(
                     ORG_PROPERTY_REGISTRATION_SURVEY_URL,
                 ),
             )
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation shows the individual landlord account reactivated section when the landlord was reactivated`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyConfirmationService.wasLandlordReactivatedByLastRegistration()).thenReturn(true)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("landlordReactivated", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("isOrganisationLandlord", false))
+            .andExpect(MockMvcResultMatchers.content().string(containsString("Your landlord account is now active.")))
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation shows the organisation landlord account reactivated section when an org landlord was reactivated`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyConfirmationService.wasLandlordReactivatedByLastRegistration()).thenReturn(true)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createOrgLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("landlordReactivated", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("isOrganisationLandlord", true))
+            .andExpect(
+                MockMvcResultMatchers.content().string(containsString("Your organisation’s landlord account is now active.")),
+            )
+    }
+
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation does not show the landlord account section when the landlord was not reactivated`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyConfirmationService.wasLandlordReactivatedByLastRegistration()).thenReturn(false)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("landlordReactivated", false))
+            .andExpect(MockMvcResultMatchers.content().string(not(containsString("Your landlord account"))))
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+    fun `getConfirmation does not show the landlord account section when the active inactive feature flag is disabled`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyConfirmationService.wasLandlordReactivatedByLastRegistration()).thenReturn(true)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("landlordReactivated", false))
+            .andExpect(MockMvcResultMatchers.content().string(not(containsString("Your landlord account"))))
     }
 
     @Test

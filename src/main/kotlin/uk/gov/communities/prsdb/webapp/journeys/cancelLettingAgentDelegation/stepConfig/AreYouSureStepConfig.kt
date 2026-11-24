@@ -25,7 +25,7 @@ class AreYouSureStepConfig(
             "optionalFieldSetHeadingParam" to
                 propertyOwnershipService.getLettingAgentAccess(state.propertyOwnershipId)?.invitedEmail,
             "fieldSetHint" to "cancelLettingAgentDelegation.areYouSure.fieldSetHint",
-            "submitButtonTextKey" to "cancelLettingAgentDelegation.areYouSure.confirmButton",
+            "submitButtonText" to "cancelLettingAgentDelegation.areYouSure.confirmButton",
             "showCancelLink" to false,
         )
 

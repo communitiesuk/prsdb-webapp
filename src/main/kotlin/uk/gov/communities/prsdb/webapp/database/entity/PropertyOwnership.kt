@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 
 @Entity
@@ -85,9 +86,21 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     val superiorLandlords: MutableSet<SuperiorLandlord> = mutableSetOf()
 
+    // Ownership structure updates also edit freeholder and superior landlord rows, which have their own timestamps.
+    fun getOwnershipStructureMostRecentlyUpdated(): Instant =
+        (
+            listOf(getMostRecentlyUpdated()) +
+                freeholders.map { it.getMostRecentlyUpdated() } +
+                superiorLandlords.map { it.getMostRecentlyUpdated() }
+        ).max()
+
     @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "property_manager_id", nullable = true, unique = true)
     var propertyManager: PropertyManager? = null
+
+    // Property manager updates edit the property manager row in place, which has its own timestamp.
+    fun getPropertyManagerMostRecentlyUpdated(): Instant =
+        listOfNotNull(getMostRecentlyUpdated(), propertyManager?.getMostRecentlyUpdated()).max()
 
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
@@ -147,6 +160,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     var lastDeactivatedDate: LocalDate? = null
         private set
 
+    // Only changes when a payment is taken, whereas renewalDate can also change at other times (e.g. reactivation).
+    @Column(name = "paid_for_until", nullable = false)
+    lateinit var paidForUntil: LocalDate
+        private set
+
     constructor(
         ownershipType: OwnershipType,
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955,
@@ -174,6 +192,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
+        paidForUntil: LocalDate = renewalDate,
     ) : this() {
         this.ownershipType = ownershipType
         this.ownershipTypeBeforePdjb955 = ownershipTypeBeforePdjb955
@@ -188,6 +207,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.correspondenceEmail = correspondenceEmail
         this.correspondenceAddress = correspondenceAddress
         this.renewalDate = renewalDate
+        this.paidForUntil = paidForUntil
         this.isActive = isActive
         this.numBedrooms = numBedrooms
         this.billsIncludedList = billsIncludedList
@@ -248,5 +268,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     fun reactivate() {
         isActive = true
         lastDeactivatedDate = null
+    }
+
+    fun updatePaidForUntil(newPaidForUntil: LocalDate) {
+        paidForUntil = newPaidForUntil
     }
 }
