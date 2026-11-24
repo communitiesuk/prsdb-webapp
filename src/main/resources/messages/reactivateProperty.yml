@@ -46,7 +46,7 @@ confirmation:
   whatToDoNext:
     heading: What to do next
     paragraph: Check that the rest of this property’s registration details are still correct
-    goToPropertyRecord: Go to this property’s record
+    goToPropertyRecord: Go to this property’s registration
 confirmMissingCompliance:
   areYouSure:
     heading: Are you sure you want to continue?
