@@ -13,7 +13,7 @@ confirmation:
   banner:
     heading: Invitation cancelled
   paragraph:
-    cancelled: 'You’ve cancelled the joint landlord invitation for {0}'
-    one: We’ve emailed them to say that their invitation link no longer works.
-    two: We’ve also sent you a confirmation email.
+    one: 'You’ve cancelled the joint landlord invitation for {0}'
+    two: We’ve emailed them to say that their invitation link no longer works.
+    three: We’ve also sent you a confirmation email.
   goBack: Go back to property registration

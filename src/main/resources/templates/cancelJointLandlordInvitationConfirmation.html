@@ -6,14 +6,14 @@
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{cancelJointLandlordInvitation.confirmation.banner.heading}, null)}">
         </div>
-        <p id="cancelled-invitation-message" class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.cancelled(${cancelledEmail})}">
-            cancelJointLandlordInvitation.confirmation.paragraph.cancelled
-        </p>
-        <p class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.one}">
+        <p id="cancelled-invitation-message" class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.one(${cancelledEmail})}">
             cancelJointLandlordInvitation.confirmation.paragraph.one
         </p>
         <p class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.two}">
             cancelJointLandlordInvitation.confirmation.paragraph.two
+        </p>
+        <p class="govuk-body" th:text="#{cancelJointLandlordInvitation.confirmation.paragraph.three}">
+            cancelJointLandlordInvitation.confirmation.paragraph.three
         </p>
         <p class="govuk-body">
             <a class="govuk-link" th:href="${propertyRecordUrl}" th:text="#{cancelJointLandlordInvitation.confirmation.goBack}">
