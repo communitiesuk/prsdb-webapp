@@ -177,6 +177,7 @@ class SuperiorLandlordsDetailsTask(
                                 ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingSuperiorLandlord.manualTownOrCity,
                                 ManualAddressStepConfig.PREFILL_COUNTY to editingSuperiorLandlord.manualCounty,
                                 ManualAddressStepConfig.PREFILL_POSTCODE to editingSuperiorLandlord.manualPostcode,
+                                ManualAddressStepConfig.PREFILL_COUNTRY to editingSuperiorLandlord.manualCountry,
                             )
                         } else {
                             emptyMap()

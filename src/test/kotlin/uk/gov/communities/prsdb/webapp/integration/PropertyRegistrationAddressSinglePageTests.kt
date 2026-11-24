@@ -82,11 +82,14 @@ class PropertyRegistrationAddressSinglePageTests : IntegrationTestWithImmutableD
         @Test
         fun `Submitting empty data fields returns errors`(page: Page) {
             val manualAddressPage = navigator.skipToPropertyRegistrationManualAddressPage()
-            manualAddressPage.submitAddress()
+            manualAddressPage.submitAddress(country = "")
             assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
             assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(
+                manualAddressPage.form.getErrorMessage("postcode"),
+            ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
+            assertThat(manualAddressPage.form.getErrorMessage("country")).containsText("Enter country")
         }
     }
 

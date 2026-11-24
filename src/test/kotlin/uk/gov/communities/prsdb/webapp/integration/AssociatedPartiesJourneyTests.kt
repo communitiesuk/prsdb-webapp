@@ -378,6 +378,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                                     manualTownOrCity = "Manual Town",
                                     manualCounty = "Manual County",
                                     manualPostcode = "MA1 1AA",
+                                    manualCountry = "England",
                                 ),
                             2 to FreeholderDataModel(detailsKnown = false),
                         ),
@@ -409,6 +410,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(manualAddressPage.form.townOrCityInput).hasValue("Manual Town")
             assertThat(manualAddressPage.form.countyInput).hasValue("Manual County")
             assertThat(manualAddressPage.form.postcodeInput).hasValue("MA1 1AA")
+            assertThat(manualAddressPage.form.countryInput).hasValue("England")
             manualAddressPage.form.addressLineOneInput.fill("3 Changed Road")
             manualAddressPage.form.submit()
 
@@ -700,6 +702,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                                     manualTownOrCity = "Manual Town",
                                     manualCounty = "Manual County",
                                     manualPostcode = "MA1 1AA",
+                                    manualCountry = "England",
                                 ),
                             2 to SuperiorLandlordDataModel(detailsKnown = false),
                         ),
@@ -732,6 +735,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertThat(manualAddressPage.form.townOrCityInput).hasValue("Manual Town")
             assertThat(manualAddressPage.form.countyInput).hasValue("Manual County")
             assertThat(manualAddressPage.form.postcodeInput).hasValue("MA1 1AA")
+            assertThat(manualAddressPage.form.countryInput).hasValue("England")
             manualAddressPage.form.addressLineOneInput.fill("3 Changed Road")
             manualAddressPage.form.submit()
 
