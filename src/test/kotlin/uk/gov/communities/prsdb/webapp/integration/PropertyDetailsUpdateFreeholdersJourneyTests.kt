@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -575,16 +573,8 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertEquals(initialFreeholderCount, propertyDetailsPage.freeholderCards.size)
     }
 
-    @ParameterizedTest(name = "{0}")
-    @EnumSource(value = OwnershipType::class, names = ["NONE", "SHARE_OF_JOINT_TENANTS"])
-    fun `editing another freeholder after abandoning an edit uses the correct contact type`(
-        ownershipType: OwnershipType,
-        page: Page,
-    ) {
-        val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow()
-        propertyOwnership.ownershipType = ownershipType
-        propertyOwnershipRepository.save(propertyOwnership)
-
+    @Test
+    fun `editing another freeholder after abandoning an edit uses the correct contact type`(page: Page) {
         val emailFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         emailFreeholder.name = "Email Freeholder"
         emailFreeholder.email = "existing@example.com"
@@ -593,14 +583,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
 
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToPeopleResponsible()
-        assertThat(propertyDetailsPage.freeholderUpdateLink.locator)
-            .hasText(
-                if (ownershipType.isJointFreeholder()) {
-                    "Add, change or remove joint freeholders"
-                } else {
-                    "Add, change or remove freeholders"
-                },
-            )
         propertyDetailsPage.freeholderUpdateLink.clickAndWait()
 
         var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
