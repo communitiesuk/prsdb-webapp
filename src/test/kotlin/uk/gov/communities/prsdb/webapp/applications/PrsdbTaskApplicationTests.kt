@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlipStrategyFactory
 import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlipStrategyFactory
+import uk.gov.communities.prsdb.webapp.database.audit.AuditTaskNameRecorder
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailDeliveryStubService
@@ -118,6 +119,7 @@ class PrsdbTaskApplicationTests {
                 LettingAgentAccessService::class.simpleBeanName,
                 UserToLandlordService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
+                AuditTaskNameRecorder::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
                 JointLandlordInvitationDeletionService::class.simpleBeanName,
                 SwapToIndividualNudgeEmailService::class.simpleBeanName,

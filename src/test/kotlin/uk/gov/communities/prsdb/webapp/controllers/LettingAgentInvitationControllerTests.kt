@@ -127,7 +127,7 @@ class LettingAgentInvitationControllerTests(
         fun stubInterceptorTokenCheck() {
             whenever(lettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
                 .thenReturn(validToken.toString())
-            whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
+            whenever(lettingAgentAccessService.getAccessIdForTokenOrNull(validToken.toString())).thenReturn(1L)
         }
 
         @Test
@@ -173,7 +173,7 @@ class LettingAgentInvitationControllerTests(
         fun stubInterceptorTokenCheck() {
             whenever(lettingAgentSessionService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
                 .thenReturn(validToken.toString())
-            whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
+            whenever(lettingAgentAccessService.getAccessIdForTokenOrNull(validToken.toString())).thenReturn(1L)
         }
 
         @Test

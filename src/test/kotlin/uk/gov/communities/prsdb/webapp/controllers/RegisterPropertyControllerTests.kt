@@ -105,28 +105,23 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `index returns 200 for a landlord user`() {
+    fun `index redirects a landlord user to the task list`() {
         mvc
             .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
             .andExpect {
-                status { isOk() }
+                status { is3xxRedirection() }
+                redirectedUrl("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT")
             }
     }
 
     @Test
     @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
-    fun `index passes registerPropertyInitialStep and backUrl model attributes`() {
+    fun `index passes the withBackUrl parameter on to the task list`() {
         mvc
-            .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
+            .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}?withBackUrl=3")
             .andExpect {
-                status { isOk() }
-                model {
-                    attribute(
-                        "registerPropertyInitialStep",
-                        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT?withBackUrl=0",
-                    )
-                    attribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL)
-                }
+                status { is3xxRedirection() }
+                redirectedUrl("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT?withBackUrl=3")
             }
     }
 

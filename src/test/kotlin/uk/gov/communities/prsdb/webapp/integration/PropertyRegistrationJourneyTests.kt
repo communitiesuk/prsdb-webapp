@@ -146,7 +146,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveEicrUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
@@ -772,11 +771,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `user can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
         page: Page,
     ) {
-        // Start page (not a journey step, but it is how the user accesses the journey)
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // The register route redirects to the task list, which is how the user accesses the journey
+        val taskListPage = navigator.startPropertyRegistration()
 
         // Task list page (part of the journey to support redirects)
         taskListPage.clickAboutYourPropertyTaskWithName("Property details")
@@ -1155,11 +1151,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `user can navigate the whole journey in the enabled flow (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
         page: Page,
     ) {
-        // Start page (not a journey step, but it is how the user accesses the journey)
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        assertThat(registerPropertyStartPage.heading).containsText("Register a property")
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        // The register route redirects to the task list, which is how the user accesses the journey
+        val taskListPage = navigator.startPropertyRegistration()
 
         // Task list page (part of the journey to support redirects)
         taskListPage.clickAboutYourPropertyTaskWithName("Property details")
@@ -2190,20 +2183,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `task list back link navigates to start page after entering from start page`(page: Page) {
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+    fun `task list back link navigates to dashboard when entered without a stored back link`(page: Page) {
+        val taskListPage = navigator.startPropertyRegistration()
 
         taskListPage.backLink.clickAndWait()
-        assertPageIs(page, RegisterPropertyStartPage::class)
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
-    fun `task list back link navigates to start page after entering from start page and returning from a task`(page: Page) {
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+    fun `task list back link navigates to dashboard when entered without a stored back link and returning from a task`(page: Page) {
+        var taskListPage = navigator.startPropertyRegistration()
 
         taskListPage.clickAboutYourPropertyTaskWithName("Property details")
         assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
@@ -2213,14 +2202,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         taskListPage.backLink.clickAndWait()
-        assertPageIs(page, RegisterPropertyStartPage::class)
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
     fun `task list shows three sections with expected task order`(page: Page) {
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        val taskListPage = navigator.startPropertyRegistration()
 
         assertEquals(3, taskListPage.getSectionCount())
         assertThat(taskListPage.getSectionHeading(0)).hasText("About your property")
@@ -2303,9 +2290,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     @Suppress("ktlint:standard:max-line-length")
     fun `occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        var taskListPage = navigator.startPropertyRegistration()
 
         taskListPage.clickAboutYourPropertyTaskWithName("Property details")
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
@@ -2561,9 +2546,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        val taskListPage = navigator.startPropertyRegistration()
 
         val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
         assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
@@ -2931,9 +2914,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `manual address selection is cached when an address search returns no results`(page: Page) {
         val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
 
-        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
-        registerPropertyStartPage.startButton.clickAndWait()
-        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        val taskListPage = navigator.startPropertyRegistration()
 
         taskListPage.clickAboutYourPropertyTaskWithName("Property details")
         val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
