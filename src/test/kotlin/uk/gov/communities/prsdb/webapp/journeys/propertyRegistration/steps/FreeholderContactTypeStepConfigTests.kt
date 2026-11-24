@@ -100,7 +100,7 @@ class FreeholderContactTypeStepConfigTests {
     }
 
     @Test
-    fun `resolvePageContent preselects email when no form model exists`() {
+    fun `resolvePageContent creates a form model preselecting email when none exists and the edited freeholder has an email`() {
         // Arrange
         whenever(mockJourneyState.editingFreeholder)
             .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
