@@ -186,6 +186,12 @@ class PropertyReactivationJourneyFactory(
                         ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
                     )
                 }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "fieldSetHeading" to "reactivateProperty.confirmMissingCompliance.areYouSure.heading",
+                        "submitButtonText" to "forms.buttons.confirmAndContinue",
+                    )
+                }
                 nextDestination { mode ->
                     when (mode) {
                         ConfirmMissingComplianceMode.GO_BACK -> Destination(journey.checkAnswersStep)

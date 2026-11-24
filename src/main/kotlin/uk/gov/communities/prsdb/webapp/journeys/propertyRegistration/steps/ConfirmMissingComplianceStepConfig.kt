@@ -11,10 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyR
 class ConfirmMissingComplianceStepConfig :
     AbstractConfirmMissingComplianceStepConfig<PropertyRegistrationConfirmMissingComplianceFormModel>() {
     override val formModelClass = PropertyRegistrationConfirmMissingComplianceFormModel::class
-
-    override val areYouSureHeadingKey = "registerProperty.confirmMissingCompliance.areYouSure.heading"
-
-    override val submitButtonKey = "registerProperty.confirmMissingCompliance.button"
 }
 
 @JourneyFrameworkComponent

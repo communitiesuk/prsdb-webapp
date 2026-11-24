@@ -52,4 +52,4 @@ confirmMissingCompliance:
     heading: Are you sure you want to continue?
   radios:
     error:
-      missing: Select whether you want to submit this reactivation
+      missing: Select whether you want to continue

@@ -11,10 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Reactivat
 class ReactivationConfirmMissingComplianceStepConfig :
     AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel>() {
     override val formModelClass = ReactivationConfirmMissingComplianceFormModel::class
-
-    override val areYouSureHeadingKey = "reactivateProperty.confirmMissingCompliance.areYouSure.heading"
-
-    override val submitButtonKey = "forms.buttons.confirmAndContinue"
 }
 
 @JourneyFrameworkComponent

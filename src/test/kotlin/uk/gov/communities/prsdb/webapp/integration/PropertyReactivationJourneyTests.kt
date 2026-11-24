@@ -568,15 +568,17 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `a landlord skips the confirm missing compliance page when no compliance tasks are required`(
+    fun `a landlord skips the confirm missing compliance page when only licensing and tenancy details are required`(
         page: Page,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
         val propertyId = INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER
-        setLicensingAsTheOnlyDetailToProvideLater(jdbcTemplate, propertyId)
+        setNoComplianceDetailsToProvideLater(jdbcTemplate, propertyId)
         navigator.goToPropertyReactivationInfoPage(propertyId).submit()
         assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
             .submitLicensingType(LicensingType.NO_LICENSING)
+
+        completeTenancyDetailsTask(page)
 
         assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments).submit()
 
@@ -789,6 +791,13 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         propertyOwnershipId: Long,
     ) {
         jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = false WHERE id = ?", propertyOwnershipId)
+        setNoComplianceDetailsToProvideLater(jdbcTemplate, propertyOwnershipId)
+    }
+
+    private fun setNoComplianceDetailsToProvideLater(
+        jdbcTemplate: JdbcTemplate,
+        propertyOwnershipId: Long,
+    ) {
         jdbcTemplate.update(
             "UPDATE property_compliance SET gas_safety_cert_provide_later = false, " +
                 "electrical_safety_cert_provide_later = false, epc_provide_later = false WHERE property_ownership_id = ?",

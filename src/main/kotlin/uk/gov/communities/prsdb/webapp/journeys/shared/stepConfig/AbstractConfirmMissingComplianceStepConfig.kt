@@ -8,10 +8,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 
 abstract class AbstractConfirmMissingComplianceStepConfig<TFormModel : ConfirmMissingComplianceFormModel> :
     AbstractRequestableStepConfig<ConfirmMissingComplianceMode, TFormModel, MissingComplianceState>() {
-    protected abstract val areYouSureHeadingKey: String
-
-    protected abstract val submitButtonKey: String
-
     override val changesAnswers = false
 
     override fun getStepSpecificContent(state: MissingComplianceState) =
@@ -19,8 +15,6 @@ abstract class AbstractConfirmMissingComplianceStepConfig<TFormModel : ConfirmMi
             "isGasMissing" to state.isGasCertMissing,
             "isElectricalMissing" to state.isElectricalCertMissing,
             "isEpcMissing" to state.isEpcMissing,
-            "areYouSureHeading" to areYouSureHeadingKey,
-            "submitButtonText" to submitButtonKey,
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

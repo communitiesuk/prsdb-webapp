@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="isElectricalMissing" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="isEpcMissing" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
-<!--/*@thymesVar id="areYouSureHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{propertyCompliance.confirmMissingCompliance.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -81,7 +81,7 @@
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#fieldset-content/content()}, fieldName='wantsToProceed', fieldSetHeading=#{${areYouSureHeading}}, fieldSetHint=#{propertyCompliance.confirmMissingCompliance.areYouSure.hint})}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#fieldset-content/content()}, fieldName='wantsToProceed', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=#{propertyCompliance.confirmMissingCompliance.areYouSure.hint})}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
     </th:block>
 

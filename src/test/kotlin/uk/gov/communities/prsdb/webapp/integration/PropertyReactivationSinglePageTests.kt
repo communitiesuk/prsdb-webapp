@@ -534,7 +534,7 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
 
             confirmPage.form.submit()
 
-            assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this reactivation")
+            assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to continue")
         }
 
         @Test

@@ -673,6 +673,12 @@ class PropertyRegistrationJourneyFactory(
                             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
                         )
                     }
+                    withAdditionalContentProperties {
+                        mapOf(
+                            "fieldSetHeading" to "registerProperty.confirmMissingCompliance.areYouSure.heading",
+                            "submitButtonText" to "registerProperty.confirmMissingCompliance.button",
+                        )
+                    }
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK -> {

@@ -85,7 +85,7 @@ class AbstractConfirmMissingComplianceStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent includes the missing certificate flags and journey specific keys`() {
+    fun `getStepSpecificContent includes the missing certificate flags`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isGasCertMissing).thenReturn(true)
@@ -99,8 +99,6 @@ class AbstractConfirmMissingComplianceStepConfigTests {
         assertEquals(true, content["isGasMissing"])
         assertEquals(false, content["isElectricalMissing"])
         assertEquals(true, content["isEpcMissing"])
-        assertEquals("test.areYouSure.heading", content["areYouSureHeading"])
-        assertEquals("test.button", content["submitButtonText"])
     }
 
     @Test
@@ -117,8 +115,6 @@ class AbstractConfirmMissingComplianceStepConfigTests {
         val stepConfig =
             object : AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel>() {
                 override val formModelClass = ReactivationConfirmMissingComplianceFormModel::class
-                override val areYouSureHeadingKey = "test.areYouSure.heading"
-                override val submitButtonKey = "test.button"
             }
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
