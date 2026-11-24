@@ -5,23 +5,35 @@
 
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{acceptOrRejectJointLandlordInvitation.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
-            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+            <span th:remove="tag"
+                  th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.banner.body.beforeRegistrationNumber}">
+                acceptOrRejectJointLandlordInvitation.confirmation.banner.body.beforeRegistrationNumber
+            </span>
+            <br>
+            <strong th:text="${prn}"></strong>
         </div>
 
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.jointLandlordFor}">
+            acceptOrRejectJointLandlordInvitation.confirmation.jointLandlordFor
+        </p>
+        <p class="govuk-body" id="property-address">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+        </p>
         <p class="govuk-body"
            th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.emailSent}">
             acceptOrRejectJointLandlordInvitation.confirmation.emailSent
         </p>
 
         <h2 class="govuk-heading-m"
-            th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.heading}">acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.heading</h2>
+            th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.heading}">acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.heading</h2>
         <p class="govuk-body"
-           th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.one}">
-            acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.one
+           th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.paragraph.one}">
+            acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.paragraph.one
         </p>
         <p class="govuk-body"
-           th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two}">
-            acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two
+           th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.paragraph.two}">
+            acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.paragraph.two
         </p>
 
         <th:block th:if="${landlordReactivated}">
@@ -33,16 +45,10 @@
             </p>
         </th:block>
 
-        <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-            #{common.confirmationPage.feedback.heading},
-            #{acceptOrRejectJointLandlordInvitation.confirmation.feedback.body},
-            ${landlordRegistrationSurveyUrl})}">
-        </div>
-
         <p class="govuk-body">
             <a class="govuk-link"
                th:href="@{${propertyDetailsUrl}}"
-               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.viewPropertyRecord}">acceptOrRejectJointLandlordInvitation.confirmation.viewPropertyRecord</a>
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.goToPropertyRegistration}">acceptOrRejectJointLandlordInvitation.confirmation.whatYouNeedToDo.goToPropertyRegistration</a>
         </p>
 
     </div>
