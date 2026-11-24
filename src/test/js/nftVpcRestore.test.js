@@ -226,7 +226,7 @@ function markQaVerified(deps) {
   Object.assign(deps.state, {appRestored: true, qaVerified: true, expectedSha: appSha, resetCompatibility});
 }
 
-test('resolves and checkpoints the newest active managed restore task and immutable dump identity', async () => {
+test('discovers and checkpoints the newest active managed restore task and immutable dump identity with an empty input', async () => {
   const deps = freshDependencies();
   const definitions = [managedRestoreDefinition(2), managedRestoreDefinition(11), managedRestoreDefinition(9)];
   deps.aws = async (service, operation, input = {}) => {
@@ -243,7 +243,7 @@ test('resolves and checkpoints the newest active managed restore task and immuta
     throw new Error(`Unexpected ${service} ${operation}`);
   };
 
-  const resolved = await resolveRestoreTaskDefinition({runId: config.runId}, deps);
+  const resolved = await resolveRestoreTaskDefinition({runId: config.runId, taskDefinition: ''}, deps);
 
   assert.equal(resolved, definitions[1].taskDefinitionArn);
   assert.equal(deps.state.taskDefinition, resolved);
@@ -372,12 +372,11 @@ test('restore task resolution rejects missing or malformed immutable dump metada
     const definition = managedRestoreDefinition(11, metadata);
     deps.aws = async (service, operation, input = {}) => {
       if (operation === 'get-caller-identity') return {Account: '448120078528'};
-      if (operation === 'list-task-definitions') return {taskDefinitionArns: [definition.taskDefinitionArn]};
       if (operation === 'describe-task-definition') return {taskDefinition: definition};
       throw new Error(`Unexpected ${service} ${operation}`);
     };
 
-    await assert.rejects(resolveRestoreTaskDefinition({runId: config.runId}, deps), /dump identity/i);
+    await assert.rejects(resolveRestoreTaskDefinition({...config, taskDefinition: definition.taskDefinitionArn}, deps), /dump identity/i);
     assert.equal(deps.state.taskDefinition, undefined);
   });
 });

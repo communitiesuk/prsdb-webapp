@@ -118,7 +118,7 @@ export async function resolveRestoreTaskDefinition(config, overrides = {}) {
   await identity(aws);
   requireCondition(state.runId === undefined || state.runId === config.runId,
     'NFT recovery checkpoint belongs to another workflow');
-  let taskDefinitionArn = config.taskDefinition ?? state.taskDefinition;
+  let taskDefinitionArn = config.taskDefinition || state.taskDefinition;
   if (!taskDefinitionArn) {
     const listed = await aws('ecs', 'list-task-definitions', {
       familyPrefix: restoreTaskFamily, status: 'ACTIVE', sort: 'DESC', maxResults: 100,

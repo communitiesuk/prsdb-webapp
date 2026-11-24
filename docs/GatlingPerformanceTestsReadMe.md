@@ -22,8 +22,10 @@ the seeded database dump, its pinned S3 version and checksum, an exact active VP
 the restore worker's S3/KMS access and the workflow runner's ECS, SSM and restore permissions.
 The runner also needs `ecs:DescribeServices` and `ecs:UpdateService` on the NFT async-worker
 service, plus the scoped task-list and task-describe permissions used to verify its shutdown.
-Configure `NFT_RESTORE_TASK_DEFINITION` as an NFT environment variable or pass the exact revision to the
-workflow. The restore worker task definition must contain the pinned dump inputs and verification settings.
+By default, the workflow discovers the highest-numbered active managed restore task revision.
+The optional `restore-task-definition` input selects an exact revision instead. The workflow does not
+use the `NFT_RESTORE_TASK_DEFINITION` environment variable. The restore worker task definition must
+contain the pinned dump inputs and verification settings.
 Certificate metadata in a database dump does not contain file bodies: the matching synthetic objects
 must be available in the app's storage for property and certificate checks.
 
@@ -162,16 +164,15 @@ checks the app and worker images. An explicit differing `expected-app-sha` requi
 task-definition variable (or legacy secret) and app-SHA variable; missing or mismatched evidence
 fails closed. Never restart an old image against an unverified schema.
 
-Before schedules or writers change, the workflow discovers and checkpoints the exact active managed
-restore task revision and immutable dump identity. Its environment must declare `NFT_DUMP_VERSION`,
+Before schedules or writers change, the workflow discovers or validates and checkpoints the exact active
+managed restore task revision and immutable dump identity. Its environment must declare `NFT_DUMP_VERSION`,
 `NFT_DUMP_BYTES` and `NFT_DUMP_SHA256` independently of `NFT_CERTIFICATE_KEY`,
 `NFT_CERTIFICATE_VERSION`, `NFT_CERTIFICATE_DUMP_VERSION`, `NFT_CERTIFICATE_DUMP_BYTES` and
 `NFT_CERTIFICATE_DUMP_SHA256`. The three certificate-bound dump fields must exactly match the restore
 dump fields. The certificate key must be `seeding/certificate_template.png` or
 `seeding/certificate-references/<positive-run-id>-<positive-attempt>.png`. The workflow checks the
 exact certificate version in `prsdb-uploaded-files-nft` before schedule changes and again before
-launch; unavailable or mismatched identities stop the run. The optional `restore-task-definition`
-input is an exceptional override.
+launch; unavailable or mismatched identities stop the run.
 
 The seed generator copies the versioned template to a run-owned key and publishes a private,
 versioned manifest binding that copy to the exact dump upload. Deploy an application version that
