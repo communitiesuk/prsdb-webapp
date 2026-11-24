@@ -4,6 +4,6 @@ checkInvitations:
   pageTitle: Check your joint landlord invitations
 confirmation:
   banner:
-    heading: Joint landlord invitations sent
+    heading: Invitations sent
   body: The joint landlords you’ve invited have 28 days to join the property. We’ll email you when they accept or reject your invitation.
-  goBackToPropertyRecord: Go back to the property record
+  goBackToPropertyRegistration: Go back to the property registration
