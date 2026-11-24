@@ -8,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
-import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
@@ -74,8 +73,6 @@ class FreeholderContactTypeStepConfigTests {
     fun `resolvePageContent does not overwrite a contact type the user has already chosen`() {
         // Arrange
         val formModel = FreeholderContactTypeFormModel(contactType = FreeholderContactType.POSTAL_ADDRESS)
-        lenient().`when`(mockJourneyState.editingFreeholder)
-            .thenReturn(FreeholderDataModel(detailsKnown = true, name = FREEHOLDER_NAME, email = "email@example.com"))
 
         // Act
         val result = FreeholderContactTypeStepConfig().resolvePageContent(mockJourneyState, mapOf(FORM_MODEL_ATTR_NAME to formModel))
@@ -122,7 +119,7 @@ class FreeholderContactTypeStepConfigTests {
         expectedContactType: FreeholderContactType?,
     ) {
         // Arrange
-        lenient().`when`(mockJourneyState.editingFreeholder).thenReturn(editedFreeholder)
+        whenever(mockJourneyState.editingFreeholder).thenReturn(editedFreeholder)
 
         // Act
         val result =
