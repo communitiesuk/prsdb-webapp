@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND
 import kotlin.test.assertEquals
 
 class AddressDataModelTests {
@@ -102,5 +103,25 @@ class AddressDataModelTests {
             )
 
         assertEquals(expectedAddressDataModel, addressDataModel)
+    }
+
+    @Test
+    fun `fromManualAddressData uses the given country`() {
+        // Act
+        val addressDataModel =
+            AddressDataModel.fromManualAddressData("1 Example Road", "Townville", "EG1 2AB", country = "France")
+
+        // Assert
+        assertEquals("France", addressDataModel.country)
+    }
+
+    @Test
+    fun `fromManualAddressData defaults country to England when no country is given`() {
+        // Act
+        val addressDataModel =
+            AddressDataModel.fromManualAddressData("1 Example Road", "Townville", "EG1 2AB", country = null)
+
+        // Assert
+        assertEquals(ENGLAND, addressDataModel.country)
     }
 }

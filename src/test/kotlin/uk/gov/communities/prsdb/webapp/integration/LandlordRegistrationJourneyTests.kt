@@ -1060,6 +1060,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
                             manualTownOrCity = "London",
                             manualCounty = "Greater London",
                             manualPostcode = "EG1 2AA",
+                            manualCountry = "England",
                         ),
                 ),
             )
@@ -1094,6 +1095,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(manualAddressPage.form.townOrCityInput).hasValue("London")
         assertThat(manualAddressPage.form.countyInput).hasValue("Greater London")
         assertThat(manualAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+        assertThat(manualAddressPage.form.countryInput).hasValue("England")
         manualAddressPage.form.submit()
 
         val updatedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
@@ -1152,6 +1154,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualTownOrCity: String? = null,
         manualCounty: String? = null,
         manualPostcode: String? = null,
+        manualCountry: String? = null,
     ) = uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel(
         name = name,
         type = type,
@@ -1167,6 +1170,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         manualTownOrCity = manualTownOrCity,
         manualCounty = manualCounty,
         manualPostcode = manualPostcode,
+        manualCountry = manualCountry,
     )
 
     private fun getExpectedScheduledDeactivationDate(createdDate: Instant): LocalDate =

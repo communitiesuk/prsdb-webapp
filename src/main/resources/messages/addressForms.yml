@@ -123,4 +123,8 @@ manualAddress:
   postcode:
     label: Postcode
     error:
-      missing: Enter postcode
+      missing: 'Enter postcode — if your address does not have a postcode, enter ‘none’'
+  country:
+    label: Country
+    error:
+      missing: Enter country

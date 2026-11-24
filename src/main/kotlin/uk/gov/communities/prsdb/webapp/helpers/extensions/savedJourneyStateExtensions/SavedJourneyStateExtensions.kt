@@ -32,6 +32,7 @@ class SavedJourneyStateExtensions {
                     county = manualAddressData["county"] as String?,
                     postcode = manualAddressData["postcode"] as String,
                     localCouncilId = localCouncilData["localCouncilId"] as Int?,
+                    country = manualAddressData["country"] as String?,
                 )
             }
         }
