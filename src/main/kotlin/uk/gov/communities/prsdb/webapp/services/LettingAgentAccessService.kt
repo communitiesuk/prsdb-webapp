@@ -28,14 +28,14 @@ class LettingAgentAccessService(
         getInvitationByTokenOrNull(token)
             ?: throw EntityNotFoundException("No letting agent access found for token $token")
 
-    fun getTokenIsValid(token: String): Boolean {
+    fun getAccessIdForTokenOrNull(token: String): Long? {
         val uuid =
             try {
                 UUID.fromString(token)
             } catch (_: IllegalArgumentException) {
-                return false
+                return null
             }
-        return lettingAgentAccessRepository.findByToken(uuid) != null
+        return lettingAgentAccessRepository.findByToken(uuid)?.id
     }
 
     fun getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId: Long): LettingAgentAccess? =
