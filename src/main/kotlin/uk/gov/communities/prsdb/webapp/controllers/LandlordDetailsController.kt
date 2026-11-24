@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.ACT_AS_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -196,6 +198,8 @@ class LandlordDetailsController(
 
     @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
     @GetMapping(LANDLORD_DETAILS_FOR_SYSTEM_OPERATOR_ROUTE)
+    // TODO PDJB-2288: Remove this annotation when the ACT_AS_LANDLORD flag is removed
+    @AvailableWhenFeatureEnabled(ACT_AS_LANDLORD)
     fun getLandlordDetailsAsSystemOperator(
         @PathVariable id: Long,
         model: Model,
