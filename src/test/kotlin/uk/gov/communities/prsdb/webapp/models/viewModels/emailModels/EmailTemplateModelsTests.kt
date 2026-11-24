@@ -665,6 +665,17 @@ class EmailTemplateModelsTests {
                     "/emails/RemoveOrgTeamMemberNotification.md",
                 ),
                 EmailTemplateTestData(
+                    FreeholderAddedToPropertyEmail(
+                        freeholderName = "Sarah Thompson",
+                        freeholderEmail = "sarah@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/FreeholderAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
                     PassphraseEmail("time anything costume"),
                     "/emails/Passphrase.md",
                 ),

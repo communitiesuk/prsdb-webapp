@@ -23,10 +23,10 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
-    fun `buildLandlordPrivacyNoticeDisplayUrl strips the scheme and www prefix for the letter copy`() {
+    fun `buildLandlordPrivacyNoticeLetterDisplayUrl strips the scheme and www prefix for the letter copy`() {
         val provider = createProvider(landlordBaseUrl = "https://www.example.test/landlord")
 
-        val url = provider.buildLandlordPrivacyNoticeDisplayUrl()
+        val url = provider.buildLandlordPrivacyNoticeLetterDisplayUrl()
 
         assertThat(url).isEqualTo("example.test/landlord/privacy-notice")
     }
