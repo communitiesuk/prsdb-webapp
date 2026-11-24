@@ -528,7 +528,6 @@ class PropertyOwnershipService(
             propertyOwnership.propertyManager = propertyManagerService.createPropertyManager(propertyManager.name, propertyManager.email)
         }
         propertyOwnershipRepository.save(propertyOwnership)
-        // TODO PDJB-1991: Email the property manager when they are added or their details change
     }
 
     @Transactional

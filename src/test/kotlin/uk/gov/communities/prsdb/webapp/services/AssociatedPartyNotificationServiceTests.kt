@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FreeholderAddedToPropertyEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyManagerAddedToPropertyEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -86,6 +87,16 @@ class AssociatedPartyNotificationServiceTests {
             privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val postalAddress = AddressDataModel(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
+    private val propertyManager = PropertyManagerDataModel(name = "James Smith", email = "james.smith@example.com")
+    private val expectedPropertyManagerAddedToPropertyEmail =
+        PropertyManagerAddedToPropertyEmail(
+            propertyManagerName = "James Smith",
+            propertyManagerEmail = "james.smith@example.com",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            landlords = listOf("Jamie Jameson (jamie@example.com)"),
+            dashboardUrl = "https://example.test/landlord/dashboard",
+            privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+        )
 
     private fun createFreeholderModel(
         name: String? = null,
@@ -373,16 +384,53 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `creation notification for a property manager fails explicitly until implemented`() {
+    fun `buildPropertyManagerAddedToPropertyEmail includes property and property manager details with landlords sorted by name`() {
         // Arrange
-        val propertyManager = PropertyManagerDataModel(name = "Alex Jones", email = "alex.jones@example.com")
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords =
+                    mutableSetOf(
+                        createOrgLandlord(name = "Zebra Homes", email = "contact@zebra.example", registrantEmail = "admin@zebra.example"),
+                        createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
+                    ),
+            )
+        stubPropertyManagerAddedToPropertyEmailUrls()
 
-        // Act & Assert
-        assertThrows(NotImplementedError::class.java) {
-            associatedPartyNotificationService.sendCreationNotificationForPropertyManager(propertyManager)
-        }
+        // Act
+        val result = associatedPartyNotificationService.buildPropertyManagerAddedToPropertyEmail(propertyManager, propertyOwnership)
 
+        // Assert
+        assertEquals(
+            expectedPropertyManagerAddedToPropertyEmail.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)", "Zebra Homes (contact@zebra.example)"),
+            ),
+            result,
+        )
         verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `property manager added to property notification is emailed to the property manager`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        stubPropertyManagerAddedToPropertyEmailUrls()
+
+        // Act
+        associatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
+
+        // Assert
+        verify(emailNotificationService).sendEmail("james.smith@example.com", expectedPropertyManagerAddedToPropertyEmail)
+        verifyNoInteractions(letterNotificationService)
+    }
+
+    private fun stubPropertyManagerAddedToPropertyEmailUrls() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.test/landlord/dashboard"))
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
     }
 
     private fun sendNotificationToFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =
