@@ -535,6 +535,21 @@ class PropertyDetailsViewModelTests {
         }
     }
 
+    // TODO PDJB-2016: delete this test when the legacy ownership section is removed.
+    @Test
+    fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                viewType = PropertyDetailsViewType.LANDLORD,
+                messageSource = mockMessageSource,
+                associatedPartiesEnabled = true,
+            )
+
+        assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
+        assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
+    }
+
     // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. It covers the single
     //  legacy ownership row on the property record tab, which goes with the flag.
     @Nested
@@ -563,20 +578,6 @@ class PropertyDetailsViewModelTests {
                 )
 
             assertFalse(viewModel.showSuperiorLandlordSection)
-        }
-
-        @Test
-        fun `the landlord's legacy ownership section is hidden when associated parties is enabled`() {
-            val viewModel =
-                PropertyDetailsViewModel(
-                    createOccupiedPropertyOwnership(),
-                    viewType = PropertyDetailsViewType.LANDLORD,
-                    messageSource = mockMessageSource,
-                    associatedPartiesEnabled = true,
-                )
-
-            assertFalse(viewModel.showOwnershipSectionOnPropertyDetailsTab)
-            assertTrue(viewModel.ownershipSectionBeforePdjb955.isEmpty())
         }
 
         @Test
