@@ -151,7 +151,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(manualOrgAddressPage.form.getErrorMessage("addressLineOne"))
             .containsText("Enter the first line of an address, typically the building and street")
         assertThat(manualOrgAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-        assertThat(manualOrgAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        assertThat(
+            manualOrgAddressPage.form.getErrorMessage("postcode"),
+        ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
     }
 
     @Test
