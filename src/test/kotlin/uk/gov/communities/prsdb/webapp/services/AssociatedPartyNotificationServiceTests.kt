@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -54,8 +54,18 @@ class AssociatedPartyNotificationServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @InjectMocks
     private lateinit var associatedPartyNotificationService: AssociatedPartyNotificationService
+
+    @BeforeEach
+    fun setUp() {
+        associatedPartyNotificationService =
+            AssociatedPartyNotificationService(
+                emailNotificationService,
+                letterNotificationService,
+                absoluteUrlProvider,
+                GDS_START_PAGE_URL,
+            )
+    }
 
     private val email = TestEmail()
     private val letter = TestLetter()
@@ -182,13 +192,11 @@ class AssociatedPartyNotificationServiceTests {
                 freeholderEmail = "sarah@example.com",
                 propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
-                gdsStartPageUrl = "https://example.test/gds-start-page",
+                gdsStartPageUrl = GDS_START_PAGE_URL,
                 privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
             )
         whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
             .thenReturn(URI("https://www.example.test/landlord/privacy-notice"))
-        whenever(absoluteUrlProvider.buildGdsStartPageUrl())
-            .thenReturn("https://example.test/gds-start-page")
 
         // Act
         val outcome =
@@ -616,5 +624,9 @@ class AssociatedPartyNotificationServiceTests {
             ),
             letter,
         )
+    }
+
+    companion object {
+        private const val GDS_START_PAGE_URL = "https://example.test/gds-start-page"
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -21,6 +22,7 @@ class AssociatedPartyNotificationService(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val letterNotificationService: LetterNotificationService<LetterTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    @Value("\${gds.start-page-url}") private val gdsStartPageUrl: String,
 ) {
     fun sendNotificationToFreeholderAddedToProperty(
         freeholder: FreeholderDataModel,
@@ -59,7 +61,7 @@ class AssociatedPartyNotificationService(
             freeholderEmail = freeholder.email.orEmpty(),
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlordsRentingOutProperty(propertyOwnership),
-            gdsStartPageUrl = absoluteUrlProvider.buildGdsStartPageUrl(),
+            gdsStartPageUrl = gdsStartPageUrl,
             privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
         )
 
