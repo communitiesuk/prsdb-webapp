@@ -1,5 +1,12 @@
 [
   {
+    "test_id": "7b9404c0-e507-48ad-833e-4ae107026632",
+    "prod_id": "9342ce96-2d49-45c5-887d-2f99010d6343",
+    "enumName": "AUTOMATED_PROPERTY_DEACTIVATION",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/AutomatedPropertyDeactivation.md"
+  },
+  {
     "test_id": "6a9b40c1-ede1-4851-b10b-5bc40026813f",
     "prod_id": "0012a96e-9ad9-48b8-99dd-d19baebda534",
     "enumName": "LOCAL_COUNCIL_INVITATION_EMAIL",

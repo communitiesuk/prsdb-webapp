@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -340,8 +341,10 @@ class DeactivationServiceTests {
 
     @Test
     fun `batch property deactivation queries with the UK-local cutoff and continues after an individual failure`() {
-        val firstSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf())
-        val secondSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf())
+        val firstSuccessfulProperty =
+            MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf(), isOccupied = true, tenancyProvideLater = true)
+        val secondSuccessfulProperty =
+            MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf(), isOccupied = true, tenancyProvideLater = true)
         whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
             .thenReturn(listOf(PROPERTY_ID, firstSuccessfulProperty.id, secondSuccessfulProperty.id))
 
@@ -374,10 +377,98 @@ class DeactivationServiceTests {
         verifyNoInteractions(transactionTemplate)
     }
 
+    @Test
+    fun `batch property deactivation skips properties with no missing details`() {
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID)
+        // Initial query says property has missing details
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        // When property is loaded, no missing details are found
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        assertEquals(0, deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount())
+
+        assertTrue(property.isActive)
+        assertNull(property.lastDeactivatedDate)
+        verifyNoInteractions(landlordRepository, lettingAgentAccessService, deactivationEmailService)
+    }
+
+    @Test
+    fun `batch property deactivation schedules emails after transaction commit`() {
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                id = PROPERTY_ID,
+                landlords = mutableSetOf(landlord),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+            verifyNoInteractions(deactivationEmailService)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(deactivationEmailService).sendPropertyDeactivatedEmail(property, listOf(landlord to true), REASONS)
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `batch property deactivation doesn't send an email when ACTIVE_INACTIVE is disabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                id = PROPERTY_ID,
+                landlords = mutableSetOf(landlord),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            assertEquals(0, deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount())
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+
+            assertFalse(property.isActive)
+            assertFalse(landlord.isActive)
+            verify(propertyOwnershipRepository).save(property)
+            verify(deactivationEmailService, never()).sendPropertyDeactivatedEmail(any(), any(), any())
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
+        private val REASONS = listOf(ReactivationTaskType.TENANCY_DETAILS)
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
 
