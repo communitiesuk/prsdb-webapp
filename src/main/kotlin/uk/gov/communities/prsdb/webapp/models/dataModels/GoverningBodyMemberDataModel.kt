@@ -20,6 +20,7 @@ data class GoverningBodyMemberDataModel(
     val manualTownOrCity: String? = null,
     val manualCounty: String? = null,
     val manualPostcode: String? = null,
+    val manualCountry: String? = null,
 ) {
     companion object {
         fun fromEntity(member: OrganisationGoverningBodyMember) =

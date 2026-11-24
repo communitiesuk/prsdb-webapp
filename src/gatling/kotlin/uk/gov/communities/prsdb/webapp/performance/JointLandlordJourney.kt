@@ -112,7 +112,7 @@ object JointLandlordJourney {
                         .get("#{jointNext}")
                         .disableFollowRedirect()
                         .check(status().`is`(200))
-                        .check(bodyString().transform { it.contains("Joint landlord invitations sent") }.`is`(true))
+                        .check(bodyString().transform { it.contains("Invitations sent") }.`is`(true))
                         .check(css("a[href^='$detailsPath']").exists()),
                 ).exitHereIfFailed()
                 .exec(

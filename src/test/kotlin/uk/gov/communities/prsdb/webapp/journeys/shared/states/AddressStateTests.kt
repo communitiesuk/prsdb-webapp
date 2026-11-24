@@ -47,6 +47,7 @@ class AddressStateTests {
                 postcode = "ZZ1 1ZZ"
                 addressLineTwo = "Building"
                 county = "County"
+                country = "France"
             }
         val state = buildTestAddressState(manualAddressFormModel = manualAddressFormModel)
 
@@ -58,8 +59,10 @@ class AddressStateTests {
                 manualAddressFormModel.postcode!!,
                 manualAddressFormModel.addressLineTwo,
                 manualAddressFormModel.county,
+                country = manualAddressFormModel.country,
             )
         assertEquals(expectedResult, state.getManualAddressOrNull())
+        assertEquals("France", state.getManualAddressOrNull()?.country)
     }
 
     @Test

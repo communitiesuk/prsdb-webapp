@@ -49,8 +49,8 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         checkInvitationsPage.confirm()
 
         val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArgumentsJoint)
-        assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
-        assertThat(confirmationPage.goBackToPropertyRecordLink).containsText("Go back to the property record")
+        assertThat(confirmationPage.confirmationBanner.title).containsText("Invitations sent")
+        assertThat(confirmationPage.goBackToPropertyRecordLink).containsText("Go back to the property registration")
         assertThat(page.locator("main")).containsText("The joint landlords you’ve invited have 28 days to join the property")
     }
 
@@ -87,7 +87,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         checkInvitationsPage.confirm()
 
         val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArguments)
-        assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+        assertThat(confirmationPage.confirmationBanner.title).containsText("Invitations sent")
     }
 
     @Test
@@ -144,7 +144,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
             checkInvitationsPage.confirm()
 
             val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArgumentsExpired)
-            assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+            assertThat(confirmationPage.confirmationBanner.title).containsText("Invitations sent")
 
             // The stale expired invitation should no longer be shown once replaced by the new pending one
             val returnedDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipIdWithExpiredInvite)
@@ -180,7 +180,7 @@ class InviteJointLandlordOrgLandlordJourneyTests : IntegrationTestWithMutableDat
         checkInvitationsPage.confirm()
 
         val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, jointUrlArguments)
-        assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+        assertThat(confirmationPage.confirmationBanner.title).containsText("Invitations sent")
     }
 
     @Test
@@ -207,6 +207,6 @@ class InviteJointLandlordOrgLandlordJourneyTests : IntegrationTestWithMutableDat
         checkInvitationsPage.confirm()
 
         val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, soleUrlArguments)
-        assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+        assertThat(confirmationPage.confirmationBanner.title).containsText("Invitations sent")
     }
 }

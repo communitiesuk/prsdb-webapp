@@ -12,7 +12,8 @@ confirm:
   cancelLink: Cancel (go back to property record)
 confirmation:
   banner:
-    heading: "No longer registered as a landlord for {0,,address}"
+    heading: Removed from property
   paragraph:
-    one: "We’ve sent you a confirmation email. We’ve also told the other joint landlords that you’re no longer registered on this property."
-    two: You can no longer view this property’s details on the service.
+    one: "You’ve told us that you are no longer a landlord for:"
+    two: "We’ve sent you a confirmation email. We’ve also told the other joint landlords that you’re no longer registered on this property."
+    three: You can no longer view this property’s details on the service.

@@ -79,8 +79,8 @@ class LeavePropertyController(
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute(
-            "address",
-            leftProperties[propertyOwnershipId],
+            "addressLines",
+            leftProperties[propertyOwnershipId]?.split(", "),
         )
 
         return "leavePropertyConfirmation"

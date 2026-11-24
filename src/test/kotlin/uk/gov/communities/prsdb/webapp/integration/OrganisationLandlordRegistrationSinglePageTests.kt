@@ -148,7 +148,9 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             manualAddressPage.submitAddress(addressLineOne = "1 Example Street", townOrCity = "Exampleton")
 
-            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(
+                manualAddressPage.form.getErrorMessage("postcode"),
+            ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
         }
 
         @Test
@@ -160,7 +162,9 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
             assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(
+                manualAddressPage.form.getErrorMessage("postcode"),
+            ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
         }
     }
 

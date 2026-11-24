@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SuperiorLandlordsDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.clearSuperiorLandlordFormData
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 
@@ -61,12 +62,7 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
         state.superiorLandlordsMap = currentMap
         state.editingSuperiorLandlordId = null
 
-        // Clear the individual step form data so the next superior landlord starts fresh
-        state.superiorLandlordProvideDetailsStep.clearFormData()
-        state.superiorLandlordNameStep.clearFormData()
-        state.superiorLandlordContactTypeStep.clearFormData()
-        state.superiorLandlordEmailStep.clearFormData()
-        state.superiorLandlordAddressTask.clearFormData()
+        state.clearSuperiorLandlordFormData()
     }
 
     private fun buildSuperiorLandlordWithEmail(
@@ -107,6 +103,7 @@ class SaveSuperiorLandlordStepConfig : AbstractInternalStepConfig<Complete, Supe
             manualTownOrCity = manualFormModel?.townOrCity,
             manualCounty = manualFormModel?.county,
             manualPostcode = manualFormModel?.postcode,
+            manualCountry = manualFormModel?.country,
         )
     }
 }

@@ -27,6 +27,14 @@ interface SuperiorLandlordsDetailsState :
     val confirmRemoveSuperiorLandlordStep: ConfirmRemoveSuperiorLandlordStep
 }
 
+fun SuperiorLandlordsDetailsState.clearSuperiorLandlordFormData() {
+    superiorLandlordProvideDetailsStep.clearFormData()
+    superiorLandlordNameStep.clearFormData()
+    superiorLandlordContactTypeStep.clearFormData()
+    superiorLandlordEmailStep.clearFormData()
+    superiorLandlordAddressTask.clearFormData()
+}
+
 class SuperiorLandlordsDetailsDependencies(
     // The state slice that owns the collected superior landlords. The reusable details task reads and writes the
     // superior landlords list through this, so the list can live in the enclosing outer task or journey.
