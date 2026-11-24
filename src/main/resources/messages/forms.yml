@@ -199,6 +199,12 @@ countryOfResidence:
   radios:
     error:
       missing: Select an option
+livesInUk:
+  organisationLandlordRegistration:
+    fieldSetHeading: Is your organisation based in the UK?
+    radios:
+      error:
+        missing: Select yes if you live in the UK
 selectLocalCouncil:
   error:
     missing: Select a local council to continue

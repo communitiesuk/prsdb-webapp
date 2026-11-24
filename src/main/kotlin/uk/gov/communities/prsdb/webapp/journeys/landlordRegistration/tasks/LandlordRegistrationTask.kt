@@ -49,9 +49,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
 
 @JourneyFrameworkComponent
 class LandlordRegistrationTask(
@@ -144,7 +145,9 @@ class LandlordRegistrationTask(
                 backUrl {
                     when (journey.landlordTypeStep.outcome) {
                         LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.exitStep.backUrl
+
                         LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask.exitStep.backUrl
+
                         null -> throw IllegalStateException(
                             "landlordTypeStep must have an outcome for the check your answers step to be reachable",
                         )
@@ -233,10 +236,10 @@ class LandlordRegistrationTask(
                         checkAnswerStep(journey.orgLandlordRegistrationTask.orgNameStep, OrgNameStep.ROUTE_SEGMENT)
                     }
 
-                    "${OrgAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
+                    "${OrgInternationalAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}" -> {
                         checkAnswerTask(
                             journey.orgLandlordRegistrationTask.orgAddressTask,
-                            OrgAddressTask.ROUTE_SEGMENT,
+                            OrgInternationalAddressTask.ROUTE_SEGMENT,
                         )
                     }
 
