@@ -119,7 +119,7 @@ class OrgLandlordViewModelTests {
         val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         assertIterableEquals(
-            listOf("3rd Floor", "88 Kingsway Square", "London", "ZX1 4QP"),
+            listOf("3rd Floor", "88 Kingsway Square", "London", "ZX1 4QP", "England"),
             viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.address" }.fieldValue as List<*>,
         )
     }

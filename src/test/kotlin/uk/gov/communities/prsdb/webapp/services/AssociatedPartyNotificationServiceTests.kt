@@ -73,17 +73,17 @@ class AssociatedPartyNotificationServiceTests {
     private val expectedFreeholderAddedToPropertyLetter =
         FreeholderAddedToPropertyLetter(
             freeholderName = "Sarah Thompson",
-            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA\nEngland",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
-            freeholderAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
+            freeholderAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ\nEngland",
             privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val expectedSuperiorLandlordAddedToPropertyLetter =
         SuperiorLandlordAddedToPropertyLetter(
             superiorLandlordName = "Daniel Roberts",
-            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA\nEngland",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
-            superiorLandlordAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ",
+            superiorLandlordAddress = "Flat 2\n18 Market Street\nBristol\nBS1 4DJ\nEngland",
             privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val postalAddress = AddressDataModel(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
@@ -165,7 +165,7 @@ class AssociatedPartyNotificationServiceTests {
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
-            LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ", "England")),
             expectedLetter,
         )
         verifyNoInteractions(emailNotificationService)
@@ -307,7 +307,7 @@ class AssociatedPartyNotificationServiceTests {
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
-            LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ", "England")),
             expectedSuperiorLandlordAddedToPropertyLetter,
         )
         verifyNoInteractions(emailNotificationService)
@@ -542,7 +542,7 @@ class AssociatedPartyNotificationServiceTests {
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
-            LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            LetterAddressDataModel(listOf("Daniel Roberts", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ", "England")),
             letter,
         )
         verifyNoInteractions(emailNotificationService)
@@ -559,7 +559,7 @@ class AssociatedPartyNotificationServiceTests {
         // Assert
         assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
         verify(letterNotificationService).sendLetter(
-            LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ")),
+            LetterAddressDataModel(listOf("Sarah Thompson", "Flat 2", "18 Market Street", "Bristol", "BS1 4DJ", "England")),
             letter,
         )
         verifyNoInteractions(emailNotificationService)
@@ -602,7 +602,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification condenses a long address while keeping the postcode last`() {
+    fun `sendNotification condenses a long address while keeping the last line separate`() {
         // Arrange
         val fullAddress =
             AddressDataModel(
@@ -631,8 +631,8 @@ class AssociatedPartyNotificationServiceTests {
                     "Flat 2",
                     "12",
                     "Rose Court",
-                    "High Street, Example Locality, London",
-                    "SW1A 1AA",
+                    "High Street, Example Locality, London, SW1A 1AA",
+                    "England",
                 ),
             ),
             letter,
@@ -640,7 +640,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotification condenses a long manually entered address while keeping the postcode last`() {
+    fun `sendNotification condenses a long manually entered address while keeping the last line separate`() {
         // Arrange
         val manualAddress =
             AddressDataModel(
@@ -661,8 +661,8 @@ class AssociatedPartyNotificationServiceTests {
                     "Flat 2",
                     "12",
                     "Rose Court",
-                    "High Street, Example Locality, London",
-                    "SW1A 1AA",
+                    "High Street, Example Locality, London, SW1A 1AA",
+                    "England",
                 ),
             ),
             letter,

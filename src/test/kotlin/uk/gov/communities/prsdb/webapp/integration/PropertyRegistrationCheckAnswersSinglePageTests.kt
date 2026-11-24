@@ -847,7 +847,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertThat(
                 checkAnswersPage.summaryList.correspondencePostalAddressRow.value
                     .locator("p"),
-            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA"))
+            ).hasText(arrayOf("1 Fictional Road", "FA1 1AA", "England"))
         }
 
         @Test
@@ -876,11 +876,11 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertThat(
                 checkAnswersPage.summaryList.correspondencePostalAddressRow.value
                     .locator("p"),
-            ).hasText(arrayOf("2 Fake Way", "FA1 1AB"))
+            ).hasText(arrayOf("2 Fake Way", "FA1 1AB", "England"))
             assertThat(
                 checkAnswersPage.summaryList.propertyAddressRow.value
                     .locator("p"),
-            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD"))
+            ).hasText(arrayOf("1 Street Address", "City", "AB1 2CD", "England"))
         }
 
         @Test

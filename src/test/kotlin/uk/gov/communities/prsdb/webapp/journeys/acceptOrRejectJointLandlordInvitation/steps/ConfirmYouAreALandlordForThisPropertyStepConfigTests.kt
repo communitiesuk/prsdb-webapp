@@ -99,7 +99,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockState)
 
         // Assert
-        assertEquals(listOf("1 Fake Street", "Faketown", "FK1 2AB"), content["propertyAddress"])
+        assertEquals(listOf("1 Fake Street", "Faketown", "FK1 2AB", "England"), content["propertyAddress"])
     }
 
     @Test

@@ -87,7 +87,7 @@ class PaymentSummaryStepConfigTests {
         assertEquals(today.toString(), content["quoteDate"])
         assertEquals(
             listOf(
-                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB", "England")),
                 SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", "£12.34"),
                 SummaryListRowViewModel(
                     "registerProperty.paymentSummary.summary.paymentDate",

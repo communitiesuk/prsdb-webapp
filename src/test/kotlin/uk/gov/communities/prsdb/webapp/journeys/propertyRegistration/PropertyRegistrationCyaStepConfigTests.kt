@@ -353,7 +353,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `contact postal address uses the same multiline format as the property address`() {
-            assertEquals(listOf("12 Test Road", "Leeds", "LS1 1AA"), correspondenceRows()[1].fieldValue)
+            assertEquals(listOf("12 Test Road", "Leeds", "LS1 1AA", "England"), correspondenceRows()[1].fieldValue)
         }
 
         @Test
@@ -369,7 +369,7 @@ class PropertyRegistrationCyaStepConfigTests {
             )
 
             assertEquals(
-                listOf("12 Test Road", "Test District", "Leeds", "West Yorkshire", "LS1 1AA"),
+                listOf("12 Test Road", "Test District", "Leeds", "West Yorkshire", "LS1 1AA", "England"),
                 correspondenceRows()[1].fieldValue,
             )
         }

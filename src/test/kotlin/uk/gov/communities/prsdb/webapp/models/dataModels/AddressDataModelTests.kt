@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND
+import uk.gov.communities.prsdb.webapp.constants.UNASSIGNED
 import kotlin.test.assertEquals
 
 class AddressDataModelTests {
@@ -123,5 +125,44 @@ class AddressDataModelTests {
 
         // Assert
         assertEquals(ENGLAND, addressDataModel.country)
+    }
+
+    @Test
+    fun `toMultiLineAddress appends the country when address components are available`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1 Castle Street, Cardiff, CF10 1AA",
+                buildingNumber = "1",
+                streetName = "Castle Street",
+                townName = "Cardiff",
+                postcode = "CF10 1AA",
+                country = "Wales",
+            )
+
+        assertEquals("1 Castle Street\nCardiff\nCF10 1AA\nWales", addressDataModel.toMultiLineAddress())
+    }
+
+    @Test
+    fun `toMultiLineAddress appends the country after an appended postcode`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1 Example Road, Townville",
+                postcode = "EG1 2AB",
+            )
+
+        assertEquals("1 Example Road\nTownville\nEG1 2AB\nEngland", addressDataModel.toMultiLineAddress())
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [UNASSIGNED, "", " "])
+    fun `toMultiLineAddress omits the country when it is unassigned or blank`(country: String) {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1 Example Road, Townville, EG1 2AB",
+                postcode = "EG1 2AB",
+                country = country,
+            )
+
+        assertEquals("1 Example Road\nTownville\nEG1 2AB", addressDataModel.toMultiLineAddress())
     }
 }

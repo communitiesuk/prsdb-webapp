@@ -71,7 +71,7 @@ class SavedJourneyDataExtensionsTests {
 
         // Assert
         assertEquals(
-            "2\nExample House\nExample Road\nExample District\nExample Town\nEG1 2AB",
+            "2\nExample House\nExample Road\nExample District\nExample Town\nEG1 2AB\nEngland",
             result,
         )
     }
@@ -96,7 +96,7 @@ class SavedJourneyDataExtensionsTests {
         val result = savedJourneyState.getPropertyRegistrationMultiLineAddress()
 
         // Assert
-        assertEquals("1 Example Road\nFlat 1\nTownVille\nExample County\nEG1 2AB", result)
+        assertEquals("1 Example Road\nFlat 1\nTownVille\nExample County\nEG1 2AB\nEngland", result)
     }
 
     private fun createSerialisedStateWithSelectedAddress(address: AddressDataModel): String {

@@ -1174,11 +1174,11 @@ class NftDataSeederTests(
         assertEquals(listOf(26L, 0L, 0L, 2L, 0L), result.take(5))
         assertTrue((result.last() as Long) > 0)
         assertEquals(
-            "1 QA Fixture Road\nTestville\nQA1 1AA",
+            "1 QA Fixture Road\nTestville\nQA1 1AA\nEngland",
             propertyOwnershipRepository.findById(1).get().address.toMultiLineAddress(),
         )
         assertEquals(
-            "1 Provide Later Road\nTestville\nQA1 1AA",
+            "1 Provide Later Road\nTestville\nQA1 1AA\nEngland",
             propertyOwnershipRepository.findById(18).get().address.toMultiLineAddress(),
         )
         jdbcTemplate.execute("UPDATE address SET street_name = null WHERE id = 2")

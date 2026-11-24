@@ -2,6 +2,9 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.UNASSIGNED
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 class AddressTests {
@@ -21,7 +24,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("Flat 1\n123 Test Street\nLocality\nLondon\nSW1A 1AA", result)
+        assertEquals("Flat 1\n123 Test Street\nLocality\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -39,7 +42,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("123\nThe Manor House\nTest Street\nLondon\nSW1A 1AA", result)
+        assertEquals("123\nThe Manor House\nTest Street\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -58,7 +61,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("ACME Corp\nSuite 100\n123 Test Street\nLondon\nSW1A 1AA", result)
+        assertEquals("ACME Corp\nSuite 100\n123 Test Street\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -71,7 +74,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("123 Test Street\nLondon\nSW1A 1AA", result)
+        assertEquals("123 Test Street\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -87,7 +90,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("Test Street\nLondon\nSW1A 1AA", result)
+        assertEquals("Test Street\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -103,7 +106,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("The Manor House\nLondon\nSW1A 1AA", result)
+        assertEquals("The Manor House\nLondon\nSW1A 1AA\nEngland", result)
     }
 
     @Test
@@ -120,7 +123,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("10 Sample Street\nSampleton\nAB1 2CD", result)
+        assertEquals("10 Sample Street\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -138,7 +141,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+        assertEquals("3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -155,7 +158,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("Willow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+        assertEquals("Willow Court\nMeadow Lane\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -174,7 +177,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("Flat 2\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+        assertEquals("Flat 2\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -193,7 +196,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("Sample Org\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+        assertEquals("Sample Org\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -212,7 +215,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("3\nWillow Court\nMeadow Lane\nSample Locality\nSampleton\nAB1 2CD", result)
+        assertEquals("3\nWillow Court\nMeadow Lane\nSample Locality\nSampleton\nAB1 2CD\nEngland", result)
     }
 
     @Test
@@ -225,6 +228,53 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("12 Sample Road\nSample District\nSampleton\nAB1 2CD", result)
+        assertEquals("12 Sample Road\nSample District\nSampleton\nAB1 2CD\nEngland", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress appends the stored country when address components are available`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1 Castle Street, Cardiff, CF10 1AA",
+                buildingNumber = "1",
+                streetName = "Castle Street",
+                townName = "Cardiff",
+                postcode = "CF10 1AA",
+                country = "Wales",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("1 Castle Street\nCardiff\nCF10 1AA\nWales", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress appends the stored country when falling back to singleLineAddress`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "12 High Street, Edinburgh, EH1 1AA",
+                country = "Scotland",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("12 High Street\nEdinburgh\nEH1 1AA\nScotland", result)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [UNASSIGNED, "", " "])
+    fun `toMultiLineAddress omits the country when it is unassigned or blank`(country: String) {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "12 Sample Road, Sampleton, AB1 2CD",
+                country = country,
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("12 Sample Road\nSampleton\nAB1 2CD", result)
     }
 }
