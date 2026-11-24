@@ -7,11 +7,11 @@ import org.mockito.Answers
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.ELECTRICAL_SAFETY
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.EPC
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.GAS_SAFETY
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.LICENSING
-import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.ReactivationTaskType.TENANCY_DETAILS
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType.ELECTRICAL_SAFETY
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType.EPC
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType.GAS_SAFETY
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType.LICENSING
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType.TENANCY_DETAILS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
