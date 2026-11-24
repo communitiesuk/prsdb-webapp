@@ -34,8 +34,8 @@ class DeactivateInactiveLandlordsTaskLogic(
     private val deactivationService: DeactivationService,
 ) {
     fun deactivateInactiveLandlords(): Int {
-        val neverRegisteredIds = deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()
-        val noActivePropertiesIds = deactivationService.getIdsOfLandlordsWithNoActiveProperties()
+        val neverRegisteredIds = deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty()
+        val noActivePropertiesIds = deactivationService.getIdsOfLandlordsWhoPreviouslyRegisteredAPropertyButHaveNoActiveProperties()
         println(
             "Found ${neverRegisteredIds.size} landlords who have not registered a property within " +
                 "$LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS months and ${noActivePropertiesIds.size} landlords " +

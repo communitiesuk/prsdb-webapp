@@ -403,12 +403,12 @@ class DeactivationServiceTests {
     }
 
     @Test
-    fun `getIdsOfLandlordsWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago as the cutoff`() {
+    fun `getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago as the cutoff`() {
         val landlords = listOf(MockLandlordData.createIndividualLandlord(), MockLandlordData.createIndividualLandlord())
         whenever(landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(landlordCutoff()))
             .thenReturn(landlords)
 
-        assertEquals(landlords.map { it.id }, deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty())
+        assertEquals(landlords.map { it.id }, deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty())
     }
 
     @Test

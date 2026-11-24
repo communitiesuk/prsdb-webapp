@@ -22,8 +22,8 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
 
     @Test
     fun `deactivateInactiveLandlords deactivates each candidate from both rules once and returns zero`() {
-        whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
-        whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(2L, 3L))
+        whenever(deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
+        whenever(deactivationService.getIdsOfLandlordsWhoPreviouslyRegisteredAPropertyButHaveNoActiveProperties()).thenReturn(listOf(2L, 3L))
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenReturn(true)
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(false)
@@ -38,8 +38,8 @@ class DeactivateInactiveLandlordsTaskApplicationRunnerTests {
 
     @Test
     fun `deactivateInactiveLandlords carries on after a failure and returns the number of failures`() {
-        whenever(deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
-        whenever(deactivationService.getIdsOfLandlordsWithNoActiveProperties()).thenReturn(listOf(3L))
+        whenever(deactivationService.getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty()).thenReturn(listOf(1L, 2L))
+        whenever(deactivationService.getIdsOfLandlordsWhoPreviouslyRegisteredAPropertyButHaveNoActiveProperties()).thenReturn(listOf(3L))
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(1L)).thenThrow(RuntimeException("DB error"))
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(2L)).thenReturn(true)
         whenever(deactivationService.deactivateLandlordIfNoActiveProperties(3L)).thenReturn(true)

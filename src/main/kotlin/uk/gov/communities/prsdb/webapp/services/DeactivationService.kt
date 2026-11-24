@@ -83,7 +83,7 @@ class DeactivationService(
         return failureCount
     }
 
-    fun getIdsOfLandlordsWhoNeverRegisteredAProperty(): List<Long> {
+    fun getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty(): List<Long> {
         val cutoff =
             LocalDate
                 .now(DateTimeHelper.UK_ZONE)
@@ -93,10 +93,9 @@ class DeactivationService(
         return landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(cutoff).map { it.id }
     }
 
-    fun getIdsOfLandlordsWithNoActiveProperties(): List<Long> =
+    fun getIdsOfLandlordsWhoPreviouslyRegisteredAPropertyButHaveNoActiveProperties(): List<Long> =
         landlordRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
 
-    // Re-checks the landlord in case they changed after the candidate queries ran. Returns whether they were deactivated.
     @Transactional
     fun deactivateLandlordIfNoActiveProperties(landlordId: Long): Boolean {
         val landlord =
