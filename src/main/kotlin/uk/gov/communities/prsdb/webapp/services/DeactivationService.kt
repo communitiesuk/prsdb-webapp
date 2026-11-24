@@ -104,7 +104,7 @@ class DeactivationService(
             }
         if (!landlord.isActive || propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)) return false
 
-        deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
         return true
     }
 
@@ -118,6 +118,7 @@ class DeactivationService(
     fun deactivateLandlord(
         landlord: Landlord,
         reason: LandlordDeactivationReason,
+        sendEmail: Boolean,
     ) {
         check(landlord.isActive) { "Landlord ${landlord.id} is already inactive" }
         check(!propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
@@ -126,7 +127,7 @@ class DeactivationService(
         markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
 
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
-        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+        if (sendEmail && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             landlordDeactivatedEmailService.sendLandlordDeactivatedEmail(landlord, reason)
         }
     }

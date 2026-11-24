@@ -69,7 +69,7 @@ class DeactivationServiceTests {
     fun `deactivateLandlord marks an active landlord inactive and saves it without emailing them when ACTIVE_INACTIVE is disabled`() {
         val landlord = MockLandlordData.createIndividualLandlord()
 
-        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
 
         assertFalse(landlord.isActive)
         assertEquals(today(), landlord.lastDeactivatedDate)
@@ -82,9 +82,20 @@ class DeactivationServiceTests {
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
         val landlord = MockLandlordData.createIndividualLandlord()
 
-        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
 
         verify(landlordDeactivatedEmailService).sendLandlordDeactivatedEmail(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+    }
+
+    @Test
+    fun `deactivateLandlord does not email the landlord when sendEmail is false`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        val landlord = MockLandlordData.createIndividualLandlord()
+
+        deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = false)
+
+        assertFalse(landlord.isActive)
+        verifyNoInteractions(landlordDeactivatedEmailService)
     }
 
     @Test
@@ -93,7 +104,7 @@ class DeactivationServiceTests {
         landlord.deactivate(ORIGINAL_DATE)
 
         assertThrows<IllegalStateException> {
-            deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+            deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
         }
 
         assertEquals(ORIGINAL_DATE, landlord.lastDeactivatedDate)
@@ -107,7 +118,7 @@ class DeactivationServiceTests {
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)).thenReturn(true)
 
         assertThrows<IllegalStateException> {
-            deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED)
+            deactivationService.deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
         }
 
         assertTrue(landlord.isActive)
