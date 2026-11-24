@@ -402,8 +402,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `the people responsible tab shows the saved property manager as a read only card`() {
-                // Property 37 is seeded with a property manager
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
@@ -412,13 +411,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
                 assertThat(detailsPage.propertyManagerUpdateLink.locator)
-                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(37))
+                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(PROPERTY_WITH_PROPERTY_MANAGER_ID))
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
             }
 
             @Test
             fun `the people responsible tab shows that no property manager is used when there is none`() {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
@@ -678,8 +677,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `the people responsible tab shows the saved property manager without an update link`() {
-                // Property 37 is seeded with a property manager
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
@@ -691,7 +689,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `the people responsible tab shows that no property manager is used without a change link`() {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITHOUT_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
@@ -875,7 +873,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `the landlord view does not show the property manager section`() {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
 
             assertThat(detailsPage.propertyManagerSection).hasCount(0)
         }
@@ -1234,6 +1232,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
         private const val PROPERTY_WITH_SUPERIOR_LANDLORDS_ID = 57L
         private const val PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID = 1L
+        private const val PROPERTY_WITH_PROPERTY_MANAGER_ID = 37L
+        private const val PROPERTY_WITHOUT_PROPERTY_MANAGER_ID = 1L
     }
 }
 
