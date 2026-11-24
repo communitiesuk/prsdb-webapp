@@ -2,13 +2,13 @@ Dear ((landlord name)),
 
 Your property has been deactivated because the registration was not completed.
 
-## Property
+# Property
 
 ((property address))
 
 Property Registration Number: ((prn number))
 
-## What you need to do
+# What you need to do
 
 ## If your property is occupied
 
@@ -30,7 +30,7 @@ You can reactivate it at any time if needed.
 
 The local council can see the registration information until it’s deleted.
 
-((landlord deactivated??## Your landlord account))
+((landlord deactivated??# Your landlord account))
 
 ((landlord deactivated??You have no active property registrations, so your landlord account has been deactivated.))
 
