@@ -8,10 +8,13 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import org.hibernate.envers.Audited
+import org.hibernate.envers.RelationTargetAuditMode
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
 
 @Entity
 @Table(name = "organisational_landlord_user")
+@Audited
 class OrganisationalLandlordUser() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +26,7 @@ class OrganisationalLandlordUser() : ModifiableAuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     lateinit var baseUser: PrsdbUser
 
     @Column(nullable = false)

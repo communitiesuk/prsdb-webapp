@@ -8,6 +8,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
+import org.hibernate.envers.Audited
+import org.hibernate.envers.RelationTargetAuditMode
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -16,6 +18,7 @@ import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
+@Audited
 class OrganisationalLandlord() : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
@@ -26,6 +29,7 @@ class OrganisationalLandlord() : Landlord() {
 
     @ManyToOne
     @JoinColumn(name = "organisation_address_id")
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     override lateinit var address: Address
 
     /**
@@ -90,6 +94,7 @@ class OrganisationalLandlord() : Landlord() {
 
     @ManyToOne
     @JoinColumn(name = "organisation_lead_trustee_address_id")
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     var leadTrusteeAddress: Address? = null
 
     @Column(name = "organisation_main_contact_name")
