@@ -43,15 +43,13 @@ class FreeholderContactTypeStepConfig :
         if (formModel?.contactType != null) return defaultContent
 
         val editingFreeholder = state.editingFreeholder ?: return defaultContent
-        val contactType =
+        val prepopulatedFormModel = formModel ?: FreeholderContactTypeFormModel()
+        prepopulatedFormModel.contactType =
             when {
                 editingFreeholder.email != null -> FreeholderContactType.EMAIL
                 editingFreeholder.address != null -> FreeholderContactType.POSTAL_ADDRESS
-                else -> return defaultContent
+                else -> null
             }
-
-        val prepopulatedFormModel = formModel ?: FreeholderContactTypeFormModel()
-        prepopulatedFormModel.contactType = contactType
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 
