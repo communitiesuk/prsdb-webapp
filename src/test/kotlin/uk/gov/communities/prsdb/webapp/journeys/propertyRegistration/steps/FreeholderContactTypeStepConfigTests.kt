@@ -118,7 +118,7 @@ class FreeholderContactTypeStepConfigTests {
     @ParameterizedTest
     @MethodSource("provideEditedFreeholders")
     fun `resolvePageContent preselects contact type only when contact details are available`(
-        editedFreeholder: FreeholderDataModel,
+        editedFreeholder: FreeholderDataModel?,
         expectedContactType: FreeholderContactType?,
     ) {
         // Arrange
@@ -157,6 +157,7 @@ class FreeholderContactTypeStepConfigTests {
                     ),
                     null,
                 ),
+                Arguments.of(named("adding a new freeholder", null), null),
             )
     }
 }
