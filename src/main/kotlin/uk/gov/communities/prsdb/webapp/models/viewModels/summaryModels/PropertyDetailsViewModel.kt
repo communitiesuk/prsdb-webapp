@@ -109,6 +109,7 @@ class PropertyDetailsViewModel(
     val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
+    // TODO PDJB-2016: remove this legacy ownership section when the ASSOCIATED_PARTIES flag is removed.
     val ownershipSectionBeforePdjb955: List<SummaryListRowViewModel> =
         if (showOwnershipSectionOnPropertyDetailsTab) listOf(ownershipTypeRowBeforePdjb955()) else emptyList()
 
