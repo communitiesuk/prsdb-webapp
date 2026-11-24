@@ -119,7 +119,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import java.security.Principal
@@ -840,7 +840,7 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
-    override var paymentQuote: PropertyRegistrationPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
+    override var paymentQuote: PropertyPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
 
     override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
     override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
@@ -929,7 +929,7 @@ interface PropertyRegistrationJourneyState :
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
 
     // Payment steps (behind PAYMENTS flag)
-    var paymentQuote: PropertyRegistrationPaymentQuote?
+    var paymentQuote: PropertyPaymentQuote?
     val paymentSummaryStep: PaymentSummaryStep
     val paymentReturnStep: PaymentReturnStep
     val paymentStatusCheckStep: PaymentStatusCheckStep

@@ -26,9 +26,9 @@ class ActivationService(
             checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
 
         propertyOwnership.reactivate()
-        if (!RenewalDateHelper.isOnAnniversary(propertyOwnership.renewalDate, reactivatingLandlordAnniversary)) {
-            propertyOwnership.updateRenewalDate(RenewalDateHelper.getRenewalDate(reactivatingLandlordAnniversary))
-        }
+        propertyOwnership.updateRenewalDate(
+            RenewalDateHelper.getRenewalDateOnReactivation(propertyOwnership.renewalDate, reactivatingLandlordAnniversary),
+        )
         propertyOwnershipRepository.save(propertyOwnership)
 
         propertyOwnership.landlords.forEach { reactivateLandlordIfInactive(it) }

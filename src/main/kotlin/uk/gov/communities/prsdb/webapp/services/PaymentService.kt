@@ -28,9 +28,9 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -50,6 +50,7 @@ class PaymentService(
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val userToLandlordService: UserToLandlordService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val paymentReconciliationService: PaymentReconciliationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val messageSource: MessageSource,
@@ -58,16 +59,35 @@ class PaymentService(
 ) {
     private val gratisPeriodEndDate: LocalDate = LocalDate.parse(gratisPeriodEndDate)
 
-    fun getPropertyRegistrationPaymentQuote(
-        quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
-    ): PropertyRegistrationPaymentQuote {
+    fun getPropertyRegistrationPaymentQuote(quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE)): PropertyPaymentQuote {
         val anniversary = userToLandlordService.getCurrentLandlordForUser().anniversary ?: MonthDay.from(quoteDate)
         val renewalDate = RenewalDateHelper.getRenewalDate(anniversary, quoteDate)
 
-        return PropertyRegistrationPaymentQuote(
+        return PropertyPaymentQuote(
             amountInPence = calculateProRatedFeeInPence(renewalDate, quoteDate),
             quoteDate = quoteDate,
             renewalDate = renewalDate,
+        )
+    }
+
+    fun getPropertyReactivationPaymentQuote(
+        propertyOwnershipId: Long,
+        quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+    ): PropertyPaymentQuote {
+        val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
+        val reactivatingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val anniversary =
+            checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
+
+        val renewalDate = RenewalDateHelper.getRenewalDateOnReactivation(propertyOwnership.renewalDate, anniversary, quoteDate)
+        val paymentStartDate = maxOf(quoteDate, propertyOwnership.paidForUntil)
+        val isUnpaidPeriodAdded = renewalDate.isAfter(propertyOwnership.renewalDate) && renewalDate.isAfter(paymentStartDate)
+
+        return PropertyPaymentQuote(
+            amountInPence = if (isUnpaidPeriodAdded) calculateProRatedFeeInPence(renewalDate, paymentStartDate) else 0,
+            quoteDate = quoteDate,
+            renewalDate = renewalDate,
+            paymentStartDate = paymentStartDate,
         )
     }
 
@@ -78,7 +98,7 @@ class PaymentService(
     fun createPropertyRegistrationPayment(
         journeyId: String,
         email: String,
-        quote: PropertyRegistrationPaymentQuote,
+        quote: PropertyPaymentQuote,
     ): PropertyRegistrationPaymentCreationResult {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 

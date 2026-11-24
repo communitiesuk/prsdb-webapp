@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -55,8 +56,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
@@ -110,6 +111,9 @@ class PaymentServiceTests {
 
     @Mock
     private lateinit var mockPaymentReconciliationService: PaymentReconciliationService
+
+    @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
@@ -429,6 +433,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(service.calculateProRatedFeeInPence(expectedRenewalDate, quoteDate), quote.amountInPence)
             assertEquals(quoteDate, quote.quoteDate)
+            assertEquals(quoteDate, quote.paymentStartDate)
             assertEquals(expectedRenewalDate, quote.renewalDate)
             verifyNoInteractions(mockGovUkPayClient)
         }
@@ -483,6 +488,176 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class PropertyReactivationPaymentQuoteTests {
+        private val propertyOwnershipId = 1L
+
+        private fun setUpInactivePropertyForCurrentLandlord(
+            renewalDate: LocalDate,
+            anniversary: MonthDay?,
+            paidForUntil: LocalDate? = null,
+        ) {
+            val landlord = MockLandlordData.createIndividualLandlord().apply { anniversary?.let { setAnniversaryIfAbsent(it) } }
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = propertyOwnershipId,
+                    isActive = false,
+                    landlords = mutableSetOf(landlord),
+                    renewalDate = renewalDate,
+                    paidForUntil = paidForUntil,
+                )
+            whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+                .thenReturn(propertyOwnership)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote pro-rates from the quote date to the new renewal date when paidForUntil has passed`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2027, 12, 1), anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // c = 46, g = 0, d = 366 -> 251.36
+            assertEquals(251, quote.amountInPence)
+            assertTrue(quote.isPaymentRequired)
+            assertEquals(quoteDate, quote.quoteDate)
+            assertEquals(quoteDate, quote.paymentStartDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote pro-rates from paidForUntil when it is after the quote date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 2, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = paidForUntil, anniversary = MonthDay.of(Month.JUNE, 15))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // c = 135, g = 0, d = 366 -> 737.70
+            assertEquals(737, quote.amountInPence)
+            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote excludes gratis days after the payment start date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2027, 6, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2027, 8, 1), anniversary = MonthDay.of(Month.JANUARY, 15))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // payment start 2027-08-01, renewal 2028-01-15: c = 167, g = 106, d = 365 -> 334.25
+            assertEquals(334, quote.amountInPence)
+            assertEquals(LocalDate.of(2028, 1, 15), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when the new renewal date is earlier than the old one`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2028, 12, 1), anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertFalse(quote.isPaymentRequired)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when the renewal date is on the landlord's anniversary`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = renewalDate, anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when paidForUntil covers the new renewal date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 6, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 2, 1),
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when paidForUntil is the new renewal date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 2, 1),
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(paidForUntil, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing and keeps a past renewal date that is on the landlord's anniversary`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2026, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = renewalDate, anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote throws when the current landlord has no anniversary`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2028, 2, 1), anniversary = null)
+
+            // Act & Assert
+            assertThrows<IllegalStateException> {
+                paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, LocalDate.of(2028, 1, 15))
+            }
+        }
+    }
+
+    @Nested
     inner class CreatePropertyRegistrationPaymentTests {
         @Test
         fun `createPropertyRegistrationPayment requests a GOV UK Pay payment for the pro-rated fee`() {
@@ -525,7 +700,7 @@ class PaymentServiceTests {
                 .thenReturn(incompleteProperty)
             val expectedRenewalDate = LocalDate.of(2028, 3, 1)
             val quote =
-                PropertyRegistrationPaymentQuote(
+                PropertyPaymentQuote(
                     amountInPence = 1234,
                     quoteDate = LocalDate.of(2027, 10, 10),
                     renewalDate = expectedRenewalDate,
@@ -1342,6 +1517,7 @@ class PaymentServiceTests {
         mockSavedJourneyStateRepository,
         mockUserToLandlordService,
         mockPropertyRegistrationService,
+        mockPropertyOwnershipService,
         mockPaymentReconciliationService,
         mockAbsoluteUrlProvider,
         messageSource,

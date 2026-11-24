@@ -75,4 +75,20 @@ class RenewalDateHelperTests {
     fun `isOnAnniversary returns false for 1 Mar on a leap year when the anniversary is 29 Feb`() {
         assertFalse(RenewalDateHelper.isOnAnniversary(LocalDate.of(2028, 3, 1), MonthDay.of(2, 29)))
     }
+
+    @Test
+    fun `getRenewalDateOnReactivation keeps the current renewal date when it is on the anniversary, even if it has passed`() {
+        assertEquals(
+            LocalDate.of(2020, 6, 15),
+            RenewalDateHelper.getRenewalDateOnReactivation(LocalDate.of(2020, 6, 15), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
+        )
+    }
+
+    @Test
+    fun `getRenewalDateOnReactivation moves to the next anniversary after the current date when the current renewal date is not on it`() {
+        assertEquals(
+            LocalDate.of(2027, 6, 15),
+            RenewalDateHelper.getRenewalDateOnReactivation(LocalDate.of(2026, 1, 1), MonthDay.of(6, 15), LocalDate.of(2027, 1, 10)),
+        )
+    }
 }
