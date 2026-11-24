@@ -876,7 +876,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag.
     inner class OwnershipBeforePdjb955 {
         @Test
-        fun `local council view no longer shows the ownership row on the property record`() {
+        fun `local council view hides the ownership section and row on the property record tab when associated parties is enabled`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
             assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
