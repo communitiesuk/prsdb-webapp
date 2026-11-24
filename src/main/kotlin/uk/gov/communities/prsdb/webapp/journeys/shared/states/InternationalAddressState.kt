@@ -33,6 +33,7 @@ interface InternationalAddressState : JourneyState {
                     townOrCity = manualAddressData.notNullValue(ManualAddressFormModel::townOrCity),
                     county = manualAddressData.county,
                     postcode = manualAddressData.notNullValue(ManualAddressFormModel::postcode),
+                    country = manualAddressData.country,
                 ).copy(isInternational = true)
         }
 }

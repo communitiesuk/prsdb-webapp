@@ -26,6 +26,7 @@ class InternationalAddressTaskTests {
             addressLineOne = "1 Rue Test"
             townOrCity = "Paris"
             postcode = "75001"
+            country = "France"
         }
 
     @Test
@@ -61,6 +62,7 @@ class InternationalAddressTaskTests {
                     internationalManualAddressFormModel.addressLineOne!!,
                     internationalManualAddressFormModel.townOrCity!!,
                     internationalManualAddressFormModel.postcode!!,
+                    country = internationalManualAddressFormModel.country,
                 ).copy(isInternational = true)
         assertEquals(expectedResult, result)
     }
