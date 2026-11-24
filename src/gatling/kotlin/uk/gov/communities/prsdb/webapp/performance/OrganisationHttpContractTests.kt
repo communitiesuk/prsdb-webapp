@@ -22,7 +22,7 @@ class OrganisationHttpContractTests {
         OrganisationServer().use { server ->
             val result = runSimulation(server)
             assertEquals(0, result.exitCode, result.output)
-            assertEquals(18, server.posts.size)
+            assertEquals(22, server.posts.size)
             val profilePosts = server.posts.filter { "value" in it }
             assertEquals(6, profilePosts.size)
             assertEquals(
@@ -37,7 +37,7 @@ class OrganisationHttpContractTests {
         OrganisationServer().use { server ->
             val result = runSimulation(server)
             assertEquals(0, result.exitCode, result.output)
-            assertEquals(18, server.posts.size)
+            assertEquals(22, server.posts.size)
             assertEquals(
                 setOf("1 PRSDB Performance Square, EG1 2AA", "MANUAL"),
                 server.posts.mapNotNull { it["address"] }.toSet(),
@@ -135,7 +135,7 @@ class OrganisationHttpContractTests {
 
                 fun addressRow() =
                     row("Organisation address", address.replace(", ", "<br>")) +
-                        """<a href="$details/$addressRoute/lookup-address">Change</a>"""
+                        """<a href="$details/$addressRoute/address-in-uk">Change</a>"""
 
                 fun contactRows() =
                     """<div id="organisation-contacts">
@@ -186,6 +186,8 @@ class OrganisationHttpContractTests {
                                     if (save) values[fields.getValue(route).first] = submitted.getValue(fields.getValue(route).first)
                                     redirect(details)
                                 }
+                                route == addressRoute && stage == "address-in-uk" && submitted["addressInUk"] == "true" ->
+                                    redirect("$details/$addressRoute/lookup-address?journeyId=org-journey")
                                 route == addressRoute && stage == "lookup-address" ->
                                     redirect("$details/$addressRoute/select-address?journeyId=org-journey")
                                 route == addressRoute && stage == "select-address" && submitted["address"] == "MANUAL" ->
@@ -226,6 +228,13 @@ class OrganisationHttpContractTests {
                             },
                         )
                     }
+                    route == addressRoute && stage == "address-in-uk" ->
+                        body =
+                            form(
+                                "$path?journeyId=org-journey",
+                                """<input type="radio" name="addressInUk" value="true">
+                                    <input type="radio" name="addressInUk" value="false">""",
+                            )
                     route == addressRoute && stage == "lookup-address" ->
                         body = form("$path?journeyId=org-journey", """<input name="postcode"><input name="houseNameOrNumber">""")
                     route == addressRoute && stage == "select-address" ->
