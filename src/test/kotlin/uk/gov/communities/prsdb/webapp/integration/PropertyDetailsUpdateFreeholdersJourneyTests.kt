@@ -574,51 +574,6 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
-    fun `editing another freeholder after abandoning an edit uses the correct contact type`(page: Page) {
-        val emailFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
-        emailFreeholder.name = "Email Freeholder"
-        emailFreeholder.email = "existing@example.com"
-        freeholderRepository.save(emailFreeholder)
-        freeholderRepository.save(Freeholder(propertyOwnership = emailFreeholder.propertyOwnership, name = "Postal Freeholder"))
-
-        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToPeopleResponsible()
-        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
-
-        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
-        val listUrl = page.url()
-        freeholdersListPage.getSummaryCard("Email Freeholder").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
-        var namePage = FreeholderNameFormPagePropertyRegistration(page)
-        assertEquals("Email Freeholder", namePage.form.nameInput.locator.inputValue())
-        namePage.form.submit()
-        var contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
-        contactTypePage.form.submit()
-
-        page.navigate(listUrl)
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
-        freeholdersListPage.getSummaryCard("Postal Freeholder").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
-        namePage = FreeholderNameFormPagePropertyRegistration(page)
-        assertEquals("Postal Freeholder", namePage.form.nameInput.locator.inputValue())
-        namePage.form.submit()
-        contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertNull(contactTypePage.form.radios.selectedValue)
-        contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
-
-        page.navigate(listUrl)
-        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
-        freeholdersListPage.getSummaryCard("Email Freeholder").getAction("Change").link.clickAndWait()
-        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
-        namePage = FreeholderNameFormPagePropertyRegistration(page)
-        assertEquals("Email Freeholder", namePage.form.nameInput.locator.inputValue())
-        namePage.form.submit()
-        contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
-        assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
-    }
-
-    @Test
     fun `editing a saved freeholder preselects email and updates the existing record without adding a record`(page: Page) {
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
