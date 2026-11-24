@@ -1,6 +1,6 @@
 A landlord has listed you as the property manager of a property they’re renting out.
 
-This has happened because landlords must [register their rental property](((dashboard url))) and tell us everyone who has responsibility for it.
+This has happened because landlords must [register their rental property](((gds start page))) and tell us everyone who has responsibility for it.
 
 ^ This email does not give you access to this property’s registration. If you need access, check your inbox for another email or contact the landlord.
 

@@ -94,7 +94,7 @@ class AssociatedPartyNotificationServiceTests {
             propertyManagerEmail = "james.smith@example.com",
             propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
-            dashboardUrl = "https://example.test/landlord/dashboard",
+            gdsStartPageUrl = "https://example.test/start-page",
             privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
         )
 
@@ -429,7 +429,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     private fun stubPropertyManagerAddedToPropertyEmailUrls() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.test/landlord/dashboard"))
+        whenever(absoluteUrlProvider.buildGdsStartPageUrl()).thenReturn("https://example.test/start-page")
         whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
     }
 

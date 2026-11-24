@@ -115,7 +115,7 @@ class AssociatedPartyNotificationService(
             propertyManagerEmail = propertyManager.email,
             propertyAddress = propertyOwnership.address.toMultiLineAddress(),
             landlords = landlordsRentingOutProperty(propertyOwnership),
-            dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+            gdsStartPageUrl = absoluteUrlProvider.buildGdsStartPageUrl(),
             privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
         )
 
