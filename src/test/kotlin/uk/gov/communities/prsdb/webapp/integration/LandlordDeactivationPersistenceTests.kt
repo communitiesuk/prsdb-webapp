@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -19,9 +18,6 @@ import java.time.LocalDate
 class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("data-landlords-for-deactivation-task.sql") {
     @Autowired
     private lateinit var landlordRepository: LandlordRepository
-
-    @Autowired
-    private lateinit var landlordDeactivationRepository: LandlordDeactivationRepository
 
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -38,14 +34,14 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
                 .atStartOfDay(DateTimeHelper.UK_ZONE)
                 .toInstant()
 
-        val ids = landlordDeactivationRepository.findIdsOfActiveLandlordsWithNoRegisteredPropertyCreatedBefore(cutoff)
+        val ids = landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(cutoff).map { it.id }
 
         assertEquals(listOf(OLD_LANDLORD_WITH_NO_PROPERTY_ID), ids)
     }
 
     @Test
     fun `no active properties query only returns active landlords whose properties are all inactive`() {
-        val ids = landlordDeactivationRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
+        val ids = landlordRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
 
         assertEquals(listOf(LANDLORD_WITH_ONLY_INACTIVE_PROPERTY_ID), ids)
     }
@@ -57,7 +53,6 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
                 DeactivationService(
                     propertyOwnershipRepository,
                     landlordRepository,
-                    landlordDeactivationRepository,
                     mock(),
                     mock(),
                     transactionTemplate,
@@ -79,7 +74,7 @@ class LandlordDeactivationPersistenceTests : IntegrationTestWithMutableData("dat
         assertEquals(LocalDate.of(2026, 1, 1), landlordRepository.findById(ALREADY_INACTIVE_LANDLORD_ID).get().lastDeactivatedDate)
 
         assertEquals(0, taskLogic.deactivateInactiveLandlords())
-        assertTrue(landlordDeactivationRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties().isEmpty())
+        assertTrue(landlordRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties().isEmpty())
     }
 
     companion object {

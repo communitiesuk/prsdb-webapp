@@ -29,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -46,9 +45,6 @@ class DeactivationServiceTests {
 
     @Mock
     private lateinit var landlordRepository: LandlordRepository
-
-    @Mock
-    private lateinit var landlordDeactivationRepository: LandlordDeactivationRepository
 
     @Mock
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
@@ -408,10 +404,11 @@ class DeactivationServiceTests {
 
     @Test
     fun `getIdsOfLandlordsWhoNeverRegisteredAProperty uses the start of the UK day 3 months ago as the cutoff`() {
-        whenever(landlordDeactivationRepository.findIdsOfActiveLandlordsWithNoRegisteredPropertyCreatedBefore(landlordCutoff()))
-            .thenReturn(listOf(1L, 2L))
+        val landlords = listOf(MockLandlordData.createIndividualLandlord(), MockLandlordData.createIndividualLandlord())
+        whenever(landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(landlordCutoff()))
+            .thenReturn(landlords)
 
-        assertEquals(listOf(1L, 2L), deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty())
+        assertEquals(landlords.map { it.id }, deactivationService.getIdsOfLandlordsWhoNeverRegisteredAProperty())
     }
 
     @Test

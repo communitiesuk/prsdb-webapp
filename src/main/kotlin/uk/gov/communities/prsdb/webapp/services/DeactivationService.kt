@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordDeactivationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -25,7 +24,6 @@ import java.time.LocalDate
 class DeactivationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val landlordRepository: LandlordRepository,
-    private val landlordDeactivationRepository: LandlordDeactivationRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentPropertyDeactivatedEmailService: LettingAgentPropertyDeactivatedEmailService,
     private val transactionTemplate: TransactionTemplate,
@@ -92,11 +90,11 @@ class DeactivationService(
                 .minusMonths(LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS.toLong())
                 .atStartOfDay(DateTimeHelper.UK_ZONE)
                 .toInstant()
-        return landlordDeactivationRepository.findIdsOfActiveLandlordsWithNoRegisteredPropertyCreatedBefore(cutoff)
+        return landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(cutoff).map { it.id }
     }
 
     fun getIdsOfLandlordsWithNoActiveProperties(): List<Long> =
-        landlordDeactivationRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
+        landlordRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
 
     // Re-checks the landlord in case they changed after the candidate queries ran. Returns whether they were deactivated.
     @Transactional
