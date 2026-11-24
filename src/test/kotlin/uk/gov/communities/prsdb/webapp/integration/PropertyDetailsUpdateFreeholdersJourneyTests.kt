@@ -370,6 +370,36 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
+    fun `editing an existing postal freeholder leaves contact type and address lookup blank`(page: Page) {
+        val existingFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        freeholderRepository.save(
+            Freeholder(
+                propertyOwnership = existingFreeholder.propertyOwnership,
+                name = "Postal Freeholder",
+            ),
+        )
+
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+            .getSummaryCard("Postal Freeholder")
+            .getAction("Change")
+            .link
+            .clickAndWait()
+
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+        val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
+        assertNull(contactTypePage.form.radios.selectedValue)
+        contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("")
+    }
+
+    @Test
     fun `resuming an abandoned freeholder update after another property update discards earlier progress`(page: Page) {
         val landlordAccountEmail = "alex.surname@example.com"
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)

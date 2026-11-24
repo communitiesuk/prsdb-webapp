@@ -307,7 +307,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `Changing a freeholder with a postal address does not preselect a contact type but pre-fills their address`(page: Page) {
+        fun `editing a registration freeholder leaves contact type blank and pre-fills postal address after selection`(page: Page) {
             val freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
                     freeholders =
