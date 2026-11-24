@@ -508,4 +508,40 @@ class PropertyReactivationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(updatedCheckAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("100")
         }
     }
+
+    @Nested
+    inner class ConfirmMissingComplianceStep {
+        @Test
+        fun `the confirm missing compliance page shows only the missing certificates with reactivation content`(page: Page) {
+            val confirmPage = navigator.skipToPropertyReactivationConfirmMissingCompliancePage(inactivePropertyOwnershipId)
+
+            assertThatComponent(confirmPage.heading).containsText("Confirm missing compliance certificates")
+            assertThatComponent(confirmPage.warning).isVisible()
+            assertThatComponent(confirmPage.electricalSectionHeading).isVisible()
+            assertThatComponent(confirmPage.gasSectionHeading).isHidden()
+            assertThatComponent(confirmPage.epcSectionHeading).isHidden()
+            assertThatComponent(confirmPage.areYouSureLegend).containsText("Are you sure you want to continue?")
+            assertThatComponent(confirmPage.form.submitButton).containsText("Confirm and continue")
+            assertThatComponent(confirmPage.form.sectionHeader).isHidden()
+
+            confirmPage.backLink.clickAndWait()
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+
+        @Test
+        fun `submitting with no option selected shows the reactivation error`() {
+            val confirmPage = navigator.skipToPropertyReactivationConfirmMissingCompliancePage(inactivePropertyOwnershipId)
+
+            confirmPage.form.submit()
+
+            assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this reactivation")
+        }
+
+        @Test
+        fun `selecting no, go back returns to the check answers page`(page: Page) {
+            navigator.skipToPropertyReactivationConfirmMissingCompliancePage(inactivePropertyOwnershipId).submitNo()
+
+            assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments)
+        }
+    }
 }

@@ -3,11 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -79,6 +82,35 @@ class ConfirmMissingComplianceStepConfigTests {
 
         // Assert
         assertEquals("forms/confirmMissingCompliance", result)
+    }
+
+    @Test
+    fun `getStepSpecificContent includes the missing certificate flags and journey specific keys`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isGasCertMissing).thenReturn(true)
+        whenever(mockState.isElectricalCertMissing).thenReturn(false)
+        whenever(mockState.isEpcMissing).thenReturn(true)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(true, content["isGasMissing"])
+        assertEquals(false, content["isElectricalMissing"])
+        assertEquals(true, content["isEpcMissing"])
+        assertEquals("registerProperty.confirmMissingCompliance.areYouSure.heading", content["areYouSureHeading"])
+        assertEquals("registerProperty.confirmMissingCompliance.button", content["submitButtonText"])
+    }
+
+    @Test
+    fun `afterStepIsReached throws when answers changed since confirmation`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.answersChangedSinceConfirmation).thenReturn(true)
+
+        // Act & Assert
+        assertThrows<CyaDataHasChangedException> { stepConfig.afterStepIsReached(mockState) }
     }
 
     private fun setupStepConfig(): ConfirmMissingComplianceStepConfig {

@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasCertUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasSafetyAnswersFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmMissingComplianceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmationPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicExpiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicIssueDateFormPagePropertyReactivation
@@ -148,6 +149,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("1")
         assertThat(checkAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("400")
         checkAnswersPage.submit()
+
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyReactivation::class, urlArguments)
+        assertThat(confirmMissingCompliancePage.electricalSectionHeading).isVisible()
+        confirmMissingCompliancePage.submitYes()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
@@ -458,6 +464,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
 
         checkAnswersPage.submit()
+        assertPageIs(page, ConfirmMissingComplianceFormPagePropertyReactivation::class, urlArguments).submitYes()
 
         assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
         assertEquals(false, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
@@ -563,6 +570,28 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
         checkAnswers.backLink.clickAndWait()
         assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord skips the confirm missing compliance page when no compliance tasks are required`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        val propertyId = INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER
+        jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = false WHERE id = ?", propertyId)
+        jdbcTemplate.update(
+            "UPDATE property_compliance SET gas_safety_cert_provide_later = false, " +
+                "electrical_safety_cert_provide_later = false, epc_provide_later = false WHERE property_ownership_id = ?",
+            propertyId,
+        )
+        navigator.goToPropertyReactivationInfoPage(propertyId).submit()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+            .submitLicensingType(LicensingType.NO_LICENSING)
+
+        assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments).submit()
+
+        assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, propertyId))
     }
 
     @Test
