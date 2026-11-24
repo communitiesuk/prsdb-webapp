@@ -411,7 +411,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
                 assertThat(detailsPage.propertyManagerUpdateLink.locator)
-                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(PROPERTY_WITH_PROPERTY_MANAGER_ID))
+                    .hasAttribute(
+                        "href",
+                        UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(PROPERTY_WITH_PROPERTY_MANAGER_ID),
+                    )
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
             }
 
