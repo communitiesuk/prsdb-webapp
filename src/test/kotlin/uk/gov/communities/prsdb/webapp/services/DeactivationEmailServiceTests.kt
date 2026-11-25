@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.AutomatedPropertyDeactivationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
@@ -32,6 +33,9 @@ class DeactivationEmailServiceTests {
     private lateinit var mockPropertyEmailSender: EmailNotificationService<AutomatedPropertyDeactivationEmail>
 
     @Mock
+    private lateinit var mockInviteeCancellationEmailSender: EmailNotificationService<PropertyDeactivationInviteeCancellationEmail>
+
+    @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private val deactivationEmailService: DeactivationEmailService
@@ -40,6 +44,7 @@ class DeactivationEmailServiceTests {
                 mockLettingAgentEmailSender,
                 mockLandlordEmailSender,
                 mockPropertyEmailSender,
+                mockInviteeCancellationEmailSender,
                 absoluteUrlProvider,
             )
 
@@ -165,7 +170,32 @@ class DeactivationEmailServiceTests {
         verify(mockPropertyEmailSender).sendEmailToLandlord(eq(secondLandlord), any())
     }
 
+    @Test
+    fun `sendInviteeCancellationEmail sends the invitation cancelled email to the invitee`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5)
+
+        deactivationEmailService.sendInviteeCancellationEmail(propertyOwnership, INVITEE_EMAIL)
+
+        verify(mockInviteeCancellationEmailSender).sendEmail(
+            INVITEE_EMAIL,
+            PropertyDeactivationInviteeCancellationEmail(multiLineAddress = propertyOwnership.address.toMultiLineAddress()),
+        )
+    }
+
+    @Test
+    fun `sendInviteeCancellationEmail does not throw when sending the email fails`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5)
+        doThrow(IllegalStateException("Email delivery failed"))
+            .whenever(mockInviteeCancellationEmailSender)
+            .sendEmail(any(), any())
+
+        deactivationEmailService.sendInviteeCancellationEmail(propertyOwnership, INVITEE_EMAIL)
+
+        verify(mockInviteeCancellationEmailSender).sendEmail(any(), any())
+    }
+
     companion object {
         private const val AGENT_EMAIL = "agent@example.com"
+        private const val INVITEE_EMAIL = "invitee@example.com"
     }
 }
