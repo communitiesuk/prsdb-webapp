@@ -16,6 +16,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.TransactionStatus
@@ -25,10 +26,12 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -278,6 +281,68 @@ class DeactivationServiceTests {
         whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
             .thenReturn(true)
         whenever(lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(PROPERTY_ID)).thenReturn(delegation)
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+
+        deactivationService.deactivateProperty(PROPERTY_ID)
+
+        verifyNoInteractions(deactivationEmailService)
+    }
+
+    @Test
+    fun `deactivateProperty emails only the pending joint landlord invitees`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(jointLandlordInvitationRepository.findByRegisteredOwnership_Id(PROPERTY_ID))
+            .thenReturn(invitationsWithEachStatus(property))
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        deactivationService.deactivateProperty(PROPERTY_ID)
+
+        verify(deactivationEmailService).sendInviteeCancellationEmail(property, PENDING_EMAIL_ONE)
+        verify(deactivationEmailService).sendInviteeCancellationEmail(property, PENDING_EMAIL_TWO)
+        verify(deactivationEmailService, never()).sendInviteeCancellationEmail(property, EXPIRED_EMAIL)
+        verify(deactivationEmailService, never()).sendInviteeCancellationEmail(property, HIDDEN_EMAIL)
+        verifyNoMoreInteractions(deactivationEmailService)
+    }
+
+    @Test
+    fun `deactivateProperty only emails the pending joint landlord invitees after the transaction commits`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(jointLandlordInvitationRepository.findByRegisteredOwnership_Id(PROPERTY_ID))
+            .thenReturn(invitationsWithEachStatus(property))
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            deactivationService.deactivateProperty(PROPERTY_ID)
+
+            verifyNoInteractions(deactivationEmailService)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(deactivationEmailService).sendInviteeCancellationEmail(property, PENDING_EMAIL_ONE)
+            verify(deactivationEmailService).sendInviteeCancellationEmail(property, PENDING_EMAIL_TWO)
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `deactivateProperty does not email the joint landlord invitees when ACTIVE_INACTIVE is disabled`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(jointLandlordInvitationRepository.findByRegisteredOwnership_Id(PROPERTY_ID))
+            .thenReturn(invitationsWithEachStatus(property))
         whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
 
         deactivationService.deactivateProperty(PROPERTY_ID)
@@ -578,9 +643,32 @@ class DeactivationServiceTests {
         }
     }
 
+    private fun invitationsWithEachStatus(property: PropertyOwnership) =
+        listOf(
+            MockJointLandlordData.createJointLandlordInvitation(id = 1, email = PENDING_EMAIL_ONE, propertyOwnership = property),
+            MockJointLandlordData.createJointLandlordInvitation(id = 2, email = PENDING_EMAIL_TWO, propertyOwnership = property),
+            MockJointLandlordData.createJointLandlordInvitation(
+                id = 3,
+                email = EXPIRED_EMAIL,
+                propertyOwnership = property,
+                // An extra day beyond the expiry day, so a daylight saving change can't leave it unexpired
+                createdDate = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 2L, ChronoUnit.DAYS),
+            ),
+            MockJointLandlordData.createJointLandlordInvitation(
+                id = 4,
+                email = HIDDEN_EMAIL,
+                propertyOwnership = property,
+                isHidden = true,
+            ),
+        )
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
+        private const val PENDING_EMAIL_ONE = "pending.one@example.com"
+        private const val PENDING_EMAIL_TWO = "pending.two@example.com"
+        private const val EXPIRED_EMAIL = "expired@example.com"
+        private const val HIDDEN_EMAIL = "hidden@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
         private val REASONS = listOf(ReactivationTaskType.TENANCY_DETAILS)
 
