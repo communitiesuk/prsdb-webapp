@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.payment
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -19,11 +19,12 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
@@ -229,7 +230,7 @@ class PaymentSummaryStepConfigTests {
         stubAddressTask()
         stubSummaryDestination()
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
-        stubPaymentCreation(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted)
+        stubPaymentCreation(PaymentCreationResult.ConcurrentPaymentStarted)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -329,8 +330,8 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun stubPaymentCreation(
-        result: PropertyRegistrationPaymentCreationResult =
-            PropertyRegistrationPaymentCreationResult.NewPayment("https://pay.example.test/next"),
+        result: PaymentCreationResult =
+            PaymentCreationResult.NewPayment("https://pay.example.test/next"),
     ) {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockState.loggedInLandlordEmailAtStartOfJourney).thenReturn("landlord@example.com")

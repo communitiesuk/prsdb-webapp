@@ -54,9 +54,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
@@ -810,7 +810,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
+            assertEquals(PaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
         }
 
         @Test
@@ -940,7 +940,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
             verify(mockGovUkPayClient).cancelPayment("new-payment-id")
         }
 
@@ -963,7 +963,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
         }
 
         @Test

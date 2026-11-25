@@ -27,10 +27,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import java.time.Instant
 import java.time.LocalDate
@@ -99,7 +99,7 @@ class PaymentService(
         journeyId: String,
         email: String,
         quote: PropertyPaymentQuote,
-    ): PropertyRegistrationPaymentCreationResult {
+    ): PaymentCreationResult {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 
         val renewalDate = quote.renewalDate
@@ -128,11 +128,11 @@ class PaymentService(
             paymentRepository.saveAndFlush(
                 Payment.fromGovUkPay(createdGovUkPayPayment.payment, quote.quoteDate, renewalDate, incompleteProperty),
             )
-            PropertyRegistrationPaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
+            PaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
         } catch (exception: DataIntegrityViolationException) {
             if (!exception.isViolationOf(ONE_CREATED_PAYMENT_PER_DRAFT_CONSTRAINT)) throw exception
             cancelUnsavedPayment(createdGovUkPayPayment.payment.paymentId, journeyId)
-            PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted
+            PaymentCreationResult.ConcurrentPaymentStarted
         }
     }
 

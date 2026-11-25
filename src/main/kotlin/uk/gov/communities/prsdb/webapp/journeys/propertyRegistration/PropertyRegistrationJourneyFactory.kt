@@ -67,11 +67,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKindStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnsPropertyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentStatusCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
@@ -110,6 +105,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentFailedStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentOutcome
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentStatusCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom

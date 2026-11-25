@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.payment
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_FEE_GUIDANCE_URL
@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
@@ -109,8 +109,8 @@ class PaymentSummaryStepConfig(
                 quote,
             )
         return when (creationResult) {
-            is PropertyRegistrationPaymentCreationResult.NewPayment -> Destination.ExternalUrl(creationResult.nextUrl)
-            PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted -> Destination(state.paymentSummaryStep)
+            is PaymentCreationResult.NewPayment -> Destination.ExternalUrl(creationResult.nextUrl)
+            PaymentCreationResult.ConcurrentPaymentStarted -> Destination(state.paymentSummaryStep)
         }
     }
 
