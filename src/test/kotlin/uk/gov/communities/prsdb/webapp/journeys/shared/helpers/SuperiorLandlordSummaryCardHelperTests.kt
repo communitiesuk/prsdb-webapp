@@ -40,7 +40,11 @@ class SuperiorLandlordSummaryCardHelperTests {
         val earlier = createSuperiorLandlord(propertyOwnership, id = 1L)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(later, earlier), SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
+        val cards =
+            helper.getSummaryCards(
+                listOf(later, earlier),
+                SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
+            )
 
         // Assert
         assertEquals(
@@ -65,8 +69,10 @@ class SuperiorLandlordSummaryCardHelperTests {
         // Act
         val cards =
             helper
-                .getSummaryCards(listOf(postal, email, unknown), SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
-                .associateBy { it.title }
+                .getSummaryCards(
+                    listOf(postal, email, unknown),
+                    SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
+                ).associateBy { it.title }
 
         // Assert
         assertEquals(
@@ -94,12 +100,12 @@ class SuperiorLandlordSummaryCardHelperTests {
             helper
                 .getSummaryCards(
                     listOf(unknown, postal, email),
-                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
                 ).associateBy { it.title }
 
         // Assert
         assertEquals(
-            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
             cards.getValue("registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title").bodyTextKey,
         )
         assertEquals(SuperiorLandlordSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)

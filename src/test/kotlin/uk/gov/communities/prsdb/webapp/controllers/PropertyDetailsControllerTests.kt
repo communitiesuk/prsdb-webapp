@@ -223,7 +223,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 freeholderSummaryCardHelper.getSummaryCards(
                     propertyOwnership.freeholders,
-                    FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+                    FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY,
                 ),
             )
                 .thenReturn(expectedCards)
@@ -236,7 +236,7 @@ class PropertyDetailsControllerTests(
                 }
 
             verify(freeholderSummaryCardHelper)
-                .getSummaryCards(propertyOwnership.freeholders, FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
+                .getSummaryCards(propertyOwnership.freeholders, FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY)
         }
 
         @Test
@@ -254,7 +254,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 superiorLandlordSummaryCardHelper.getSummaryCards(
                     propertyOwnership.superiorLandlords,
-                    SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+                    SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
                 ),
             )
                 .thenReturn(expectedCards)
@@ -267,7 +267,10 @@ class PropertyDetailsControllerTests(
                 }
 
             verify(superiorLandlordSummaryCardHelper)
-                .getSummaryCards(propertyOwnership.superiorLandlords, SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
+                .getSummaryCards(
+                    propertyOwnership.superiorLandlords,
+                    SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
+                )
         }
 
         @Test
@@ -963,7 +966,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 freeholderSummaryCardHelper.getSummaryCards(
                     propertyOwnership.freeholders,
-                    FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+                    FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY,
                 ),
             )
                 .thenReturn(expectedCards)
@@ -989,7 +992,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 freeholderSummaryCardHelper.getSummaryCards(
                     propertyOwnership.freeholders,
-                    FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+                    FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY,
                 ),
             )
                 .thenReturn(emptyList())
@@ -1019,7 +1022,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 superiorLandlordSummaryCardHelper.getSummaryCards(
                     propertyOwnership.superiorLandlords,
-                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
                 ),
             )
                 .thenReturn(expectedCards)
@@ -1045,7 +1048,7 @@ class PropertyDetailsControllerTests(
             whenever(
                 superiorLandlordSummaryCardHelper.getSummaryCards(
                     propertyOwnership.superiorLandlords,
-                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
                 ),
             )
                 .thenReturn(emptyList())

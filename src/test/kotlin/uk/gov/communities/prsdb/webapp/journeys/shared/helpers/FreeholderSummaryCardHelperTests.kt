@@ -43,7 +43,7 @@ class FreeholderSummaryCardHelperTests {
         val earlier = createFreeholder(propertyOwnership, id = 1L)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(later, earlier), FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
+        val cards = helper.getSummaryCards(listOf(later, earlier), FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY)
 
         // Assert
         assertEquals(
@@ -69,7 +69,7 @@ class FreeholderSummaryCardHelperTests {
         val cards =
             helper.getSummaryCards(
                 listOf(postal, email, unknown),
-                FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+                FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY,
             ).associateBy { it.title }
 
         // Assert
@@ -96,12 +96,12 @@ class FreeholderSummaryCardHelperTests {
         // Act
         val cards =
             helper
-                .getSummaryCards(listOf(unknown, postal, email), FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY)
+                .getSummaryCards(listOf(unknown, postal, email), FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY)
                 .associateBy { it.title }
 
         // Assert
         assertEquals(
-            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
+            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY,
             cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
         )
         assertEquals(FreeholderSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)

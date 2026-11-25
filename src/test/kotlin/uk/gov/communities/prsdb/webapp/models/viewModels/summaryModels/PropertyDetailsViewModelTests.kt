@@ -438,17 +438,17 @@ class PropertyDetailsViewModelTests {
         val isCouncilView = viewType == PropertyDetailsViewType.LOCAL_COUNCIL
         assertEquals(
             if (isCouncilView) {
-                FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
+                FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY
             } else {
-                FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+                FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY
             },
             viewModel.unknownFreeholderBodyTextKey,
         )
         assertEquals(
             if (isCouncilView) {
-                SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
+                SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY
             } else {
-                SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+                SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY
             },
             viewModel.unknownSuperiorLandlordBodyTextKey,
         )
