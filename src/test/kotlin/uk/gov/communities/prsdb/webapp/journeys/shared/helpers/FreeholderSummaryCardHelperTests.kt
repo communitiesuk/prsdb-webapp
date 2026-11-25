@@ -43,7 +43,7 @@ class FreeholderSummaryCardHelperTests {
         val earlier = createFreeholder(propertyOwnership, id = 1L)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(later, earlier), FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY)
+        val cards = helper.getSummaryCards(listOf(later, earlier))
 
         // Assert
         assertEquals(
@@ -66,11 +66,7 @@ class FreeholderSummaryCardHelperTests {
         val unknown = createFreeholder(propertyOwnership)
 
         // Act
-        val cards =
-            helper.getSummaryCards(
-                listOf(postal, email, unknown),
-                FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY,
-            ).associateBy { it.title }
+        val cards = helper.getSummaryCards(listOf(postal, email, unknown)).associateBy { it.title }
 
         // Assert
         assertEquals(

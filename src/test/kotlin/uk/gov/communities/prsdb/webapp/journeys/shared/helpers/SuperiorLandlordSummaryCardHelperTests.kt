@@ -40,11 +40,7 @@ class SuperiorLandlordSummaryCardHelperTests {
         val earlier = createSuperiorLandlord(propertyOwnership, id = 1L)
 
         // Act
-        val cards =
-            helper.getSummaryCards(
-                listOf(later, earlier),
-                SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
-            )
+        val cards = helper.getSummaryCards(listOf(later, earlier))
 
         // Assert
         assertEquals(
@@ -67,12 +63,7 @@ class SuperiorLandlordSummaryCardHelperTests {
         val unknown = createSuperiorLandlord(propertyOwnership)
 
         // Act
-        val cards =
-            helper
-                .getSummaryCards(
-                    listOf(postal, email, unknown),
-                    SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
-                ).associateBy { it.title }
+        val cards = helper.getSummaryCards(listOf(postal, email, unknown)).associateBy { it.title }
 
         // Assert
         assertEquals(
