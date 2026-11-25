@@ -6,18 +6,18 @@ import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESSES
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.FormData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
 class ManualAddressStepConfig(
     private val featureFlagManager: FeatureFlagManager,
-) : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, AddressState>() {
+) : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
     override val formModelClass = ManualAddressFormModel::class
 
-    override fun getStepSpecificContent(state: AddressState) =
+    override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHint" to "addressForms.manualAddress.fieldSetHint",
             "addressLineOneLabel" to "addressForms.manualAddress.addressLineOne.label",
@@ -30,10 +30,10 @@ class ManualAddressStepConfig(
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: AddressState) = "forms/manualAddressForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/manualAddressForm"
 
     override fun enrichSubmittedDataBeforeValidation(
-        state: AddressState,
+        state: JourneyState,
         formData: FormData,
     ): FormData {
         val isInternationalAddressesEnabled = featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES)
@@ -44,7 +44,7 @@ class ManualAddressStepConfig(
     }
 
     override fun resolvePageContent(
-        state: AddressState,
+        state: JourneyState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val prefillAddressLineOne = defaultContent[PREFILL_ADDRESS_LINE_ONE] as? String ?: return defaultContent
@@ -68,13 +68,13 @@ class ManualAddressStepConfig(
         const val PREFILL_COUNTRY = "manualPrefillCountry"
     }
 
-    override fun mode(state: AddressState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class ManualAddressStep(
     stepConfig: ManualAddressStepConfig,
-) : RequestableStep<Complete, ManualAddressFormModel, AddressState>(stepConfig) {
+) : RequestableStep<Complete, ManualAddressFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "manual-address"
     }
