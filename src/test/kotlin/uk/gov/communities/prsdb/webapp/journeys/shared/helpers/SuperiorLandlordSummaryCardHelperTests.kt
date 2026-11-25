@@ -94,12 +94,12 @@ class SuperiorLandlordSummaryCardHelperTests {
             helper
                 .getSummaryCards(
                     listOf(unknown, postal, email),
-                    "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
                 ).associateBy { it.title }
 
         // Assert
         assertEquals(
-            "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
             cards.getValue("registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title").bodyTextKey,
         )
         assertEquals(SuperiorLandlordSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)

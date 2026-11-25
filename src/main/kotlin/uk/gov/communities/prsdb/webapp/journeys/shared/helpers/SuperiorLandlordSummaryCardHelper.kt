@@ -66,6 +66,7 @@ class SuperiorLandlordSummaryCardHelper {
 
     companion object {
         const val UNKNOWN_DETAILS_BODY_KEY = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.body"
+        const val COUNCIL_UNKNOWN_DETAILS_BODY_KEY = "propertyDetails.peopleResponsible.superiorLandlord.councilUnknownDetails"
         const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
     }
 }

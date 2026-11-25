@@ -61,7 +61,7 @@ class PropertyDetailsViewModel(
 
     val unknownFreeholderBodyTextKey: String =
         if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
-            "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable"
+            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
         } else {
             FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
         }
@@ -78,7 +78,7 @@ class PropertyDetailsViewModel(
 
     val unknownSuperiorLandlordBodyTextKey: String =
         if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
-            "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable"
+            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
         } else {
             SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
         }

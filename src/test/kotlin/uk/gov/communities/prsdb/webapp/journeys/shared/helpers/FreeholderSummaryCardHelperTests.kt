@@ -93,12 +93,12 @@ class FreeholderSummaryCardHelperTests {
         // Act
         val cards =
             helper
-                .getSummaryCards(listOf(unknown, postal, email), "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable")
+                .getSummaryCards(listOf(unknown, postal, email), FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY)
                 .associateBy { it.title }
 
         // Assert
         assertEquals(
-            "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable",
+            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY,
             cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
         )
         assertEquals(FreeholderSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)
