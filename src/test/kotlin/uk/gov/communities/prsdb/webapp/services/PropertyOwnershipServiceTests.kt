@@ -2466,7 +2466,12 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `updateIsOccupied clears stale tenancy details when a property becomes unoccupied`() {
             // Arrange
-            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    tenancyProvideLater = true,
+                    licenseProvideLater = true,
+                )
             val originalNumBedrooms = propertyOwnership.numBedrooms
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
@@ -2491,6 +2496,7 @@ class PropertyOwnershipServiceTests {
             assertNull(propertyOwnership.customRentFrequency)
             assertNull(propertyOwnership.rentAmount)
             assertNull(propertyOwnership.tenancyProvideLater)
+            assertNull(propertyOwnership.licenseProvideLater)
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
 
@@ -2501,6 +2507,7 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership(id = 1).apply {
                     isOccupied = false
+                    licenseProvideLater = true
                 }
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
@@ -2516,6 +2523,7 @@ class PropertyOwnershipServiceTests {
             // Assert
             assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
             assertEquals(true, propertyOwnership.tenancyProvideLater)
+            assertEquals(true, propertyOwnership.licenseProvideLater)
         }
 
         @Test
@@ -2577,6 +2585,7 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership(id = 1, tenancyProvideLater = true).apply {
                     isOccupied = false
+                    licenseProvideLater = true
                 }
             val propertyCompliance =
                 PropertyCompliance(
@@ -2609,6 +2618,7 @@ class PropertyOwnershipServiceTests {
             assertNull(propertyOwnership.customRentFrequency)
             assertNull(propertyOwnership.rentAmount)
             assertNull(propertyOwnership.tenancyProvideLater)
+            assertNull(propertyOwnership.licenseProvideLater)
             assertNull(propertyCompliance.tenancyStartedBeforeEpcExpiry)
             assertNull(propertyCompliance.gasSafetyCertProvideLater)
             assertNull(propertyCompliance.electricalSafetyCertProvideLater)

@@ -551,6 +551,7 @@ class PropertyOwnershipService(
             // Tenancy details don't apply, so clear them rather than potentially holding onto stale data.
             clearTenancyDetails(propertyOwnership)
             propertyOwnership.tenancyProvideLater = null
+            propertyOwnership.licenseProvideLater = null
             propertyOwnership.propertyCompliance?.apply {
                 tenancyStartedBeforeEpcExpiry = null
                 gasSafetyCertProvideLater = null
