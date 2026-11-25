@@ -29,11 +29,9 @@ import java.util.UUID
 class AbsoluteUrlProvider(
     @Value("\${base-url.landlord}") landlordBaseUrl: String,
     @Value("\${base-url.local-council}") localCouncilBaseUrl: String,
-    @Value("\${gds.start-page-url}") gdsStartPageUrl: String,
 ) {
     private val landlordBaseUrl: String = ensureScheme(landlordBaseUrl)
     private val localCouncilBaseUrl: String = ensureScheme(localCouncilBaseUrl)
-    private val gdsStartPageUrl: String = ensureScheme(gdsStartPageUrl)
 
     private companion object {
         private fun ensureScheme(baseUrl: String): String =
@@ -41,8 +39,6 @@ class AbsoluteUrlProvider(
     }
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
-
-    fun buildGdsStartPageUrl(): String = gdsStartPageUrl
 
     // TODO PDJB-2234: Use the final privacy notice URL for letters and emails, accessible without logging in.
     fun buildLandlordPrivacyNoticeUri(): URI =

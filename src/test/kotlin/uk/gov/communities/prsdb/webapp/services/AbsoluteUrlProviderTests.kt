@@ -68,15 +68,6 @@ class AbsoluteUrlProviderTests {
     }
 
     @Test
-    fun `buildGdsStartPageUrl prepends https when the configured URL has no scheme`() {
-        val provider = createProvider(gdsStartPageUrl = "example.test/landlord")
-
-        val url = provider.buildGdsStartPageUrl()
-
-        assertThat(url).isEqualTo("https://example.test/landlord")
-    }
-
-    @Test
     fun `buildTeamMembersUri builds the landlord team members URL`() {
         val provider = createProvider(landlordBaseUrl = "https://example.test")
 
@@ -159,6 +150,5 @@ class AbsoluteUrlProviderTests {
     private fun createProvider(
         landlordBaseUrl: String = "https://example.test/landlord",
         localCouncilBaseUrl: String = "https://example.test/local-council",
-        gdsStartPageUrl: String = "https://example.test/start-page",
-    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl, gdsStartPageUrl)
+    ): AbsoluteUrlProvider = AbsoluteUrlProvider(landlordBaseUrl, localCouncilBaseUrl)
 }

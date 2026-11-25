@@ -94,7 +94,7 @@ class AssociatedPartyNotificationServiceTests {
             propertyManagerEmail = "james.smith@example.com",
             propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
-            gdsStartPageUrl = "https://example.test/start-page",
+            gdsStartPageUrl = GDS_START_PAGE_URL,
             privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
         )
 
@@ -395,7 +395,7 @@ class AssociatedPartyNotificationServiceTests {
                         createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
                     ),
             )
-        stubPropertyManagerAddedToPropertyEmailUrls()
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
 
         // Act
         val result = associatedPartyNotificationService.buildPropertyManagerAddedToPropertyEmail(propertyManager, propertyOwnership)
@@ -418,7 +418,7 @@ class AssociatedPartyNotificationServiceTests {
                 address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
                 landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
             )
-        stubPropertyManagerAddedToPropertyEmailUrls()
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
 
         // Act
         associatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
@@ -426,11 +426,6 @@ class AssociatedPartyNotificationServiceTests {
         // Assert
         verify(emailNotificationService).sendEmail("james.smith@example.com", expectedPropertyManagerAddedToPropertyEmail)
         verifyNoInteractions(letterNotificationService)
-    }
-
-    private fun stubPropertyManagerAddedToPropertyEmailUrls() {
-        whenever(absoluteUrlProvider.buildGdsStartPageUrl()).thenReturn("https://example.test/start-page")
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
     }
 
     private fun sendNotificationToFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =

@@ -12,7 +12,7 @@ data class PropertyManagerAddedToPropertyEmail(
     private val propertyManagerEmailKey = "property manager email"
     private val propertyAddressKey = "property address"
     private val landlordsKey = "landlords"
-    private val gdsStartPageUrlKey = "gds start page"
+    private val gdsStartPageKey = "gds start page"
     private val privacyNoticeUrlKey = "privacy notice url"
 
     override val template = EmailTemplate.PROPERTY_MANAGER_ADDED_TO_PROPERTY
@@ -23,7 +23,7 @@ data class PropertyManagerAddedToPropertyEmail(
             propertyManagerEmailKey to propertyManagerEmail,
             propertyAddressKey to propertyAddress,
             landlordsKey to formatAsBulletList(landlords),
-            gdsStartPageUrlKey to gdsStartPageUrl,
+            gdsStartPageKey to gdsStartPageUrl,
             privacyNoticeUrlKey to privacyNoticeUrl,
         )
 }
