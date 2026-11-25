@@ -5,6 +5,7 @@ import jakarta.persistence.EntityListeners
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.Temporal
 import jakarta.persistence.TemporalType
+import org.hibernate.envers.Audited
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.io.Serializable
@@ -12,6 +13,7 @@ import java.time.Instant
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
+@Audited
 abstract class AuditableEntity : Serializable {
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)

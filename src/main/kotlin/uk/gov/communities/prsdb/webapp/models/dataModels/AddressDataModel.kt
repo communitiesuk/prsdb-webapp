@@ -19,6 +19,8 @@ data class AddressDataModel(
     val postcode: String? = null,
     val country: String = ENGLAND,
     val gss: String? = null,
+    // TODO: PDJB-2280: Use this to determine whether to insert the country at the end of the address
+    val isInternational: Boolean = false,
 ) {
     fun toMultiLineAddress(): String {
         val multiLineFromComponents = buildMultiLineAddressFromComponents()

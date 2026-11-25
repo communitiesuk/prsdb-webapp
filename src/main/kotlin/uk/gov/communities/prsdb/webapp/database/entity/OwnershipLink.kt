@@ -8,9 +8,11 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import org.hibernate.envers.Audited
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(name = "uc_ownerhship_link_uniqueness", columnNames = ["landlord_id", "landlordship_id"])])
+@Audited
 class OwnershipLink(
     @ManyToOne(optional = false)
     @JoinColumn(name = "landlord_id", nullable = false)

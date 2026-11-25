@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -13,13 +13,23 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
@@ -27,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 @ExtendWith(MockitoExtension::class)
 class HasMissingComplianceStepConfigTests {
     @Mock
-    private lateinit var mockState: PropertyRegistrationJourneyState
+    private lateinit var mockState: MissingComplianceState
 
     private lateinit var stepConfig: HasMissingComplianceStepConfig
 
@@ -39,10 +49,9 @@ class HasMissingComplianceStepConfigTests {
     @Nested
     inner class Mode {
         @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when not occupied`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when the check is not applicable`() {
             // Arrange
-            whenever(mockState.isOccupied).thenReturn(false)
-            setupGasCertMissing()
+            whenever(mockState.isMissingComplianceCheckApplicable).thenReturn(false)
 
             // Act
             val result = stepConfig.mode(mockState)
@@ -52,10 +61,10 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and gas cert missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when applicable and the gas cert is missing`() {
             // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            setupGasCertMissing()
+            whenever(mockState.isMissingComplianceCheckApplicable).thenReturn(true)
+            whenever(mockState.isGasCertMissing).thenReturn(true)
 
             // Act
             val result = stepConfig.mode(mockState)
@@ -65,11 +74,11 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and electrical cert missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when applicable and only the electrical cert is missing`() {
             // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            setupGasCertPresent()
-            setupElectricalCertMissing()
+            whenever(mockState.isMissingComplianceCheckApplicable).thenReturn(true)
+            whenever(mockState.isGasCertMissing).thenReturn(false)
+            whenever(mockState.isElectricalCertMissing).thenReturn(true)
 
             // Act
             val result = stepConfig.mode(mockState)
@@ -79,12 +88,12 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and epc missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when applicable and only the EPC is missing`() {
             // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            setupGasCertPresent()
-            setupElectricalCertPresent()
-            setupEpcMissing()
+            whenever(mockState.isMissingComplianceCheckApplicable).thenReturn(true)
+            whenever(mockState.isGasCertMissing).thenReturn(false)
+            whenever(mockState.isElectricalCertMissing).thenReturn(false)
+            whenever(mockState.isEpcMissing).thenReturn(true)
 
             // Act
             val result = stepConfig.mode(mockState)
@@ -94,164 +103,18 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied and all certs present`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when applicable and nothing is missing`() {
             // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            setupGasCertPresent()
-            setupElectricalCertPresent()
-            setupEpcPresent()
+            whenever(mockState.isMissingComplianceCheckApplicable).thenReturn(true)
+            whenever(mockState.isGasCertMissing).thenReturn(false)
+            whenever(mockState.isElectricalCertMissing).thenReturn(false)
+            whenever(mockState.isEpcMissing).thenReturn(false)
 
             // Act
             val result = stepConfig.mode(mockState)
 
             // Assert
             assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
-        }
-
-        @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied but all certs are provide later`() {
-            // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            setupGasCertProvideLater()
-            setupElectricalCertProvideLater()
-            setupEpcProvideLater()
-
-            // Act
-            val result = stepConfig.mode(mockState)
-
-            // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
-        }
-
-        @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied and delegated to a letting agent`() {
-            // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(true)
-            setupGasCertMissing()
-
-            // Act
-            val result = stepConfig.mode(mockState)
-
-            // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
-        }
-
-        @Test
-        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied with missing certs and not delegated to a letting agent`() {
-            // Arrange
-            whenever(mockState.isOccupied).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent()).thenReturn(false)
-            setupGasCertMissing()
-
-            // Act
-            val result = stepConfig.mode(mockState)
-
-            // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES, result)
-        }
-
-        private fun setupGasCertMissing() {
-            val mockDetailsTask: GasSafetyDetailsTask = mock()
-            val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
-            whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(null)
-
-            val mockGasSafetyTask: GasSafetyTask = mock()
-            whenever(mockGasSafetyTask.gasSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
-        }
-
-        private fun setupGasCertPresent() {
-            val mockDetailsTask: GasSafetyDetailsTask = mock()
-            val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
-            whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-
-            val mockGasSafetyTask: GasSafetyTask = mock()
-            whenever(mockGasSafetyTask.gasSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
-        }
-
-        private fun setupElectricalCertMissing() {
-            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
-            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockDetailsTask.getElectricalCertificateIsOutdated()).thenReturn(null)
-
-            val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
-            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
-        }
-
-        private fun setupElectricalCertPresent() {
-            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
-            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockDetailsTask.getElectricalCertificateIsOutdated()).thenReturn(false)
-
-            val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
-            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
-        }
-
-        private fun setupEpcMissing() {
-            val mockDetailsTask: EpcDetailsTask = mock()
-            whenever(mockDetailsTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            whenever(mockDetailsTask.acceptedEpcIfStillAccepted).thenReturn(null)
-            val mockEpcExemptionStep = mock<EpcExemptionStep>()
-            whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-            whenever(mockDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-
-            val mockEpcTask: EpcTask = mock()
-            whenever(mockEpcTask.epcDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.epcTask).thenReturn(mockEpcTask)
-        }
-
-        private fun setupEpcPresent() {
-            val mockDetailsTask: EpcDetailsTask = mock()
-            whenever(mockDetailsTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            val mockEpc = mock<EpcDataModel>()
-            whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
-            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
-            whenever(mockDetailsTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
-
-            val mockEpcTask: EpcTask = mock()
-            whenever(mockEpcTask.epcDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.epcTask).thenReturn(mockEpcTask)
-        }
-
-        private fun setupGasCertProvideLater() {
-            val mockDetailsTask: GasSafetyDetailsTask = mock()
-            val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
-            whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-
-            val mockGasSafetyTask: GasSafetyTask = mock()
-            whenever(mockGasSafetyTask.gasSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
-        }
-
-        private fun setupElectricalCertProvideLater() {
-            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
-            val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
-            whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
-            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-
-            val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
-            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
-        }
-
-        private fun setupEpcProvideLater() {
-            val mockDetailsTask: EpcDetailsTask = mock()
-            val mockHasEpcStep = mock<HasEpcStep>()
-            whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
-
-            val mockEpcTask: EpcTask = mock()
-            whenever(mockEpcTask.epcDetailsTask).thenReturn(mockDetailsTask)
-            whenever(mockState.epcTask).thenReturn(mockEpcTask)
         }
     }
 

@@ -52,6 +52,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
             val freeholderCard = detailsPage.freeholderCards.single()
             assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertThat(freeholderCard.bodyText).hasText(
+                "You told us there was another freeholder, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
             assertEquals(0, freeholderCard.actionLinks.count())
         }
 
@@ -96,6 +100,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow).isHidden()
             val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
             assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
             cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
 
@@ -402,8 +410,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `the people responsible tab shows the saved property manager as a read only card`() {
-                // Property 37 is seeded with a property manager
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
@@ -412,13 +419,16 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
                 assertThat(detailsPage.propertyManagerUpdateLink.locator).hasText("Add, change or remove the property manager")
                 assertThat(detailsPage.propertyManagerUpdateLink.locator)
-                    .hasAttribute("href", UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(37))
+                    .hasAttribute(
+                        "href",
+                        UpdatePropertyManagerController.getUpdatePropertyManagerFirstStepRoute(PROPERTY_WITH_PROPERTY_MANAGER_ID),
+                    )
                 assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow).not().isVisible()
             }
 
             @Test
             fun `the people responsible tab shows that no property manager is used when there is none`() {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITHOUT_PROPERTY_MANAGER_ID)
                 detailsPage.tabs.goToPeopleResponsible()
 
                 assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
@@ -503,7 +513,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             private val inactivePropertyOwnershipId = 52L
 
             @Test
-            fun `the deactivated caption and reactivation panel are shown`(page: Page) {
+            fun `the deactivated caption and reactivation panel are shown`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
 
                 assertThat(detailsPage.caption).hasText("Deactivated property")
@@ -524,7 +534,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the property tab has no change links, letting agent panel, deactivate link or deregister link`(page: Page) {
+            fun `the property tab has no change links, letting agent panel, deactivate link or deregister link`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.actionLinks).hasCount(0)
@@ -534,7 +544,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the people responsible tab has no invite or remove actions`(page: Page) {
+            fun `the people responsible tab has no invite or remove actions`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
                 detailsPage.tabs.goToPeopleResponsible()
 
@@ -544,7 +554,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `the compliance tab has no change actions or notification banner`(page: Page) {
+            fun `the compliance tab has no change actions or notification banner`() {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(inactivePropertyOwnershipId)
                 detailsPage.tabs.goToComplianceInformation()
 
@@ -558,22 +568,55 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
     @Nested
     inner class PropertyDetailsLocalCouncilView {
-        // TODO PDJB-1999: remove this test when freeholders are shown in the local council view
         @Test
-        fun `the people responsible tab does not show saved freeholders`() {
+        fun `the people responsible tab shows saved freeholders without an update link`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_PLACEHOLDER_FREEHOLDER_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
-            assertThat(detailsPage.freeholderSection).hasCount(0)
+            assertThat(detailsPage.freeholderSection).containsText("Freeholders")
+            val freeholderCard = detailsPage.freeholderCards.single()
+            assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertThat(freeholderCard.bodyText).hasText(
+                "There’s another freeholder, but the landlord cannot currently provide their details.",
+            )
+            assertEquals(0, freeholderCard.actionLinks.count())
+            assertThat(detailsPage.freeholderUpdateLink.locator).hasCount(0)
         }
 
-        // TODO PDJB-1999: remove this test when superior landlords are shown in the local council view
         @Test
-        fun `the people responsible tab does not show saved superior landlords`() {
+        fun `the people responsible tab shows saved superior landlords without an update link`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_SUPERIOR_LANDLORDS_ID)
             detailsPage.tabs.goToPeopleResponsible()
 
-            assertThat(detailsPage.superiorLandlordSection).hasCount(0)
+            assertThat(detailsPage.superiorLandlordSection).containsText("Other people in the property’s ownership chain")
+            val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
+            assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "There’s someone else in the property’s ownership chain, but the landlord cannot currently provide their details.",
+            )
+            cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
+            assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasCount(0)
+        }
+
+        @Test
+        fun `the people responsible tab shows the ownership answers and no change links`() {
+            // Property 1 is seeded with OwnershipType.LEASEHOLD_ONLY, no superior landlords and no property manager,
+            // so it has every row that would have a change link in the landlord view
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownsPropertyRow.value).containsText("Yes")
+            assertThat(detailsPage.peopleResponsibleOwnershipSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+            assertThat(detailsPage.peopleResponsibleChangeLinks).hasCount(0)
+        }
+
+        // TODO PDJB-2016: delete this test with the flag, once the legacy ownership row is gone
+        @Test
+        fun `the property record tab does not show the ownership section`() {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+            assertThat(detailsPage.sectionHeading("Ownership")).isHidden()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow).isHidden()
         }
 
         @Test
@@ -649,12 +692,27 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals("Tobias Evans", detailsPage.landlordSummaryCards[2].title.getText())
             }
 
-            // TODO PDJB-1999: replace with a positive assertion when the local council view shows the property manager
             @Test
-            fun `the property manager section is not shown`() {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+            fun `the people responsible tab shows the saved property manager without an update link`() {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
+                detailsPage.tabs.goToPeopleResponsible()
 
-                assertThat(detailsPage.propertyManagerSection).hasCount(0)
+                assertThat(detailsPage.propertyManagerSection).containsText("Property manager")
+                assertEquals("Pat Manager", detailsPage.propertyManagerCard.title.getText())
+                assertThat(detailsPage.propertyManagerCard.summaryList.emailAddressRow.value).containsText("pat.manager@example.com")
+                assertEquals(0, detailsPage.propertyManagerCard.actionLinks.count())
+                assertThat(detailsPage.propertyManagerUpdateLink.locator).hasCount(0)
+            }
+
+            @Test
+            fun `the people responsible tab shows that no property manager is used without a change link`() {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(PROPERTY_WITHOUT_PROPERTY_MANAGER_ID)
+                detailsPage.tabs.goToPeopleResponsible()
+
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.value)
+                    .containsText("No, I manage this property (or another joint landlord does)")
+                assertThat(detailsPage.propertyManagerNotUsedSummaryList.usingPropertyManagerRow.actions.firstActionLink.locator)
+                    .hasCount(0)
             }
 
             @Test
@@ -832,16 +890,20 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `the landlord view does not show the property manager section`() {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_WITH_PROPERTY_MANAGER_ID)
 
             assertThat(detailsPage.propertyManagerSection).hasCount(0)
         }
     }
 
     @Nested
-    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag. PDJB-1999 moves the
-    //  local council view onto the people responsible tab, after which no view shows the legacy row.
+    // TODO PDJB-2016: delete this class along with the ASSOCIATED_PARTIES flag.
     inner class OwnershipBeforePdjb955 {
+        @BeforeEach
+        fun disableAssociatedParties() {
+            featureFlagManager.disableFeature(ASSOCIATED_PARTIES)
+        }
+
         @Test
         fun `local council view keeps the ownership row on the property record`() {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
@@ -1187,6 +1249,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         private const val PROPERTY_WITH_JOINT_FREEHOLDERS_ID = 54L
         private const val PROPERTY_WITH_SUPERIOR_LANDLORDS_ID = 57L
         private const val PROPERTY_WITHOUT_SUPERIOR_LANDLORDS_ID = 1L
+        private const val PROPERTY_WITH_PROPERTY_MANAGER_ID = 37L
+        private const val PROPERTY_WITHOUT_PROPERTY_MANAGER_ID = 1L
     }
 }
 

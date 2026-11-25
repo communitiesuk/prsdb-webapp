@@ -172,7 +172,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Payme
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
@@ -704,7 +704,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `submitting a payment summary page rendered on a previous day refreshes the summary without creating a payment`(page: Page) {
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
         val staleQuote =
-            PropertyRegistrationPaymentQuote(
+            PropertyPaymentQuote(
                 amountInPence = 1000,
                 quoteDate = today.minusDays(1),
                 renewalDate = today.plusYears(1),
@@ -2832,7 +2832,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val existingAnniversary = MonthDay.of(1, 1)
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
         val chargeableQuote =
-            PropertyRegistrationPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
+            PropertyPaymentQuote(amountInPence = 1000, quoteDate = today, renewalDate = today.plusYears(1))
         doReturn(chargeableQuote).whenever(paymentService).getPropertyRegistrationPaymentQuote(any())
         jdbcTemplate.update(
             "UPDATE landlord SET anniversary_day = ?, anniversary_month = ?" +

@@ -95,7 +95,7 @@ class ConfirmDeactivationStepConfigTests {
                     registrationNumber =
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                     landlordDeactivated = true,
-                    dashboardUrl = "https://example.com/dashboard",
+                    propertyRecordUrl = "https://example.com/property",
                 ),
             ),
         )
@@ -134,7 +134,7 @@ class ConfirmDeactivationStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockCurrentUserService.getRegisteredUserDetails())
             .thenReturn(CurrentUserService.RegisteredUserDetails(name = "James", email = "james@example.com"))
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("https://example.com/property"))
     }
 
     private fun setupStepConfig() =

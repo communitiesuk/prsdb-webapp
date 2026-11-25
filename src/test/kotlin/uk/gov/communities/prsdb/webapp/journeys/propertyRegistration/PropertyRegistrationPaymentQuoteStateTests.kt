@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -11,7 +12,7 @@ import org.springframework.mock.web.MockHttpSession
 import tools.jackson.databind.ObjectMapper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStatePersistenceService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -46,6 +47,18 @@ class PropertyRegistrationPaymentQuoteStateTests {
         assertEquals(quote, restoredJourney.paymentQuote)
     }
 
+    @Test
+    fun `payment quote saved without a payment start date restores with the quote date as the payment start date`() {
+        // Arrange
+        val savedQuote = """{"amountInPence":1234,"quoteDate":"2027-10-10","renewalDate":"2028-03-01"}"""
+
+        // Act
+        val restoredQuote = Json.decodeFromString<PropertyPaymentQuote>(savedQuote)
+
+        // Assert
+        assertEquals(LocalDate.of(2027, 10, 10), restoredQuote.paymentStartDate)
+    }
+
     private fun createJourney(service: JourneyStateService) =
         PropertyRegistrationJourney(
             taskListStep = mock(),
@@ -78,7 +91,7 @@ class PropertyRegistrationPaymentQuoteStateTests {
         )
 
     private fun createQuote(quoteDate: LocalDate) =
-        PropertyRegistrationPaymentQuote(
+        PropertyPaymentQuote(
             amountInPence = 1234,
             quoteDate = quoteDate,
             renewalDate = LocalDate.of(2028, 3, 1),

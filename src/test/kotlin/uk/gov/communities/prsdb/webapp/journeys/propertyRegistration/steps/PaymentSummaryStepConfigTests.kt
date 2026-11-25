@@ -22,8 +22,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
@@ -311,7 +311,7 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun stubSummaryContent(
-        quote: PropertyRegistrationPaymentQuote,
+        quote: PropertyPaymentQuote,
         firstChargeableDate: LocalDate,
     ) {
         stubAddressTask()
@@ -342,7 +342,7 @@ class PaymentSummaryStepConfigTests {
     }
 
     private fun createQuote(quoteDate: LocalDate) =
-        PropertyRegistrationPaymentQuote(
+        PropertyPaymentQuote(
             amountInPence = 1234,
             quoteDate = quoteDate,
             renewalDate = LocalDate.of(2028, 3, 1),

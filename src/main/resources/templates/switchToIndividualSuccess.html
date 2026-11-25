@@ -7,17 +7,20 @@
             <h1 class="govuk-panel__title" th:text="#{switchToIndividual.success.banner.heading}">
                 switchToIndividual.success.banner.heading
             </h1>
-            <div class="govuk-panel__body" th:text="${address}">
-                address
-            </div>
         </div>
-        <p class="govuk-body" th:text="#{switchToIndividual.success.body}">
-            switchToIndividual.success.body
+        <p class="govuk-body" th:text="#{switchToIndividual.success.body.one}">
+            switchToIndividual.success.body.one
         </p>
         <p class="govuk-body">
-            <a class="govuk-link" th:href="${propertyDetailsUrl}" th:text="#{switchToIndividual.success.viewPropertyRecord.link}">
-                switchToIndividual.success.viewPropertyRecord.link
-            </a><span th:remove="tag" th:text="#{switchToIndividual.success.viewPropertyRecord.after}">.</span>
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+        </p>
+        <p class="govuk-body" th:text="#{switchToIndividual.success.body.two}">
+            switchToIndividual.success.body.two
+        </p>
+        <p class="govuk-body">
+            <a class="govuk-link" th:href="${propertyDetailsUrl}" th:text="#{switchToIndividual.success.goBackToPropertyRegistration}">
+                switchToIndividual.success.goBackToPropertyRegistration
+            </a>
         </p>
     </div>
 </main>

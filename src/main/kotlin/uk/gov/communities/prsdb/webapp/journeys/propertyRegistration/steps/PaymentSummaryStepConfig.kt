@@ -10,8 +10,8 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
@@ -47,7 +47,7 @@ class PaymentSummaryStepConfig(
 
     private fun getSummaryListRows(
         state: PropertyRegistrationJourneyState,
-        quote: PropertyRegistrationPaymentQuote,
+        quote: PropertyPaymentQuote,
     ) = listOf(
         SummaryListRowViewModel(
             "registerProperty.paymentSummary.summary.address",

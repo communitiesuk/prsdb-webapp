@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -20,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataMode
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FreeholderAddedToPropertyEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyManagerAddedToPropertyEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class AssociatedPartyNotificationServiceTests {
@@ -52,8 +55,18 @@ class AssociatedPartyNotificationServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
-    @InjectMocks
     private lateinit var associatedPartyNotificationService: AssociatedPartyNotificationService
+
+    @BeforeEach
+    fun setUp() {
+        associatedPartyNotificationService =
+            AssociatedPartyNotificationService(
+                emailNotificationService,
+                letterNotificationService,
+                absoluteUrlProvider,
+                GDS_START_PAGE_URL,
+            )
+    }
 
     private val email = TestEmail()
     private val letter = TestLetter()
@@ -74,6 +87,16 @@ class AssociatedPartyNotificationServiceTests {
             privacyNoticeUrl = "example.test/landlord/privacy-notice",
         )
     private val postalAddress = AddressDataModel(singleLineAddress = "Flat 2, 18 Market Street, Bristol, BS1 4DJ")
+    private val propertyManager = PropertyManagerDataModel(name = "James Smith", email = "james.smith@example.com")
+    private val expectedPropertyManagerAddedToPropertyEmail =
+        PropertyManagerAddedToPropertyEmail(
+            propertyManagerName = "James Smith",
+            propertyManagerEmail = "james.smith@example.com",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            landlords = listOf("Jamie Jameson (jamie@example.com)"),
+            gdsStartPageUrl = GDS_START_PAGE_URL,
+            privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+        )
 
     private fun createFreeholderModel(
         name: String? = null,
@@ -100,7 +123,7 @@ class AssociatedPartyNotificationServiceTests {
                     ),
             )
         val freeholder = createFreeholderModel(name = "Sarah Thompson", address = postalAddress)
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -129,7 +152,7 @@ class AssociatedPartyNotificationServiceTests {
             expectedFreeholderAddedToPropertyLetter.copy(
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
             )
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -166,25 +189,41 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `freeholder added to property notification sends nothing yet to a freeholder with only an email address`() {
+    fun `freeholder with an email receives an added-to-property email with a full privacy notice link`() {
         // Arrange
         val freeholder = createFreeholderModel(name = "Sarah Thompson", email = "sarah@example.com")
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        val expectedEmail =
+            FreeholderAddedToPropertyEmail(
+                freeholderName = "Sarah Thompson",
+                freeholderEmail = "sarah@example.com",
+                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                gdsStartPageUrl = GDS_START_PAGE_URL,
+                privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
+            .thenReturn(URI("https://www.example.test/landlord/privacy-notice"))
 
         // Act
         val outcome =
             associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
-                createPropertyOwnership(),
+                propertyOwnership,
             )
 
         // Assert
-        assertNull(outcome)
-        verifyNoInteractions(emailNotificationService, letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("sarah@example.com", expectedEmail)
+        verifyNoInteractions(letterNotificationService)
     }
 
-    // TODO PDJB-1987: Update this test to expect to throw in this case, you should not have two contact methods
     @Test
-    fun `freeholder with both contact methods receives no notification while email implementation is pending`() {
+    fun `freeholder with both contact methods throws without sending a notification`() {
         // Arrange
         val freeholder =
             createFreeholderModel(
@@ -192,15 +231,13 @@ class AssociatedPartyNotificationServiceTests {
                 email = "sarah@example.com",
                 address = postalAddress,
             )
-        // Act
-        val outcome =
+        // Act & Assert
+        assertThrows(PrsdbWebException::class.java) {
             associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
                 freeholder,
                 createPropertyOwnership(),
             )
-
-        // Assert
-        assertNull(outcome)
+        }
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
@@ -232,7 +269,7 @@ class AssociatedPartyNotificationServiceTests {
                     ),
             )
         val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", address = postalAddress)
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -257,7 +294,7 @@ class AssociatedPartyNotificationServiceTests {
                 address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
                 landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
             )
-        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeDisplayUrl())
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
             .thenReturn("example.test/landlord/privacy-notice")
 
         // Act
@@ -293,6 +330,7 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
+    // TODO PDJB-1989: Update this test to expect an email once superior-landlord email support is implemented.
     @Test
     fun `superior landlord added to property notification sends nothing yet to a superior landlord with only an email address`() {
         // Arrange
@@ -310,9 +348,8 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
-    // TODO PDJB-1989: Update this test to expect to throw in this case, you should not have two contact methods
     @Test
-    fun `superior landlord with both contact methods receives no notification while email implementation is pending`() {
+    fun `superior landlord with both contact methods throws without sending a notification`() {
         // Arrange
         val superiorLandlord =
             createSuperiorLandlordModel(
@@ -321,15 +358,13 @@ class AssociatedPartyNotificationServiceTests {
                 address = postalAddress,
             )
 
-        // Act
-        val outcome =
+        // Act & Assert
+        assertThrows(PrsdbWebException::class.java) {
             associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
                 superiorLandlord,
                 createPropertyOwnership(),
             )
-
-        // Assert
-        assertNull(outcome)
+        }
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
@@ -349,16 +384,48 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `creation notification for a property manager fails explicitly until implemented`() {
+    fun `buildPropertyManagerAddedToPropertyEmail includes property and property manager details with landlords sorted by name`() {
         // Arrange
-        val propertyManager = PropertyManagerDataModel(name = "Alex Jones", email = "alex.jones@example.com")
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords =
+                    mutableSetOf(
+                        createOrgLandlord(name = "Zebra Homes", email = "contact@zebra.example", registrantEmail = "admin@zebra.example"),
+                        createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com"),
+                    ),
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
 
-        // Act & Assert
-        assertThrows(NotImplementedError::class.java) {
-            associatedPartyNotificationService.sendCreationNotificationForPropertyManager(propertyManager)
-        }
+        // Act
+        val result = associatedPartyNotificationService.buildPropertyManagerAddedToPropertyEmail(propertyManager, propertyOwnership)
 
+        // Assert
+        assertEquals(
+            expectedPropertyManagerAddedToPropertyEmail.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)", "Zebra Homes (contact@zebra.example)"),
+            ),
+            result,
+        )
         verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
+    fun `property manager added to property notification is emailed to the property manager`() {
+        // Arrange
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri()).thenReturn(URI("https://example.test/landlord/privacy-notice"))
+
+        // Act
+        associatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
+
+        // Assert
+        verify(emailNotificationService).sendEmail("james.smith@example.com", expectedPropertyManagerAddedToPropertyEmail)
+        verifyNoInteractions(letterNotificationService)
     }
 
     private fun sendNotificationToFreeholder(freeholder: FreeholderDataModel): AssociatedPartyNotificationOutcome =
@@ -367,7 +434,7 @@ class AssociatedPartyNotificationServiceTests {
                 name = freeholder.name,
                 emailAddress = freeholder.email,
                 postalAddress = freeholder.address,
-                emailTemplate = email,
+                buildEmail = { email },
                 buildLetter = { letter },
             ),
         )
@@ -378,7 +445,7 @@ class AssociatedPartyNotificationServiceTests {
                 name = superiorLandlord.name,
                 emailAddress = superiorLandlord.email,
                 postalAddress = superiorLandlord.address,
-                emailTemplate = email,
+                buildEmail = { email },
                 buildLetter = { letter },
             ),
         )
@@ -450,7 +517,7 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
-    fun `sendNotificationToSuperiorLandlord prefers email over letter when both contact methods are available`() {
+    fun `sendNotificationToSuperiorLandlord throws when both contact methods are available`() {
         // Arrange
         val superiorLandlord =
             createSuperiorLandlordModel(
@@ -459,13 +526,9 @@ class AssociatedPartyNotificationServiceTests {
                 address = postalAddress,
             )
 
-        // Act
-        val outcome = sendNotificationToSuperiorLandlord(superiorLandlord)
-
-        // Assert
-        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
-        verify(emailNotificationService).sendEmail("daniel.roberts@example.com", email)
-        verifyNoInteractions(letterNotificationService)
+        // Act & Assert
+        assertThrows(PrsdbWebException::class.java) { sendNotificationToSuperiorLandlord(superiorLandlord) }
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
     @Test
@@ -604,5 +667,9 @@ class AssociatedPartyNotificationServiceTests {
             ),
             letter,
         )
+    }
+
+    companion object {
+        private const val GDS_START_PAGE_URL = "https://example.test/gds-start-page"
     }
 }

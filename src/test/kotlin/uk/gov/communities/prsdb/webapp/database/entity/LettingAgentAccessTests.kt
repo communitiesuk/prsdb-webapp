@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.time.Instant
 import java.util.UUID
 
 class LettingAgentAccessTests {
@@ -22,5 +24,16 @@ class LettingAgentAccessTests {
         assertEquals(token, access.token)
         assertEquals("agent@example.com", access.invitedEmail)
         assertEquals(propertyOwnership, access.propertyOwnership)
+    }
+
+    @Test
+    fun `setEncodedPassword records when the password was set`() {
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
+        val before = Instant.now()
+
+        access.setEncodedPassword("encoded")
+
+        assertEquals("encoded", access.encodedPassword)
+        assertTrue(access.passwordSetDate!! in before..Instant.now())
     }
 }

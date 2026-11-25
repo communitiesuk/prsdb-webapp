@@ -5,7 +5,9 @@ import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
@@ -26,8 +28,15 @@ class PropertyReactivationStateSessionBuilder :
         return self()
     }
 
+    fun withCheckAnswersSubmitted(): PropertyReactivationStateSessionBuilder {
+        withSubmittedValue(ReactivationCheckAnswersStep.ROUTE_SEGMENT, CheckAnswersFormModel())
+        return self()
+    }
+
     companion object {
         fun beforeCheckAnswers() = beforeCheckAnswersWith()
+
+        fun beforeConfirmMissingCompliance() = beforeCheckAnswers().withCheckAnswersSubmitted()
 
         fun beforeCheckAnswersGasCertUploaded() = beforeCheckAnswersWith(gasSafety = { withGasSafetyTaskCompletedWithUploadedCert() })
 

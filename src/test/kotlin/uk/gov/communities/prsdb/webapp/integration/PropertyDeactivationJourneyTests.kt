@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
@@ -41,6 +42,9 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @MockitoBean
     private lateinit var lettingAgentDeactivatedEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>
+
+    @MockitoBean
+    private lateinit var inviteeCancellationEmailSender: EmailNotificationService<PropertyDeactivationInviteeCancellationEmail>
 
     @Test
     fun `landlord can deactivate a single-landlord property from the property record`(page: Page) {
@@ -66,6 +70,24 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to propertyOwnershipId.toString()))
         assertThat(deactivatedDetailsPage.deactivationSuccessBanner).containsText("Property deactivated.")
         assertThat(deactivatedDetailsPage.caption).hasText("Deactivated property")
+    }
+
+    @Test
+    fun `deactivating a property emails its pending joint landlord invitees`(page: Page) {
+        val propertyWithPendingInvitesId = 38L
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyWithPendingInvitesId)
+        detailsPage.deactivatePropertyLink.clickAndWait()
+        val confirmPage =
+            assertPageIs(
+                page,
+                ConfirmPagePropertyDeactivation::class,
+                mapOf("propertyOwnershipId" to propertyWithPendingInvitesId.toString()),
+            )
+
+        confirmPage.submitConfirm()
+
+        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.three@example.com"), any())
+        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.four@example.com"), any())
     }
 
     @Test

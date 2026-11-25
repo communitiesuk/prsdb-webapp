@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class FreeholderSummaryCardHelper {
     fun getSummaryCards(
         freeholdersMap: Map<Int, FreeholderDataModel>,
+        unknownBodyTextKey: String = LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY,
         getActions: (freeholderId: Int) -> List<SummaryCardActionViewModel> = { emptyList() },
     ): List<SummaryCardViewModel> =
         freeholdersMap
@@ -31,17 +32,21 @@ class FreeholderSummaryCardHelper {
                         title = "registerProperty.freeholders.list.unknownFreeholder.title",
                         summaryList = emptyList(),
                         actions = actions,
-                        bodyTextKey = "registerProperty.freeholders.list.unknownFreeholder.body",
+                        bodyTextKey = unknownBodyTextKey,
                     )
                 }
             }
 
-    fun getSummaryCards(freeholders: Collection<Freeholder>): List<SummaryCardViewModel> =
+    fun getSummaryCards(
+        freeholders: Collection<Freeholder>,
+        unknownBodyTextKey: String = LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY,
+    ): List<SummaryCardViewModel> =
         getSummaryCards(
             freeholders
                 .sortedBy { it.id }
                 .withIndex()
                 .associate { (index, freeholder) -> index to FreeholderDataModel.fromFreeholder(freeholder) },
+            unknownBodyTextKey = unknownBodyTextKey,
         )
 
     private fun getContactRows(freeholder: FreeholderDataModel): List<SummaryListRowViewModel> =
@@ -58,6 +63,8 @@ class FreeholderSummaryCardHelper {
         )
 
     companion object {
+        const val LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY = "registerProperty.freeholders.list.unknownFreeholder.body"
+        const val COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY = "propertyDetails.peopleResponsible.freeholder.councilUnknownDetails"
         const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.freeholder.postalAddressNote"
     }
 }

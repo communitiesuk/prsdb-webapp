@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskServ
 import uk.gov.communities.prsdb.webapp.services.DeactivationService
 import kotlin.system.exitProcess
 
-@PrsdbScheduledTask("deactivate-missing-detail-properties")
+@PrsdbScheduledTask("deactivate-missing-detail-properties-scheduled-task")
 class DeactivateMissingDetailPropertiesTaskApplicationRunner(
     private val context: ApplicationContext,
     private val taskLogic: DeactivateMissingDetailPropertiesTaskLogic,
