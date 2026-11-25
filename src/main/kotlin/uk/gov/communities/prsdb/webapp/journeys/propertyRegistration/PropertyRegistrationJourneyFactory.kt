@@ -35,8 +35,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckPropertyManagerStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EicExpiryDateStep
@@ -55,7 +53,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -113,10 +110,14 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceCheckResult
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
@@ -672,6 +673,12 @@ class PropertyRegistrationJourneyFactory(
                             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
                         )
                     }
+                    withAdditionalContentProperties {
+                        mapOf(
+                            "fieldSetHeading" to "registerProperty.confirmMissingCompliance.areYouSure.heading",
+                            "submitButtonText" to "registerProperty.confirmMissingCompliance.button",
+                        )
+                    }
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK -> {
@@ -886,7 +893,7 @@ interface PropertyRegistrationJourneyState :
     WhoProvidesDetailsDependencies,
     CorrespondenceDependencies,
     CombinedComplianceCheckState,
-    CheckYourAnswersJourneyState {
+    MissingComplianceState {
     var isStateInitialized: Boolean
     override var loggedInLandlordEmailAtStartOfJourney: String
 
@@ -917,8 +924,14 @@ interface PropertyRegistrationJourneyState :
     override val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
 
-    val answersChangedSinceConfirmation: Boolean
-        get() = cyaStep.formModelOrNull?.answersLastChangedAt.orEmpty() != answersLastChanged?.toString().orEmpty()
+    override val isMissingComplianceCheckApplicable: Boolean
+        get() = isOccupied && !isDelegatedToLettingAgent()
+    override val isGasCertMissing: Boolean
+        get() = HasMissingComplianceStepConfig.isGasCertInvalid(gasSafetyTask)
+    override val isElectricalCertMissing: Boolean
+        get() = HasMissingComplianceStepConfig.isElectricalCertInvalid(electricalSafetyTask)
+    override val isEpcMissing: Boolean
+        get() = HasMissingComplianceStepConfig.isEpcInvalid(epcTask)
 
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
