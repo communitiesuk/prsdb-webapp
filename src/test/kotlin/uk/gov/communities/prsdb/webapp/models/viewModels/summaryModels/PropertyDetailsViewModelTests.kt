@@ -25,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownership.InitialiseOwnershipUpdateStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyManager
@@ -417,6 +419,39 @@ class PropertyDetailsViewModelTests {
         assertTrue(viewModel.showSuperiorLandlordSection)
         assertFalse(viewModel.showSuperiorLandlordSectionUpdateLink)
         assertTrue(viewModel.superiorLandlordNotUsedRows.single().actions.isEmpty())
+    }
+
+    @ParameterizedTest
+    @EnumSource(PropertyDetailsViewType::class)
+    fun `the unknown freeholder and superior landlord body text keys use council wording only in the local council view`(
+        viewType: PropertyDetailsViewType,
+    ) {
+        // Arrange & Act
+        val viewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY),
+                viewType = viewType,
+                messageSource = mockMessageSource,
+            )
+
+        // Assert
+        val isCouncilView = viewType == PropertyDetailsViewType.LOCAL_COUNCIL
+        assertEquals(
+            if (isCouncilView) {
+                FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
+            } else {
+                FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+            },
+            viewModel.unknownFreeholderBodyTextKey,
+        )
+        assertEquals(
+            if (isCouncilView) {
+                SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_DETAILS_BODY_KEY
+            } else {
+                SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+            },
+            viewModel.unknownSuperiorLandlordBodyTextKey,
+        )
     }
 
     @Test
