@@ -82,6 +82,8 @@ class LandlordDetailsController(
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
+        model.addDeleteLandlordUrl(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(landlord, model)
         }
@@ -114,13 +116,11 @@ class LandlordDetailsController(
         model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
+        model.addDeleteLandlordUrl(DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH)
+
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(orgLandlord, model)
         }
-        model.addAttribute(
-            "deleteLandlordRecordUrl",
-            DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
-        )
 
         return "orgLandlordDetailsView"
     }
@@ -181,8 +181,18 @@ class LandlordDetailsController(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
         )
-        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+    }
+
+    private fun Model.addDeleteLandlordUrl(url: String) {
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            addAttribute("showDeleteLandlordRecordLink", false)
+        } else {
+            addAttribute(
+                "deleteLandlordRecordUrl",
+                url,
+            )
+        }
     }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
