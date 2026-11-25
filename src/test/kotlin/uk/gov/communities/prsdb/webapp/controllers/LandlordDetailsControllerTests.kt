@@ -537,12 +537,9 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getLandlordDetails shows property record links and a back link to the root page for an LC user`() {
+        fun `getLandlordDetails shows a back link to the root page for an LC user`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
-                model {
-                    attribute("backUrl", "/")
-                    attribute("showPropertyRecordLinks", true)
-                }
+                model { attribute("backUrl", "/") }
             }
         }
 
@@ -631,6 +628,22 @@ class LandlordDetailsControllerTests(
         }
 
         @Test
+        @WithMockUser
+        fun `getLandlordDetailsAsSystemOperator returns 403 for an unauthorized user`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getLandlordDetailsAsSystemOperator returns 403 for a landlord`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER", "LOCAL_COUNCIL_ADMIN"])
         fun `getLandlordDetailsAsSystemOperator returns 403 for a local council user`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
@@ -640,21 +653,20 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `getLandlordDetailsAsSystemOperator returns the LC view without property links for an individual landlord`() {
+        fun `getLandlordDetailsAsSystemOperator returns the LC view with a back link to the SO dashboard for an individual landlord`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
                 status { isOk() }
                 view { name("localCouncilLandlordDetailsView") }
                 model {
                     attributeExists("landlord", "lastModifiedDate", "registeredPropertiesList")
                     attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
-                    attribute("showPropertyRecordLinks", false)
                 }
             }
         }
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `getLandlordDetailsAsSystemOperator returns the LC org view without property links for an org landlord`() {
+        fun `getLandlordDetailsAsSystemOperator returns the LC org view with a back link to the SO dashboard for an org landlord`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(orgLandlordId)).andExpect {
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
@@ -662,7 +674,6 @@ class LandlordDetailsControllerTests(
                     attribute("isLandlordView", false)
                     attribute("showDeleteLandlordRecordLink", false)
                     attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
-                    attribute("showPropertyRecordLinks", false)
                 }
             }
         }

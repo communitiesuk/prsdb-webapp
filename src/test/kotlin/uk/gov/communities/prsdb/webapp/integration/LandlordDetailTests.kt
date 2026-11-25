@@ -324,17 +324,6 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
     @Nested
     inner class LandlordDetailsSystemOperatorView : NestedIntegrationTestWithImmutableData("data-local.sql") {
-        // TODO PDJB-1909: Check the address links to the system operator view of the property record
-        @Test
-        fun `the registered properties tab lists property addresses without links`() {
-            val detailsPage = navigator.goToLandlordDetailsAsASystemOperator(1)
-            detailsPage.tabs.goToRegisteredProperties()
-
-            assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
-            assertThat(detailsPage.registeredPropertiesTable).containsText("1, Example Road, EG")
-            assertThat(detailsPage.getPropertyAddressLink("1, Example Road, EG")).isHidden()
-        }
-
         // TODO PDJB-1910: Check the back link returns to the system operator landlord search results
         @Test
         fun `the back link goes to the system operator dashboard`(page: Page) {

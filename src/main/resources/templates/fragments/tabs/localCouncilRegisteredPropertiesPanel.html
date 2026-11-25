@@ -4,8 +4,7 @@
             <tbody class="govuk-table__body">
             <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
                 <td class="govuk-table__cell">
-                    <a th:if="${showPropertyRecordLinks}" class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">property.address</a>
-                    <th:block th:unless="${showPropertyRecordLinks}" th:text="${property.address}">property.address</th:block>
+                    <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">property.address</a>
                 </td>
                 <td class="govuk-table__cell" th:text="${property.registrationNumber}"></td>
                 <td class="govuk-table__cell" th:text="${property.localCouncilName}"></td>
