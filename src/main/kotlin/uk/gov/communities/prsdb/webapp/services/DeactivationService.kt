@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -47,12 +48,21 @@ class DeactivationService(
         val lettingAgentDelegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
         val jointLandlordInvitations = jointLandlordInvitationRepository.findByRegisteredOwnership_Id(propertyOwnershipId)
+        val pendingInviteeEmails =
+            jointLandlordInvitations
+                .filter { it.status == JointLandlordInvitationStatus.PENDING }
+                .map { it.invitedEmail }
         jointLandlordInvitationRepository.deleteAll(jointLandlordInvitations)
-        // TODO PDJB-2169: Email the invitees of the pending invitations cancelled here, only when ACTIVE_INACTIVE is enabled
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
         if (lettingAgentDelegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             TransactionHelper.runAfterTransactionCommits {
                 deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, lettingAgentDelegation.invitedEmail)
+            }
+        }
+        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
+        if (pendingInviteeEmails.isNotEmpty() && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            TransactionHelper.runAfterTransactionCommits {
+                pendingInviteeEmails.forEach { deactivationEmailService.sendInviteeCancellationEmail(propertyOwnership, it) }
             }
         }
 

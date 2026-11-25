@@ -387,6 +387,13 @@
     "bodyLocation": "/emails/LettingAgentPropertyDeactivatedNotification.md"
   },
   {
+    "test_id": "70155b2c-453f-41a3-9226-d39eb7eab0ee",
+    "prod_id": "4282d1fb-1b25-4dc5-89cd-a53dcdca6d49",
+    "enumName": "PROPERTY_DEACTIVATION_INVITEE_CANCELLATION",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/PropertyDeactivationInviteeCancellation.md"
+  },
+  {
     "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
     "prod_id": "b3f8620c-67b8-4988-98c7-1d8bf7738aea",
     "enumName": "DELEGATE_TO_LETTING_AGENT_CONFIRMATION_EMAIL",

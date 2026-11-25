@@ -639,6 +639,12 @@ class EmailTemplateModelsTests {
                     "/emails/LettingAgentPropertyDeactivatedNotification.md",
                 ),
                 EmailTemplateTestData(
+                    PropertyDeactivationInviteeCancellationEmail(
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                    ),
+                    "/emails/PropertyDeactivationInviteeCancellation.md",
+                ),
+                EmailTemplateTestData(
                     ChangeOrgTeamMemberAccessLevelEmail(
                         memberName = "Anita Locke",
                         roleName = "administrator",
