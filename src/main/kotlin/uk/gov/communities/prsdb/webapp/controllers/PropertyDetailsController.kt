@@ -294,12 +294,21 @@ class PropertyDetailsController(
     ): Map<String, Any> =
         buildMap {
             if (propertyDetails.showFreeholderSection) {
-                put("freeholderSummaryCards", freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders))
+                put(
+                    "freeholderSummaryCards",
+                    freeholderSummaryCardHelper.getSummaryCards(
+                        propertyOwnership.freeholders,
+                        propertyDetails.unknownFreeholderBodyTextKey,
+                    ),
+                )
             }
             if (propertyDetails.showSuperiorLandlordSection) {
                 put(
                     "superiorLandlordSummaryCards",
-                    superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
+                    superiorLandlordSummaryCardHelper.getSummaryCards(
+                        propertyOwnership.superiorLandlords,
+                        propertyDetails.unknownSuperiorLandlordBodyTextKey,
+                    ),
                 )
             }
             // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed

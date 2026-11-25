@@ -79,6 +79,31 @@ class SuperiorLandlordSummaryCardHelperTests {
     }
 
     @Test
+    fun `custom unknown details message applies only to unknown superior landlords`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val unknown = createSuperiorLandlord(propertyOwnership)
+        val postal = createSuperiorLandlord(propertyOwnership, name = "Casey Address", id = 2L)
+        val email = createSuperiorLandlord(propertyOwnership, name = "Jordan Email", email = "jordan@example.com", id = 3L)
+
+        // Act
+        val cards =
+            helper
+                .getSummaryCards(
+                    listOf(unknown, postal, email),
+                    SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
+                ).associateBy { it.title }
+
+        // Assert
+        assertEquals(
+            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY,
+            cards.getValue("registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title").bodyTextKey,
+        )
+        assertEquals(SuperiorLandlordSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)
+        assertNull(cards.getValue("Jordan Email").bodyTextKey)
+    }
+
+    @Test
     fun `superior landlord with a postal address has a card titled with their name and a multi-line postal address row`() {
         val superiorLandlord =
             SuperiorLandlordDataModel(
