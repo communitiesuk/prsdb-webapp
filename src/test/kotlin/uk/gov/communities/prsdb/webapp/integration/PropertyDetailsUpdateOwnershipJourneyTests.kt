@@ -42,6 +42,9 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
     // Seeded as SOLE_FREEHOLD with no freeholders or superior landlords
     private val soleFreeholdPropertyId = 33L
 
+    // Seeded as JOINT_TENANTS with saved freeholders that do not include the logged-in landlord
+    private val jointFreeholdPropertyId = 54L
+
     // Seeded as LEASEHOLD_ONLY with two named freeholders, one "no details known" freeholder and one named superior landlord
     private val propertyWithPartiesId = 55L
 
@@ -219,6 +222,25 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(propertyDetailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow.value).containsText("Joint tenants")
         assertEquals(listOf(LOGGED_IN_LANDLORD_NAME), propertyDetailsPage.freeholderCards.map { it.title.getText() })
         assertThat(propertyDetailsPage.freeholderCards.single()).containsText(LOGGED_IN_LANDLORD_EMAIL)
+    }
+
+    @Test
+    fun `changing an existing joint freehold type does not add the logged-in landlord again`(page: Page) {
+        val urlArguments = urlArgumentsFor(jointFreeholdPropertyId)
+        startJourney(jointFreeholdPropertyId)
+
+        assertPageIs(page, OwnsPropertyFormPagePropertyDetailsUpdate::class, urlArguments).submitOwnsProperty(true)
+        assertPageIs(page, OwnershipKindFormPagePropertyDetailsUpdate::class, urlArguments)
+            .submitOwnershipKind(OwnershipKind.FREEHOLD_ONLY)
+        assertPageIs(page, FreeholdTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+            .submitFreeholdType(FreeholdType.TENANTS_IN_COMMON)
+        assertPageIs(page, FreeholdersInfoFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertEquals(
+            setOf("Jordan Joint", "Casey Joint", "Unknown freeholder"),
+            (0..2).map { freeholdersListPage.getSummaryCard(it).title.getText() }.toSet(),
+        )
     }
 
     @Test
