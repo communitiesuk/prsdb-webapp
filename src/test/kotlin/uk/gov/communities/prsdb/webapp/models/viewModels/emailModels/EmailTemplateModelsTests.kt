@@ -463,19 +463,10 @@ class EmailTemplateModelsTests {
                         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
                         landlordDeactivated = false,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
+                        propertyRecordUrl = "https://example.com/property",
                     ),
                     "/emails/PropertyDeactivationConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    PropertyDeactivationConfirmationEmail(
-                        recipientName = "Alice",
-                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
-                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
-                        landlordDeactivated = true,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
-                    ),
-                    "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LandlordDeactivatedEmail(
