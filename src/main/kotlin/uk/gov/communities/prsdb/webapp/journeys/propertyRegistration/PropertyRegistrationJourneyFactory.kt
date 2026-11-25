@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
@@ -105,7 +106,9 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentFailedStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentHandler
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentStatusCheckStep
@@ -114,6 +117,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStep
@@ -806,6 +810,7 @@ class PropertyRegistrationJourney(
     override val paymentReturnStep: PaymentReturnStep,
     override val paymentStatusCheckStep: PaymentStatusCheckStep,
     override val paymentFailedStep: PaymentFailedStep,
+    private val paymentHandlerFactory: PropertyRegistrationPaymentHandlerFactory,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -852,6 +857,22 @@ class PropertyRegistrationJourney(
     override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
     override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
 
+    override val dependencies: PaymentDependencies get() = this
+
+    override val paymentHandler: PaymentHandler get() = paymentHandlerFactory.create(this)
+
+    override val paymentSummaryAddressLines: List<String>
+        get() = propertyDetailsTask.addressTask.getAddress().toMultiLineAddress().split("\n")
+
+    override var isPaymentAddressTaken: Boolean?
+        get() = propertyDetailsTask.addressTask.isAddressAlreadyRegistered
+        set(value) {
+            propertyDetailsTask.addressTask.isAddressAlreadyRegistered = value
+        }
+
+    override val addressTakenStep: JourneyStep<*, *, *>
+        get() = propertyDetailsTask.addressTask.alreadyRegisteredStep
+
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
     // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
@@ -893,7 +914,9 @@ interface PropertyRegistrationJourneyState :
     WhoProvidesDetailsDependencies,
     CorrespondenceDependencies,
     CombinedComplianceCheckState,
-    MissingComplianceState {
+    MissingComplianceState,
+    PaymentState,
+    PaymentDependencies {
     var isStateInitialized: Boolean
     override var loggedInLandlordEmailAtStartOfJourney: String
 
@@ -933,6 +956,9 @@ interface PropertyRegistrationJourneyState :
     override val isEpcMissing: Boolean
         get() = HasMissingComplianceStepConfig.isEpcInvalid(epcTask)
 
+    override val answersChangedSinceConfirmation: Boolean
+        get() = super<MissingComplianceState>.answersChangedSinceConfirmation
+
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep
@@ -941,14 +967,6 @@ interface PropertyRegistrationJourneyState :
     val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
 
-    // Payment steps (behind PAYMENTS flag)
-    var paymentQuote: PropertyPaymentQuote?
-    val paymentSummaryStep: PaymentSummaryStep
-    val paymentReturnStep: PaymentReturnStep
-    val paymentStatusCheckStep: PaymentStatusCheckStep
-    val paymentFailedStep: PaymentFailedStep
-    var paymentReference: String?
-    var paymentOutcome: PaymentOutcome?
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 

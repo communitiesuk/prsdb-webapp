@@ -7,9 +7,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationDataModelFactory
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.services.PaymentReconciliationService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 
@@ -25,12 +23,10 @@ enum class PaymentOutcome {
 class PaymentStatusCheckStepConfig(
     private val paymentService: PaymentService,
     private val paymentReconciliationService: PaymentReconciliationService,
-    private val propertyRegistrationDataModelFactory: PropertyRegistrationDataModelFactory,
-    private val addressAvailabilityService: AddressAvailabilityService,
-) : AbstractInternalStepConfig<PaymentOutcome, PropertyRegistrationJourneyState>() {
-    override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
+) : AbstractInternalStepConfig<PaymentOutcome, PaymentState>() {
+    override fun afterStepIsReached(state: PaymentState) {
         val paymentReference = checkNotNull(state.paymentReference) { "No payment reference for journey ${state.journeyId}" }
-        val storedPaymentStatus = paymentService.getStoredPropertyRegistrationPaymentStatus(state.journeyId, paymentReference)
+        val storedPaymentStatus = state.dependencies.paymentHandler.getStoredPaymentStatus(paymentReference)
         val paymentStatus =
             if (storedPaymentStatus.isCreated()) {
                 try {
@@ -57,21 +53,20 @@ class PaymentStatusCheckStepConfig(
         state.paymentOutcome = paymentOutcome
 
         if (paymentOutcome.isUnsuccessful()) {
-            val addressTask = state.propertyDetailsTask.addressTask
-            addressTask.isAddressAlreadyRegistered = addressTask.getAddress().uprn?.let { addressAvailabilityService.isAddressOwned(it) }
+            state.dependencies.isPaymentAddressTaken = state.dependencies.paymentHandler.isAddressTaken()
         }
     }
 
     private fun checkWithGovUkPay(
         paymentId: String,
-        state: PropertyRegistrationJourneyState,
+        state: PaymentState,
     ): PaymentStatus {
         val govUkPayStatus = paymentService.getGovUkPayPaymentStatus(paymentId).status
         if (govUkPayStatus == PaymentStatus.CREATED) {
             return PaymentStatus.CREATED
         }
 
-        if (govUkPayStatus == PaymentStatus.CAPTURABLE && state.answersChangedSinceConfirmation) {
+        if (govUkPayStatus == PaymentStatus.CAPTURABLE && state.dependencies.answersChangedSinceConfirmation) {
             val storedStatus = paymentReconciliationService.markForCancellation(paymentId)
             if (storedStatus == PaymentStatus.SUCCEEDED) {
                 return storedStatus
@@ -81,23 +76,26 @@ class PaymentStatusCheckStepConfig(
             )
         }
 
-        return paymentService.finalisePayment(paymentId, govUkPayStatus, propertyRegistrationDataModelFactory.fromJourneyState(state))
+        return state.dependencies.paymentHandler.finalisePayment(paymentId, govUkPayStatus)
     }
 
-    override fun mode(state: PropertyRegistrationJourneyState) = state.paymentOutcome
+    override fun mode(state: PaymentState) = state.paymentOutcome
 
     override fun resolveNextDestination(
-        state: PropertyRegistrationJourneyState,
+        state: PaymentState,
         defaultDestination: Destination,
     ): Destination {
         if (state.paymentOutcome == PaymentOutcome.SUCCESS) {
+            // Resolve the exit destination first: it depends on journey state that deleting the journey removes
+            val nextUrl =
+                checkNotNull(defaultDestination.toUrlStringOrNull()) {
+                    "No destination after payment for journey ${state.journeyId}"
+                }
             state.deleteJourney()
+            return Destination.ExternalUrl(nextUrl)
         }
-        if (state.paymentOutcome?.isUnsuccessful() == true) {
-            val addressTask = state.propertyDetailsTask.addressTask
-            if (addressTask.isAddressAlreadyRegistered == true) {
-                return Destination(addressTask.alreadyRegisteredStep)
-            }
+        if (state.paymentOutcome?.isUnsuccessful() == true && state.dependencies.isPaymentAddressTaken == true) {
+            return Destination(state.dependencies.addressTakenStep)
         }
         return defaultDestination
     }
@@ -108,4 +106,4 @@ class PaymentStatusCheckStepConfig(
 @JourneyFrameworkComponent
 final class PaymentStatusCheckStep(
     stepConfig: PaymentStatusCheckStepConfig,
-) : JourneyStep.InternalStep<PaymentOutcome, PropertyRegistrationJourneyState>(stepConfig)
+) : JourneyStep.InternalStep<PaymentOutcome, PaymentState>(stepConfig)

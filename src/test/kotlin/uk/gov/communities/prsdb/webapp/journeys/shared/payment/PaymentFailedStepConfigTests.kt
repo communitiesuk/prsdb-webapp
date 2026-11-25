@@ -6,13 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class PaymentFailedStepConfigTests {
     @Mock
-    lateinit var mockState: PropertyRegistrationJourneyState
+    lateinit var mockState: PaymentState
 
     @Test
     fun `chooseTemplate returns payment not completed template when payment outcome is NOT_COMPLETED`() {

@@ -5,35 +5,35 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.PaymentReferenceParameterService
 
 @JourneyFrameworkComponent
 class PaymentReturnStepConfig(
     private val paymentReferenceParameterService: PaymentReferenceParameterService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PaymentState>() {
     override val formModelClass = NoInputFormModel::class
 
     override val changesAnswers = false
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> = emptyMap()
+    override fun getStepSpecificContent(state: PaymentState): Map<String, Any?> = emptyMap()
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentProcessingForm"
+    override fun chooseTemplate(state: PaymentState) = "forms/paymentProcessingForm"
 
     override fun resolveChosenTemplate(
-        state: PropertyRegistrationJourneyState,
+        state: PaymentState,
         templateName: String,
     ): Destination {
         markStepCompleteSoPaymentStatusCanBeChecked(state)
         return getPaymentOutcomeDestinationIfPaymentHasFinished(state) ?: super.resolveChosenTemplate(state, templateName)
     }
 
-    private fun markStepCompleteSoPaymentStatusCanBeChecked(state: PropertyRegistrationJourneyState) =
+    private fun markStepCompleteSoPaymentStatusCanBeChecked(state: PaymentState) =
         state.addStepData(stepDataKey, NoInputFormModel().toPageData())
 
-    private fun getPaymentOutcomeDestinationIfPaymentHasFinished(state: PropertyRegistrationJourneyState): Destination? {
+    private fun getPaymentOutcomeDestinationIfPaymentHasFinished(state: PaymentState): Destination? {
         val paymentStatusCheckStep = state.paymentStatusCheckStep
         return try {
             if (paymentStatusCheckStep.attemptToReachStep() && state.paymentOutcome != PaymentOutcome.IN_PROGRESS) {
@@ -47,21 +47,21 @@ class PaymentReturnStepConfig(
         }
     }
 
-    override fun beforeAttemptingToReachStep(state: PropertyRegistrationJourneyState): Boolean =
+    override fun beforeAttemptingToReachStep(state: PaymentState): Boolean =
         paymentReferenceParameterService.getParameterOrNull() != null || state.paymentReference != null
 
-    override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
+    override fun afterStepIsReached(state: PaymentState) {
         val paymentReference = paymentReferenceParameterService.getParameterOrNull() ?: return
         state.paymentReference = paymentReference
     }
 
-    override fun mode(state: PropertyRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: PaymentState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class PaymentReturnStep(
     stepConfig: PaymentReturnStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, PropertyRegistrationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, PaymentState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "payment-return"
     }

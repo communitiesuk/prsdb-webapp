@@ -8,13 +8,12 @@ import uk.gov.communities.prsdb.webapp.helpers.PaymentHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PaymentSummaryFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.services.PaymentService
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -22,73 +21,65 @@ import java.util.Locale
 
 @JourneyFrameworkComponent
 class PaymentSummaryStepConfig(
-    private val addressAvailabilityService: AddressAvailabilityService,
     private val paymentService: PaymentService,
-) : AbstractRequestableStepConfig<Complete, PaymentSummaryFormModel, PropertyRegistrationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, PaymentSummaryFormModel, PaymentState>() {
     override val formModelClass = PaymentSummaryFormModel::class
 
     override val changesAnswers = false
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val quote = paymentService.getPropertyRegistrationPaymentQuote()
+    override fun getStepSpecificContent(state: PaymentState): Map<String, Any?> {
+        val dependencies = state.dependencies
+        val quote = dependencies.paymentHandler.getQuote()
         state.paymentQuote = quote
 
-        val firstChargeableDate = paymentService.getFirstChargeableDate(quote.quoteDate)
+        val firstChargeableDate = paymentService.getFirstChargeableDate(quote.paymentStartDate)
 
         return mapOf(
             "annualFee" to PaymentHelper.formatPence(paymentService.getAnnualFeeInPence()),
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
-            "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.quoteDate),
-            "summaryListRows" to getSummaryListRows(state, quote),
+            "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.paymentStartDate),
+            "summaryListRows" to getSummaryListRows(dependencies.paymentSummaryAddressLines, quote),
             "propertyFeeGuidanceUrl" to PROPERTY_FEE_GUIDANCE_URL,
             "quoteDate" to quote.quoteDate.toString(),
         )
     }
 
     private fun getSummaryListRows(
-        state: PropertyRegistrationJourneyState,
+        addressLines: List<String>,
         quote: PropertyPaymentQuote,
     ) = listOf(
-        SummaryListRowViewModel(
-            "registerProperty.paymentSummary.summary.address",
-            state.propertyDetailsTask.addressTask
-                .getAddress()
-                .toMultiLineAddress()
-                .split("\n"),
-        ),
+        SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", addressLines),
         SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", PaymentHelper.formatPence(quote.amountInPence)),
         SummaryListRowViewModel("registerProperty.paymentSummary.summary.paymentDate", quote.quoteDate.format(DATE_FORMATTER)),
         SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", quote.renewalDate.format(DATE_FORMATTER)),
     )
 
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/paymentSummary"
+    override fun chooseTemplate(state: PaymentState) = "forms/paymentSummary"
 
-    override fun mode(state: PropertyRegistrationJourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: PaymentState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
-        if (state.answersChangedSinceConfirmation) {
+    override fun afterStepIsReached(state: PaymentState) {
+        if (state.dependencies.answersChangedSinceConfirmation) {
             throw CyaDataHasChangedException("Answers changed after confirmation for journey ${state.journeyId}")
         }
     }
 
-    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
+    override fun afterStepDataIsAdded(state: PaymentState) {
         state.paymentOutcome = null
         state.paymentReference = null
 
-        val addressTask = state.propertyDetailsTask.addressTask
-        val uprn = addressTask.getAddress().uprn
-        if (uprn != null && addressAvailabilityService.isAddressOwned(uprn)) {
-            addressTask.isAddressAlreadyRegistered = true
+        if (state.dependencies.paymentHandler.isAddressTaken()) {
+            state.dependencies.isPaymentAddressTaken = true
         }
     }
 
     override fun resolveNextDestination(
-        state: PropertyRegistrationJourneyState,
+        state: PaymentState,
         defaultDestination: Destination,
     ): Destination {
-        val addressTask = state.propertyDetailsTask.addressTask
-        if (addressTask.isAddressAlreadyRegistered == true) {
-            return Destination(addressTask.alreadyRegisteredStep)
+        val dependencies = state.dependencies
+        if (dependencies.isPaymentAddressTaken == true) {
+            return Destination(dependencies.addressTakenStep)
         }
 
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
@@ -96,19 +87,13 @@ class PaymentSummaryStepConfig(
         val quote = state.paymentQuote
 
         if (submittedQuoteDate != today || quote == null || quote.quoteDate != submittedQuoteDate) {
-            state.paymentQuote = paymentService.getPropertyRegistrationPaymentQuote(today)
+            state.paymentQuote = dependencies.paymentHandler.getQuote(today)
             // TODO PDJB-1869: Inform the user about the updated payment total when a stale quote redirects them back to the payment summary
             //  page. For now, we will just redirect them back to the payment summary page with the updated total and no info text.
             return Destination(state.paymentSummaryStep)
         }
 
-        val creationResult =
-            paymentService.createPropertyRegistrationPayment(
-                state.journeyId,
-                state.loggedInLandlordEmailAtStartOfJourney,
-                quote,
-            )
-        return when (creationResult) {
+        return when (val creationResult = dependencies.paymentHandler.createPayment(quote)) {
             is PaymentCreationResult.NewPayment -> Destination.ExternalUrl(creationResult.nextUrl)
             PaymentCreationResult.ConcurrentPaymentStarted -> Destination(state.paymentSummaryStep)
         }
@@ -122,7 +107,7 @@ class PaymentSummaryStepConfig(
 @JourneyFrameworkComponent
 final class PaymentSummaryStep(
     stepConfig: PaymentSummaryStepConfig,
-) : RequestableStep<Complete, PaymentSummaryFormModel, PropertyRegistrationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, PaymentSummaryFormModel, PaymentState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "payment-summary"
     }

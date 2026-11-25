@@ -17,7 +17,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.services.PaymentReferenceParameterService
 import kotlin.test.assertIs
 
@@ -27,7 +27,7 @@ class PaymentReturnStepConfigTests {
     private lateinit var mockPaymentReferenceParameterService: PaymentReferenceParameterService
 
     @Mock
-    private lateinit var mockState: PropertyRegistrationJourneyState
+    private lateinit var mockState: PaymentState
 
     @Mock
     private lateinit var mockPaymentStatusCheckStep: PaymentStatusCheckStep
