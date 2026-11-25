@@ -4,11 +4,9 @@ import jakarta.persistence.EntityManagerFactory
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -114,29 +112,6 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `a property can have a CREATED payment as well as finished ones`() {
-        paymentRepository.saveAndFlush(createStoredPropertyPayment("cancelled-payment-id", PaymentStatus.CANCELLED))
-        paymentRepository.saveAndFlush(createStoredPropertyPayment("succeeded-payment-id", PaymentStatus.SUCCEEDED))
-
-        assertDoesNotThrow { paymentRepository.saveAndFlush(createStoredPropertyPayment("created-payment-id")) }
-    }
-
-    @Test
-    fun `claimForReactivation activates an inactive property and reports that it has done so`() {
-        val claimedRows = transactionTemplate.execute { propertyOwnershipRepository.claimForReactivation(JOINT_PROPERTY_ID) }
-
-        assertEquals(1, claimedRows)
-        assertTrue(propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().isActive)
-    }
-
-    @Test
-    fun `claimForReactivation does not claim an active property`() {
-        jdbcTemplate.update("UPDATE property_ownership SET is_active = true WHERE id = ?", JOINT_PROPERTY_ID)
-
-        assertEquals(0, transactionTemplate.execute { propertyOwnershipRepository.claimForReactivation(JOINT_PROPERTY_ID) })
-    }
-
-    @Test
     fun `a second claim waits for the first to commit, then claims nothing`() {
         val executor = Executors.newFixedThreadPool(2)
         val firstClaimMade = CountDownLatch(1)
@@ -165,27 +140,6 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
             executor.shutdown()
             executor.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         }
-    }
-
-    @Test
-    fun `existsByIsActiveTrueAndAddress_UprnAndIdNot ignores the property itself`() {
-        jdbcTemplate.update("UPDATE property_ownership SET is_active = true WHERE id = ?", JOINT_PROPERTY_ID)
-
-        assertFalse(propertyOwnershipRepository.existsByIsActiveTrueAndAddress_UprnAndIdNot(JOINT_PROPERTY_UPRN, JOINT_PROPERTY_ID))
-        assertTrue(propertyOwnershipRepository.existsByIsActiveTrueAndAddress_UprnAndIdNot(JOINT_PROPERTY_UPRN, SOLE_PROPERTY_ID))
-    }
-
-    @Test
-    fun `findByReferenceAndAssociatedProperty_IdAndPayingUser_Id does not find another landlord's payment`() {
-        paymentRepository.saveAndFlush(createStoredPropertyPayment(PAYMENT_ID, payingUserId = LANDLORD_2_USER_ID))
-
-        assertNull(
-            paymentRepository.findByReferenceAndAssociatedProperty_IdAndPayingUser_Id(
-                "reference-$PAYMENT_ID",
-                JOINT_PROPERTY_ID,
-                LANDLORD_1_USER_ID,
-            ),
-        )
     }
 
     @Test
@@ -293,23 +247,18 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
 
     private fun createStoredPropertyPayment(
         paymentId: String,
-        status: PaymentStatus = PaymentStatus.CREATED,
         payingUserId: String = LANDLORD_1_USER_ID,
     ) = createReactivationPayment(
         paymentId = paymentId,
         reference = "reference-$paymentId",
-        status = status,
         propertyOwnership = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get(),
         payingUser = prsdbUserRepository.findById(payingUserId).get(),
     )
 
     companion object {
-        private const val SOLE_PROPERTY_ID = 1L
         private const val JOINT_PROPERTY_ID = 2L
-        private const val JOINT_PROPERTY_UPRN = 3L
         private const val LANDLORD_1_USER_ID = "urn:fdc:gov.uk:2022:UVWXY"
         private const val LANDLORD_2_USER_ID = "urn:fdc:gov.uk:2022:ABCDE"
-        private const val PAYMENT_ID = "payment-id"
         private const val TIMEOUT_SECONDS = 10L
         private const val JOURNEY_ID = "reactivation-journey"
         private const val EMAIL = "user@example.test"

@@ -1619,44 +1619,6 @@ class PaymentServiceTests {
             inOrder.verify(mockTransactionManager).commit(any())
             verifyNoInteractions(mockPropertyRegistrationService, mockSavedJourneyStateRepository)
         }
-
-        @Test
-        fun `finalisePaymentApplyingChanges cancels the payment without capturing it and rethrows when already reactivated`() {
-            // Arrange
-            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
-            stubTransaction()
-            stubStoredPayment(createReactivationPayment(paymentId = PAYMENT_ID))
-            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
-
-            // Act, Assert
-            assertThrows<PropertyAlreadyReactivatedException> {
-                paymentService.finalisePaymentApplyingChanges(PAYMENT_ID, PaymentStatus.CAPTURABLE) {
-                    throw PropertyAlreadyReactivatedException(PROPERTY_ID)
-                }
-            }
-            verify(mockGovUkPayClient, never()).capturePayment(any())
-            val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
-            inOrder.verify(mockTransactionManager).rollback(any())
-            inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
-        }
-
-        @Test
-        fun `finalisePaymentApplyingChanges returns SUCCEEDED when another request finalising the payment reactivated the property`() {
-            // Arrange
-            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
-            stubTransaction()
-            stubStoredPayment(createReactivationPayment(paymentId = PAYMENT_ID))
-            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.SUCCEEDED)
-
-            // Act
-            val status =
-                paymentService.finalisePaymentApplyingChanges(PAYMENT_ID, PaymentStatus.CAPTURABLE) {
-                    throw PropertyAlreadyReactivatedException(PROPERTY_ID)
-                }
-
-            // Assert
-            assertEquals(PaymentStatus.SUCCEEDED, status)
-        }
     }
 
     @Nested

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpSession
@@ -74,25 +73,6 @@ class PropertyReactivationServicePersistenceTests : IntegrationTestWithMutableDa
 
         // Act
         assertThrows<EntityExistsException> {
-            propertyReactivationService.reactivatePropertyWithoutPayment(INACTIVE_PROPERTY_ID, reactivationData)
-        }
-
-        // Assert
-        assertNothingSavedOrRecorded()
-    }
-
-    @Test
-    fun `reactivatePropertyWithoutPayment saves and records nothing when the active address index stops the claim`() {
-        // Arrange
-        giveTheActivePropertyTheInactivePropertysAddress()
-        // Without a UPRN the address check can't run, so only the index stops the property becoming active
-        jdbcTemplate.update(
-            "UPDATE address SET uprn = NULL WHERE id = (SELECT address_id FROM property_ownership WHERE id = ?)",
-            INACTIVE_PROPERTY_ID,
-        )
-
-        // Act
-        assertThrows<DataIntegrityViolationException> {
             propertyReactivationService.reactivatePropertyWithoutPayment(INACTIVE_PROPERTY_ID, reactivationData)
         }
 

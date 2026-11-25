@@ -46,6 +46,7 @@ class PropertyReactivationService(
                     userToLandlordService.getCurrentLandlordForUser(),
                     LocalDate.now(DateTimeHelper.UK_ZONE),
                 )
+            // TODO PDJB-2076: Throw if the quote needs payment, so the free path can't add an unpaid period
             saveReactivationData(claimedProperty, reactivationData)
             activationService.reactivateClaimedProperty(claimedProperty, quote.renewalDate)
             recordReactivationAfterCommit(propertyOwnershipId, landlordWillBeReactivated, wasPaid = false)
