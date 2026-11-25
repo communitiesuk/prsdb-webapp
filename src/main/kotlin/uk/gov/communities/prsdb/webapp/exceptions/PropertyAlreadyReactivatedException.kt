@@ -6,4 +6,4 @@ import org.springframework.web.bind.annotation.ResponseStatus
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class PropertyAlreadyReactivatedException(
     propertyOwnershipId: Long,
-) : PrsdbWebException("Property ownership $propertyOwnershipId has already been reactivated")
+) : PaidChangesRejectedException("Property ownership $propertyOwnershipId has already been reactivated")

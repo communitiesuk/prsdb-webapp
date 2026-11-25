@@ -61,8 +61,7 @@ class PropertyReactivationService(
 
     fun wasLastReactivationPaid(): Boolean = session.getAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID) == true
 
-    // Logs rather than throws, as the reactivation has committed. A payment left live can't be taken, because the paid
-    // path's claim would fail.
+    // A payment left live can't be taken, because the paid path's claim would fail
     private fun cancelLivePaymentAndLogFailures(propertyOwnershipId: Long) {
         try {
             paymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId)

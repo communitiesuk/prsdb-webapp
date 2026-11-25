@@ -18,8 +18,6 @@ class ActivationService(
     private val landlordRepository: LandlordRepository,
     private val entityManager: EntityManager,
 ) {
-    // Must run in the transaction that applies the reactivation. A concurrent claim waits for this transaction and then
-    // claims nothing, so only one reactivation (and so only one payment) can ever apply.
     @Transactional(Transactional.TxType.MANDATORY)
     fun claimPropertyForReactivation(propertyOwnershipId: Long): PropertyOwnership {
         if (propertyOwnershipRepository.claimForReactivation(propertyOwnershipId) == 0) {
@@ -28,7 +26,6 @@ class ActivationService(
         return getPropertyOwnership(propertyOwnershipId).also { entityManager.refresh(it) }
     }
 
-    // Call claimPropertyForReactivation first, in the same transaction
     @Transactional(Transactional.TxType.MANDATORY)
     fun reactivateClaimedProperty(
         propertyOwnership: PropertyOwnership,
