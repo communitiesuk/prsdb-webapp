@@ -959,6 +959,26 @@ class PropertyDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView adds no freeholder cards when the property has no freeholders`() {
+            // Arrange
+            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.LEASEHOLD_ONLY)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(emptyList())
+
+            // Act & Assert
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("freeholderSummaryCards", emptyList<SummaryCardViewModel>()) }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getPropertyDetailsLocalCouncilView adds cards built from the property's persisted superior landlords`() {
             // Arrange
             val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_SOLE_FREEHOLD)
@@ -978,6 +998,27 @@ class PropertyDetailsControllerTests(
                 .andExpect {
                     status { isOk() }
                     model { attribute("superiorLandlordSummaryCards", expectedCards) }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView adds no superior landlord cards when the property has no superior landlords`() {
+            // Arrange
+            val propertyOwnership = createPropertyOwnership(ownershipType = OwnershipType.SHARE_OF_SOLE_FREEHOLD)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords))
+                .thenReturn(emptyList())
+
+            // Act & Assert
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("superiorLandlordSummaryCards", emptyList<SummaryCardViewModel>()) }
                 }
         }
 
