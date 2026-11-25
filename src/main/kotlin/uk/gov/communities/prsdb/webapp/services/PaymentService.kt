@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePro
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
-import uk.gov.communities.prsdb.webapp.exceptions.PaidChangesRejectedException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureNotTakenException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
@@ -349,10 +348,10 @@ class PaymentService(
                 onCaptureAttempted = { isCaptureAttempted = true },
                 onCaptured = { isCaptured = true },
             )
-        } catch (exception: PaidChangesRejectedException) {
-            println("Marking payment $paymentId for cancellation: ${exception.message}")
-            val status = paymentReconciliationService.markForCancellation(paymentId)
-            if (status == PaymentStatus.SUCCEEDED) status else throw exception
+        } catch (exception: PaymentQuoteExpiredException) {
+            cancelPaymentForRejectedChanges(paymentId, exception)
+        } catch (exception: PropertyAlreadyReactivatedException) {
+            cancelPaymentForRejectedChanges(paymentId, exception)
         } catch (exception: PaymentCaptureNotTakenException) {
             println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
             recordPaymentNotTaken(paymentId, exception.govUkPayStatus)
@@ -380,6 +379,15 @@ class PaymentService(
                 }
             }
         }
+    }
+
+    private fun cancelPaymentForRejectedChanges(
+        paymentId: String,
+        exception: RuntimeException,
+    ): PaymentStatus {
+        println("Marking payment $paymentId for cancellation: ${exception.message}")
+        val status = paymentReconciliationService.markForCancellation(paymentId)
+        if (status == PaymentStatus.SUCCEEDED) return status else throw exception
     }
 
     private fun applyPaidChangesAndCapturePayment(
