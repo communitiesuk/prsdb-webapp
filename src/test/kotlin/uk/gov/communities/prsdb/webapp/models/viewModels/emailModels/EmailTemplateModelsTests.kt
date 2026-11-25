@@ -678,6 +678,17 @@ class EmailTemplateModelsTests {
                     "/emails/FreeholderAddedToPropertyEmail.md",
                 ),
                 EmailTemplateTestData(
+                    SuperiorLandlordAddedToPropertyEmail(
+                        superiorLandlordName = "James Smith",
+                        superiorLandlordEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/SuperiorLandlordAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
                     PassphraseEmail("time anything costume"),
                     "/emails/Passphrase.md",
                 ),
