@@ -40,10 +40,10 @@ class CompletePropertyManagerUpdateStepConfig(
             throw ex
         }
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The property manager responsible for the property"))
-        if (updatedPropertyManager != null && updatedPropertyManager != state.originalPropertyManager) {
+        if (updatedPropertyManager != null && state.originalPropertyManager == null) {
             sendAddedPropertyManagerNotification(state.propertyId, updatedPropertyManager)
         }
-        // TODO PDJB-2171: when state.originalPropertyManager is not null and differs from updatedPropertyManager, send the removed
+        // TODO PDJB-2171: when updatedPropertyManager is null and state.originalPropertyManager is not null, send the removed
         //  property manager email
     }
 

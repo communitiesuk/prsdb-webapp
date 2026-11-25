@@ -1914,7 +1914,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty still returns the property and sends other notifications when a notification fails to send`() {
+    fun `registerProperty still returns the property and sends other notifications when notifications fail to send`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))

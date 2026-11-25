@@ -29,10 +29,11 @@ import java.util.UUID
 class AbsoluteUrlProvider(
     @Value("\${base-url.landlord}") landlordBaseUrl: String,
     @Value("\${base-url.local-council}") localCouncilBaseUrl: String,
-    @Value("\${gds.start-page-url}") private val gdsStartPageUrl: String,
+    @Value("\${gds.start-page-url}") gdsStartPageUrl: String,
 ) {
     private val landlordBaseUrl: String = ensureScheme(landlordBaseUrl)
     private val localCouncilBaseUrl: String = ensureScheme(localCouncilBaseUrl)
+    private val gdsStartPageUrl: String = ensureScheme(gdsStartPageUrl)
 
     private companion object {
         private fun ensureScheme(baseUrl: String): String =

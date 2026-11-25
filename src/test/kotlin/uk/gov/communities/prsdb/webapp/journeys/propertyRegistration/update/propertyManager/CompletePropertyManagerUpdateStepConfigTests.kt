@@ -108,40 +108,10 @@ class CompletePropertyManagerUpdateStepConfigTests {
         }
 
         @Test
-        fun `afterStepIsReached emails the property manager when their email address changes`() {
+        fun `afterStepIsReached does not email the property manager when an existing property manager is updated`() {
             givenTheRecordWillBeUpdated()
             givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
-            givenUsingPropertyManager("Agent Ltd", "new@example.com")
-            givenThePropertyOwnershipCanBeRetrieved()
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockAssociatedPartyNotificationService).sendNotificationToPropertyManagerAddedToProperty(
-                PropertyManagerDataModel("Agent Ltd", "new@example.com"),
-                propertyOwnership,
-            )
-        }
-
-        @Test
-        fun `afterStepIsReached emails the property manager when only their name changes`() {
-            givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
-            givenUsingPropertyManager("Agent Limited", "agent@example.com")
-            givenThePropertyOwnershipCanBeRetrieved()
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockAssociatedPartyNotificationService).sendNotificationToPropertyManagerAddedToProperty(
-                PropertyManagerDataModel("Agent Limited", "agent@example.com"),
-                propertyOwnership,
-            )
-        }
-
-        @Test
-        fun `afterStepIsReached does not email the property manager when their details are unchanged`() {
-            givenTheRecordWillBeUpdated()
-            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
-            givenUsingPropertyManager("Agent Ltd", "agent@example.com")
+            givenUsingPropertyManager("New Agent", "new@example.com")
 
             stepConfig.afterStepIsReached(mockState)
 
