@@ -1220,9 +1220,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
         freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
         assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
-        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
         assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+        assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+        assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
+        assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+        assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Unknown freeholder")
         freeholdersListPage.submit()
         assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
         val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -2545,7 +2551,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
+    fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`() {
         val taskListPage = navigator.startPropertyRegistration()
 
         val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
@@ -3459,5 +3465,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
+
+        // The logged-in mock user's landlord record in data-local.sql
+        private const val LOGGED_IN_LANDLORD_NAME = "Alexander Smith"
     }
 }

@@ -63,9 +63,11 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(freeholdersInfoPage.heading).containsText("Add joint freeholders")
         freeholdersInfoPage.submit()
 
-        // The existing freeholder has been loaded into the list
+        // The existing freeholder has been loaded into the list, followed by the logged-in landlord as a joint freeholder
         var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
         assertThat(freeholdersListPage.getSummaryCard(0).title).containsText("Unknown freeholder")
+        assertThat(freeholdersListPage.getSummaryCard(1).title).hasText(LOGGED_IN_LANDLORD_NAME)
+        assertThat(freeholdersListPage.getSummaryCard(1).summaryList).containsText(LOGGED_IN_LANDLORD_EMAIL)
         freeholdersListPage.addAnotherButton.click()
 
         assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitYes()
@@ -76,7 +78,7 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
             .submitEmail("new.freeholder@example.com")
 
         freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
-        assertThat(freeholdersListPage.getSummaryCard(1).title).containsText("New Freeholder")
+        assertThat(freeholdersListPage.getSummaryCard(2).title).containsText("New Freeholder")
         assertThat(freeholdersListPage.form.submitButton).hasText("Continue")
         freeholdersListPage.submit()
 
@@ -101,7 +103,7 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(checkAnswersPage.changeJointFreeholdersLink).isVisible()
         assertThat(checkAnswersPage.changeSuperiorLandlordsLink).isVisible()
         assertThat(checkAnswersPage.insetTexts.first()).containsText("We’ll notify anyone you add.")
-        assertThat(checkAnswersPage.summaryCards).hasCount(3)
+        assertThat(checkAnswersPage.summaryCards).hasCount(4)
         checkAnswersPage.submit()
 
         val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -112,9 +114,11 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(ownershipSummaryList.freeholdTypeRow.value).containsText("Joint tenants")
         assertThat(propertyDetailsPage.freeholderSection.locator("h3")).hasText("Joint freeholders")
         assertEquals(
-            setOf("Unknown freeholder", "New Freeholder"),
+            setOf("Unknown freeholder", LOGGED_IN_LANDLORD_NAME, "New Freeholder"),
             propertyDetailsPage.freeholderCards.map { it.title.getText() }.toSet(),
         )
+        assertThat(propertyDetailsPage.freeholderCards.single { it.title.getText() == LOGGED_IN_LANDLORD_NAME })
+            .containsText(LOGGED_IN_LANDLORD_EMAIL)
         assertThat(propertyDetailsPage.freeholderCards.single { it.title.getText() == "New Freeholder" })
             .containsText("new.freeholder@example.com")
         val superiorLandlordCard = propertyDetailsPage.superiorLandlordCards.single()
@@ -203,14 +207,18 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertThat(freeholdersInfoPage.heading).containsText("Add joint freeholders")
         freeholdersInfoPage.submit()
 
-        // With no existing freeholders, the first one is added straight away
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyDetailsUpdate::class, urlArguments).submitNo()
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        // With no existing freeholders, the logged-in landlord is added as the first joint freeholder
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+        assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+        assertThat(freeholdersListPage.getSummaryCard(0).summaryList).containsText(LOGGED_IN_LANDLORD_EMAIL)
+        freeholdersListPage.submit()
         assertPageIs(page, OwnershipCheckAnswersPagePropertyDetailsUpdate::class, urlArguments).submit()
 
         val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertThat(propertyDetailsPage.peopleResponsibleOwnershipSummaryList.freeholdTypeRow.value).containsText("Joint tenants")
-        assertEquals(listOf("Unknown freeholder"), propertyDetailsPage.freeholderCards.map { it.title.getText() })
+        assertEquals(listOf(LOGGED_IN_LANDLORD_NAME), propertyDetailsPage.freeholderCards.map { it.title.getText() })
+        assertThat(propertyDetailsPage.freeholderCards.single()).containsText(LOGGED_IN_LANDLORD_EMAIL)
     }
 
     @Test
@@ -223,7 +231,7 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
 
         val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         assertEquals(
-            setOf("Alex Non-Joint", "Taylor Non-Joint", "Unknown freeholder"),
+            setOf("Alex Non-Joint", "Taylor Non-Joint", "Unknown freeholder", LOGGED_IN_LANDLORD_NAME),
             propertyDetailsPage.freeholderCards.map { it.title.getText() }.toSet(),
         )
         assertThat(propertyDetailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow.value).hasText("No")
@@ -237,8 +245,9 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
 
         checkAnswersPage.changeJointFreeholdersLink.clickAndWait()
         val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
-        val cardTitles = (0..2).map { freeholdersListPage.getSummaryCard(it).title.getText() }
+        val cardTitles = (0..3).map { freeholdersListPage.getSummaryCard(it).title.getText() }
         assertContains(cardTitles, "Taylor Non-Joint")
+        assertEquals(LOGGED_IN_LANDLORD_NAME, cardTitles.last())
 
         freeholdersListPage.backLink.clickAndWait()
         checkAnswersPage = assertPageIs(page, OwnershipCheckAnswersPagePropertyDetailsUpdate::class, urlArguments)
@@ -249,12 +258,12 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
     fun `the postal address note is shown on the check answers and freeholders list pages`(page: Page) {
         val urlArguments = urlArgumentsFor(propertyWithPartiesId)
         val checkAnswersPage = completeJourneyToCheckAnswersAsShareOfJointTenantsWithNoOwnershipChain(page, urlArguments)
-        val checkAnswersCard = (0..2).map { checkAnswersPage.getSummaryCard(it) }.single { it.title.getText() == "Alex Non-Joint" }
+        val checkAnswersCard = (0..3).map { checkAnswersPage.getSummaryCard(it) }.single { it.title.getText() == "Alex Non-Joint" }
         assertThat(checkAnswersCard).containsText(POSTAL_ADDRESS_NOTE)
 
         checkAnswersPage.changeJointFreeholdersLink.clickAndWait()
         val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
-        val listCard = (0..2).map { freeholdersListPage.getSummaryCard(it) }.single { it.title.getText() == "Alex Non-Joint" }
+        val listCard = (0..3).map { freeholdersListPage.getSummaryCard(it) }.single { it.title.getText() == "Alex Non-Joint" }
         assertThat(listCard).containsText(POSTAL_ADDRESS_NOTE)
     }
 
@@ -292,7 +301,11 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
         assertPageIs(page, FreeholdTypeFormPagePropertyDetailsUpdate::class, urlArguments)
             .submitFreeholdType(FreeholdType.JOINT_TENANTS)
         assertPageIs(page, FreeholdersInfoFormPagePropertyDetailsUpdate::class, urlArguments).submit()
-        assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments).submit()
+        // The existing freeholders are loaded into the list, followed by the logged-in landlord as a joint freeholder
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyDetailsUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.heading).containsText("added 4 joint freeholders")
+        assertThat(freeholdersListPage.getSummaryCard(3).title).hasText(LOGGED_IN_LANDLORD_NAME)
+        freeholdersListPage.submit()
 
         // The ownership chain question is not prefilled, even though the property has superior landlords
         val anyoneInOwnershipChainPage =
@@ -305,5 +318,9 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
 
     companion object {
         private const val POSTAL_ADDRESS_NOTE = "A postal address was provided for this freeholder."
+
+        // The logged-in mock user's landlord record in data-local.sql
+        private const val LOGGED_IN_LANDLORD_NAME = "Alexander Smith"
+        private const val LOGGED_IN_LANDLORD_EMAIL = "alex.surname@example.com"
     }
 }

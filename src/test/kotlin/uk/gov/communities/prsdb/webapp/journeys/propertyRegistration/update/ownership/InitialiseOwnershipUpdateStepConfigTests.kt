@@ -5,9 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholdersTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipStructureTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordsTask
@@ -83,6 +86,36 @@ class InitialiseOwnershipUpdateStepConfigTests {
         verify(mockSuperiorLandlordsTask).superiorLandlordsMap = emptyMap()
         verify(mockSuperiorLandlordsTask).nextSuperiorLandlordId = 1
         verify(mockState).ownershipPartiesInitialised = true
+    }
+
+    @Test
+    fun `afterStepIsReached marks the landlord's freeholder card as added when the property is already a joint freehold`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, ownershipType = OwnershipType.JOINT_TENANTS)
+        setupUninitialisedMockState()
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockFreeholdersTask).loggedInLandlordFreeholderInitialised = true
+    }
+
+    @Test
+    fun `afterStepIsReached leaves the landlord's freeholder card unmarked when the property is not a joint freehold`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, ownershipType = OwnershipType.LEASEHOLD_ONLY)
+        setupUninitialisedMockState()
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockFreeholdersTask, never()).loggedInLandlordFreeholderInitialised = any()
     }
 
     @Test

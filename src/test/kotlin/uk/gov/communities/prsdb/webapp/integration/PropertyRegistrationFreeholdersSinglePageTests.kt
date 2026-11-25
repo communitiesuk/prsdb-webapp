@@ -23,7 +23,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     inner class ProvideFreeholderDetailsStep {
         @Test
         fun `Joint freeholders see the joint heading`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            navigator.skipToPropertyRegistrationFreeholdersListPage().addAnotherButton.click()
             val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
 
             assertThat(provideDetailsPage.heading).containsText("Can you provide this joint freeholder’s details?")
@@ -39,7 +39,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
         @Test
         fun `Submitting without an answer for a joint freeholder returns the joint validation error`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            navigator.skipToPropertyRegistrationFreeholdersListPage().addAnotherButton.click()
             val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
 
             provideDetailsPage.form.submit()
@@ -61,7 +61,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
         @Test
         fun `Selecting yes continues to the freeholder name page`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
                 .submitYes()
 
@@ -70,7 +70,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
         @Test
         fun `Selecting no continues to the freeholders list`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
                 .submitNo()
 
@@ -79,7 +79,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
         @Test
         fun `Back link returns to the freeholders info page`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
             val provideDetailsPage = assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
 
             provideDetailsPage.backLink.clickAndWait()
@@ -186,8 +186,8 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `Adding the first freeholder enters the details flow`(page: Page) {
-            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+        fun `Adding the first non-joint freeholder enters the details flow`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage(isJointFreeholder = false).submit()
 
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class)
         }
@@ -427,7 +427,7 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
 
         @Test
         fun `Back link returns to the freeholder list page`(page: Page) {
-            var freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
+            val freeholdersListPage = navigator.skipToPropertyRegistrationFreeholdersListPage()
             freeholdersListPage.getSummaryCard(1).getAction("Remove").link.clickAndWait()
 
             val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
