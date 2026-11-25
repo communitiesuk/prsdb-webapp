@@ -58,6 +58,8 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
         // Assert
         verify(mockState).freeholdersMap =
             mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Org Ltd", email = "org@example.com"))
+        verify(mockState).nextFreeholderId = 2
+        verify(mockState).loggedInLandlordFreeholderInitialised = true
     }
 
     @Test
