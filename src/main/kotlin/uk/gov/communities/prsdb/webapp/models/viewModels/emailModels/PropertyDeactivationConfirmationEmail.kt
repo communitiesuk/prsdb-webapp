@@ -5,30 +5,22 @@ data class PropertyDeactivationConfirmationEmail(
     val multiLineAddress: String,
     val registrationNumber: String,
     val landlordDeactivated: Boolean,
-    val dashboardUrl: String,
+    val propertyRecordUrl: String,
 ) : EmailTemplateModel {
     private val recipientNameKey = "recipient name"
     private val addressKey = "property address"
     private val registrationNumberKey = "prn"
-    private val dashboardUrlKey = "dashboard url"
+    private val landlordDeactivatedKey = "landlord deactivated"
+    private val propertyRecordUrlKey = "property record url"
 
-    override val template =
-        if (landlordDeactivated) {
-            EmailTemplate.PROPERTY_DEACTIVATION_CONFIRMATION_ACCOUNT_DEACTIVATED
-        } else {
-            EmailTemplate.PROPERTY_DEACTIVATION_CONFIRMATION
-        }
+    override val template = EmailTemplate.PROPERTY_DEACTIVATION_CONFIRMATION
 
-    override fun toHashMap(): HashMap<String, String> {
-        val hashMap =
-            hashMapOf(
-                recipientNameKey to recipientName,
-                addressKey to multiLineAddress,
-                registrationNumberKey to registrationNumber,
-            )
-        if (landlordDeactivated) {
-            hashMap[dashboardUrlKey] = dashboardUrl
-        }
-        return hashMap
-    }
+    override fun toHashMap(): HashMap<String, String> =
+        hashMapOf(
+            recipientNameKey to recipientName,
+            addressKey to multiLineAddress,
+            registrationNumberKey to registrationNumber,
+            landlordDeactivatedKey to landlordDeactivated.toNotifyYesNo(),
+            propertyRecordUrlKey to propertyRecordUrl,
+        )
 }

@@ -310,18 +310,11 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md"
   },
   {
-    "test_id": "b94f36f7-98f8-49a4-8492-7ebac9b8bfe0",
-    "prod_id": "351fdb3e-3dbf-46a3-9039-6a5650f637ad",
+    "test_id": "84643434-6a6b-409f-a5bf-4d17fe13ccbc",
+    "prod_id": "17be9d0e-229e-4528-a35f-ecf8fd3c93e9",
     "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION",
     "subject": "Property deactivated",
     "bodyLocation": "/emails/PropertyDeactivationConfirmation.md"
-  },
-  {
-    "test_id": "1cbfb48f-2905-47f5-acae-b792df5effb3",
-    "prod_id": "b09afdd9-c525-4393-8816-983b9e95042a",
-    "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION_ACCOUNT_DEACTIVATED",
-    "subject": "Property deactivated",
-    "bodyLocation": "/emails/PropertyDeactivationConfirmationAccountDeactivated.md"
   },
   {
     "test_id": "3881a1b9-6f69-457a-8848-3c861ac00156",
