@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsContro
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -57,6 +59,13 @@ class PropertyDetailsViewModel(
 
     val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 
+    val unknownFreeholderBodyTextKey: String =
+        if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+            "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable"
+        } else {
+            FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+        }
+
     val freeholderSectionUpdateUrl: String =
         UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
 
@@ -66,6 +75,13 @@ class PropertyDetailsViewModel(
     val hasSuperiorLandlords: Boolean = propertyOwnership.superiorLandlords.isNotEmpty()
 
     val showSuperiorLandlordSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    val unknownSuperiorLandlordBodyTextKey: String =
+        if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+            "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable"
+        } else {
+            SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+        }
 
     val superiorLandlordSectionUpdateUrl: String =
         UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(propertyOwnership.id)
