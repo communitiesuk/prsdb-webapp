@@ -48,6 +48,11 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
+enum class PropertyDetailsCouncilViewType {
+    LocalCouncilView,
+    SystemOperatorView,
+}
+
 @PrsdbController
 @RequestMapping
 class PropertyDetailsController(
@@ -230,7 +235,7 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
-        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, isSystemOperatorView = false)
+        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, PropertyDetailsCouncilViewType.LocalCouncilView)
     }
 
     @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
@@ -243,13 +248,13 @@ class PropertyDetailsController(
     ): String {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
-        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, isSystemOperatorView = true)
+        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, PropertyDetailsCouncilViewType.SystemOperatorView)
     }
 
     private fun buildLocalCouncilViewOfPropertyDetails(
         propertyOwnership: PropertyOwnership,
         model: Model,
-        isSystemOperatorView: Boolean,
+        viewType: PropertyDetailsCouncilViewType,
     ): String {
         val propertyOwnershipId = propertyOwnership.id
 
@@ -273,7 +278,7 @@ class PropertyDetailsController(
                 propertyOwnership.landlords,
                 landlordDetailsUrlProvider = { landlord ->
                     val landlordDetailsPath =
-                        if (isSystemOperatorView) {
+                        if (viewType == PropertyDetailsCouncilViewType.SystemOperatorView) {
                             LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)
                         } else {
                             LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)
@@ -315,7 +320,11 @@ class PropertyDetailsController(
         model.addAttribute("isLandlordView", false)
 
         // TODO PDJB-1910: Return system operators to the property search results
-        val backUrl = if (isSystemOperatorView) SYSTEM_OPERATOR_DASHBOARD_URL else LOCAL_COUNCIL_DASHBOARD_URL
+        val backUrl =
+            when (viewType) {
+                PropertyDetailsCouncilViewType.LocalCouncilView -> LOCAL_COUNCIL_DASHBOARD_URL
+                PropertyDetailsCouncilViewType.SystemOperatorView -> SYSTEM_OPERATOR_DASHBOARD_URL
+            }
         model.addAttribute("backUrl", backUrl)
 
         return PROPERTY_DETAILS_VIEW
