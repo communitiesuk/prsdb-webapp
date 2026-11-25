@@ -84,24 +84,6 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `deactivating a property emails its pending joint landlord invitees`(page: Page) {
-        val propertyWithPendingInvitesId = 38L
-        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyWithPendingInvitesId)
-        detailsPage.deactivatePropertyLink.clickAndWait()
-        val confirmPage =
-            assertPageIs(
-                page,
-                ConfirmPagePropertyDeactivation::class,
-                mapOf("propertyOwnershipId" to propertyWithPendingInvitesId.toString()),
-            )
-
-        confirmPage.submitConfirm()
-
-        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.three@example.com"), any())
-        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.four@example.com"), any())
-    }
-
-    @Test
     fun `cancel returns to the property record without deactivating`(page: Page) {
         val confirmPage = navigator.goToPropertyDeactivationConfirmPage(propertyOwnershipId)
         confirmPage.cancelLink.clickAndWait()
@@ -126,7 +108,7 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `landlord is warned about pending joint landlord invitations before deactivating`(page: Page) {
+    fun `landlord is warned about pending joint landlord invitations before deactivating and invitees are emailed`(page: Page) {
         val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
         assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deactivate")
         assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
@@ -143,6 +125,8 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertFalse(propertyOwnershipRepository.findById(propertyWithPendingInvitationsId).get().isActive)
         assertTrue(jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyWithPendingInvitationsId).isEmpty())
+        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.three@example.com"), any())
+        verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.four@example.com"), any())
     }
 
     @Test
