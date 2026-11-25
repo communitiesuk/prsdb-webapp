@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
+// TODO PDJB-2149: Remove this controller when the ACTIVE_INACTIVE flag is removed
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(

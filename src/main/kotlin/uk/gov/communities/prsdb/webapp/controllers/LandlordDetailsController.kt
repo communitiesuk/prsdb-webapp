@@ -82,7 +82,7 @@ class LandlordDetailsController(
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
-        model.addDeleteLandlordUrl(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+        model.addDeleteLandlordUrlAttributes(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
 
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(landlord, model)
@@ -116,7 +116,7 @@ class LandlordDetailsController(
         model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
-        model.addDeleteLandlordUrl(DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH)
+        model.addDeleteLandlordUrlAttributes(DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH)
 
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(orgLandlord, model)
@@ -184,14 +184,12 @@ class LandlordDetailsController(
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
     }
 
-    private fun Model.addDeleteLandlordUrl(url: String) {
+    // TODO PDJB-2149: Remove this function and its usages when the ACTIVE_INACTIVE feature flag is removed
+    private fun Model.addDeleteLandlordUrlAttributes(url: String) {
         if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             addAttribute("showDeleteLandlordRecordLink", false)
         } else {
-            addAttribute(
-                "deleteLandlordRecordUrl",
-                url,
-            )
+            addAttribute("deleteLandlordRecordUrl", url)
         }
     }
 
