@@ -69,6 +69,28 @@ class Payment() : ModifiableAuditableEntity() {
         this.payingUser = incompleteProperty.user
     }
 
+    constructor(
+        paymentId: String,
+        amountInPence: Int,
+        reference: String,
+        paymentCreatedAt: Instant,
+        quoteDate: LocalDate,
+        forPeriodEnding: LocalDate,
+        status: PaymentStatus,
+        propertyOwnership: PropertyOwnership,
+        payingUser: PrsdbUser,
+    ) : this() {
+        this.paymentId = paymentId
+        this.amountInPence = amountInPence
+        this.reference = reference
+        this.paymentCreatedAt = paymentCreatedAt
+        this.quoteDate = quoteDate
+        this.forPeriodEnding = forPeriodEnding
+        this.status = status
+        associatedProperty = propertyOwnership
+        this.payingUser = payingUser
+    }
+
     companion object {
         fun fromGovUkPay(
             payment: GovUkPayPayment,
@@ -85,6 +107,25 @@ class Payment() : ModifiableAuditableEntity() {
                 periodEnding,
                 PaymentStatus.fromGovUKPayStatus(payment.state.status),
                 incompleteProperty,
+            )
+
+        fun fromGovUkPayForProperty(
+            payment: GovUkPayPayment,
+            quoteDate: LocalDate,
+            periodEnding: LocalDate,
+            propertyOwnership: PropertyOwnership,
+            payingUser: PrsdbUser,
+        ): Payment =
+            Payment(
+                payment.paymentId,
+                payment.amount,
+                payment.reference,
+                payment.createdDate,
+                quoteDate,
+                periodEnding,
+                PaymentStatus.fromGovUKPayStatus(payment.state.status),
+                propertyOwnership,
+                payingUser,
             )
     }
 }

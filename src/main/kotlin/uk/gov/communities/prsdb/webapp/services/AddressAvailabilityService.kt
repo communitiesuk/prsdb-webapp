@@ -8,4 +8,9 @@ class AddressAvailabilityService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) {
     fun isAddressOwned(uprn: Long): Boolean = propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)
+
+    fun hasAnotherActiveRegistration(
+        uprn: Long,
+        propertyOwnershipId: Long,
+    ): Boolean = propertyOwnershipRepository.existsByIsActiveTrueAndAddress_UprnAndIdNot(uprn, propertyOwnershipId)
 }

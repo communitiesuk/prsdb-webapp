@@ -29,4 +29,20 @@ class AddressAvailabilityServiceTests {
 
         assertFalse(service.isAddressOwned(123L))
     }
+
+    @Test
+    fun `hasAnotherActiveRegistration returns true when another active registration has the address`() {
+        val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_UprnAndIdNot(123L, 456L)).thenReturn(true)
+
+        assertTrue(service.hasAnotherActiveRegistration(123L, 456L))
+    }
+
+    @Test
+    fun `hasAnotherActiveRegistration returns false when no other active registration has the address`() {
+        val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_UprnAndIdNot(123L, 456L)).thenReturn(false)
+
+        assertFalse(service.hasAnotherActiveRegistration(123L, 456L))
+    }
 }

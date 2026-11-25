@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -13,6 +14,11 @@ interface PropertyOwnershipRepository :
     PropertyOwnershipSearchRepository {
     fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
+    fun existsByIsActiveTrueAndAddress_UprnAndIdNot(
+        uprn: Long,
+        id: Long,
+    ): Boolean
+
     fun findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
     fun findAllByOwnershipLinks_Landlord_IdAndIsActiveFalse(landlordId: Long): List<PropertyOwnership>
@@ -22,6 +28,16 @@ interface PropertyOwnershipRepository :
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
     fun findByIdAndIsActiveFalse(id: Long): PropertyOwnership?
+
+    fun existsByIdAndIsActiveFalse(id: Long): Boolean
+
+    // Postgres re-checks is_active after waiting for a concurrent claim's row lock, so only one claim can succeed.
+    // Not clearAutomatically: that would detach entities the caller's transaction is still using.
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE PropertyOwnership po SET po.isActive = true WHERE po.id = :id AND po.isActive = false")
+    fun claimForReactivation(
+        @Param("id") id: Long,
+    ): Int
 
     @Query(
         "SELECT po.id FROM PropertyOwnership po " +
