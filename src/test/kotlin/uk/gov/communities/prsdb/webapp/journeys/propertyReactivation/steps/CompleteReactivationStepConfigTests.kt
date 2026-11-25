@@ -33,7 +33,6 @@ class CompleteReactivationStepConfigTests {
     private lateinit var stepConfig: CompleteReactivationStepConfig
 
     private val propertyOwnershipId = 123L
-    private val uprn = 456L
     private val defaultDestination = Destination.ExternalUrl("redirect")
     private val reactivationData = PropertyReactivationDataModel()
 
@@ -47,17 +46,16 @@ class CompleteReactivationStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached reactivates the property`() {
+    fun `afterStepIsReached reactivates the property without payment`() {
         // Arrange
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockState.uprn).thenReturn(uprn)
         whenever(mockPropertyReactivationDataModelFactory.fromJourneyState(mockState)).thenReturn(reactivationData)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPropertyReactivationService).reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, reactivationData)
+        verify(mockPropertyReactivationService).reactivatePropertyWithoutPayment(propertyOwnershipId, reactivationData)
         verify(mockState, never()).isPropertyAlreadyRegistered = any()
     }
 
@@ -65,9 +63,8 @@ class CompleteReactivationStepConfigTests {
     fun `afterStepIsReached marks the property as already registered when reactivation throws an EntityExistsException`() {
         // Arrange
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockState.uprn).thenReturn(uprn)
         whenever(mockPropertyReactivationDataModelFactory.fromJourneyState(mockState)).thenReturn(reactivationData)
-        whenever(mockPropertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, reactivationData))
+        whenever(mockPropertyReactivationService.reactivatePropertyWithoutPayment(propertyOwnershipId, reactivationData))
             .thenThrow(EntityExistsException("Address already registered"))
 
         // Act

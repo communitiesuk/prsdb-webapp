@@ -10,6 +10,8 @@ const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION = "landlordReactiva
 
 const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION = "landlordReactivatedByLastPropertyReactivation"
 
+const val LAST_PROPERTY_REACTIVATION_WAS_PAID = "lastPropertyReactivationWasPaid"
+
 const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDeregisteredThisSessionWithAddresses"
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"

@@ -1,10 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import jakarta.persistence.EntityManagerFactory
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -14,11 +16,18 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpSession
+import org.springframework.orm.jpa.EntityManagerHolder
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -26,8 +35,10 @@ import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.services.PaymentService
+import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
@@ -61,7 +72,13 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     private lateinit var jdbcTemplate: JdbcTemplate
 
     @Autowired
+    private lateinit var entityManagerFactory: EntityManagerFactory
+
+    @Autowired
     private lateinit var paymentService: PaymentService
+
+    @Autowired
+    private lateinit var propertyReactivationService: PropertyReactivationService
 
     @MockitoBean
     private lateinit var mockGovUkPayClient: GovUkPayClient
@@ -71,9 +88,17 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     private val quote =
         PropertyPaymentQuote(1234, LocalDate.now(DateTimeHelper.UK_ZONE), LocalDate.now(DateTimeHelper.UK_ZONE).plusYears(1))
 
+    private val session = MockHttpSession()
+
+    @BeforeEach
+    fun setUpRequest() {
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(MockHttpServletRequest().also { it.setSession(session) }))
+    }
+
     @AfterEach
-    fun clearSecurityContext() {
+    fun tearDown() {
         SecurityContextHolder.clearContext()
+        RequestContextHolder.resetRequestAttributes()
     }
 
     @Test
@@ -169,7 +194,10 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
         stubGovUkPayCreatePayment { "new-payment-id" }
         JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
 
-        val result = paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+        val result =
+            withOpenInViewEntityManager {
+                paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+            }
 
         assertEquals(PaymentCreationResult.NewPayment("${NEXT_URL_PREFIX}new-payment-id"), result)
         verify(mockGovUkPayClient).cancelPayment("other-landlord-payment-id")
@@ -182,6 +210,22 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
             LANDLORD_1_USER_ID,
             jdbcTemplate.queryForObject("SELECT paying_user_id FROM payment WHERE payment_id = ?", String::class.java, "new-payment-id"),
         )
+    }
+
+    @Test
+    fun `reactivating without payment reactivates the property, then cancels another landlord's live payment for it`() {
+        paymentRepository.saveAndFlush(createStoredPropertyPayment("other-landlord-payment-id", payingUserId = LANDLORD_2_USER_ID))
+        JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
+
+        propertyReactivationService.reactivatePropertyWithoutPayment(JOINT_PROPERTY_ID, PropertyReactivationDataModel())
+
+        assertEquals(
+            true,
+            jdbcTemplate.queryForObject("SELECT is_active FROM property_ownership WHERE id = ?", Boolean::class.java, JOINT_PROPERTY_ID),
+        )
+        verify(mockGovUkPayClient).cancelPayment("other-landlord-payment-id")
+        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId("other-landlord-payment-id"))
+        assertEquals(JOINT_PROPERTY_ID, session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID))
     }
 
     @Test
@@ -202,7 +246,9 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
                     .map { userId ->
                         executor.submit<PaymentCreationResult> {
                             JourneyTestHelper.setMockUser(userId)
-                            paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+                            withOpenInViewEntityManager {
+                                paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+                            }
                         }
                     }.map { it.get(TIMEOUT_SECONDS, TimeUnit.SECONDS) }
 
@@ -219,6 +265,18 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
         } finally {
             executor.shutdown()
             executor.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        }
+    }
+
+    // createPropertyReactivationPayment isn't transactional, so it relies on the web request's open-in-view persistence context
+    private fun <T> withOpenInViewEntityManager(action: () -> T): T {
+        val entityManager = entityManagerFactory.createEntityManager()
+        TransactionSynchronizationManager.bindResource(entityManagerFactory, EntityManagerHolder(entityManager))
+        try {
+            return action()
+        } finally {
+            TransactionSynchronizationManager.unbindResource(entityManagerFactory)
+            entityManager.close()
         }
     }
 
