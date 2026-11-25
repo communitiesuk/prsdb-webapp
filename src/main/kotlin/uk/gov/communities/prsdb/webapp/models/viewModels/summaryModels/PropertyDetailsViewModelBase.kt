@@ -474,12 +474,9 @@ abstract class PropertyDetailsViewModelBase(
     }
 }
 
-enum class PropertyDetailsViewType(
-    // TODO PDJB-2016: remove isLandlordView - it is no longer read anywhere
-    val isLandlordView: Boolean,
-) {
-    LANDLORD(isLandlordView = true),
-    LOCAL_COUNCIL(isLandlordView = false),
-    LETTING_AGENT(isLandlordView = false),
-    DEACTIVATED_LANDLORD(isLandlordView = true),
+enum class PropertyDetailsViewType {
+    LANDLORD,
+    LOCAL_COUNCIL,
+    LETTING_AGENT,
+    DEACTIVATED_LANDLORD,
 }
