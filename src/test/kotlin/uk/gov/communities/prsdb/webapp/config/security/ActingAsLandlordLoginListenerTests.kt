@@ -11,6 +11,7 @@ class ActingAsLandlordLoginListenerTests {
     private val actingAsLandlordService: ActingAsLandlordService = mock()
     private val listener = ActingAsLandlordLoginListener(actingAsLandlordService)
 
+    // TODO PDJB-1907: Integration test that signing in again ends acting as a landlord
     @Test
     fun `signing in clears any acting as user ID from the session`() {
         // Arrange
