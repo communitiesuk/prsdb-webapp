@@ -318,8 +318,6 @@ class PropertyDetailsUpdateOwnershipJourneyTests :
 
     companion object {
         private const val POSTAL_ADDRESS_NOTE = "A postal address was provided for this freeholder."
-
-        // The logged-in mock user's landlord record in data-local.sql
         private const val LOGGED_IN_LANDLORD_NAME = "Alexander Smith"
         private const val LOGGED_IN_LANDLORD_EMAIL = "alex.surname@example.com"
     }
