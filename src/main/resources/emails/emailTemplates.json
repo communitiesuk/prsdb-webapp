@@ -511,5 +511,12 @@
     "enumName": "PROPERTY_MANAGER_ADDED_TO_PROPERTY",
     "subject": "You’ve been listed as the property manager of a rental property",
     "bodyLocation": "/emails/PropertyManagerAddedToProperty.md"
+  },
+  {
+    "test_id": "00000000-0000-0000-0000-000000002050",
+    "prod_id": "00000000-0000-0000-0000-000000002051",
+    "enumName": "JOINT_LANDLORD_PROPERTY_REACTIVATED_NOTIFICATION",
+    "subject": "A joint landlord reactivated a property",
+    "bodyLocation": "/emails/JointLandlordPropertyReactivatedNotification.md"
   }
 ]

@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyReactivatedNotification
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReactivationConfirmationEmail
 
 @PrsdbWebService
@@ -11,8 +13,31 @@ class PropertyReactivationEmailService(
     private val userToLandlordService: UserToLandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyReactivationConfirmationEmail>,
+    private val jointLandlordNotificationSender: EmailNotificationService<JointLandlordPropertyReactivatedNotification>,
 ) {
-    // TODO PDJB-2050: Notify joint landlords that the property has been reactivated
+    fun sendJointLandlordNotifications(propertyOwnershipId: Long) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val reactivatingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId).toString()
+
+        propertyOwnership.otherLandlordsTo(reactivatingLandlord).forEach { jointLandlord ->
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the joint landlord property reactivation notification for property ownership $propertyOwnershipId",
+            ) {
+                jointLandlordNotificationSender.sendEmailToLandlord(
+                    jointLandlord,
+                    JointLandlordPropertyReactivatedNotification(
+                        recipientName = jointLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                        propertyRecordUrl = propertyRecordUrl,
+                    ),
+                )
+            }
+        }
+    }
+
     fun sendConfirmationEmail(
         propertyOwnershipId: Long,
         landlordReactivated: Boolean,

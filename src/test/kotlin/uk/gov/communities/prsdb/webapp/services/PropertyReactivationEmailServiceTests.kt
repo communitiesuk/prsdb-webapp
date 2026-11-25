@@ -2,16 +2,20 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyReactivatedNotification
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReactivationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -33,8 +37,19 @@ class PropertyReactivationEmailServiceTests {
     @Mock
     private lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyReactivationConfirmationEmail>
 
-    @InjectMocks
-    private lateinit var propertyReactivationEmailService: PropertyReactivationEmailService
+    @Mock
+    private lateinit var mockJointLandlordEmailSender: EmailNotificationService<JointLandlordPropertyReactivatedNotification>
+
+    private val propertyReactivationEmailService by lazy {
+        PropertyReactivationEmailService(
+            mockPropertyOwnershipService,
+            mockCurrentUserService,
+            mockUserToLandlordService,
+            mockAbsoluteUrlProvider,
+            mockConfirmationEmailSender,
+            mockJointLandlordEmailSender,
+        )
+    }
 
     private val propertyOwnershipId = 1L
     private val currentLandlord = createLandlordWithId(1L)
@@ -99,6 +114,78 @@ class PropertyReactivationEmailServiceTests {
             eq("james@example.com"),
             argThat<PropertyReactivationConfirmationEmail> { landlordReactivated },
         )
+    }
+
+    @Test
+    fun `sendJointLandlordNotifications emails the other landlords on the property with the property details`() {
+        // Arrange
+        val jointLandlord = createLandlordWithId(2L)
+        arrangeJointLandlordNotifications(mutableSetOf(currentLandlord, jointLandlord))
+
+        // Act
+        propertyReactivationEmailService.sendJointLandlordNotifications(propertyOwnershipId)
+
+        // Assert
+        verify(mockJointLandlordEmailSender).sendEmailToLandlord(
+            eq(jointLandlord),
+            eq(
+                JointLandlordPropertyReactivatedNotification(
+                    recipientName = jointLandlord.name,
+                    multiLineAddress = jointLandlordOwnership.address.toMultiLineAddress(),
+                    registrationNumber =
+                        RegistrationNumberDataModel.fromRegistrationNumber(jointLandlordOwnership.registrationNumber).toString(),
+                    propertyRecordUrl = "https://example.com/property",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `sendJointLandlordNotifications does not email the landlord who reactivated the property`() {
+        // Arrange
+        arrangeJointLandlordNotifications(mutableSetOf(currentLandlord, createLandlordWithId(2L)))
+
+        // Act
+        propertyReactivationEmailService.sendJointLandlordNotifications(propertyOwnershipId)
+
+        // Assert
+        verify(mockJointLandlordEmailSender, never()).sendEmailToLandlord(eq(currentLandlord), any())
+    }
+
+    @Test
+    fun `sendJointLandlordNotifications sends nothing when the property has no other landlords`() {
+        // Arrange
+        arrangeJointLandlordNotifications(mutableSetOf(currentLandlord))
+
+        // Act
+        propertyReactivationEmailService.sendJointLandlordNotifications(propertyOwnershipId)
+
+        // Assert
+        verifyNoInteractions(mockJointLandlordEmailSender)
+    }
+
+    @Test
+    fun `sendJointLandlordNotifications still emails the remaining landlords when one email fails`() {
+        // Arrange
+        val failingLandlord = createLandlordWithId(2L)
+        val otherLandlord = createLandlordWithId(3L)
+        arrangeJointLandlordNotifications(linkedSetOf(currentLandlord, failingLandlord, otherLandlord))
+        whenever(mockJointLandlordEmailSender.sendEmailToLandlord(eq(failingLandlord), any())).thenThrow(RuntimeException("Notify is down"))
+
+        // Act
+        propertyReactivationEmailService.sendJointLandlordNotifications(propertyOwnershipId)
+
+        // Assert
+        verify(mockJointLandlordEmailSender).sendEmailToLandlord(eq(otherLandlord), any())
+    }
+
+    private lateinit var jointLandlordOwnership: PropertyOwnership
+
+    private fun arrangeJointLandlordNotifications(landlords: MutableSet<Landlord>) {
+        jointLandlordOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = landlords)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(jointLandlordOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(currentLandlord)
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("https://example.com/property"))
     }
 
     private fun arrangeConfirmationEmail(propertyOwnership: PropertyOwnership = this.propertyOwnership) {
