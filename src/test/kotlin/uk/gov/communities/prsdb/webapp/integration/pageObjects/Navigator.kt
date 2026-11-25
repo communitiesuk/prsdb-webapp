@@ -95,6 +95,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEnt
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageSystemOperatorView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
@@ -1659,6 +1660,15 @@ class Navigator(
         return createValidPage(
             page,
             PropertyDetailsPageLocalCouncilView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsAsASystemOperator(id: Long): PropertyDetailsPageSystemOperatorView {
+        navigate(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(id))
+        return createValidPage(
+            page,
+            PropertyDetailsPageSystemOperatorView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
     }

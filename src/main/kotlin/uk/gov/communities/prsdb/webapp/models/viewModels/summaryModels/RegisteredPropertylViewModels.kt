@@ -19,6 +19,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
         fun fromPropertyOwnership(
             propertyOwnership: PropertyOwnership,
             currentUrlKey: Int? = null,
+            isSystemOperatorView: Boolean = false,
         ): RegisteredPropertyLocalCouncilViewModel =
             RegisteredPropertyLocalCouncilViewModel(
                 address = propertyOwnership.address.singleLineAddress,
@@ -36,9 +37,13 @@ data class RegisteredPropertyLocalCouncilViewModel(
                     ),
                 isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
                 recordLink =
-                    PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
-                        .overrideBackLinkForUrl(currentUrlKey),
+                    (
+                        if (isSystemOperatorView) {
+                            PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(propertyOwnership.id)
+                        } else {
+                            PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
+                        }
+                    ).overrideBackLinkForUrl(currentUrlKey),
             )
     }
 }

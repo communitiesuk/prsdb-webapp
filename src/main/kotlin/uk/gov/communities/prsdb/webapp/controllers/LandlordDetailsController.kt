@@ -279,6 +279,7 @@ class LandlordDetailsController(
             propertyOwnershipService.getRegisteredPropertiesForLandlord(
                 landlordId,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                isSystemOperatorView = viewType == LandlordDetailsViewType.SystemOperatorView,
             )
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)

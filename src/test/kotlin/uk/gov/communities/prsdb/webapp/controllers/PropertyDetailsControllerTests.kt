@@ -22,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
@@ -1103,6 +1105,41 @@ class PropertyDetailsControllerTests(
                 }
         }
 
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView links landlord cards to the local council landlord record`() {
+            val propertyOwnership = createPropertyOwnership()
+            val landlord = propertyOwnership.landlords.first()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { isOk() }
+                content {
+                    string(containsString(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)))
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView sets the back link to the local council dashboard`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { isOk() }
+                model { attribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL) }
+            }
+        }
+
         // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
         @Nested
         inner class BeforeAssociatedParties {
@@ -1135,6 +1172,91 @@ class PropertyDetailsControllerTests(
                         model { attributeDoesNotExist("superiorLandlordSummaryCards") }
                         model { attributeDoesNotExist("propertyManagerSummaryCard") }
                     }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetPropertyDetailsSystemOperatorViewTests {
+        private val propertyOwnership = createPropertyOwnership()
+
+        @BeforeEach
+        fun setUpPropertyOwnership() {
+            whenever(propertyOwnershipService.getPropertyOwnership(eq(1))).thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+        }
+
+        @Test
+        fun `getPropertyDetailsSystemOperatorView returns a redirect for an unauthenticated user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER", "LOCAL_COUNCIL_ADMIN"])
+        fun `getPropertyDetailsSystemOperatorView returns 403 for a local council user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetailsSystemOperatorView returns 403 for a landlord`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView returns the council view of a property in any council`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
+                model {
+                    attribute("isLandlordView", false)
+                    attributeExists("propertyDetails", "landlordSummaryCards")
+                }
+            }
+
+            verify(propertyOwnershipService).getPropertyOwnership(1L)
+            verify(propertyOwnershipService, never()).getPropertyOwnershipIfCurrentUserAuthorized(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView sets the back link to the system operator dashboard`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                model { attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView links landlord cards to the system operator landlord record`() {
+            val landlord = propertyOwnership.landlords.first()
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                content {
+                    string(containsString(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)))
+                    string(not(containsString(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id))))
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView returns 404 when the property is not found`() {
+            whenever(propertyOwnershipService.getPropertyOwnership(eq(2)))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(2L)).andExpect {
+                status { isNotFound() }
             }
         }
     }

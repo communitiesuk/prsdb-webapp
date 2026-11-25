@@ -849,6 +849,32 @@ class PropertyOwnershipServiceTests {
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
         }
+
+        @Test
+        fun `Returns landlords properties with record links to the system operator view when isSystemOperatorView is true`() {
+            whenever(
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
+            ).thenReturn(landlordsProperties)
+
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
+                .thenReturn(expectedCurrentUrlKey)
+
+            val result =
+                propertyOwnershipService.getRegisteredPropertiesForLandlord(
+                    currentLandlord.id,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                    isSystemOperatorView = true,
+                )
+
+            assertEquals(
+                landlordsProperties.map {
+                    PropertyDetailsController
+                        .getPropertyDetailsForSystemOperatorPath(it.id)
+                        .overrideBackLinkForUrl(expectedCurrentUrlKey)
+                },
+                result.map { it.recordLink },
+            )
+        }
     }
 
     @Nested
