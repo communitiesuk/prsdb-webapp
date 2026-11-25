@@ -328,17 +328,6 @@ numberOfBedrooms:
     one: rooms built as bedrooms that are being used for another purpose, such as a home office
     two: living rooms or other rooms that have been converted into a bedroom
   label: How many bedrooms does this property have?
-hmoShared:
-  detail:
-    paragraph:
-      one:
-        beforeLink: A property is a
-        link:
-          text: house in multiple occupation (HMO) (opens in new tab)
-        afterLink: 'if both of the following apply:'
-    bullet:
-      one: 'it’s rented to at least 3 tenants who are not from 1 ‘household’ (for example, a family)'
-      two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
   warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.

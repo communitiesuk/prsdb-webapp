@@ -885,7 +885,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
 
         // Selective licence - render page
-        assertThat(selectiveLicencePage.form.fieldsetHeading).containsText("What is your selective licence number?")
+        assertThat(selectiveLicencePage.heading).containsText("What is your selective licence number?")
         assertThat(selectiveLicencePage.form.sectionHeader).containsText(licenseSectionHeader)
         selectiveLicencePage.submitLicenseNumber("licence number")
 
