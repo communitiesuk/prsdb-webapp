@@ -176,6 +176,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.AlreadyRegisteredPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckAnswersPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmMissingComplianceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.InfoFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AnyoneInOwnershipChainFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
@@ -285,6 +286,7 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Ent
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AnyoneInOwnershipChainStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -1769,6 +1771,22 @@ class Navigator(
         return createValidPage(
             page,
             CheckAnswersPagePropertyReactivation::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun skipToPropertyReactivationConfirmMissingCompliancePage(
+        propertyOwnershipId: Long,
+        stateBuilder: PropertyReactivationStateSessionBuilder = PropertyReactivationStateSessionBuilder.beforeConfirmMissingCompliance(),
+    ): ConfirmMissingComplianceFormPagePropertyReactivation {
+        setJourneyStateInSession(stateBuilder.build())
+        navigate(
+            ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId) +
+                "/${ReactivationConfirmMissingComplianceStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+        )
+        return createValidPage(
+            page,
+            ConfirmMissingComplianceFormPagePropertyReactivation::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
