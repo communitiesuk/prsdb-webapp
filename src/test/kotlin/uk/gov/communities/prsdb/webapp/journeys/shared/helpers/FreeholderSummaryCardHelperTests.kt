@@ -43,7 +43,7 @@ class FreeholderSummaryCardHelperTests {
         val earlier = createFreeholder(propertyOwnership, id = 1L)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(later, earlier))
+        val cards = helper.getSummaryCards(listOf(later, earlier), FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
 
         // Assert
         assertEquals(
@@ -66,7 +66,8 @@ class FreeholderSummaryCardHelperTests {
         val unknown = createFreeholder(propertyOwnership)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(postal, email, unknown)).associateBy { it.title }
+        val cards =
+            helper.getSummaryCards(listOf(postal, email, unknown), FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY).associateBy { it.title }
 
         // Assert
         assertEquals(
@@ -79,6 +80,29 @@ class FreeholderSummaryCardHelperTests {
             "registerProperty.freeholders.list.unknownFreeholder.body",
             cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
         )
+    }
+
+    @Test
+    fun `custom unknown details message applies only to unknown freeholders`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val unknown = createFreeholder(propertyOwnership)
+        val postal = createFreeholder(propertyOwnership, name = "Casey Address", id = 2L)
+        val email = createFreeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com", id = 3L)
+
+        // Act
+        val cards =
+            helper
+                .getSummaryCards(listOf(unknown, postal, email), "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable")
+                .associateBy { it.title }
+
+        // Assert
+        assertEquals(
+            "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable",
+            cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
+        )
+        assertEquals(FreeholderSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)
+        assertNull(cards.getValue("Jordan Email").bodyTextKey)
     }
 
     @Test

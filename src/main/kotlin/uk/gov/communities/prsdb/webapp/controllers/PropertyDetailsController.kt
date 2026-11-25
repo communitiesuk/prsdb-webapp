@@ -178,7 +178,7 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
-        modelAndView.addAllObjects(associatedPartySummaryCards(propertyOwnership, propertyDetails))
+        modelAndView.addAllObjects(associatedPartySummaryCards(propertyOwnership, propertyDetails, viewType))
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         // The notification banner prompts for actions that a deactivated record can't take
@@ -274,7 +274,7 @@ class PropertyDetailsController(
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
-        model.addAllAttributes(associatedPartySummaryCards(propertyOwnership, propertyDetails))
+        model.addAllAttributes(associatedPartySummaryCards(propertyOwnership, propertyDetails, PropertyDetailsViewType.LOCAL_COUNCIL))
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute(
@@ -291,15 +291,31 @@ class PropertyDetailsController(
     private fun associatedPartySummaryCards(
         propertyOwnership: PropertyOwnership,
         propertyDetails: PropertyDetailsViewModel,
+        viewType: PropertyDetailsViewType,
     ): Map<String, Any> =
         buildMap {
             if (propertyDetails.showFreeholderSection) {
-                put("freeholderSummaryCards", freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders))
+                val unknownBodyTextKey =
+                    if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+                        "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable"
+                    } else {
+                        FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+                    }
+                put(
+                    "freeholderSummaryCards",
+                    freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders, unknownBodyTextKey),
+                )
             }
             if (propertyDetails.showSuperiorLandlordSection) {
+                val unknownBodyTextKey =
+                    if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+                        "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable"
+                    } else {
+                        SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY
+                    }
                 put(
                     "superiorLandlordSummaryCards",
-                    superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
+                    superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords, unknownBodyTextKey),
                 )
             }
             // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed

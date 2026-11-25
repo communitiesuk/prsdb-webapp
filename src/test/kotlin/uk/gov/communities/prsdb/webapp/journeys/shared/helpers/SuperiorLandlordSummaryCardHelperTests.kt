@@ -40,7 +40,7 @@ class SuperiorLandlordSummaryCardHelperTests {
         val earlier = createSuperiorLandlord(propertyOwnership, id = 1L)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(later, earlier))
+        val cards = helper.getSummaryCards(listOf(later, earlier), SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
 
         // Assert
         assertEquals(
@@ -63,7 +63,10 @@ class SuperiorLandlordSummaryCardHelperTests {
         val unknown = createSuperiorLandlord(propertyOwnership)
 
         // Act
-        val cards = helper.getSummaryCards(listOf(postal, email, unknown)).associateBy { it.title }
+        val cards =
+            helper
+                .getSummaryCards(listOf(postal, email, unknown), SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
+                .associateBy { it.title }
 
         // Assert
         assertEquals(
@@ -76,6 +79,31 @@ class SuperiorLandlordSummaryCardHelperTests {
             "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.body",
             cards.getValue("registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title").bodyTextKey,
         )
+    }
+
+    @Test
+    fun `custom unknown details message applies only to unknown superior landlords`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val unknown = createSuperiorLandlord(propertyOwnership)
+        val postal = createSuperiorLandlord(propertyOwnership, name = "Casey Address", id = 2L)
+        val email = createSuperiorLandlord(propertyOwnership, name = "Jordan Email", email = "jordan@example.com", id = 3L)
+
+        // Act
+        val cards =
+            helper
+                .getSummaryCards(
+                    listOf(unknown, postal, email),
+                    "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+                ).associateBy { it.title }
+
+        // Assert
+        assertEquals(
+            "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+            cards.getValue("registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title").bodyTextKey,
+        )
+        assertEquals(SuperiorLandlordSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)
+        assertNull(cards.getValue("Jordan Email").bodyTextKey)
     }
 
     @Test

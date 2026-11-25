@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class SuperiorLandlordSummaryCardHelper {
     fun getSummaryCards(
         superiorLandlordsMap: Map<Int, SuperiorLandlordDataModel>,
+        unknownBodyTextKey: String = UNKNOWN_DETAILS_BODY_KEY,
         getActions: (superiorLandlordId: Int) -> List<SummaryCardActionViewModel> = { emptyList() },
     ): List<SummaryCardViewModel> =
         superiorLandlordsMap
@@ -33,17 +34,21 @@ class SuperiorLandlordSummaryCardHelper {
                         title = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.title",
                         summaryList = emptyList(),
                         actions = actions,
-                        bodyTextKey = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.body",
+                        bodyTextKey = unknownBodyTextKey,
                     )
                 }
             }
 
-    fun getSummaryCards(superiorLandlords: Collection<SuperiorLandlord>): List<SummaryCardViewModel> =
+    fun getSummaryCards(
+        superiorLandlords: Collection<SuperiorLandlord>,
+        unknownBodyTextKey: String,
+    ): List<SummaryCardViewModel> =
         getSummaryCards(
             superiorLandlords
                 .sortedBy { it.id }
                 .withIndex()
                 .associate { (index, superiorLandlord) -> index to SuperiorLandlordDataModel.fromSuperiorLandlord(superiorLandlord) },
+            unknownBodyTextKey = unknownBodyTextKey,
         )
 
     private fun getContactRows(superiorLandlord: SuperiorLandlordDataModel): List<SummaryListRowViewModel> =
@@ -60,6 +65,7 @@ class SuperiorLandlordSummaryCardHelper {
         )
 
     companion object {
+        const val UNKNOWN_DETAILS_BODY_KEY = "registerProperty.superiorLandlords.list.unknownSuperiorLandlord.body"
         const val POSTAL_ADDRESS_NOTE_KEY = "propertyDetails.peopleResponsible.superiorLandlord.postalAddressNote"
     }
 }

@@ -220,7 +220,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
+            whenever(
+                freeholderSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.freeholders,
+                    FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+                ),
+            )
+                .thenReturn(expectedCards)
 
             mvc
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
@@ -229,7 +235,8 @@ class PropertyDetailsControllerTests(
                     model { attribute("freeholderSummaryCards", expectedCards) }
                 }
 
-            verify(freeholderSummaryCardHelper).getSummaryCards(propertyOwnership.freeholders)
+            verify(freeholderSummaryCardHelper)
+                .getSummaryCards(propertyOwnership.freeholders, FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
         }
 
         @Test
@@ -244,7 +251,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords)).thenReturn(expectedCards)
+            whenever(
+                superiorLandlordSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.superiorLandlords,
+                    SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+                ),
+            )
+                .thenReturn(expectedCards)
 
             mvc
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
@@ -253,7 +266,8 @@ class PropertyDetailsControllerTests(
                     model { attribute("superiorLandlordSummaryCards", expectedCards) }
                 }
 
-            verify(superiorLandlordSummaryCardHelper).getSummaryCards(propertyOwnership.superiorLandlords)
+            verify(superiorLandlordSummaryCardHelper)
+                .getSummaryCards(propertyOwnership.superiorLandlords, SuperiorLandlordSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY)
         }
 
         @Test
@@ -946,7 +960,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(expectedCards)
+            whenever(
+                freeholderSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.freeholders,
+                    "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable",
+                ),
+            )
+                .thenReturn(expectedCards)
 
             // Act & Assert
             mvc
@@ -966,7 +986,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders)).thenReturn(emptyList())
+            whenever(
+                freeholderSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.freeholders,
+                    "propertyDetails.peopleResponsible.freeholder.unknownDetailsUnavailable",
+                ),
+            )
+                .thenReturn(emptyList())
 
             // Act & Assert
             mvc
@@ -990,7 +1016,13 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords)).thenReturn(expectedCards)
+            whenever(
+                superiorLandlordSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.superiorLandlords,
+                    "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+                ),
+            )
+                .thenReturn(expectedCards)
 
             // Act & Assert
             mvc
@@ -1010,7 +1042,12 @@ class PropertyDetailsControllerTests(
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords))
+            whenever(
+                superiorLandlordSummaryCardHelper.getSummaryCards(
+                    propertyOwnership.superiorLandlords,
+                    "propertyDetails.peopleResponsible.superiorLandlord.unknownDetailsUnavailable",
+                ),
+            )
                 .thenReturn(emptyList())
 
             // Act & Assert

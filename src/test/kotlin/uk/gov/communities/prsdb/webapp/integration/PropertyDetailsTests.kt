@@ -52,6 +52,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
             val freeholderCard = detailsPage.freeholderCards.single()
             assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertThat(freeholderCard.bodyText).hasText(
+                "You told us there was another freeholder, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
             assertEquals(0, freeholderCard.actionLinks.count())
         }
 
@@ -96,6 +100,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.noSuperiorLandlordsSummaryList.anyoneInOwnershipChainRow).isHidden()
             val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
             assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "You told us there was someone else in the property’s ownership chain, but you cannot currently provide their details. " +
+                    "Return and add these details when you can.",
+            )
             cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
         }
 
@@ -568,6 +576,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.freeholderSection).containsText("Freeholders")
             val freeholderCard = detailsPage.freeholderCards.single()
             assertEquals("Unknown freeholder", freeholderCard.title.getText())
+            assertThat(freeholderCard.bodyText).hasText(
+                "There’s another freeholder, but the landlord cannot currently provide their details.",
+            )
             assertEquals(0, freeholderCard.actionLinks.count())
             assertThat(detailsPage.freeholderUpdateLink.locator).hasCount(0)
         }
@@ -580,6 +591,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.superiorLandlordSection).containsText("Other people in the property’s ownership chain")
             val cards = detailsPage.superiorLandlordCards.associateBy { it.title.getText() }
             assertEquals(setOf("Sam Superior", "Robin Superior", "Unknown person"), cards.keys)
+            assertThat(cards.getValue("Unknown person").bodyText).hasText(
+                "There’s someone else in the property’s ownership chain, but the landlord cannot currently provide their details.",
+            )
             cards.values.forEach { assertEquals(0, it.actionLinks.count()) }
             assertThat(detailsPage.superiorLandlordUpdateLink.locator).hasCount(0)
         }
