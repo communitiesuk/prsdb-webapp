@@ -67,7 +67,10 @@ class FreeholderSummaryCardHelperTests {
 
         // Act
         val cards =
-            helper.getSummaryCards(listOf(postal, email, unknown), FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY).associateBy { it.title }
+            helper.getSummaryCards(
+                listOf(postal, email, unknown),
+                FreeholderSummaryCardHelper.UNKNOWN_DETAILS_BODY_KEY,
+            ).associateBy { it.title }
 
         // Assert
         assertEquals(
