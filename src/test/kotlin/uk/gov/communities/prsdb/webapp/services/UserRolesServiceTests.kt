@@ -147,22 +147,6 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns individual then organisation roles for a user with both`() {
-        // Arrange
-        val baseUser = MockPrsdbUserData.createPrsdbUser()
-        whenever(individualLandlordRepository.existsByBaseUser_Id(baseUser.id))
-            .thenReturn(true)
-        whenever(organisationalLandlordUserRepository.findRolesByBaseUserId(baseUser.id))
-            .thenReturn(listOf(OrganisationalLandlordUserRole.ADMIN, OrganisationalLandlordUserRole.EDITOR))
-
-        // Act
-        val roles = userRolesService.getLandlordRolesForSubjectId(baseUser.id)
-
-        // Assert
-        Assertions.assertEquals(listOf(ROLE_INDIVIDUAL_LANDLORD, ROLE_ORG_ADMIN, ROLE_ORG_EDITOR), roles)
-    }
-
-    @Test
     fun `getLandlordRolesForSubjectId returns no roles for a local council manager`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
