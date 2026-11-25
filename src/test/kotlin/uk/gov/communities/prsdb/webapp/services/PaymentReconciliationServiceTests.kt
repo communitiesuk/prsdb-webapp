@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymen
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Optional
@@ -123,6 +125,34 @@ class PaymentReconciliationServiceTests {
 
             // Act & Assert
             assertThrows<IllegalStateException> { paymentReconciliationService.markForCancellation(PAYMENT_ID) }
+        }
+    }
+
+    @Nested
+    inner class CancelLivePaymentForProperty {
+        @Test
+        fun `cancelLivePaymentForProperty returns null and cancels nothing when the property has no live payment`() {
+            // Arrange
+            whenever(mockPaymentRepository.findByAssociatedProperty_IdAndStatus(PROPERTY_ID, PaymentStatus.CREATED)).thenReturn(null)
+
+            // Act & Assert
+            assertNull(paymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID))
+            verify(mockGovUkPayClient, never()).cancelPayment(any())
+        }
+
+        @Test
+        fun `cancelLivePaymentForProperty marks the live payment for cancellation and returns its status`() {
+            // Arrange
+            val livePayment = createReactivationPayment(paymentId = PAYMENT_ID)
+            whenever(mockPaymentRepository.findByAssociatedProperty_IdAndStatus(PROPERTY_ID, PaymentStatus.CREATED))
+                .thenReturn(livePayment)
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.CANCELLING, rowsUpdated = 1)
+            stubConditionalUpdate(PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, rowsUpdated = 1)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act & Assert
+            assertEquals(PaymentStatus.CANCELLED, paymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID))
+            verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
         }
     }
 
@@ -355,6 +385,7 @@ class PaymentReconciliationServiceTests {
 
     companion object {
         private const val PAYMENT_ID = "payment-id"
+        private const val PROPERTY_ID = 1L
         private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
         private val REASON = PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED
         private val NOW = Instant.parse("2026-05-01T12:00:00Z")

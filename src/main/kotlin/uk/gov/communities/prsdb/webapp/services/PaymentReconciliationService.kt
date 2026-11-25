@@ -53,6 +53,14 @@ class PaymentReconciliationService(
         return getStoredPaymentStatus(paymentId)
     }
 
+    // Returns the live payment's status after trying to cancel it, or null if the property had no live payment.
+    // A payment being finalised is SUCCEEDED once this has waited for its row lock.
+    fun cancelLivePaymentForProperty(propertyOwnershipId: Long): PaymentStatus? {
+        val livePayment =
+            paymentRepository.findByAssociatedProperty_IdAndStatus(propertyOwnershipId, PaymentStatus.CREATED) ?: return null
+        return markForCancellation(livePayment.paymentId)
+    }
+
     fun recordManualIntervention(
         paymentId: String,
         reason: PaymentManualInterventionReason,

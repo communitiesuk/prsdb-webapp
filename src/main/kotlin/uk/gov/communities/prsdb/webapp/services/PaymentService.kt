@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualInterventionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -73,9 +74,18 @@ class PaymentService(
     fun getPropertyReactivationPaymentQuote(
         propertyOwnershipId: Long,
         quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+    ): PropertyPaymentQuote =
+        calculatePropertyReactivationPaymentQuote(
+            propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId),
+            userToLandlordService.getCurrentLandlordForUser(),
+            quoteDate,
+        )
+
+    fun calculatePropertyReactivationPaymentQuote(
+        propertyOwnership: PropertyOwnership,
+        reactivatingLandlord: Landlord,
+        quoteDate: LocalDate,
     ): PropertyPaymentQuote {
-        val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
-        val reactivatingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val anniversary =
             checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
 

@@ -109,7 +109,7 @@ class Payment() : ModifiableAuditableEntity() {
                 incompleteProperty,
             )
 
-        fun fromGovUkPayForProperty(
+        fun fromGovUkPayForReactivation(
             payment: GovUkPayPayment,
             quoteDate: LocalDate,
             periodEnding: LocalDate,

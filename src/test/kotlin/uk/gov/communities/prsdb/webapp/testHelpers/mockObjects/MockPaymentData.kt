@@ -35,7 +35,7 @@ class MockPaymentData {
             incompleteProperty = incompleteProperty,
         )
 
-        fun createPropertyPayment(
+        fun createReactivationPayment(
             paymentId: String = DEFAULT_PAYMENT_ID,
             amountInPence: Int = 1000,
             reference: String = "reference",

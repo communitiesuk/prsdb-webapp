@@ -95,6 +95,20 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
+    fun buildPropertyReactivationPaymentReturnUri(
+        propertyOwnershipId: Long,
+        journeyId: String,
+        paymentReference: String,
+    ): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath(
+                "${ReactivatePropertyController.getPropertyReactivationBasePath(propertyOwnershipId)}/${PaymentReturnStep.ROUTE_SEGMENT}",
+            ).queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
+            .queryParam(PaymentReferenceParameterService.PARAMETER_NAME, paymentReference)
+            .build()
+            .toUri()
+
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
         return UriComponentsBuilder

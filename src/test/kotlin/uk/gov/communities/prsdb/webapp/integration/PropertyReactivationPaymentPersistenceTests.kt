@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPropertyPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -136,7 +136,7 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
         paymentId: String,
         status: PaymentStatus = PaymentStatus.CREATED,
         payingUserId: String = LANDLORD_1_USER_ID,
-    ) = createPropertyPayment(
+    ) = createReactivationPayment(
         paymentId = paymentId,
         reference = "reference-$paymentId",
         status = status,

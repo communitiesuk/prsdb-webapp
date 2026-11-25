@@ -692,6 +692,27 @@ class PaymentServiceTests {
                 paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, LocalDate.of(2028, 1, 15))
             }
         }
+
+        @Test
+        fun `calculatePropertyReactivationPaymentQuote quotes a given property and landlord without looking them up`() {
+            // Arrange
+            val landlord = MockLandlordData.createIndividualLandlord().apply { setAnniversaryIfAbsent(MonthDay.of(Month.JUNE, 1)) }
+            val claimedProperty =
+                MockLandlordData.createPropertyOwnership(
+                    isActive = true,
+                    renewalDate = LocalDate.of(2028, 3, 1),
+                    paidForUntil = LocalDate.of(2028, 3, 1),
+                )
+
+            // Act
+            val quote = paymentService.calculatePropertyReactivationPaymentQuote(claimedProperty, landlord, LocalDate.of(2028, 1, 1))
+
+            // Assert
+            assertEquals(LocalDate.of(2028, 6, 1), quote.renewalDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.paymentStartDate)
+            assertTrue(quote.amountInPence > 0)
+            verifyNoInteractions(mockPropertyOwnershipService, mockUserToLandlordService)
+        }
     }
 
     @Nested
