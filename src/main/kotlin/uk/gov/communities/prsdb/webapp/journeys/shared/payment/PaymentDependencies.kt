@@ -6,6 +6,6 @@ interface PaymentDependencies {
     val paymentHandler: PaymentHandler
     val paymentSummaryAddressLines: List<String>
     val answersChangedSinceConfirmation: Boolean
-    var isPaymentAddressTaken: Boolean?
-    val addressTakenStep: JourneyStep<*, *, *>
+    var isPropertyAlreadyRegistered: Boolean?
+    val alreadyRegisteredStep: JourneyStep<*, *, *>
 }

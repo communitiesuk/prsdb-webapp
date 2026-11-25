@@ -135,7 +135,7 @@ class PaymentStatusCheckStepConfigTests {
         // Assert
         verify(mockState).paymentOutcome = PaymentOutcome.QUOTE_EXPIRED
         verify(mockState).paymentReference = null
-        verify(mockPaymentHandler, never()).isAddressTaken()
+        verify(mockPaymentHandler, never()).isPropertyAlreadyRegistered()
     }
 
     @Test
@@ -149,36 +149,36 @@ class PaymentStatusCheckStepConfigTests {
 
     @ParameterizedTest
     @EnumSource(value = PaymentStatus::class, names = ["FAILED", "CANCELLING", "CANCELLED", "MANUAL_INTERVENTION"])
-    fun `afterStepIsReached marks the address as taken when the payment did not succeed and the address has been taken`(
+    fun `afterStepIsReached marks the property as already registered when the payment did not succeed and the address is now registered`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
         // Arrange
         stubFinalisedPaymentStatus(finalisedPaymentStatus)
-        whenever(mockPaymentHandler.isAddressTaken()).thenReturn(true)
+        whenever(mockPaymentHandler.isPropertyAlreadyRegistered()).thenReturn(true)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockDependencies).isPaymentAddressTaken = true
+        verify(mockDependencies).isPropertyAlreadyRegistered = true
     }
 
     @Test
-    fun `afterStepIsReached marks the address as not taken when the payment failed and the address is available`() {
+    fun `afterStepIsReached marks the property as not already registered when the payment failed and the address is available`() {
         // Arrange
         stubFinalisedPaymentStatus(PaymentStatus.FAILED)
-        whenever(mockPaymentHandler.isAddressTaken()).thenReturn(false)
+        whenever(mockPaymentHandler.isPropertyAlreadyRegistered()).thenReturn(false)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockDependencies).isPaymentAddressTaken = false
+        verify(mockDependencies).isPropertyAlreadyRegistered = false
     }
 
     @ParameterizedTest
     @EnumSource(value = PaymentStatus::class, names = ["SUCCEEDED", "CREATED"])
-    fun `afterStepIsReached does not check whether the address is taken when the payment has not failed`(
+    fun `afterStepIsReached does not check whether the property is already registered when the payment has not failed`(
         finalisedPaymentStatus: PaymentStatus,
     ) {
         // Arrange
@@ -188,12 +188,12 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentHandler, never()).isAddressTaken()
-        verify(mockDependencies, never()).isPaymentAddressTaken = anyOrNull()
+        verify(mockPaymentHandler, never()).isPropertyAlreadyRegistered()
+        verify(mockDependencies, never()).isPropertyAlreadyRegistered = anyOrNull()
     }
 
     @Test
-    fun `afterStepIsReached does not check whether the address is taken when the payment is still in progress on GOV UK Pay`() {
+    fun `afterStepIsReached does not check whether the property is already registered when the payment is in progress on GOV UK Pay`() {
         // Arrange
         stubGovUkPayStatus(PaymentStatus.CREATED)
 
@@ -201,8 +201,8 @@ class PaymentStatusCheckStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPaymentHandler, never()).isAddressTaken()
-        verify(mockDependencies, never()).isPaymentAddressTaken = anyOrNull()
+        verify(mockPaymentHandler, never()).isPropertyAlreadyRegistered()
+        verify(mockDependencies, never()).isPropertyAlreadyRegistered = anyOrNull()
     }
 
     @Test
@@ -291,12 +291,12 @@ class PaymentStatusCheckStepConfigTests {
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = [false])
-    fun `resolveNextDestination returns the default destination when the payment failed and the address is not taken`(
-        isPaymentAddressTaken: Boolean?,
+    fun `resolveNextDestination returns the default destination when the payment failed and the property is not already registered`(
+        isPropertyAlreadyRegistered: Boolean?,
     ) {
         // Arrange
         whenever(mockState.paymentOutcome).thenReturn(PaymentOutcome.FAILURE)
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(isPaymentAddressTaken)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(isPropertyAlreadyRegistered)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -307,30 +307,30 @@ class PaymentStatusCheckStepConfigTests {
 
     @ParameterizedTest
     @EnumSource(value = PaymentOutcome::class, names = ["FAILURE", "NOT_COMPLETED"])
-    fun `resolveNextDestination redirects to the address taken step when the payment was unsuccessful and the address is taken`(
+    fun `resolveNextDestination redirects to the already registered step when the payment was unsuccessful and the address is registered`(
         paymentOutcome: PaymentOutcome,
     ) {
         // Arrange
         whenever(mockState.paymentOutcome).thenReturn(paymentOutcome)
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(true)
-        val mockAddressTakenStep = mock<RequestableStep<*, *, *>>()
-        whenever(mockAddressTakenStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockDependencies.addressTakenStep).thenReturn(mockAddressTakenStep)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(true)
+        val mockAlreadyRegisteredStep = mock<RequestableStep<*, *, *>>()
+        whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockDependencies.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
 
         // Assert
-        assertEquals(mockAddressTakenStep, assertIs<Destination.VisitableStep>(result).step)
+        assertEquals(mockAlreadyRegisteredStep, assertIs<Destination.VisitableStep>(result).step)
         verify(mockState, never()).deleteJourney()
     }
 
     @ParameterizedTest
     @EnumSource(value = PaymentOutcome::class, names = ["SUCCESS", "IN_PROGRESS", "QUOTE_EXPIRED"])
-    fun `resolveNextDestination ignores the address taken flag when the payment has not failed`(paymentOutcome: PaymentOutcome) {
+    fun `resolveNextDestination ignores the already registered flag when the payment has not failed`(paymentOutcome: PaymentOutcome) {
         // Arrange
         whenever(mockState.paymentOutcome).thenReturn(paymentOutcome)
-        lenient().`when`(mockDependencies.isPaymentAddressTaken).thenReturn(true)
+        lenient().`when`(mockDependencies.isPropertyAlreadyRegistered).thenReturn(true)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)

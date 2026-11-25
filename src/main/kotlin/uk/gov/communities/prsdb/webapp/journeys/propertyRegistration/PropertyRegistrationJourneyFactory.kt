@@ -823,13 +823,13 @@ class PropertyRegistrationJourney(
     override val paymentSummaryAddressLines: List<String>
         get() = propertyDetailsTask.addressTask.getAddress().toMultiLineAddress().split("\n")
 
-    override var isPaymentAddressTaken: Boolean?
+    override var isPropertyAlreadyRegistered: Boolean?
         get() = propertyDetailsTask.addressTask.isAddressAlreadyRegistered
         set(value) {
             propertyDetailsTask.addressTask.isAddressAlreadyRegistered = value
         }
 
-    override val addressTakenStep: JourneyStep<*, *, *>
+    override val alreadyRegisteredStep: JourneyStep<*, *, *>
         get() = propertyDetailsTask.addressTask.alreadyRegisteredStep
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can

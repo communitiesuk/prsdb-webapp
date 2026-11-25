@@ -27,7 +27,7 @@ class PropertyRegistrationPaymentHandler(
         govUkPayStatus: PaymentStatus,
     ) = paymentService.finalisePayment(paymentId, govUkPayStatus, propertyRegistrationDataModelFactory.fromJourneyState(state))
 
-    override fun isAddressTaken(): Boolean {
+    override fun isPropertyAlreadyRegistered(): Boolean {
         val uprn = state.propertyDetailsTask.addressTask.getAddress().uprn ?: return false
         return addressAvailabilityService.isAddressOwned(uprn)
     }

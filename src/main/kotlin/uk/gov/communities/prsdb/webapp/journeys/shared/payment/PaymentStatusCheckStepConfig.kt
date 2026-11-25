@@ -53,7 +53,7 @@ class PaymentStatusCheckStepConfig(
         state.paymentOutcome = paymentOutcome
 
         if (paymentOutcome.isUnsuccessful()) {
-            state.dependencies.isPaymentAddressTaken = state.dependencies.paymentHandler.isAddressTaken()
+            state.dependencies.isPropertyAlreadyRegistered = state.dependencies.paymentHandler.isPropertyAlreadyRegistered()
         }
     }
 
@@ -94,8 +94,8 @@ class PaymentStatusCheckStepConfig(
             state.deleteJourney()
             return Destination.ExternalUrl(nextUrl)
         }
-        if (state.paymentOutcome?.isUnsuccessful() == true && state.dependencies.isPaymentAddressTaken == true) {
-            return Destination(state.dependencies.addressTakenStep)
+        if (state.paymentOutcome?.isUnsuccessful() == true && state.dependencies.isPropertyAlreadyRegistered == true) {
+            return Destination(state.dependencies.alreadyRegisteredStep)
         }
         return defaultDestination
     }

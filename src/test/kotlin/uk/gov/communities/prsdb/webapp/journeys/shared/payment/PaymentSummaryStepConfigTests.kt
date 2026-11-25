@@ -141,7 +141,7 @@ class PaymentSummaryStepConfigTests {
     @Test
     fun `afterStepDataIsAdded clears the previous payment outcome and reference`() {
         // Arrange
-        whenever(mockPaymentHandler.isAddressTaken()).thenReturn(false)
+        whenever(mockPaymentHandler.isPropertyAlreadyRegistered()).thenReturn(false)
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
@@ -152,50 +152,50 @@ class PaymentSummaryStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded marks the address as taken when it has been taken since the journey started`() {
+    fun `afterStepDataIsAdded marks the property as already registered when the address has been registered since the journey started`() {
         // Arrange
-        whenever(mockPaymentHandler.isAddressTaken()).thenReturn(true)
+        whenever(mockPaymentHandler.isPropertyAlreadyRegistered()).thenReturn(true)
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockDependencies).isPaymentAddressTaken = true
+        verify(mockDependencies).isPropertyAlreadyRegistered = true
     }
 
     @Test
-    fun `afterStepDataIsAdded does not mark the address as taken when it is still available`() {
+    fun `afterStepDataIsAdded does not mark the property as already registered when the address is still available`() {
         // Arrange
-        whenever(mockPaymentHandler.isAddressTaken()).thenReturn(false)
+        whenever(mockPaymentHandler.isPropertyAlreadyRegistered()).thenReturn(false)
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockDependencies, never()).isPaymentAddressTaken = anyOrNull()
+        verify(mockDependencies, never()).isPropertyAlreadyRegistered = anyOrNull()
     }
 
     @Test
-    fun `resolveNextDestination redirects to the address taken step when the address is taken`() {
+    fun `resolveNextDestination redirects to the already registered step when the property is already registered`() {
         // Arrange
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(true)
-        val mockAddressTakenStep = mock<RequestableStep<*, *, *>>()
-        whenever(mockAddressTakenStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockDependencies.addressTakenStep).thenReturn(mockAddressTakenStep)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(true)
+        val mockAlreadyRegisteredStep = mock<RequestableStep<*, *, *>>()
+        whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn(journeyId)
+        whenever(mockDependencies.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
 
         // Assert
-        assertEquals(mockAddressTakenStep, assertIs<Destination.VisitableStep>(result).step)
+        assertEquals(mockAlreadyRegisteredStep, assertIs<Destination.VisitableStep>(result).step)
         verifyNoInteractions(mockPaymentService, mockPaymentHandler)
         verify(mockState, never()).paymentQuote
     }
 
     @Test
-    fun `resolveNextDestination creates a payment and redirects to GOV UK Pay when the address is not taken`() {
+    fun `resolveNextDestination creates a payment and redirects to GOV UK Pay when the property is not already registered`() {
         // Arrange
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(false)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(false)
         stubPaymentCreation()
 
         // Act
@@ -212,7 +212,7 @@ class PaymentSummaryStepConfigTests {
     fun `resolveNextDestination returns to the payment summary when another payment was started at the same time`() {
         // Arrange
         stubSummaryDestination()
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(false)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(false)
         stubPaymentCreation(PaymentCreationResult.ConcurrentPaymentStarted)
 
         // Act
@@ -226,7 +226,7 @@ class PaymentSummaryStepConfigTests {
     fun `resolveNextDestination refreshes a missing quote without creating a payment`() {
         // Arrange
         stubSummaryDestination()
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(false)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(false)
         stubSubmittedQuoteDate(today.toString())
         val refreshedQuote = createQuote(today)
         whenever(mockPaymentHandler.getQuote(today)).thenReturn(refreshedQuote)
@@ -244,7 +244,7 @@ class PaymentSummaryStepConfigTests {
     fun `resolveNextDestination refreshes a quote from a previous UK day without creating a payment`() {
         // Arrange
         stubSummaryDestination()
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(false)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(false)
         whenever(mockState.paymentQuote).thenReturn(createQuote(today.minusDays(1)))
         stubSubmittedQuoteDate(today.toString())
         val refreshedQuote = createQuote(today)
@@ -266,7 +266,7 @@ class PaymentSummaryStepConfigTests {
     ) {
         // Arrange
         stubSummaryDestination()
-        whenever(mockDependencies.isPaymentAddressTaken).thenReturn(false)
+        whenever(mockDependencies.isPropertyAlreadyRegistered).thenReturn(false)
         whenever(mockState.paymentQuote).thenReturn(createQuote(today))
         stubSubmittedQuoteDate(submittedQuoteDate)
         val refreshedQuote = createQuote(today)

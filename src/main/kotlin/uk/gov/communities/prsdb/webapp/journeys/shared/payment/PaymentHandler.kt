@@ -19,5 +19,5 @@ interface PaymentHandler {
         govUkPayStatus: PaymentStatus,
     ): PaymentStatus
 
-    fun isAddressTaken(): Boolean
+    fun isPropertyAlreadyRegistered(): Boolean
 }

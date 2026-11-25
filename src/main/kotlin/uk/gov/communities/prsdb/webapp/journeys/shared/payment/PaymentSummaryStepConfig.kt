@@ -68,8 +68,8 @@ class PaymentSummaryStepConfig(
         state.paymentOutcome = null
         state.paymentReference = null
 
-        if (state.dependencies.paymentHandler.isAddressTaken()) {
-            state.dependencies.isPaymentAddressTaken = true
+        if (state.dependencies.paymentHandler.isPropertyAlreadyRegistered()) {
+            state.dependencies.isPropertyAlreadyRegistered = true
         }
     }
 
@@ -78,8 +78,8 @@ class PaymentSummaryStepConfig(
         defaultDestination: Destination,
     ): Destination {
         val dependencies = state.dependencies
-        if (dependencies.isPaymentAddressTaken == true) {
-            return Destination(dependencies.addressTakenStep)
+        if (dependencies.isPropertyAlreadyRegistered == true) {
+            return Destination(dependencies.alreadyRegisteredStep)
         }
 
         val today = LocalDate.now(DateTimeHelper.UK_ZONE)
