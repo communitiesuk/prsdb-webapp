@@ -106,7 +106,7 @@ class ConfirmStepConfigTests {
     @Test
     fun `afterStepDataIsAdded sends confirmation email with correct current user name and address`() {
         val stepConfig = setupStepConfig()
-        val multiLineAddress = "123 Test Street\nAB1 2CD"
+        val multiLineAddress = "123 Test Street\nAB1 2CD\nEngland"
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(
@@ -130,7 +130,7 @@ class ConfirmStepConfigTests {
     @Test
     fun `afterStepDataIsAdded sends invitee cancellation email to each cancelled invitee`() {
         val stepConfig = setupStepConfig()
-        val multiLineAddress = "123 Test Street\nAB1 2CD"
+        val multiLineAddress = "123 Test Street\nAB1 2CD\nEngland"
         val signInUrl = "https://example.com/dashboard"
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(

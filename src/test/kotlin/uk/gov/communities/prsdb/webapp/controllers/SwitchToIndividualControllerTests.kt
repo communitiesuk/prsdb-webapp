@@ -182,7 +182,7 @@ class SwitchToIndividualControllerTests(
                         .get("${getSwitchToIndividualBasePath(propertyOwnershipId)}/confirmation")
                         .sessionAttr(SWITCHED_TO_INDIVIDUAL_PROPERTY_ID, propertyOwnershipId),
                 ).andExpect(MockMvcResultMatchers.status().isOk)
-                .andExpect(MockMvcResultMatchers.model().attribute("addressParts", listOf("123 Test Street", "AB1 2CD")))
+                .andExpect(MockMvcResultMatchers.model().attribute("addressParts", listOf("123 Test Street", "AB1 2CD", "England")))
                 .andExpect(
                     MockMvcResultMatchers
                         .model()

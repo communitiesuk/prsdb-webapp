@@ -363,7 +363,7 @@ class VirusNotificationEmailHandlerTests {
     private fun expectedIncompletePropertyEmail(certType: CertificateType) =
         VirusScanUnsuccessfulEmail(
             certificateType = expectedCertType(certType),
-            propertyAddress = "1 Main St\nAnytown",
+            propertyAddress = "1 Main St\nAnytown\nEngland",
         )
 
     @ParameterizedTest
@@ -570,7 +570,7 @@ class VirusNotificationEmailHandlerTests {
             ownership.id,
             VirusScanUnsuccessfulEmail(
                 certificateType = bodyCertificateType,
-                propertyAddress = "123 Main St\nAnytown",
+                propertyAddress = "123 Main St\nAnytown\nEngland",
             ),
             landlords,
         )

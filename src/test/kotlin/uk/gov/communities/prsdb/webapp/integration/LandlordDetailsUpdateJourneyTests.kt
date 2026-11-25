@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 
 class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -129,7 +128,8 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             // Check changes have occurred
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSelectedAddress)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value.locator("p"))
+                .hasText(arrayOf("1 PRSDB Square", "EG1 2AA", "England"))
         }
 
         @Test
@@ -157,8 +157,8 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             // Check changes have occurred
-            val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
-            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value.locator("p"))
+                .hasText(arrayOf(newFirstLine, newTown, newPostcode, "England"))
         }
     }
 

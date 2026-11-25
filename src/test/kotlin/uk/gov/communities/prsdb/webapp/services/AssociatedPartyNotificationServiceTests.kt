@@ -92,7 +92,7 @@ class AssociatedPartyNotificationServiceTests {
         PropertyManagerAddedToPropertyEmail(
             propertyManagerName = "James Smith",
             propertyManagerEmail = "james.smith@example.com",
-            propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+            propertyAddress = "12 Real Street\nBristol\nBS8 1AA\nEngland",
             landlords = listOf("Jamie Jameson (jamie@example.com)"),
             gdsStartPageUrl = GDS_START_PAGE_URL,
             privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
@@ -201,7 +201,7 @@ class AssociatedPartyNotificationServiceTests {
             FreeholderAddedToPropertyEmail(
                 freeholderName = "Sarah Thompson",
                 freeholderEmail = "sarah@example.com",
-                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                propertyAddress = "12 Real Street\nBristol\nBS8 1AA\nEngland",
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
                 gdsStartPageUrl = GDS_START_PAGE_URL,
                 privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
