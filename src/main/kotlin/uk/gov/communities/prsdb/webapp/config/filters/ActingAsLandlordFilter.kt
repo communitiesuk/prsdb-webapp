@@ -20,13 +20,13 @@ class ActingAsLandlordFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val systemOperator = SecurityContextHolder.getContext().authentication
-        if (systemOperator == null || !systemOperator.isAuthenticated) {
+        val user = SecurityContextHolder.getContext().authentication
+        if (user == null || !user.isAuthenticated) {
             filterChain.doFilter(request, response)
             return
         }
 
-        val isSystemOperator = systemOperator.authorities.any { it.authority == ROLE_SYSTEM_OPERATOR }
+        val isSystemOperator = user.authorities.any { it.authority == ROLE_SYSTEM_OPERATOR }
         val actingAsUserId = if (isSystemOperator) actingAsLandlordService.getActingAsUserId() else null
         if (actingAsUserId == null) {
             response.sendRedirect(SYSTEM_OPERATOR_DASHBOARD_URL)
@@ -39,7 +39,7 @@ class ActingAsLandlordFilter(
             ActingAsLandlordAuthenticationToken(
                 actingAsUserId = actingAsUserId,
                 landlordRoles = userRolesService.getLandlordRolesForSubjectId(actingAsUserId),
-                systemOperatorId = systemOperator.name,
+                systemOperatorId = user.name,
             )
         SecurityContextHolder.setContext(actingContext)
 
