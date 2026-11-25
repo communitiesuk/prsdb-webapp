@@ -8,6 +8,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
 import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
@@ -101,6 +102,31 @@ class DeactivationService(
         return failureCount
     }
 
+    fun getIdsOfLandlordsCreatedBeforeDeactivationCutoffWhoNeverRegisteredAProperty(): List<Long> {
+        val cutoff =
+            LocalDate
+                .now(DateTimeHelper.UK_ZONE)
+                .minusMonths(LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS.toLong())
+                .atStartOfDay(DateTimeHelper.UK_ZONE)
+                .toInstant()
+        return landlordRepository.findAllByIsActiveTrueAndHasRegisteredPropertyFalseAndCreatedDateBefore(cutoff).map { it.id }
+    }
+
+    fun getIdsOfLandlordsWhoPreviouslyRegisteredAPropertyButHaveNoActiveProperties(): List<Long> =
+        landlordRepository.findIdsOfActiveLandlordsWithRegisteredPropertyButNoActiveProperties()
+
+    @Transactional
+    fun deactivateLandlordIfNoActiveProperties(landlordId: Long): Boolean {
+        val landlord =
+            landlordRepository.findById(landlordId).orElseThrow {
+                IllegalStateException("Landlord $landlordId not found")
+            }
+        if (!landlord.isActive || propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)) return false
+
+        deactivateLandlord(landlord, LandlordDeactivationReason.NO_PROPERTIES_REGISTERED, sendEmail = true)
+        return true
+    }
+
     fun landlordHasOtherActiveProperties(
         landlordId: Long,
         excludingPropertyOwnershipId: Long,
@@ -111,6 +137,7 @@ class DeactivationService(
     fun deactivateLandlord(
         landlord: Landlord,
         reason: LandlordDeactivationReason,
+        sendEmail: Boolean,
     ) {
         check(landlord.isActive) { "Landlord ${landlord.id} is already inactive" }
         check(!propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)) {
@@ -119,7 +146,7 @@ class DeactivationService(
         markLandlordAsInactive(landlord, LocalDate.now(DateTimeHelper.UK_ZONE))
 
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE check when the flag is removed
-        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE) && sendEmail) {
             deactivationEmailService.sendLandlordDeactivatedEmail(landlord, reason)
         }
     }

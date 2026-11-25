@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.application.DeactivateInactiveLandlordsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeactivateMissingDetailPropertiesTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredJointLandlordInvitationsTaskLogic
 import uk.gov.communities.prsdb.webapp.application.DeleteExpiredOrganisationalLandlordInvitationsTaskLogic
@@ -135,6 +136,7 @@ class PrsdbTaskApplicationTests {
                 GovUkPayClient::class.simpleBeanName,
                 PaymentReconciliationService::class.simpleBeanName,
                 ReconcilePaymentsTaskLogic::class.simpleBeanName,
+                DeactivateInactiveLandlordsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context)
