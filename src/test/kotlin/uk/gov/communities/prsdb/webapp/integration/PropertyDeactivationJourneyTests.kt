@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -13,6 +14,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.controllers.DeactivatePropertyController
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.CannotDeactivatePropertyJointLandlordsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.CheckInvitationsPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationConfirmationEmail
@@ -30,12 +33,16 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
 class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
+    private val propertyWithPendingInvitationsId = 38L
 
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     @Autowired
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Autowired
+    private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyDeactivationConfirmationEmail>
@@ -47,7 +54,11 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var inviteeCancellationEmailSender: EmailNotificationService<PropertyDeactivationInviteeCancellationEmail>
 
     @Test
-    fun `landlord can deactivate a single-landlord property from the property record`(page: Page) {
+    fun `landlord with no pending joint landlord invitations goes straight to the deactivation confirm page and can deactivate`(
+        page: Page,
+    ) {
+        assertTrue(jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyOwnershipId).isEmpty())
+
         val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         BaseComponent.assertThat(detailsPage.deregisterPropertyLink).isHidden()
         detailsPage.deactivatePropertyLink.clickAndWait()
@@ -112,6 +123,70 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmPage = navigator.goToPropertyDeactivationConfirmPage(propertyOwnershipId)
 
         assertThat(confirmPage.landlordAccountHeading).isHidden()
+    }
+
+    @Test
+    fun `landlord is warned about pending joint landlord invitations before deactivating`(page: Page) {
+        val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
+        assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deactivate")
+        assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
+        assertThat(checkInvitationsPage.invitationEmails).hasCount(2)
+        checkInvitationsPage.submitContinue()
+
+        val confirmPage =
+            assertPageIs(
+                page,
+                ConfirmPagePropertyDeactivation::class,
+                mapOf("propertyOwnershipId" to propertyWithPendingInvitationsId.toString()),
+            )
+        confirmPage.submitConfirm()
+
+        assertFalse(propertyOwnershipRepository.findById(propertyWithPendingInvitationsId).get().isActive)
+        assertTrue(jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyWithPendingInvitationsId).isEmpty())
+    }
+
+    @Test
+    fun `back link on the confirm page returns to the check invitations page when there are pending invitations`(page: Page) {
+        navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId).submitContinue()
+        val confirmPage =
+            assertPageIs(
+                page,
+                ConfirmPagePropertyDeactivation::class,
+                mapOf("propertyOwnershipId" to propertyWithPendingInvitationsId.toString()),
+            )
+        confirmPage.backLink.clickAndWait()
+
+        assertPageIs(
+            page,
+            CheckInvitationsPagePropertyDeactivation::class,
+            mapOf("propertyOwnershipId" to propertyWithPendingInvitationsId.toString()),
+        )
+    }
+
+    @Test
+    fun `back link on the check invitations page returns to the property record`(page: Page) {
+        val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
+        checkInvitationsPage.backLink.clickAndWait()
+
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyWithPendingInvitationsId.toString()),
+        )
+    }
+
+    @Test
+    fun `cancel on the check invitations page returns to the property record without deactivating`(page: Page) {
+        val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
+        checkInvitationsPage.cancelLink.clickAndWait()
+
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyWithPendingInvitationsId.toString()),
+        )
+        assertTrue(propertyOwnershipRepository.findById(propertyWithPendingInvitationsId).get().isActive)
+        assertEquals(2, jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyWithPendingInvitationsId).size)
     }
 }
 
