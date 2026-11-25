@@ -504,5 +504,12 @@
     "enumName": "PASSPHRASE_EMAIL",
     "subject": "Your passphrase to speak with us",
     "bodyLocation": "/emails/Passphrase.md"
+  },
+  {
+    "test_id": "c57968bf-3aa7-40a1-893a-108ae52d9c72",
+    "prod_id": "1ff4411e-17b0-4515-acf9-e0039fbde109",
+    "enumName": "PROPERTY_MANAGER_ADDED_TO_PROPERTY",
+    "subject": "You’ve been listed as the property manager of a rental property",
+    "bodyLocation": "/emails/PropertyManagerAddedToProperty.md"
   }
 ]

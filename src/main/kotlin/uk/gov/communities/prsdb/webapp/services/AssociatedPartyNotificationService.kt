@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataMode
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FreeholderAddedToPropertyEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyManagerAddedToPropertyEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.SuperiorLandlordAddedToPropertyLetter
@@ -95,9 +96,28 @@ class AssociatedPartyNotificationService(
             "${landlord.name} (${landlord.getContactEmail()})"
         }
 
-    // TODO PDJB-1991: implement once the property manager creation email template is available
-    fun sendCreationNotificationForPropertyManager(propertyManager: PropertyManagerDataModel): AssociatedPartyNotificationOutcome =
-        TODO("Implement property manager creation notification when its email template is available")
+    fun sendNotificationToPropertyManagerAddedToProperty(
+        propertyManager: PropertyManagerDataModel,
+        propertyOwnership: PropertyOwnership,
+    ) {
+        emailNotificationService.sendEmail(
+            propertyManager.email,
+            buildPropertyManagerAddedToPropertyEmail(propertyManager, propertyOwnership),
+        )
+    }
+
+    internal fun buildPropertyManagerAddedToPropertyEmail(
+        propertyManager: PropertyManagerDataModel,
+        propertyOwnership: PropertyOwnership,
+    ): PropertyManagerAddedToPropertyEmail =
+        PropertyManagerAddedToPropertyEmail(
+            propertyManagerName = propertyManager.name,
+            propertyManagerEmail = propertyManager.email,
+            propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            landlords = landlordsRentingOutProperty(propertyOwnership),
+            gdsStartPageUrl = gdsStartPageUrl,
+            privacyNoticeUrl = absoluteUrlProvider.buildLandlordPrivacyNoticeUri().toString(),
+        )
 
     internal fun sendNotificationToAssociatedParty(
         name: String?,

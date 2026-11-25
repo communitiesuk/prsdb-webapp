@@ -517,6 +517,17 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
+                    PropertyManagerAddedToPropertyEmail(
+                        propertyManagerName = "James Smith",
+                        propertyManagerEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)", "Janie Jameson (janie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.com/landlord/privacy-notice",
+                    ),
+                    "/emails/PropertyManagerAddedToProperty.md",
+                ),
+                EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
                         landlordName = "Alice",
                         propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
