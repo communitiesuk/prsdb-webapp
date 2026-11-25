@@ -28,7 +28,8 @@ class PrsdbScheduledTaskApplicationTests {
 
         assertTrue(
             invalidTaskNames.isEmpty(),
-            "Scheduled task names must end with 'scheduled-task'. Invalid names: $invalidTaskNames",
+            "Scheduled task names must end with 'scheduled-task'. See the prsdb-infra repository's ReadMe for more details. " +
+                "Invalid names: $invalidTaskNames",
         )
     }
 }
