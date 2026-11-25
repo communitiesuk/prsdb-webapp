@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -7,20 +8,36 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.services.PaymentService
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
+import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicInteger
 
 class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableData(
     listOf(
@@ -43,7 +60,21 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
 
+    @Autowired
+    private lateinit var paymentService: PaymentService
+
+    @MockitoBean
+    private lateinit var mockGovUkPayClient: GovUkPayClient
+
     private val transactionTemplate get() = TransactionTemplate(transactionManager)
+
+    private val quote =
+        PropertyPaymentQuote(1234, LocalDate.now(DateTimeHelper.UK_ZONE), LocalDate.now(DateTimeHelper.UK_ZONE).plusYears(1))
+
+    @AfterEach
+    fun clearSecurityContext() {
+        SecurityContextHolder.clearContext()
+    }
 
     @Test
     fun `a property can't have two CREATED payments at once`() {
@@ -132,6 +163,76 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
         )
     }
 
+    @Test
+    fun `starting a reactivation payment cancels another landlord's live payment for the property`() {
+        paymentRepository.saveAndFlush(createStoredPropertyPayment("other-landlord-payment-id", payingUserId = LANDLORD_2_USER_ID))
+        stubGovUkPayCreatePayment { "new-payment-id" }
+        JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
+
+        val result = paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+
+        assertEquals(PaymentCreationResult.NewPayment("${NEXT_URL_PREFIX}new-payment-id"), result)
+        verify(mockGovUkPayClient).cancelPayment("other-landlord-payment-id")
+        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId("other-landlord-payment-id"))
+        assertEquals(
+            "new-payment-id",
+            paymentRepository.findByAssociatedProperty_IdAndStatus(JOINT_PROPERTY_ID, PaymentStatus.CREATED)?.paymentId,
+        )
+        assertEquals(
+            LANDLORD_1_USER_ID,
+            jdbcTemplate.queryForObject("SELECT paying_user_id FROM payment WHERE payment_id = ?", String::class.java, "new-payment-id"),
+        )
+    }
+
+    @Test
+    fun `two landlords starting reactivation payments at once keep one CREATED payment and cancel the other on GOV UK Pay`() {
+        val executor = Executors.newFixedThreadPool(2)
+        val bothPaymentsCreatedOnGovUkPay = CyclicBarrier(2)
+        val paymentCount = AtomicInteger()
+        stubGovUkPayCreatePayment {
+            // Neither payment is saved until both are created, so neither request cancels the other's payment first
+            "concurrent-payment-${paymentCount.incrementAndGet()}".also {
+                bothPaymentsCreatedOnGovUkPay.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            }
+        }
+
+        try {
+            val results =
+                listOf(LANDLORD_1_USER_ID, LANDLORD_2_USER_ID)
+                    .map { userId ->
+                        executor.submit<PaymentCreationResult> {
+                            JourneyTestHelper.setMockUser(userId)
+                            paymentService.createPropertyReactivationPayment(JOINT_PROPERTY_ID, JOURNEY_ID, EMAIL, quote)
+                        }
+                    }.map { it.get(TIMEOUT_SECONDS, TimeUnit.SECONDS) }
+
+            assertEquals(1, results.count { it == PaymentCreationResult.ConcurrentPaymentStarted })
+            val savedPaymentId =
+                results.filterIsInstance<PaymentCreationResult.NewPayment>().single().nextUrl.removePrefix(NEXT_URL_PREFIX)
+            val unsavedPaymentId = setOf("concurrent-payment-1", "concurrent-payment-2").minus(savedPaymentId).single()
+            assertEquals(
+                savedPaymentId,
+                paymentRepository.findByAssociatedProperty_IdAndStatus(JOINT_PROPERTY_ID, PaymentStatus.CREATED)?.paymentId,
+            )
+            assertFalse(paymentRepository.existsById(unsavedPaymentId))
+            verify(mockGovUkPayClient).cancelPayment(unsavedPaymentId)
+        } finally {
+            executor.shutdown()
+            executor.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        }
+    }
+
+    private fun stubGovUkPayCreatePayment(nextPaymentId: () -> String) {
+        whenever(mockGovUkPayClient.createPayment(any())).thenAnswer { invocation ->
+            val paymentId = nextPaymentId()
+            createGovUkPayCreatedPayment(
+                paymentId = paymentId,
+                reference = invocation.getArgument<GovUkPayCreatePaymentRequest>(0).reference,
+                nextUrl = "$NEXT_URL_PREFIX$paymentId",
+            )
+        }
+    }
+
     private fun createStoredPropertyPayment(
         paymentId: String,
         status: PaymentStatus = PaymentStatus.CREATED,
@@ -152,5 +253,8 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
         private const val LANDLORD_2_USER_ID = "urn:fdc:gov.uk:2022:ABCDE"
         private const val PAYMENT_ID = "payment-id"
         private const val TIMEOUT_SECONDS = 10L
+        private const val JOURNEY_ID = "reactivation-journey"
+        private const val EMAIL = "user@example.test"
+        private const val NEXT_URL_PREFIX = "https://pay.example.test/"
     }
 }

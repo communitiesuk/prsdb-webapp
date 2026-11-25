@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
@@ -25,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureNotTakenException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentCaptureOutcomeUnknownException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
+import uk.gov.communities.prsdb.webapp.exceptions.PropertyAlreadyReactivatedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -142,9 +144,65 @@ class PaymentService(
             PaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
         } catch (exception: DataIntegrityViolationException) {
             if (!exception.isViolationOf(ONE_CREATED_PAYMENT_PER_DRAFT_CONSTRAINT)) throw exception
-            cancelUnsavedPayment(createdGovUkPayPayment.payment.paymentId, journeyId)
+            cancelUnsavedPayment(createdGovUkPayPayment.payment.paymentId, "journey $journeyId")
             PaymentCreationResult.ConcurrentPaymentStarted
         }
+    }
+
+    fun createPropertyReactivationPayment(
+        propertyOwnershipId: Long,
+        journeyId: String,
+        email: String,
+        quote: PropertyPaymentQuote,
+    ): PaymentCreationResult {
+        check(quote.amountInPence > 0) {
+            "Cannot create a GOV.UK Pay payment to reactivate property $propertyOwnershipId: the fee for the period ending " +
+                "${quote.renewalDate} is ${quote.amountInPence}p but GOV.UK Pay only accepts amounts greater than zero"
+        }
+        val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
+
+        // Newest payment wins: the property's live payment is cancelled whichever landlord started it
+        if (paymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId) == PaymentStatus.SUCCEEDED) {
+            throw PropertyAlreadyReactivatedException(propertyOwnershipId)
+        }
+
+        val reference = UUID.randomUUID().toString()
+        val returnUrl = absoluteUrlProvider.buildPropertyReactivationPaymentReturnUri(propertyOwnershipId, journeyId, reference).toString()
+        val createdGovUkPayPayment =
+            govUkPayClient.createPayment(
+                GovUkPayCreatePaymentRequest(
+                    amount = quote.amountInPence,
+                    reference = reference,
+                    description = messageSource.getMessageForKey("reactivateProperty.paymentDescription"),
+                    returnUrl = returnUrl,
+                    email = email,
+                ),
+            )
+        val paymentId = createdGovUkPayPayment.payment.paymentId
+        val payingUser = entityManager.getReference(PrsdbUser::class.java, SecurityContextHolder.getContext().authentication!!.name)
+
+        try {
+            paymentRepository.saveAndFlush(
+                Payment.fromGovUkPayForReactivation(
+                    createdGovUkPayPayment.payment,
+                    quote.quoteDate,
+                    quote.renewalDate,
+                    propertyOwnership,
+                    payingUser,
+                ),
+            )
+        } catch (exception: DataIntegrityViolationException) {
+            if (!exception.isViolationOf(ONE_CREATED_PAYMENT_PER_PROPERTY_CONSTRAINT)) throw exception
+            cancelUnsavedPayment(paymentId, "property $propertyOwnershipId")
+            return PaymentCreationResult.ConcurrentPaymentStarted
+        }
+
+        // A reactivation that committed after the first check couldn't cancel this payment, because it wasn't saved yet
+        if (!propertyOwnershipService.isPropertyOwnershipInactive(propertyOwnershipId)) {
+            paymentReconciliationService.markForCancellation(paymentId)
+            throw PropertyAlreadyReactivatedException(propertyOwnershipId)
+        }
+        return PaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
     }
 
     private fun markPreviousPaymentForCancellation(
@@ -167,14 +225,14 @@ class PaymentService(
 
     private fun cancelUnsavedPayment(
         paymentId: String,
-        journeyId: String,
+        paymentFor: String,
     ) {
         try {
             govUkPayClient.cancelPayment(paymentId)
         } catch (exception: GovUkPayException) {
             println(
                 "Could not cancel GOV.UK Pay payment $paymentId, which was not saved because another payment was started for " +
-                    "journey $journeyId at the same time: ${exception.stackTraceToString()}",
+                    "$paymentFor at the same time: ${exception.stackTraceToString()}",
             )
         }
     }
@@ -188,6 +246,22 @@ class PaymentService(
             checkNotNull(paymentRepository.findByReferenceAndAssociatedIncompleteProperty(paymentReference, incompleteProperty)) {
                 "No payment with reference $paymentReference found for journey $journeyId"
             }
+        return PaymentStatusCheckDataModel(payment.paymentId, getStoredPaymentStatus(payment.paymentId))
+    }
+
+    fun getStoredPropertyReactivationPaymentStatus(
+        propertyOwnershipId: Long,
+        paymentReference: String,
+    ): PaymentStatusCheckDataModel {
+        val payingUserId = SecurityContextHolder.getContext().authentication!!.name
+        val payment =
+            checkNotNull(
+                paymentRepository.findByReferenceAndAssociatedProperty_IdAndPayingUser_Id(
+                    paymentReference,
+                    propertyOwnershipId,
+                    payingUserId,
+                ),
+            ) { "No payment with reference $paymentReference found for property $propertyOwnershipId and user $payingUserId" }
         return PaymentStatusCheckDataModel(payment.paymentId, getStoredPaymentStatus(payment.paymentId))
     }
 
@@ -219,6 +293,15 @@ class PaymentService(
         paymentId: String,
         govUkPayStatus: PaymentStatus,
         registrationData: PropertyRegistrationDataModel,
+    ): PaymentStatus = finalisePaymentApplyingChanges(paymentId, govUkPayStatus) { registerPropertyForPayment(it, registrationData) }
+
+    // applyPaidChanges runs in the transaction that claims the payment, before the payment is captured. If it throws, the
+    // transaction rolls back and the payment is cancelled instead of captured.
+    @Transactional(Transactional.TxType.NOT_SUPPORTED)
+    fun finalisePaymentApplyingChanges(
+        paymentId: String,
+        govUkPayStatus: PaymentStatus,
+        applyPaidChanges: (Payment) -> Unit,
     ): PaymentStatus =
         when (govUkPayStatus) {
             PaymentStatus.CREATED -> {
@@ -226,7 +309,7 @@ class PaymentService(
             }
 
             PaymentStatus.CAPTURABLE -> {
-                finaliseCapturablePayment(paymentId, registrationData)
+                finaliseCapturablePayment(paymentId, applyPaidChanges)
             }
 
             PaymentStatus.FAILED, PaymentStatus.CANCELLED -> {
@@ -236,7 +319,7 @@ class PaymentService(
             PaymentStatus.SUCCEEDED -> {
                 paymentReconciliationService.recordManualIntervention(
                     paymentId,
-                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED,
+                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_APPLIED,
                     expectedStatus = PaymentStatus.CREATED,
                 )
             }
@@ -248,21 +331,21 @@ class PaymentService(
 
     private fun finaliseCapturablePayment(
         paymentId: String,
-        registrationData: PropertyRegistrationDataModel,
+        applyPaidChanges: (Payment) -> Unit,
     ): PaymentStatus {
         var isCaptureAttempted = false
         var isCaptured = false
         return try {
-            registerPropertyAndCapturePayment(
+            applyPaidChangesAndCapturePayment(
                 paymentId,
-                registrationData,
+                applyPaidChanges,
                 onCaptureAttempted = { isCaptureAttempted = true },
                 onCaptured = { isCaptured = true },
             )
         } catch (exception: PaymentQuoteExpiredException) {
-            println("Marking payment $paymentId for cancellation: ${exception.message}")
-            val status = paymentReconciliationService.markForCancellation(paymentId)
-            if (status == PaymentStatus.SUCCEEDED) status else throw exception
+            cancelPaymentForRejectedChanges(paymentId, exception)
+        } catch (exception: PropertyAlreadyReactivatedException) {
+            cancelPaymentForRejectedChanges(paymentId, exception)
         } catch (exception: PaymentCaptureNotTakenException) {
             println("Failed to capture payment $paymentId: ${exception.stackTraceToString()}")
             recordPaymentNotTaken(paymentId, exception.govUkPayStatus)
@@ -272,7 +355,7 @@ class PaymentService(
                 isCaptured -> {
                     paymentReconciliationService.recordManualIntervention(
                         paymentId,
-                        PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
+                        PaymentManualInterventionReason.CHANGES_DID_NOT_COMMIT,
                         expectedStatus = PaymentStatus.CREATED,
                     )
                 }
@@ -292,9 +375,19 @@ class PaymentService(
         }
     }
 
-    private fun registerPropertyAndCapturePayment(
+    // Rethrows unless another request has finalised the payment meanwhile
+    private fun cancelPaymentForRejectedChanges(
         paymentId: String,
-        registrationData: PropertyRegistrationDataModel,
+        exception: RuntimeException,
+    ): PaymentStatus {
+        println("Marking payment $paymentId for cancellation: ${exception.message}")
+        val status = paymentReconciliationService.markForCancellation(paymentId)
+        if (status == PaymentStatus.SUCCEEDED) return status else throw exception
+    }
+
+    private fun applyPaidChangesAndCapturePayment(
+        paymentId: String,
+        applyPaidChanges: (Payment) -> Unit,
         onCaptureAttempted: () -> Unit,
         onCaptured: () -> Unit,
     ): PaymentStatus =
@@ -311,21 +404,7 @@ class PaymentService(
 
                 val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
                 entityManager.refresh(storedPayment)
-                val incompleteProperty =
-                    checkNotNull(storedPayment.associatedIncompleteProperty) { "Payment $paymentId has no incomplete property to register" }
-
-                val property =
-                    propertyRegistrationService.registerProperty(registrationData.copy(renewalDate = storedPayment.forPeriodEnding))
-                storedPayment.associateWithProperty(property)
-                storedPayment.status = PaymentStatus.SUCCEEDED
-                paymentRepository.saveAndFlush(storedPayment)
-
-                // Detached here because the @MapsId on its savedJourneyState cascades a persist on flush, undoing the journey's deletion
-                entityManager.detach(incompleteProperty)
-                savedJourneyStateRepository.delete(incompleteProperty.savedJourneyState)
-                paymentRepository.flush()
-
-                checkQuoteDateMatchesRegistrationDate(storedPayment, property)
+                applyPaidChanges(storedPayment)
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 onCaptureAttempted()
@@ -339,6 +418,28 @@ class PaymentService(
                 PaymentStatus.SUCCEEDED
             },
         )
+
+    private fun registerPropertyForPayment(
+        storedPayment: Payment,
+        registrationData: PropertyRegistrationDataModel,
+    ) {
+        val incompleteProperty =
+            checkNotNull(storedPayment.associatedIncompleteProperty) {
+                "Payment ${storedPayment.paymentId} has no incomplete property to register"
+            }
+
+        val property = propertyRegistrationService.registerProperty(registrationData.copy(renewalDate = storedPayment.forPeriodEnding))
+        storedPayment.associateWithProperty(property)
+        storedPayment.status = PaymentStatus.SUCCEEDED
+        paymentRepository.saveAndFlush(storedPayment)
+
+        // Detached here because the @MapsId on its savedJourneyState cascades a persist on flush, undoing the journey's deletion
+        entityManager.detach(incompleteProperty)
+        savedJourneyStateRepository.delete(incompleteProperty.savedJourneyState)
+        paymentRepository.flush()
+
+        checkQuoteDateMatchesRegistrationDate(storedPayment, property)
+    }
 
     private fun confirmPaymentTakenAfterCaptureFailure(
         paymentId: String,
@@ -421,5 +522,6 @@ class PaymentService(
 
     companion object {
         private const val ONE_CREATED_PAYMENT_PER_DRAFT_CONSTRAINT = "uc_payment_one_created_per_incomplete_property"
+        private const val ONE_CREATED_PAYMENT_PER_PROPERTY_CONSTRAINT = "uc_payment_one_created_per_property"
     }
 }

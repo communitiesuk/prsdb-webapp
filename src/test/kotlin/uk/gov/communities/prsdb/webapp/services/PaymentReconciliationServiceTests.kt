@@ -387,7 +387,7 @@ class PaymentReconciliationServiceTests {
         private const val PAYMENT_ID = "payment-id"
         private const val PROPERTY_ID = 1L
         private const val MANUAL_INTERVENTION_EMAIL_ADDRESS = "payments-support@example.com"
-        private val REASON = PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED
+        private val REASON = PaymentManualInterventionReason.CAPTURED_BUT_NOT_APPLIED
         private val NOW = Instant.parse("2026-05-01T12:00:00Z")
     }
 }
