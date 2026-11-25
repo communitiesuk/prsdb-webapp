@@ -103,8 +103,6 @@ class LandlordSecurityConfig(
                 oauth.redirectionEndpoint { redirection ->
                     redirection.baseUri("/landlord/login/oauth2/code/one-login")
                 }
-            }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**")
             }
 
         return http.build()
