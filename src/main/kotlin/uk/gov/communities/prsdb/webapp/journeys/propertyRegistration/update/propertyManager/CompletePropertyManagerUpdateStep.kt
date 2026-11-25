@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
+import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 class CompletePropertyManagerUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
+    private val associatedPartyNotificationService: AssociatedPartyNotificationService,
 ) : AbstractInternalStepConfig<Complete, UpdatePropertyManagerJourneyState>() {
     override fun mode(state: UpdatePropertyManagerJourneyState): Complete = Complete.COMPLETE
 
@@ -37,10 +40,24 @@ class CompletePropertyManagerUpdateStepConfig(
             throw ex
         }
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The property manager responsible for the property"))
-        // TODO PDJB-1991: when updatedPropertyManager is not null and differs from state.originalPropertyManager, send the new
-        //  property manager email using AssociatedPartyNotificationService.sendCreationNotificationForPropertyManager once it is implemented
-        // TODO PDJB-2171: when state.originalPropertyManager is not null and differs from updatedPropertyManager, send the removed
+        if (updatedPropertyManager != null && state.originalPropertyManager == null) {
+            sendAddedPropertyManagerNotification(state.propertyId, updatedPropertyManager)
+        }
+        // TODO PDJB-2171: when updatedPropertyManager is null and state.originalPropertyManager is not null, send the removed
         //  property manager email
+    }
+
+    // Load the property inside the wrapper so a failure here is logged rather than failing an update that has already been saved
+    private fun sendAddedPropertyManagerNotification(
+        propertyId: Long,
+        propertyManager: PropertyManagerDataModel,
+    ) {
+        NotificationHelper.sendNotificationAndLogFailures(
+            "the property manager added-to-property notification for property ownership $propertyId",
+        ) {
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
+            associatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
+        }
     }
 
     // The details form can still hold answers after the landlord has answered "No", so the yes or no answer decides
