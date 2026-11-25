@@ -513,8 +513,8 @@
     "bodyLocation": "/emails/PropertyManagerAddedToProperty.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000002050",
-    "prod_id": "00000000-0000-0000-0000-000000002051",
+    "test_id": "85537491-2296-47db-ae43-9dbd1cc1b495",
+    "prod_id": "c05fcce1-0436-4f60-909a-2b96d69ba325",
     "enumName": "JOINT_LANDLORD_PROPERTY_REACTIVATED_NOTIFICATION",
     "subject": "A joint landlord reactivated a property",
     "bodyLocation": "/emails/JointLandlordPropertyReactivatedNotification.md"
