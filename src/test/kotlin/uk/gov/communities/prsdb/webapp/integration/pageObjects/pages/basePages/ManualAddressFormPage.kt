@@ -19,6 +19,7 @@ abstract class ManualAddressFormPage(
         townOrCity: String? = null,
         county: String? = null,
         postcode: String? = null,
+        country: String? = "England",
     ) {
         if (addressLineOne != null) {
             form.addressLineOneInput.fill(addressLineOne)
@@ -35,6 +36,9 @@ abstract class ManualAddressFormPage(
         if (postcode != null) {
             form.postcodeInput.fill(postcode)
         }
+        if (country != null && form.countryInput.locator.isVisible) {
+            form.countryInput.fill(country)
+        }
         form.submit()
     }
 
@@ -46,5 +50,6 @@ abstract class ManualAddressFormPage(
         val townOrCityInput = TextInput.textByFieldName(locator, "townOrCity")
         val countyInput = TextInput.textByFieldName(locator, "county")
         val postcodeInput = TextInput.textByFieldName(locator, "postcode")
+        val countryInput = TextInput.textByFieldName(locator, "country")
     }
 }

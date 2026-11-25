@@ -61,6 +61,7 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 manualTownOrCity = manualFormModel?.townOrCity,
                 manualCounty = manualFormModel?.county,
                 manualPostcode = manualFormModel?.postcode,
+                manualCountry = manualFormModel?.country,
             )
 
         currentMap[targetKey] = member

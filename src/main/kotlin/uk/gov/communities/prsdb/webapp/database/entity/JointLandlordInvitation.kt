@@ -12,6 +12,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
+import org.hibernate.envers.Audited
+import org.hibernate.envers.NotAudited
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -19,12 +21,14 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Entity
+@Audited
 class JointLandlordInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 ) : ModifiableAuditableEntity() {
     @Column(nullable = false, unique = true)
+    @NotAudited
     lateinit var token: UUID
         private set
 

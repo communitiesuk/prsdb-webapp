@@ -11,8 +11,10 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -25,31 +27,45 @@ class DeactivationService(
     private val landlordRepository: LandlordRepository,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val deactivationEmailService: DeactivationEmailService,
+    private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
     private val transactionTemplate: TransactionTemplate,
     // TODO PDJB-2149: Remove the feature flag manager when the ACTIVE_INACTIVE flag is removed
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    // TODO PDJB-2168: Cancel pending joint landlord invites when a property is deactivated
     @Transactional
     fun deactivateProperty(propertyOwnershipId: Long) {
+        deactivatePropertyReturningLandlordDeactivationStatuses(propertyOwnershipId)
+    }
+
+    private fun deactivatePropertyReturningLandlordDeactivationStatuses(propertyOwnershipId: Long): List<Pair<Landlord, Boolean>> {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         check(propertyOwnership.isActive) { "Property ownership $propertyOwnershipId is already inactive" }
 
         val deactivationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         propertyOwnership.deactivate(deactivationDate)
         propertyOwnershipRepository.save(propertyOwnership)
-        val delegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
+        val lettingAgentDelegation = lettingAgentAccessService.getDelegationByPropertyOwnershipIdOrNull(propertyOwnershipId)
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyOwnershipId)
+        val jointLandlordInvitations = jointLandlordInvitationRepository.findByRegisteredOwnership_Id(propertyOwnershipId)
+        jointLandlordInvitationRepository.deleteAll(jointLandlordInvitations)
+        // TODO PDJB-2169: Email the invitees of the pending invitations cancelled here, only when ACTIVE_INACTIVE is enabled
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
-        if (delegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+        if (lettingAgentDelegation != null && featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
             TransactionHelper.runAfterTransactionCommits {
-                deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, delegation.invitedEmail)
+                deactivationEmailService.sendLettingAgentPropertyDeactivatedEmail(propertyOwnership, lettingAgentDelegation.invitedEmail)
             }
         }
 
-        propertyOwnership.landlords
-            .filterNot { landlordHasOtherActiveProperties(it.id, propertyOwnershipId) }
-            .forEach { markLandlordAsInactive(it, deactivationDate) }
+        return propertyOwnership.landlords.map { landlord ->
+            val deactivated =
+                if (landlordHasOtherActiveProperties(landlord.id, propertyOwnershipId)) {
+                    false
+                } else {
+                    markLandlordAsInactive(landlord, deactivationDate)
+                    true
+                }
+            landlord to deactivated
+        }
     }
 
     fun deactivateMissingDetailPropertiesPastDueDateReturningFailureCount(): Int {
@@ -64,7 +80,19 @@ class DeactivationService(
 
         propertyOwnershipIds.forEach { propertyOwnershipId ->
             try {
-                transactionTemplate.executeWithoutResult { deactivateProperty(propertyOwnershipId) }
+                transactionTemplate.executeWithoutResult {
+                    val property = getPropertyOwnership(propertyOwnershipId)
+                    val deactivationReasons = ReactivationTaskType.requiredFor(property)
+                    if (deactivationReasons.isNotEmpty()) {
+                        val landlordStatuses = deactivatePropertyReturningLandlordDeactivationStatuses(property.id)
+                        // TODO PDJB-2149: Remove the ACTIVE_INACTIVE feature flag check
+                        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+                            TransactionHelper.runAfterTransactionCommits {
+                                deactivationEmailService.sendPropertyDeactivatedEmail(property, landlordStatuses, deactivationReasons)
+                            }
+                        }
+                    }
+                }
             } catch (exception: Exception) {
                 logger.error("Failed to deactivate property ownership $propertyOwnershipId", exception)
                 failureCount++

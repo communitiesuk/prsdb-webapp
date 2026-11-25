@@ -28,12 +28,17 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_WITHOUT_PROPERTY_DEACTIVATION_PERIOD_IN_MONTHS
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.function.Consumer
 
@@ -50,6 +55,9 @@ class DeactivationServiceTests {
 
     @Mock
     private lateinit var deactivationEmailService: DeactivationEmailService
+
+    @Mock
+    private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @Mock
     private lateinit var transactionTemplate: TransactionTemplate
@@ -172,6 +180,35 @@ class DeactivationServiceTests {
         assertEquals(today(), property.lastDeactivatedDate)
         verify(propertyOwnershipRepository).save(property)
         verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_ID)
+    }
+
+    @Test
+    fun `deactivateProperty deletes all joint landlord invitations for the property`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, landlords = mutableSetOf(landlord))
+        val invitations =
+            listOf(
+                MockJointLandlordData.createJointLandlordInvitation(id = 1, propertyOwnership = property),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 2,
+                    propertyOwnership = property,
+                    createdDate = Instant.now().minus(30, ChronoUnit.DAYS),
+                ),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 3,
+                    propertyOwnership = property,
+                    createdDate = Instant.now().minus(30, ChronoUnit.DAYS),
+                    isHidden = true,
+                ),
+            )
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        whenever(propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrueAndIdNot(landlord.id, PROPERTY_ID))
+            .thenReturn(true)
+        whenever(jointLandlordInvitationRepository.findByRegisteredOwnership_Id(PROPERTY_ID)).thenReturn(invitations)
+
+        deactivationService.deactivateProperty(PROPERTY_ID)
+
+        verify(jointLandlordInvitationRepository).deleteAll(invitations)
     }
 
     @Test
@@ -337,7 +374,7 @@ class DeactivationServiceTests {
         assertNull(property.lastDeactivatedDate)
         assertTrue(landlord.isActive)
         verify(propertyOwnershipRepository, never()).save(any())
-        verifyNoInteractions(lettingAgentAccessService, landlordRepository)
+        verifyNoInteractions(lettingAgentAccessService, landlordRepository, jointLandlordInvitationRepository)
     }
 
     @Test
@@ -352,8 +389,10 @@ class DeactivationServiceTests {
 
     @Test
     fun `batch property deactivation queries with the UK-local cutoff and continues after an individual failure`() {
-        val firstSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf())
-        val secondSuccessfulProperty = MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf())
+        val firstSuccessfulProperty =
+            MockLandlordData.createPropertyOwnership(id = 2L, landlords = mutableSetOf(), isOccupied = true, tenancyProvideLater = true)
+        val secondSuccessfulProperty =
+            MockLandlordData.createPropertyOwnership(id = 3L, landlords = mutableSetOf(), isOccupied = true, tenancyProvideLater = true)
         whenever(propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()))
             .thenReturn(listOf(PROPERTY_ID, firstSuccessfulProperty.id, secondSuccessfulProperty.id))
 
@@ -452,10 +491,98 @@ class DeactivationServiceTests {
         verifyNoInteractions(deactivationEmailService)
     }
 
+    @Test
+    fun `batch property deactivation skips properties with no missing details`() {
+        val property = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID)
+        // Initial query says property has missing details
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        // When property is loaded, no missing details are found
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        assertEquals(0, deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount())
+
+        assertTrue(property.isActive)
+        assertNull(property.lastDeactivatedDate)
+        verifyNoInteractions(landlordRepository, lettingAgentAccessService, deactivationEmailService)
+    }
+
+    @Test
+    fun `batch property deactivation schedules emails after transaction commit`() {
+        // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE flag is removed
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                id = PROPERTY_ID,
+                landlords = mutableSetOf(landlord),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount()
+            verifyNoInteractions(deactivationEmailService)
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+            verify(deactivationEmailService).sendPropertyDeactivatedEmail(property, listOf(landlord to true), REASONS)
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
+    // TODO PDJB-2149: Remove this test when the ACTIVE_INACTIVE flag is removed
+    @Test
+    fun `batch property deactivation doesn't send an email when ACTIVE_INACTIVE is disabled`() {
+        whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(false)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                id = PROPERTY_ID,
+                landlords = mutableSetOf(landlord),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+        whenever(
+            propertyOwnershipRepository.findActivePropertyIdsWithAnyProvideLaterTaskCreatedBefore(cutoff()),
+        ).thenReturn(listOf(PROPERTY_ID))
+        whenever(propertyOwnershipRepository.findById(PROPERTY_ID)).thenReturn(Optional.of(property))
+        doAnswer { invocation -> invocation.getArgument<Consumer<TransactionStatus>>(0).accept(SimpleTransactionStatus()) }
+            .whenever(transactionTemplate)
+            .executeWithoutResult(any())
+
+        TransactionSynchronizationManager.initSynchronization()
+        try {
+            assertEquals(0, deactivationService.deactivateMissingDetailPropertiesPastDueDateReturningFailureCount())
+            TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
+
+            assertFalse(property.isActive)
+            assertFalse(landlord.isActive)
+            verify(propertyOwnershipRepository).save(property)
+            verify(deactivationEmailService, never()).sendPropertyDeactivatedEmail(any(), any(), any())
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
+    }
+
     companion object {
         private const val PROPERTY_ID = 1L
         private const val LETTING_AGENT_EMAIL = "letting.agent@example.com"
         private val ORIGINAL_DATE = LocalDate.of(2026, 1, 1)
+        private val REASONS = listOf(ReactivationTaskType.TENANCY_DETAILS)
 
         private fun today() = LocalDate.now(DateTimeHelper.UK_ZONE)
 
