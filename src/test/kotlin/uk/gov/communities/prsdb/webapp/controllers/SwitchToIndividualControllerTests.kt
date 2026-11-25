@@ -167,11 +167,11 @@ class SwitchToIndividualControllerTests(
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `returns 200 with address and property details url when session matches`() {
             val propertyOwnershipId = 1L
-            val address = "123 Test Street, AB1 2CD"
+            val singleLineAddress = "123 Test Street, AB1 2CD"
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = propertyOwnershipId,
-                    address = MockLandlordData.createAddress(singleLineAddress = address),
+                    address = MockLandlordData.createAddress(singleLineAddress = singleLineAddress),
                 )
             whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
             whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
@@ -182,7 +182,7 @@ class SwitchToIndividualControllerTests(
                         .get("${getSwitchToIndividualBasePath(propertyOwnershipId)}/confirmation")
                         .sessionAttr(SWITCHED_TO_INDIVIDUAL_PROPERTY_ID, propertyOwnershipId),
                 ).andExpect(MockMvcResultMatchers.status().isOk)
-                .andExpect(MockMvcResultMatchers.model().attribute("address", address))
+                .andExpect(MockMvcResultMatchers.model().attribute("addressParts", listOf("123 Test Street", "AB1 2CD")))
                 .andExpect(
                     MockMvcResultMatchers
                         .model()
