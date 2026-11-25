@@ -7,6 +7,7 @@
 <!--/*@thymesVar id="isPreGratisPeriod" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="propertyFeeGuidanceUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="quoteDate" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryInsetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentSummary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -37,8 +38,8 @@
     </h2>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListRows})}"></dl>
 
-    <div class="govuk-inset-text" th:text="#{registerProperty.paymentSummary.prnHint}">
-        registerProperty.paymentSummary.prnHint
+    <div class="govuk-inset-text" th:text="#{${summaryInsetText}}">
+        summaryInsetText
     </div>
 
     <input type="hidden" name="quoteDate" th:value="${quoteDate}"/>

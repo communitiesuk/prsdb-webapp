@@ -107,24 +107,18 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersS
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentDependencies
-import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentHandler
-import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentOutcome
-import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentStatusCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentSummaryStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
 import java.security.Principal
@@ -663,7 +657,7 @@ class PropertyRegistrationJourneyFactory(
 
                             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
                                 paymentsStrategy.ifEnabledOrElse {
-                                    ifEnabled { journey.paymentSummaryStep }
+                                    ifEnabled { journey.paymentTask.firstStep }
                                     ifDisabled { journey.savePropertyRegistrationDataStep }
                                 }
                             }
@@ -691,7 +685,7 @@ class PropertyRegistrationJourneyFactory(
 
                             ConfirmMissingComplianceMode.CONFIRMED -> {
                                 paymentsStrategy.ifEnabledOrElse {
-                                    ifEnabled { Destination(journey.paymentSummaryStep) }
+                                    ifEnabled { Destination(journey.paymentTask.firstStep) }
                                     ifDisabled { Destination(journey.savePropertyRegistrationDataStep) }
                                 }
                             }
@@ -699,8 +693,8 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
                 paymentsStrategy.ifEnabled {
-                    step(journey.paymentSummaryStep) {
-                        routeSegment(PaymentSummaryStep.ROUTE_SEGMENT)
+                    task(journey.paymentTask) {
+                        withDependencies { journey }
                         parents {
                             OrParents(
                                 journey.hasMissingComplianceStep.hasOutcome(
@@ -709,46 +703,20 @@ class PropertyRegistrationJourneyFactory(
                                 journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                             )
                         }
-                        nextStep { journey.paymentReturnStep }
+                        nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                         saveProgress()
-                    }
-                    step(journey.paymentReturnStep) {
-                        routeSegment(PaymentReturnStep.ROUTE_SEGMENT)
-                        parents { journey.paymentSummaryStep.isComplete() }
-                        nextStep { journey.paymentStatusCheckStep }
-                    }
-                    step(journey.paymentStatusCheckStep) {
-                        parents { journey.paymentReturnStep.isComplete() }
-                        nextDestination { mode ->
-                            when (mode) {
-                                PaymentOutcome.SUCCESS -> {
-                                    Destination.ExternalUrl("$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
-                                }
-
-                                PaymentOutcome.FAILURE, PaymentOutcome.NOT_COMPLETED -> {
-                                    Destination(journey.paymentFailedStep)
-                                }
-
-                                PaymentOutcome.IN_PROGRESS -> {
-                                    Destination(journey.paymentReturnStep)
-                                }
-
-                                PaymentOutcome.QUOTE_EXPIRED -> {
-                                    Destination(journey.paymentSummaryStep)
-                                }
+                        configureStep(journey.paymentTask.paymentSummaryStep) {
+                            withAdditionalContentProperty { "summaryInsetText" to "registerProperty.paymentSummary.prnHint" }
+                        }
+                        configureStep(journey.paymentTask.paymentFailedStep) {
+                            withAdditionalContentProperties {
+                                mapOf(
+                                    "failedOutcomeText" to "registerProperty.paymentFailed.notRegistered",
+                                    "notCompletedOutcomeText" to "registerProperty.paymentNotCompleted.notRegistered",
+                                    "notCompletedWhatYouNeedToDoText" to "registerProperty.paymentNotCompleted.whatYouNeedToDo.paragraph",
+                                )
                             }
                         }
-                    }
-                    step(journey.paymentFailedStep) {
-                        routeSegment(PaymentFailedStep.ROUTE_SEGMENT)
-                        parents {
-                            OrParents(
-                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.FAILURE),
-                                journey.paymentStatusCheckStep.hasOutcome(PaymentOutcome.NOT_COMPLETED),
-                            )
-                        }
-                        noNextDestination()
-                        backUrl { null }
                     }
                 }
                 paymentsStrategy.ifDisabled {
@@ -805,11 +773,8 @@ class PropertyRegistrationJourney(
     override val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
-    // Payment steps (behind PAYMENTS flag)
-    override val paymentSummaryStep: PaymentSummaryStep,
-    override val paymentReturnStep: PaymentReturnStep,
-    override val paymentStatusCheckStep: PaymentStatusCheckStep,
-    override val paymentFailedStep: PaymentFailedStep,
+    // Payment task (behind PAYMENTS flag)
+    override val paymentTask: PaymentTask,
     private val paymentHandlerFactory: PropertyRegistrationPaymentHandlerFactory,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
@@ -852,12 +817,6 @@ class PropertyRegistrationJourney(
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
-    override var paymentQuote: PropertyPaymentQuote? by delegateProvider.nullableDelegate("paymentQuote")
-
-    override var paymentReference: String? by delegateProvider.nullableDelegate("paymentReference")
-    override var paymentOutcome: PaymentOutcome? by delegateProvider.nullableDelegate("paymentOutcome")
-
-    override val dependencies: PaymentDependencies get() = this
 
     override val paymentHandler: PaymentHandler get() = paymentHandlerFactory.create(this)
 
@@ -915,7 +874,6 @@ interface PropertyRegistrationJourneyState :
     CorrespondenceDependencies,
     CombinedComplianceCheckState,
     MissingComplianceState,
-    PaymentState,
     PaymentDependencies {
     var isStateInitialized: Boolean
     override var loggedInLandlordEmailAtStartOfJourney: String
@@ -964,6 +922,7 @@ interface PropertyRegistrationJourneyState :
     val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep
     val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
+    val paymentTask: PaymentTask
     val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
 
