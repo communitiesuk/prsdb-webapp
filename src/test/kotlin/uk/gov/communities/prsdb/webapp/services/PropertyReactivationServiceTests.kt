@@ -250,7 +250,8 @@ class PropertyReactivationServiceTests {
         fun `still sends the confirmation email when the joint landlord notifications fail`() {
             // Arrange
             stubFreeReactivation()
-            whenever(mockPropertyReactivationEmailService.sendJointLandlordNotifications(any())).thenThrow(RuntimeException("Notify is down"))
+            whenever(mockPropertyReactivationEmailService.sendJointLandlordNotifications(any()))
+                .thenThrow(RuntimeException("Notify is down"))
 
             // Act & Assert
             assertDoesNotThrow {
