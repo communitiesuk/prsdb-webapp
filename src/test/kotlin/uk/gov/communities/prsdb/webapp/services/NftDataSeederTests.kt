@@ -890,11 +890,12 @@ class NftDataSeederTests(
         newSeeder().seedDatabase()
         val uploads = captureSeedSnapshot().uploads
 
-        val indexes = listOf(
-            Triple("test_file_upload_reverse_id", "file_upload", "id"),
-            Triple("test_gas_upload_reverse_id", "gas_safety_uploads", "gas_safety_file_uploads_id"),
-            Triple("test_electrical_upload_reverse_id", "electrical_safety_uploads", "electrical_safety_file_uploads_id"),
-        )
+        val indexes =
+            listOf(
+                Triple("test_file_upload_reverse_id", "file_upload", "id"),
+                Triple("test_gas_upload_reverse_id", "gas_safety_uploads", "gas_safety_file_uploads_id"),
+                Triple("test_electrical_upload_reverse_id", "electrical_safety_uploads", "electrical_safety_file_uploads_id"),
+            )
         try {
             indexes.forEach { (name, table, column) ->
                 jdbcTemplate.execute("CREATE INDEX $name ON $table ($column DESC)")
