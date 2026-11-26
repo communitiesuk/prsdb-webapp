@@ -29,14 +29,27 @@ class AssociatedPartyNotificationService(
     fun sendNotificationToFreeholderAddedToProperty(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
-    ): AssociatedPartyNotificationOutcome =
-        sendNotificationToAssociatedParty(
+    ): AssociatedPartyNotificationOutcome {
+        // A joint freeholder landlord is added to the freeholders list themselves, and shouldn't be told about it
+        if (isLandlordOnProperty(freeholder.email, propertyOwnership)) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD
+        }
+
+        return sendNotificationToAssociatedParty(
             name = freeholder.name,
             emailAddress = freeholder.email,
             postalAddress = freeholder.address,
             buildEmail = { buildFreeholderAddedToPropertyEmail(freeholder, propertyOwnership) },
             buildLetter = { buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership) },
         )
+    }
+
+    private fun isLandlordOnProperty(
+        email: String?,
+        propertyOwnership: PropertyOwnership,
+    ): Boolean =
+        !email.isNullOrBlank() &&
+            propertyOwnership.landlords.any { it.getContactEmail().equals(email.trim(), ignoreCase = true) }
 
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,

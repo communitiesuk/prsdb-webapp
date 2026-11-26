@@ -40,7 +40,6 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
         verify(mockState).freeholdersMap =
             mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Ind Landlord", email = "ind@example.com"))
         verify(mockState).nextFreeholderId = 2
-        verify(mockState).loggedInLandlordFreeholderInitialised = true
     }
 
     @Test
@@ -59,29 +58,6 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
         verify(mockState).freeholdersMap =
             mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Org Ltd", email = "org@example.com"))
         verify(mockState).nextFreeholderId = 2
-        verify(mockState).loggedInLandlordFreeholderInitialised = true
-    }
-
-    @Test
-    fun `appends the landlord using the next freeholder id when the list already has freeholders`() {
-        // Arrange
-        whenever(mockState.isJointFreeholder).thenReturn(true)
-        whenever(mockState.loggedInLandlordFreeholderInitialised).thenReturn(null)
-        whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to existingFreeholder))
-        whenever(mockState.nextFreeholderId).thenReturn(4)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser())
-            .thenReturn(MockLandlordData.createIndividualLandlord(name = "Ind Landlord", email = "ind@example.com"))
-
-        // Act
-        stepConfig().afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockState).freeholdersMap =
-            mapOf(
-                1 to existingFreeholder,
-                4 to FreeholderDataModel(detailsKnown = true, name = "Ind Landlord", email = "ind@example.com"),
-            )
-        verify(mockState).nextFreeholderId = 5
     }
 
     @Test
@@ -98,10 +74,9 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
     }
 
     @Test
-    fun `does not add the landlord again once added while the list still has freeholders`() {
+    fun `does not add the landlord when the list already has freeholders`() {
         // Arrange
         whenever(mockState.isJointFreeholder).thenReturn(true)
-        whenever(mockState.loggedInLandlordFreeholderInitialised).thenReturn(true)
         whenever(mockState.freeholdersMap).thenReturn(mapOf(1 to existingFreeholder))
 
         // Act
@@ -127,7 +102,6 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
         // Assert
         verify(mockState).freeholdersMap =
             mapOf(3 to FreeholderDataModel(detailsKnown = true, name = "Ind Landlord", email = "ind@example.com"))
-        verify(mockState).loggedInLandlordFreeholderInitialised = true
     }
 
     private fun stepConfig() = AddLoggedInLandlordFreeholderStepConfig(mockUserToLandlordService)

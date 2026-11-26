@@ -32,8 +32,6 @@ class FreeholdersTask(
     override var freeholdersMap: Map<Int, FreeholderDataModel>? by delegateProvider.nullableDelegate("freeholdersMap")
     override var nextFreeholderId: Int? by delegateProvider.nullableDelegate("nextFreeholderId")
     override var editingFreeholderId: Int? by delegateProvider.nullableDelegate("editingFreeholderId")
-    override var loggedInLandlordFreeholderInitialised: Boolean?
-        by delegateProvider.nullableDelegate("loggedInLandlordFreeholderInitialised")
 
     override fun makeSubJourney(state: FreeholdersState) =
         subJourney(state) {

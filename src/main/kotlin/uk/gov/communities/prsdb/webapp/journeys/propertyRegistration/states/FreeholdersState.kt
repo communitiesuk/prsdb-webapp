@@ -16,10 +16,6 @@ interface FreeholdersState :
     val addLoggedInLandlordFreeholderStep: AddLoggedInLandlordFreeholderStep
     val freeholdersDetailsTask: FreeholdersDetailsTask
     val freeholdersBackRoutingStep: FreeholdersBackRoutingStep
-
-    // Set once the logged-in landlord's own freeholder card has been added, so it isn't added again if they move
-    // back and forth. It's ignored once the list has been emptied, so restarting the task adds them again.
-    var loggedInLandlordFreeholderInitialised: Boolean?
 }
 
 // Null if none were collected, which is an impossible state for an ownership type requiring freeholder records.

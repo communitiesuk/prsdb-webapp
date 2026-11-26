@@ -34,8 +34,6 @@ class InitialiseOwnershipUpdateStepConfig(
         val freeholdersTask = state.ownershipStructureTask.freeholdersTask
         freeholdersTask.freeholdersMap = freeholders.mapIndexed { index, freeholder -> (index + 1) to freeholder }.toMap()
         freeholdersTask.nextFreeholderId = freeholders.size + 1
-        // The saved freeholders already reflect a joint freeholder's choices, including if they removed themselves
-        if (propertyOwnership.ownershipType.isJointFreeholder()) freeholdersTask.loggedInLandlordFreeholderInitialised = true
 
         val superiorLandlords =
             propertyOwnership.superiorLandlords.sortedBy { it.id }.map { SuperiorLandlordDataModel.fromSuperiorLandlord(it) }

@@ -223,6 +223,27 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `freeholder whose email matches a landlord on the property does not receive a notification`() {
+        // Arrange
+        val freeholder = createFreeholderModel(name = "Jamie Jameson", email = "Jamie@Example.com")
+        val propertyOwnership =
+            createPropertyOwnership(
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                propertyOwnership,
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
     fun `freeholder with both contact methods throws without sending a notification`() {
         // Arrange
         val freeholder =
