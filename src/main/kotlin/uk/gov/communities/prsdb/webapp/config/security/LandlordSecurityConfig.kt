@@ -14,18 +14,12 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.SecurityContextHolderFilter
 import org.springframework.security.web.context.SecurityContextRepository
-import org.springframework.security.web.csrf.CsrfFilter
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
-import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
-import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
-import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
-import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
-import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.INVITATION_REJECTED_PATH_SEGMENT
@@ -54,6 +48,7 @@ class LandlordSecurityConfig(
     fun landlordSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/landlord/**")
+            .applyLandlordChainSettings(csrfTokenRepository())
             // Required to allow csrf token to be stored in the session on public pages
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
@@ -108,19 +103,7 @@ class LandlordSecurityConfig(
                 oauth.redirectionEndpoint { redirection ->
                     redirection.baseUri("/landlord/login/oauth2/code/one-login")
                 }
-            }.csrf { requests ->
-                requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
-            }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
-            .headers { headers ->
-                headers
-                    .contentSecurityPolicy { csp ->
-                        csp
-                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
-                    }.permissionsPolicyHeader { permissions ->
-                        permissions
-                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
-                    }
-            }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
+            }
 
         return http.build()
     }

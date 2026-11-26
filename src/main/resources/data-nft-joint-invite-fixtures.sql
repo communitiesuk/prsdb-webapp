@@ -54,12 +54,16 @@ WITH owner_pool AS MATERIALIZED (
     JOIN gas_safety_uploads gas ON gas.gas_safety_file_uploads_id = upload.id
     JOIN property_compliance seeded ON seeded.id = gas.property_compliance_id
     WHERE upload.object_key !~ '^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$'
+      AND upload.object_key <> 'seeding/certificate_template.png'
+      AND upload.object_key !~ '^seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*[.]png$'
     UNION
     SELECT seeded.property_ownership_id
     FROM file_upload upload
     JOIN electrical_safety_uploads electrical ON electrical.electrical_safety_file_uploads_id = upload.id
     JOIN property_compliance seeded ON seeded.id = electrical.property_compliance_id
     WHERE upload.object_key !~ '^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$'
+      AND upload.object_key <> 'seeding/certificate_template.png'
+      AND upload.object_key !~ '^seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*[.]png$'
 ), app_touched_landlords AS MATERIALIZED (
     SELECT DISTINCT ol.landlord_id
     FROM ownership_link ol
@@ -126,17 +130,21 @@ WITH owner_pool AS MATERIALIZED (
     FROM eligible
     JOIN property_compliance compliance ON compliance.property_ownership_id = eligible.property_id
 ), fixture_file_rows AS MATERIALIZED (
-    SELECT fixture_compliance.property_id, upload.object_key AS "objectKey", upload.extension
+    SELECT fixture_compliance.property_id, upload.object_key AS "objectKey", upload.extension,
+           upload.version_id AS "versionId"
     FROM fixture_compliance
     JOIN gas_safety_uploads gas ON gas.property_compliance_id = fixture_compliance.compliance_id
     JOIN file_upload upload ON upload.id = gas.gas_safety_file_uploads_id
     UNION
-    SELECT fixture_compliance.property_id, upload.object_key AS "objectKey", upload.extension
+    SELECT fixture_compliance.property_id, upload.object_key AS "objectKey", upload.extension,
+           upload.version_id AS "versionId"
     FROM fixture_compliance
     JOIN electrical_safety_uploads electrical ON electrical.property_compliance_id = fixture_compliance.compliance_id
     JOIN file_upload upload ON upload.id = electrical.electrical_safety_file_uploads_id
 ), fixture_files AS (
-    SELECT property_id, json_agg(json_build_object('objectKey', "objectKey", 'extension', extension) ORDER BY "objectKey") AS files
+    SELECT property_id, json_agg(json_build_object(
+        'objectKey', "objectKey", 'extension', extension, 'versionId', "versionId"
+    ) ORDER BY "objectKey") AS files
     FROM fixture_file_rows
     GROUP BY property_id
 )

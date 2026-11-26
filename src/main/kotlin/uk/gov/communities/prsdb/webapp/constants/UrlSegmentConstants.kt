@@ -64,6 +64,8 @@ const val EDIT_ADMIN_PATH_SEGMENT = "edit-admin"
 const val DELETE_ADMIN_PATH_SEGMENT = "delete-admin"
 const val WELL_KNOWN_PATH_SEGMENT = ".well-known"
 const val SECURITY_PATH_SEGMENT = "security.txt"
+const val AWS_PATH_SEGMENT = "aws"
+const val AWS_SECURITY_AGENT_DOMAIN_VERIFICATION_PATH_SEGMENT = "securityagent-domain-verification.json"
 const val JOINT_LANDLORD_INVITATION_PATH_SEGMENT = "joint-landlord-invitation"
 const val SUBJECT_IDENTIFIER_PATH_SEGMENT = "subject-identifier"
 

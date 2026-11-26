@@ -27,12 +27,12 @@ class UserRolesService(
     fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
-        if (individualLandlordRepository.findByBaseUser_Id(subjectId) != null) {
+        if (individualLandlordRepository.existsByBaseUser_Id(subjectId)) {
             roles.add(ROLE_INDIVIDUAL_LANDLORD)
         }
 
-        organisationalLandlordUserRepository.findByBaseUser_Id(subjectId).forEach { orgUser ->
-            when (orgUser.role) {
+        organisationalLandlordUserRepository.findRolesByBaseUserId(subjectId).forEach { role ->
+            when (role) {
                 OrganisationalLandlordUserRole.ADMIN -> roles.add(ROLE_ORG_ADMIN)
                 OrganisationalLandlordUserRole.EDITOR -> roles.add(ROLE_ORG_EDITOR)
             }
