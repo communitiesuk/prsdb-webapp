@@ -38,12 +38,7 @@ class ActingAsLandlordService(
     ): String =
         when (val landlord = landlordService.retrieveLandlordById(landlordId)) {
             null -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $landlordId not found")
-            is IndividualLandlord -> {
-                if (memberId != null) {
-                    throw ResponseStatusException(HttpStatus.BAD_REQUEST, "An individual landlord has no members")
-                }
-                landlord.baseUser.id
-            }
+            is IndividualLandlord -> landlord.baseUser.id
             is OrganisationalLandlord -> {
                 if (memberId == null) {
                     throw ResponseStatusException(HttpStatus.BAD_REQUEST, "A member ID is needed to act as an organisation")

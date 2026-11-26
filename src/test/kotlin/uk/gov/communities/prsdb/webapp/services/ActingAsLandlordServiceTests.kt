@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.inOrder
@@ -83,13 +84,17 @@ class ActingAsLandlordServiceTests {
     }
 
     @Test
-    fun `startActingAsLandlord throws BAD_REQUEST for an individual landlord with a member ID`() {
+    fun `startActingAsLandlord ignores a member ID for an individual landlord`() {
         // Arrange
-        val landlord = createIndividualLandlord()
+        val landlord = createIndividualLandlord(baseUser = createPrsdbUser("landlord-user-id"))
         whenever(landlordService.retrieveLandlordById(landlord.id)).thenReturn(landlord)
 
+        // Act
+        actingAsLandlordService.startActingAsLandlord(landlord.id, MEMBER_ID)
+
         // Assert
-        assertRejected(HttpStatus.BAD_REQUEST) { actingAsLandlordService.startActingAsLandlord(landlord.id, MEMBER_ID) }
+        verify(actingAsLandlordSessionService).setActingAsUserId("landlord-user-id")
+        verifyNoInteractions(organisationalLandlordUserRepository)
     }
 
     @Test
@@ -103,7 +108,7 @@ class ActingAsLandlordServiceTests {
     }
 
     @Test
-    fun `startActingAsLandlord throws NOT_FOUND for an unknown member ID`() {
+    fun `startActingAsLandlord throws NOT_FOUND for an organisation landlord with an unknown member ID`() {
         // Arrange
         val landlord = createOrgLandlord()
         whenever(landlordService.retrieveLandlordById(landlord.id)).thenReturn(landlord)
