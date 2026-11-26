@@ -11,7 +11,10 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.body
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayAccount
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedMotoPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayErrorResponse
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -25,6 +28,7 @@ import java.time.Duration
 @Service
 class GovUkPayClient(
     @Qualifier("gov-uk-pay-client") private val client: RestClient,
+    @Qualifier("gov-uk-pay-moto-client") private val motoClient: RestClient,
     @Value("\${gov-uk-pay.rate-limit-retry-delays-ms:1000,2000}") private val rateLimitRetryDelaysMs: List<Long>,
     @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
 ) {
@@ -48,9 +52,34 @@ class GovUkPayClient(
         return GovUkPayCreatedPayment(payment = payment, nextUrl = nextUrl)
     }
 
-    fun capturePayment(paymentId: String) {
+    fun createMotoPayment(request: GovUkPayCreateMotoPaymentRequest): GovUkPayCreatedMotoPayment {
+        val payment =
+            sendWithRateLimitRetries {
+                motoClient
+                    .post()
+                    .uri("/v1/payments")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .requireStatus(HttpStatus.CREATED, "create MOTO payment")
+                    .body<GovUkPayPayment>()
+            } ?: throw GovUkPayException("GOV.UK Pay create MOTO payment response had no body")
+        val oneTimeToken =
+            payment.links.authUrlPost?.params?.oneTimeToken
+                ?: throw GovUkPayException(
+                    "GOV.UK Pay create MOTO payment response for payment ${payment.paymentId} had no one_time_token",
+                )
+
+        return GovUkPayCreatedMotoPayment(payment = payment, oneTimeToken = oneTimeToken)
+    }
+
+    fun capturePayment(
+        paymentId: String,
+        account: GovUkPayAccount = GovUkPayAccount.ONLINE,
+    ) {
         sendWithRateLimitRetries {
-            client
+            clientFor(account)
                 .post()
                 .uri("/v1/payments/{paymentId}/capture", paymentId)
                 .retrieve()
@@ -59,9 +88,12 @@ class GovUkPayClient(
         }
     }
 
-    fun cancelPayment(paymentId: String) {
+    fun cancelPayment(
+        paymentId: String,
+        account: GovUkPayAccount = GovUkPayAccount.ONLINE,
+    ) {
         sendWithRateLimitRetries {
-            client
+            clientFor(account)
                 .post()
                 .uri("/v1/payments/{paymentId}/cancel", paymentId)
                 .retrieve()
@@ -70,9 +102,12 @@ class GovUkPayClient(
         }
     }
 
-    fun getPayment(paymentId: String): GovUkPayPayment =
+    fun getPayment(
+        paymentId: String,
+        account: GovUkPayAccount = GovUkPayAccount.ONLINE,
+    ): GovUkPayPayment =
         sendWithRateLimitRetries {
-            client
+            clientFor(account)
                 .get()
                 .uri("/v1/payments/{paymentId}", paymentId)
                 .accept(MediaType.APPLICATION_JSON)
@@ -80,18 +115,27 @@ class GovUkPayClient(
                 .body<GovUkPayPayment>()
         } ?: throw GovUkPayException("GOV.UK Pay get payment response for payment $paymentId had no body")
 
-    fun getPaymentWithRetry(paymentId: String): GovUkPayPayment =
+    fun getPaymentWithRetry(
+        paymentId: String,
+        account: GovUkPayAccount = GovUkPayAccount.ONLINE,
+    ): GovUkPayPayment =
         try {
-            getPayment(paymentId)
+            getPayment(paymentId, account)
         } catch (exception: GovUkPayException) {
             if (!exception.isTransient()) throw exception
             try {
                 waitBeforeRetrying(paymentStatusRetryDelay)
-                getPayment(paymentId)
+                getPayment(paymentId, account)
             } catch (retryException: GovUkPayException) {
                 retryException.addSuppressed(exception)
                 throw retryException
             }
+        }
+
+    private fun clientFor(account: GovUkPayAccount): RestClient =
+        when (account) {
+            GovUkPayAccount.ONLINE -> client
+            GovUkPayAccount.MOTO -> motoClient
         }
 
     // GOV.UK Pay rejects rate-limited requests without acting on them, so retrying after a 429 is safe for every endpoint

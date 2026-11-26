@@ -31,7 +31,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedMotoPayment
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
@@ -166,6 +168,20 @@ class PaymentService(
                     "journey $journeyId at the same time: ${exception.stackTraceToString()}",
             )
         }
+    }
+
+    // This only creates the payment with GOV.UK Pay. The code using it must save the payment and pass the
+    // one-time token to Encoded, which collects the card details
+    fun createMotoPayment(
+        amountInPence: Int,
+        reference: String,
+        description: String,
+    ): GovUkPayCreatedMotoPayment {
+        check(amountInPence > 0) {
+            "Cannot create GOV.UK Pay MOTO payment $reference: the amount is ${amountInPence}p but GOV.UK Pay only " +
+                "accepts amounts greater than zero"
+        }
+        return govUkPayClient.createMotoPayment(GovUkPayCreateMotoPaymentRequest(amountInPence, reference, description))
     }
 
     fun getStoredPropertyRegistrationPaymentStatus(
