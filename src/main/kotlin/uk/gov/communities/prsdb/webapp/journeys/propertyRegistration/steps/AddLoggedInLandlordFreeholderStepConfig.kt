@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getDisplayEmail
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
@@ -24,7 +24,7 @@ class AddLoggedInLandlordFreeholderStepConfig(
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val nextKey = state.nextFreeholderId ?: 1
         state.freeholdersMap =
-            mapOf(nextKey to FreeholderDataModel(detailsKnown = true, name = landlord.name, email = landlord.getContactEmail()))
+            mapOf(nextKey to FreeholderDataModel(detailsKnown = true, name = landlord.name, email = landlord.getDisplayEmail()))
         state.nextFreeholderId = nextKey + 1
     }
 }

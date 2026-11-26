@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getDisplayEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
@@ -49,7 +49,7 @@ class AssociatedPartyNotificationService(
         propertyOwnership: PropertyOwnership,
     ): Boolean =
         !email.isNullOrBlank() &&
-            propertyOwnership.landlords.any { it.getContactEmail().equals(email.trim(), ignoreCase = true) }
+            propertyOwnership.landlords.any { it.getDisplayEmail().equals(email.trim(), ignoreCase = true) }
 
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
@@ -115,7 +115,7 @@ class AssociatedPartyNotificationService(
 
     private fun landlordsRentingOutProperty(propertyOwnership: PropertyOwnership): List<String> =
         propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
-            "${landlord.name} (${landlord.getContactEmail()})"
+            "${landlord.name} (${landlord.getDisplayEmail()})"
         }
 
     fun sendNotificationToPropertyManagerAddedToProperty(
