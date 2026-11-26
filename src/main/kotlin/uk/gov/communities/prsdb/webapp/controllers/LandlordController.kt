@@ -21,6 +21,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.OUTSTANDING_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_THREE
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.ACTING_AS_LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -37,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
 @AllowIfLandlord
 @PrsdbController
-@RequestMapping(LANDLORD_BASE_URL, "/")
+@RequestMapping(LANDLORD_BASE_URL, "/", ACTING_AS_LANDLORD_BASE_URL)
 class LandlordController(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -188,6 +190,8 @@ class LandlordController(
     companion object {
         const val LANDLORD_DASHBOARD_URL = "/$LANDLORD_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
         const val LANDLORD_BASE_URL = "/$LANDLORD_PATH_SEGMENT"
+        const val ACTING_AS_LANDLORD_BASE_URL = "/$SYSTEM_OPERATOR_PATH_SEGMENT$LANDLORD_BASE_URL"
+        const val ACTING_AS_LANDLORD_DASHBOARD_URL = "/$SYSTEM_OPERATOR_PATH_SEGMENT$LANDLORD_DASHBOARD_URL"
         const val INCOMPLETE_PROPERTIES_URL = "/$LANDLORD_PATH_SEGMENT/$INCOMPLETE_PROPERTIES_PATH_SEGMENT"
 
         // TODO PDJB-2006: Remove when the PROPERTY_REGISTRATION_PHASE_THREE flag is removed
