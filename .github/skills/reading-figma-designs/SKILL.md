@@ -88,6 +88,14 @@ Template conventions:
 - Page title = the h1. Only propose a different title if the h1 is not unique or not descriptive out of context
   (see "Page Titles" in `.github/instructions/frontend.instructions.md`)
 
+## Email Designs
+
+Email templates are Notify markdown files in `src/main/resources/emails/`, not Thymeleaf templates. Notify only
+supports `#` and `##` headings (there is no `###`). Map section headings in the email body to `#`, and reserve `##` for
+sub-headings nested under a `#` section heading. Designs often show headings at a size between Notify's `#` and `##`,
+so treat ambiguous sizes as `#`. Only map a heading that isn't a sub-heading to `##` when the design or ticket
+explicitly says so, or there is a clear reason to, and call out that decision in the implementation spec.
+
 ## Taking Screenshots for Validation
 
 When extracting designs, also capture screenshots of the relevant Figma frames. These
