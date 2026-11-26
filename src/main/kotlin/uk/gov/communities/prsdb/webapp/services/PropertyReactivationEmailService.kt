@@ -22,7 +22,8 @@ class PropertyReactivationEmailService(
 
         propertyOwnership.otherLandlordsTo(reactivatingLandlord).forEach { jointLandlord ->
             NotificationHelper.sendNotificationAndLogFailures(
-                "the joint landlord property reactivation notification for property ownership $propertyOwnershipId",
+                "the joint landlord property reactivation notification for property ownership $propertyOwnershipId" +
+                    " and joint landlord ${jointLandlord.id}",
             ) {
                 jointLandlordNotificationSender.sendEmailToLandlord(
                     jointLandlord,
