@@ -39,6 +39,7 @@ class PaymentSummaryStepConfig(
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
             "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.paymentStartDate),
             "summaryListRows" to getSummaryListRows(dependencies.paymentSummaryAddressLines, quote),
+            "summaryInsetText" to dependencies.paymentContentKeys.summaryInsetText,
             "propertyFeeGuidanceUrl" to PROPERTY_FEE_GUIDANCE_URL,
             "quoteDate" to quote.quoteDate.toString(),
         )
@@ -48,10 +49,10 @@ class PaymentSummaryStepConfig(
         addressLines: List<String>,
         quote: PropertyPaymentQuote,
     ) = listOf(
-        SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", addressLines),
-        SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", PaymentHelper.formatPence(quote.amountInPence)),
-        SummaryListRowViewModel("registerProperty.paymentSummary.summary.paymentDate", quote.quoteDate.format(DATE_FORMATTER)),
-        SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", quote.renewalDate.format(DATE_FORMATTER)),
+        SummaryListRowViewModel("payment.summary.summaryList.address", addressLines),
+        SummaryListRowViewModel("payment.summary.summaryList.payment", PaymentHelper.formatPence(quote.amountInPence)),
+        SummaryListRowViewModel("payment.summary.summaryList.paymentDate", quote.quoteDate.format(DATE_FORMATTER)),
+        SummaryListRowViewModel("payment.summary.summaryList.renewalDate", quote.renewalDate.format(DATE_FORMATTER)),
     )
 
     override fun chooseTemplate(state: PaymentState) = "forms/paymentSummary"

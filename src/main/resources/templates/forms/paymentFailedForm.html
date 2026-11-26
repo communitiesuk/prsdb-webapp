@@ -4,23 +4,23 @@
 <!--/*@thymesVar id="tryAgainUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="failedOutcomeText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentFailed.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{payment.failed.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentFailed.heading}">
-        registerProperty.paymentFailed.heading
+    <h1 class="govuk-heading-l" th:text="#{payment.failed.heading}">
+        payment.failed.heading
     </h1>
-    <p class="govuk-body" th:text="#{registerProperty.paymentFailed.contactBank}">
-        registerProperty.paymentFailed.contactBank
+    <p class="govuk-body" th:text="#{payment.failed.contactBank}">
+        payment.failed.contactBank
     </p>
     <p class="govuk-body" th:text="#{${failedOutcomeText}}">
         failedOutcomeText
     </p>
     <p class="govuk-body">
-        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentTryAgainLink}">
-            registerProperty.paymentTryAgainLink
+        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{payment.tryAgainLink}">
+            payment.tryAgainLink
         </a>
     </p>
-    <details id="details" th:replace="~{fragments/details :: details(#{registerProperty.paymentFailed.getHelp}, ~{::#details/content()})}">
+    <details id="details" th:replace="~{fragments/details :: details(#{payment.failed.getHelp}, ~{::#details/content()})}">
         <div class="govuk-details__text">
             <p th:replace="~{fragments/contactDetails :: contactDetails}"></p>
         </div>

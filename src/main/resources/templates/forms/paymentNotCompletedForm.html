@@ -5,33 +5,33 @@
 <!--/*@thymesVar id="notCompletedOutcomeText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="notCompletedWhatYouNeedToDoText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentNotCompleted.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{payment.notCompleted.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentNotCompleted.heading}">
-        registerProperty.paymentNotCompleted.heading
+    <h1 class="govuk-heading-l" th:text="#{payment.notCompleted.heading}">
+        payment.notCompleted.heading
     </h1>
-    <p class="govuk-body" th:text="#{registerProperty.paymentNotCompleted.canHappenIf}">
-        registerProperty.paymentNotCompleted.canHappenIf
+    <p class="govuk-body" th:text="#{payment.notCompleted.canHappenIf}">
+        payment.notCompleted.canHappenIf
     </p>
     <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{registerProperty.paymentNotCompleted.bullet.one}">registerProperty.paymentNotCompleted.bullet.one</li>
-        <li th:text="#{registerProperty.paymentNotCompleted.bullet.two}">registerProperty.paymentNotCompleted.bullet.two</li>
+        <li th:text="#{payment.notCompleted.bullet.one}">payment.notCompleted.bullet.one</li>
+        <li th:text="#{payment.notCompleted.bullet.two}">payment.notCompleted.bullet.two</li>
     </ul>
     <p class="govuk-body" th:text="#{${notCompletedOutcomeText}}">
         notCompletedOutcomeText
     </p>
-    <div class="govuk-inset-text" th:text="#{registerProperty.paymentNotCompleted.insetText}">
-        registerProperty.paymentNotCompleted.insetText
+    <div class="govuk-inset-text" th:text="#{payment.notCompleted.insetText}">
+        payment.notCompleted.insetText
     </div>
-    <h2 class="govuk-heading-m" th:text="#{registerProperty.paymentNotCompleted.whatYouNeedToDo.heading}">
-        registerProperty.paymentNotCompleted.whatYouNeedToDo.heading
+    <h2 class="govuk-heading-m" th:text="#{payment.notCompleted.whatYouNeedToDo.heading}">
+        payment.notCompleted.whatYouNeedToDo.heading
     </h2>
     <p class="govuk-body" th:text="#{${notCompletedWhatYouNeedToDoText}}">
         notCompletedWhatYouNeedToDoText
     </p>
     <p class="govuk-body">
-        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{registerProperty.paymentTryAgainLink}">
-            registerProperty.paymentTryAgainLink
+        <a class="govuk-link" th:href="@{${tryAgainUrl}}" th:text="#{payment.tryAgainLink}">
+            payment.tryAgainLink
         </a>
     </p>
 </th:block>

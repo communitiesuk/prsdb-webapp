@@ -14,6 +14,26 @@ class PaymentFailedStepConfigTests {
     @Mock
     lateinit var mockState: PaymentState
 
+    @Mock
+    lateinit var mockDependencies: PaymentDependencies
+
+    @Test
+    fun `getStepSpecificContent includes the failed and not completed outcome text from the journey`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.dependencies).thenReturn(mockDependencies)
+        whenever(mockDependencies.paymentContentKeys)
+            .thenReturn(PaymentContentKeys("summary.inset", "failed.outcome", "notCompleted.outcome", "notCompleted.whatToDo"))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals("failed.outcome", content["failedOutcomeText"])
+        assertEquals("notCompleted.outcome", content["notCompletedOutcomeText"])
+        assertEquals("notCompleted.whatToDo", content["notCompletedWhatYouNeedToDoText"])
+    }
+
     @Test
     fun `chooseTemplate returns payment not completed template when payment outcome is NOT_COMPLETED`() {
         // Arrange

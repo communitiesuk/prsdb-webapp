@@ -53,6 +53,7 @@ class PaymentSummaryStepConfigTests {
     private val journeyId = "journey-123"
     private val defaultDestination = Destination.ExternalUrl("default")
     private val today = LocalDate.now(DateTimeHelper.UK_ZONE)
+    private val paymentContentKeys = PaymentContentKeys("summary.inset", "failed.outcome", "notCompleted.outcome", "notCompleted.whatToDo")
 
     @BeforeEach
     fun setUp() {
@@ -61,6 +62,7 @@ class PaymentSummaryStepConfigTests {
         stepConfig.validator = AlwaysTrueValidator()
         lenient().`when`(mockState.dependencies).thenReturn(mockDependencies)
         lenient().`when`(mockDependencies.paymentHandler).thenReturn(mockPaymentHandler)
+        lenient().`when`(mockDependencies.paymentContentKeys).thenReturn(paymentContentKeys)
     }
 
     @Test
@@ -79,13 +81,13 @@ class PaymentSummaryStepConfigTests {
         assertEquals(today.toString(), content["quoteDate"])
         assertEquals(
             listOf(
-                SummaryListRowViewModel("registerProperty.paymentSummary.summary.address", listOf("1 Example Road", "EG1 2AB")),
-                SummaryListRowViewModel("registerProperty.paymentSummary.summary.payment", "£12.34"),
+                SummaryListRowViewModel("payment.summary.summaryList.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("payment.summary.summaryList.payment", "£12.34"),
                 SummaryListRowViewModel(
-                    "registerProperty.paymentSummary.summary.paymentDate",
+                    "payment.summary.summaryList.paymentDate",
                     today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
                 ),
-                SummaryListRowViewModel("registerProperty.paymentSummary.summary.renewalDate", "1 March 2028"),
+                SummaryListRowViewModel("payment.summary.summaryList.renewalDate", "1 March 2028"),
             ),
             content["summaryListRows"],
         )
@@ -113,6 +115,18 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(false, content["isPreGratisPeriod"])
+    }
+
+    @Test
+    fun `getStepSpecificContent includes the summary inset text from the journey`() {
+        // Arrange
+        stubSummaryContent(createQuote(today), firstChargeableDate = today)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals("summary.inset", content["summaryInsetText"])
     }
 
     @Test

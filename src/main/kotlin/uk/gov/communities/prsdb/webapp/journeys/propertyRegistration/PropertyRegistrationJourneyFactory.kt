@@ -106,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentContentKeys
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentHandler
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentTask
@@ -705,18 +706,6 @@ class PropertyRegistrationJourneyFactory(
                         }
                         nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                         saveProgress()
-                        configureStep(journey.paymentTask.paymentSummaryStep) {
-                            withAdditionalContentProperty { "summaryInsetText" to "registerProperty.paymentSummary.prnHint" }
-                        }
-                        configureStep(journey.paymentTask.paymentFailedStep) {
-                            withAdditionalContentProperties {
-                                mapOf(
-                                    "failedOutcomeText" to "registerProperty.paymentFailed.notRegistered",
-                                    "notCompletedOutcomeText" to "registerProperty.paymentNotCompleted.notRegistered",
-                                    "notCompletedWhatYouNeedToDoText" to "registerProperty.paymentNotCompleted.whatYouNeedToDo.paragraph",
-                                )
-                            }
-                        }
                     }
                 }
                 paymentsStrategy.ifDisabled {
@@ -818,7 +807,7 @@ class PropertyRegistrationJourney(
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
-    override val paymentHandler: PaymentHandler get() = paymentHandlerFactory.create(this)
+    override val paymentHandler: PaymentHandler by lazy { paymentHandlerFactory.create(this) }
 
     override val paymentSummaryAddressLines: List<String>
         get() = propertyDetailsTask.addressTask.getAddress().toMultiLineAddress().split("\n")
@@ -831,6 +820,14 @@ class PropertyRegistrationJourney(
 
     override val alreadyRegisteredStep: JourneyStep<*, *, *>
         get() = propertyDetailsTask.addressTask.alreadyRegisteredStep
+
+    override val paymentContentKeys =
+        PaymentContentKeys(
+            summaryInsetText = "registerProperty.paymentSummary.prnHint",
+            failedOutcomeText = "registerProperty.paymentFailed.notRegistered",
+            notCompletedOutcomeText = "registerProperty.paymentNotCompleted.notRegistered",
+            notCompletedWhatYouNeedToDoText = "registerProperty.paymentNotCompleted.whatYouNeedToDo.paragraph",
+        )
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).

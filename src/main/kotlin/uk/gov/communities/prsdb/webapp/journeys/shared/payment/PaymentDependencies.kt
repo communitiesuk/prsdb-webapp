@@ -8,4 +8,12 @@ interface PaymentDependencies {
     val answersChangedSinceConfirmation: Boolean
     var isPropertyAlreadyRegistered: Boolean?
     val alreadyRegisteredStep: JourneyStep<*, *, *>
+    val paymentContentKeys: PaymentContentKeys
 }
+
+data class PaymentContentKeys(
+    val summaryInsetText: String,
+    val failedOutcomeText: String,
+    val notCompletedOutcomeText: String,
+    val notCompletedWhatYouNeedToDoText: String,
+)
