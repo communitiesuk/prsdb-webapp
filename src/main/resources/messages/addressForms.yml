@@ -11,7 +11,7 @@ addressInUk:
     fieldSetHeading: Is your organisation based in the UK?
     radios:
       error:
-        missing: Select if you live in the UK
+        missing: Select if the organisation is based in the UK
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?
