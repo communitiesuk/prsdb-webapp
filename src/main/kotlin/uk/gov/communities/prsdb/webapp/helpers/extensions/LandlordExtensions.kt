@@ -6,7 +6,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 
 class LandlordExtensions {
     companion object {
-        fun Landlord.getContactEmail(): String =
+        /**
+         * For displaying or matching a landlord's email only, not for sending emails to: for organisations this is
+         * the organisation's email, which must not be used for sending emails.
+         */
+        fun Landlord.getDisplayEmail(): String =
             when (this) {
                 is IndividualLandlord -> email
                 is OrganisationalLandlord -> wholeOrgEmail

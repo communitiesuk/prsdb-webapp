@@ -260,6 +260,24 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `freeholder with notifications suppressed does not receive a notification`() {
+        // Arrange
+        val freeholder =
+            FreeholderDataModel(detailsKnown = true, name = "Jamie Jameson", email = "jamie@example.com", suppressNotification = true)
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
     fun `freeholder with both contact methods throws without sending a notification`() {
         // Arrange
         val freeholder =

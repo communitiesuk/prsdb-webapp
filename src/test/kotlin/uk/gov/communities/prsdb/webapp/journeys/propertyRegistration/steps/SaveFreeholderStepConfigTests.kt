@@ -105,6 +105,21 @@ class SaveFreeholderStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached keeps the edited freeholder's notification setting`() {
+        val stepConfig = SaveFreeholderStepConfig()
+        setupStepsWithAnswers(false)
+        whenever(mockState.freeholdersMap).thenReturn(
+            mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Logged in landlord", suppressNotification = true)),
+        )
+        whenever(mockState.editingFreeholderId).thenReturn(1)
+
+        stepConfig.afterStepIsReached(mockState)
+
+        val savedMap = captureSavedMap()
+        assertEquals(mapOf(1 to FreeholderDataModel(detailsKnown = false, suppressNotification = true)), savedMap)
+    }
+
+    @Test
     fun `afterStepIsReached saves the entered name and email when the contact type is email`() {
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(true, FreeholderContactType.EMAIL)

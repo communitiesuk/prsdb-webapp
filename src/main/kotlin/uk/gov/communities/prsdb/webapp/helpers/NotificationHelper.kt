@@ -26,11 +26,16 @@ class NotificationHelper {
                 sendNotificationAndLogFailures(
                     "the $partyLabel added-to-property notification for property ownership $propertyOwnershipId",
                 ) {
-                    if (sendNotification(party) == AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED) {
+                    val notSentReason =
+                        when (sendNotification(party)) {
+                            AssociatedPartyNotificationOutcome.NOT_SENT_FULLY_REDACTED -> "details are fully redacted"
+                            AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD -> "they are a landlord on the property"
+                            else -> null
+                        }
+                    if (notSentReason != null) {
                         println(
                             "Not sending $partyLabel added-to-property notification " +
-                                "for property ownership $propertyOwnershipId: " +
-                                "details are fully redacted",
+                                "for property ownership $propertyOwnershipId: $notSentReason",
                         )
                     }
                 }

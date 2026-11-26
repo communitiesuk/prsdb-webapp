@@ -54,10 +54,15 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
             }
 
         // Store the database id if the user is updating an existing freeholder, so that the journey
-        // can distinguish between an updated freeholder and a new one.
-        val existingDatabaseId = currentMap[targetKey]?.databaseId
+        // can distinguish between an updated freeholder and a new one. Keep the notification setting too,
+        // so editing the logged-in landlord's own card doesn't make it send them a notification.
+        val existingFreeholder = currentMap[targetKey]
 
-        currentMap[targetKey] = freeholder.copy(databaseId = existingDatabaseId)
+        currentMap[targetKey] =
+            freeholder.copy(
+                databaseId = existingFreeholder?.databaseId,
+                suppressNotification = existingFreeholder?.suppressNotification ?: false,
+            )
         state.freeholdersMap = currentMap
         state.editingFreeholderId = null
 

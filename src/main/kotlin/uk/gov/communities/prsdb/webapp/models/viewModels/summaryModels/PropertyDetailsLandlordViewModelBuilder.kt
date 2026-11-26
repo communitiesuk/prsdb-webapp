@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
-import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getDisplayEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
@@ -56,7 +56,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.getContactEmail(),
+                    fieldValue = landlord.getDisplayEmail(),
                 ),
             )
 
