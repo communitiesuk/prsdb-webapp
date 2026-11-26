@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
@@ -137,7 +138,15 @@ class SuperiorLandlordsDetailsTask(
                 parents { journey.superiorLandlordContactTypeStep.hasOutcome(SuperiorLandlordContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveSuperiorLandlordStep }
                 savable()
-                configureStep(journey.superiorLandlordAddressTask.lookupAddressStep) {
+                configureStep(journey.superiorLandlordAddressTask.addressInUkStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        mapOf(AddressInUkStepConfig.PREFILL_ADDRESS_IN_UK to journey.editingSuperiorLandlord?.addressInUk)
+                    }
+                }
+                configureStep(journey.superiorLandlordAddressTask.addressTask.lookupAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
                     }
@@ -154,7 +163,7 @@ class SuperiorLandlordsDetailsTask(
                         }
                     }
                 }
-                configureStep(journey.superiorLandlordAddressTask.selectAddressStep) {
+                configureStep(journey.superiorLandlordAddressTask.addressTask.selectAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
                     }
@@ -164,24 +173,22 @@ class SuperiorLandlordsDetailsTask(
                         )
                     }
                 }
-                configureStep(journey.superiorLandlordAddressTask.manualAddressStep) {
+                configureStep(journey.superiorLandlordAddressTask.addressTask.manualAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
                     }
                     withAdditionalContentProperties {
                         val editingSuperiorLandlord = journey.editingSuperiorLandlord
-                        if (editingSuperiorLandlord?.manualAddressLineOne != null) {
-                            mapOf(
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingSuperiorLandlord.manualAddressLineOne,
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingSuperiorLandlord.manualAddressLineTwo,
-                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingSuperiorLandlord.manualTownOrCity,
-                                ManualAddressStepConfig.PREFILL_COUNTY to editingSuperiorLandlord.manualCounty,
-                                ManualAddressStepConfig.PREFILL_POSTCODE to editingSuperiorLandlord.manualPostcode,
-                                ManualAddressStepConfig.PREFILL_COUNTRY to editingSuperiorLandlord.manualCountry,
-                            )
-                        } else {
-                            emptyMap()
-                        }
+                        if (editingSuperiorLandlord?.addressInUk == true) manualAddressPrefill(editingSuperiorLandlord) else emptyMap()
+                    }
+                }
+                configureStep(journey.superiorLandlordAddressTask.internationalManualAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.superiorLandlordNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingSuperiorLandlord = journey.editingSuperiorLandlord
+                        if (editingSuperiorLandlord?.addressInUk == false) manualAddressPrefill(editingSuperiorLandlord) else emptyMap()
                     }
                 }
             }
@@ -205,4 +212,14 @@ class SuperiorLandlordsDetailsTask(
                 }
             }
         }
+
+    private fun manualAddressPrefill(superiorLandlord: SuperiorLandlordDataModel): Map<String, Any?> =
+        mapOf(
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to superiorLandlord.manualAddressLineOne,
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to superiorLandlord.manualAddressLineTwo,
+            ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to superiorLandlord.manualTownOrCity,
+            ManualAddressStepConfig.PREFILL_COUNTY to superiorLandlord.manualCounty,
+            ManualAddressStepConfig.PREFILL_POSTCODE to superiorLandlord.manualPostcode,
+            ManualAddressStepConfig.PREFILL_COUNTRY to superiorLandlord.manualCountry,
+        )
 }

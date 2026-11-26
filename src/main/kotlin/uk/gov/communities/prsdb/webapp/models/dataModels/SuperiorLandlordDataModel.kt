@@ -13,6 +13,7 @@ data class SuperiorLandlordDataModel(
     val name: String? = null,
     val email: String? = null,
     val address: AddressDataModel? = null,
+    val addressInUk: Boolean? = null,
     val addressSearchPostcode: String? = null,
     val addressSearchHouseNameOrNumber: String? = null,
     val selectedAddress: String? = null,
