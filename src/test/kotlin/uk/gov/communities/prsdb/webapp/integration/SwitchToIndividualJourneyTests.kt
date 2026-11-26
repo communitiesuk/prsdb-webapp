@@ -45,9 +45,9 @@ class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-loca
                 ConfirmationPageSwitchToIndividual::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Registered as the only landlord")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Confirmed as the only landlord")
 
-        confirmationPage.viewPropertyRecordLink.clickAndWait()
+        confirmationPage.goBackToPropertyRegistrationLink.clickAndWait()
         val returnedPropertyDetailsPage =
             assertPageIs(
                 page,

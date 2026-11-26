@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.CompleteReactivationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationCheckAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyReactivation.steps.ReactivationInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -73,12 +74,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.hideCheckAnswersSectionHeader
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.useContinueButtons
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTaskFrom
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceCheckResult
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ConfirmMissingComplianceMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasMissingComplianceStepConfig
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -159,7 +164,41 @@ class PropertyReactivationJourneyFactory(
             step(journey.checkAnswersStep) {
                 routeSegment(ReactivationCheckAnswersStep.ROUTE_SEGMENT)
                 parents { journey.checkAnswersParents() }
-                nextStep { journey.completeReactivationStep }
+                nextStep { journey.hasMissingComplianceStep }
+            }
+            step(journey.hasMissingComplianceStep) {
+                parents { journey.checkAnswersStep.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES -> {
+                            journey.confirmMissingComplianceStep
+                        }
+
+                        ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
+                            journey.completeReactivationStep
+                        }
+                    }
+                }
+            }
+            step(journey.confirmMissingComplianceStep) {
+                routeSegment(ReactivationConfirmMissingComplianceStep.ROUTE_SEGMENT)
+                parents {
+                    journey.hasMissingComplianceStep.hasOutcome(
+                        ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
+                    )
+                }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "fieldSetHeading" to "reactivateProperty.confirmMissingCompliance.areYouSure.heading",
+                        "submitButtonText" to "forms.buttons.confirmAndContinue",
+                    )
+                }
+                nextDestination { mode ->
+                    when (mode) {
+                        ConfirmMissingComplianceMode.GO_BACK -> Destination(journey.checkAnswersStep)
+                        ConfirmMissingComplianceMode.CONFIRMED -> Destination(journey.completeReactivationStep)
+                    }
+                }
             }
             step(journey.completeReactivationStep) {
                 parents { journey.completeReactivationParents() }
@@ -417,7 +456,8 @@ class PropertyReactivationJourneyFactory(
     private fun PropertyReactivationJourneyState.completeReactivationParents(): Parentage =
         OrParents(
             SingleParent(infoStep) { requiredTaskTypes.isEmpty() && infoStep.outcome == ReactivationInfoMode.PROPERTY_AVAILABLE },
-            checkAnswersStep.isComplete(),
+            hasMissingComplianceStep.hasOutcome(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED),
+            confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
         )
 }
 
@@ -431,6 +471,8 @@ class PropertyReactivationJourney(
     override val epcTask: EpcTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val checkAnswersStep: ReactivationCheckAnswersStep,
+    override val hasMissingComplianceStep: HasMissingComplianceStep,
+    override val confirmMissingComplianceStep: ReactivationConfirmMissingComplianceStep,
     override val completeReactivationStep: CompleteReactivationStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
@@ -475,7 +517,7 @@ interface PropertyReactivationJourneyState :
     ElectricalSafetyDependencies,
     EpcDependencies,
     HouseholdsAndTenantsDependencies,
-    CheckYourAnswersJourneyState {
+    MissingComplianceState {
     val infoStep: ReactivationInfoStep
     val alreadyRegisteredStep: ReactivationAlreadyRegisteredStep
     val licensingTask: LicensingTask
@@ -484,6 +526,8 @@ interface PropertyReactivationJourneyState :
     val epcTask: EpcTask
     val tenancyDetailsTask: TenancyDetailsTask
     val checkAnswersStep: ReactivationCheckAnswersStep
+    val hasMissingComplianceStep: HasMissingComplianceStep
+    val confirmMissingComplianceStep: ReactivationConfirmMissingComplianceStep
     val completeReactivationStep: CompleteReactivationStep
     var requiredTaskTypes: List<ReactivationTaskType>
     override var propertyOwnershipId: Long
@@ -491,4 +535,13 @@ interface PropertyReactivationJourneyState :
     override var uprn: Long?
     var isPropertyAlreadyRegistered: Boolean?
     var previousRenewalDate: LocalDate
+
+    override val isMissingComplianceCheckApplicable: Boolean
+        get() = isOccupied
+    override val isGasCertMissing: Boolean
+        get() = GAS_SAFETY in requiredTaskTypes && HasMissingComplianceStepConfig.isGasCertInvalid(gasSafetyTask)
+    override val isElectricalCertMissing: Boolean
+        get() = ELECTRICAL_SAFETY in requiredTaskTypes && HasMissingComplianceStepConfig.isElectricalCertInvalid(electricalSafetyTask)
+    override val isEpcMissing: Boolean
+        get() = EPC in requiredTaskTypes && HasMissingComplianceStepConfig.isEpcInvalid(epcTask)
 }

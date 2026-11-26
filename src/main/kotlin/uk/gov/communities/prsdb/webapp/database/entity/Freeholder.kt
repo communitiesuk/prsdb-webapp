@@ -6,12 +6,14 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import org.hibernate.envers.Audited
 
 /**
  * A freeholder of the property. A row with no name means "no details known". A row with a name but no email
  * means they gave a postal address, which is used to notify them but not stored.
  */
 @Entity
+@Audited
 class Freeholder() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

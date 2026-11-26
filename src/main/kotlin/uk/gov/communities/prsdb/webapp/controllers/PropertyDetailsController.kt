@@ -178,24 +178,7 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView(PROPERTY_DETAILS_VIEW)
         modelAndView.addObject("propertyDetails", propertyDetails)
-        if (propertyDetails.showFreeholderSection) {
-            modelAndView.addObject(
-                "freeholderSummaryCards",
-                freeholderSummaryCardHelper.getSummaryCards(propertyOwnership.freeholders),
-            )
-        }
-        if (propertyDetails.showSuperiorLandlordSection) {
-            modelAndView.addObject(
-                "superiorLandlordSummaryCards",
-                superiorLandlordSummaryCardHelper.getSummaryCards(propertyOwnership.superiorLandlords),
-            )
-        }
-        // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed
-        if (propertyDetails.showPropertyManagerSection) {
-            propertyOwnership.propertyManager?.let {
-                modelAndView.addObject("propertyManagerSummaryCard", propertyManagerSummaryCardHelper.getSummaryCard(it))
-            }
-        }
+        modelAndView.addAllObjects(associatedPartySummaryCards(propertyOwnership, propertyDetails))
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         // The notification banner prompts for actions that a deactivated record can't take
@@ -291,6 +274,7 @@ class PropertyDetailsController(
             )
 
         model.addAttribute("propertyDetails", propertyDetails)
+        model.addAllAttributes(associatedPartySummaryCards(propertyOwnership, propertyDetails))
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute(
@@ -303,6 +287,37 @@ class PropertyDetailsController(
 
         return PROPERTY_DETAILS_VIEW
     }
+
+    private fun associatedPartySummaryCards(
+        propertyOwnership: PropertyOwnership,
+        propertyDetails: PropertyDetailsViewModel,
+    ): Map<String, Any> =
+        buildMap {
+            if (propertyDetails.showFreeholderSection) {
+                put(
+                    "freeholderSummaryCards",
+                    freeholderSummaryCardHelper.getSummaryCards(
+                        propertyOwnership.freeholders,
+                        propertyDetails.unknownFreeholderBodyTextKey,
+                    ),
+                )
+            }
+            if (propertyDetails.showSuperiorLandlordSection) {
+                put(
+                    "superiorLandlordSummaryCards",
+                    superiorLandlordSummaryCardHelper.getSummaryCards(
+                        propertyOwnership.superiorLandlords,
+                        propertyDetails.unknownSuperiorLandlordBodyTextKey,
+                    ),
+                )
+            }
+            // TODO PDJB-2016: Remove the showPropertyManagerSection guard when the ASSOCIATED_PARTIES flag is removed
+            if (propertyDetails.showPropertyManagerSection) {
+                propertyOwnership.propertyManager?.let {
+                    put("propertyManagerSummaryCard", propertyManagerSummaryCardHelper.getSummaryCard(it))
+                }
+            }
+        }
 
     private fun buildNotificationBanner(
         isLandlordView: Boolean,

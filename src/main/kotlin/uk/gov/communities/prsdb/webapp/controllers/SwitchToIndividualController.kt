@@ -79,8 +79,13 @@ class SwitchToIndividualController(
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
 
-        val address = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.singleLineAddress
-        model.addAttribute("address", address)
+        val addressParts =
+            propertyOwnershipService
+                .getPropertyOwnership(propertyOwnershipId)
+                .address
+                .toMultiLineAddress()
+                .split("\n")
+        model.addAttribute("addressParts", addressParts)
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
 
         return "switchToIndividualSuccess"

@@ -463,19 +463,10 @@ class EmailTemplateModelsTests {
                         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
                         landlordDeactivated = false,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
+                        propertyRecordUrl = "https://example.com/property",
                     ),
                     "/emails/PropertyDeactivationConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    PropertyDeactivationConfirmationEmail(
-                        recipientName = "Alice",
-                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
-                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
-                        landlordDeactivated = true,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
-                    ),
-                    "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LandlordDeactivatedEmail(
@@ -515,6 +506,17 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyReactivationConfirmationWithPayment.md",
                     allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    PropertyManagerAddedToPropertyEmail(
+                        propertyManagerName = "James Smith",
+                        propertyManagerEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)", "Janie Jameson (janie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.com/landlord/privacy-notice",
+                    ),
+                    "/emails/PropertyManagerAddedToProperty.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
@@ -628,6 +630,12 @@ class EmailTemplateModelsTests {
                     "/emails/LettingAgentPropertyDeactivatedNotification.md",
                 ),
                 EmailTemplateTestData(
+                    PropertyDeactivationInviteeCancellationEmail(
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                    ),
+                    "/emails/PropertyDeactivationInviteeCancellation.md",
+                ),
+                EmailTemplateTestData(
                     ChangeOrgTeamMemberAccessLevelEmail(
                         memberName = "Anita Locke",
                         roleName = "administrator",
@@ -674,6 +682,17 @@ class EmailTemplateModelsTests {
                         privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
                     ),
                     "/emails/FreeholderAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
+                    SuperiorLandlordAddedToPropertyEmail(
+                        superiorLandlordName = "James Smith",
+                        superiorLandlordEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/SuperiorLandlordAddedToPropertyEmail.md",
                 ),
                 EmailTemplateTestData(
                     PassphraseEmail("time anything costume"),

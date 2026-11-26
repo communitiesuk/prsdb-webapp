@@ -21,4 +21,20 @@ class SecurityContextService(
 
         securityContextRepository.saveContext(SecurityContextHolder.createEmptyContext(), request, response)
     }
+
+    /* Gives the user a brand-new session while keeping them signed in, so nothing from their previous session
+     * (journey state, back links, confirmation flags etc.) carries over. It also rotates the session ID and the CSRF
+     * token, so forms left open from before the reset are rejected. Callers should redirect afterwards, as the current
+     * request may already hold the old CSRF token.
+     */
+    fun resetSession() {
+        val attributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
+        val request = attributes.request
+        val response = attributes.response!!
+        val context = SecurityContextHolder.getContext()
+
+        request.getSession(false)?.invalidate()
+        request.getSession(true)
+        securityContextRepository.saveContext(context, request, response)
+    }
 }

@@ -40,8 +40,10 @@ peopleResponsible:
     freeholdType: Freehold type
   freeholder:
     postalAddressNote: A <strong>postal address</strong> was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.
+    councilUnknownDetails: There’s another freeholder, but the landlord cannot currently provide their details.
   superiorLandlord:
     postalAddressNote: A <strong>postal address</strong> was provided for this person in the ownership chain. We’ve used this to tell them that they’re named on this registration.
+    councilUnknownDetails: There’s someone else in the property’s ownership chain, but the landlord cannot currently provide their details.
 landlordDetails:
   heading: Landlords
   registeredLandlords:

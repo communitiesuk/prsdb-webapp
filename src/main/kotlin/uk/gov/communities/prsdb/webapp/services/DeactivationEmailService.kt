@@ -10,12 +10,14 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.AutomatedPropertyDeactivationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordDeactivatedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyDeactivatedNotificationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeactivationInviteeCancellationEmail
 
 @Service
 class DeactivationEmailService(
     private val lettingAgentEmailSender: EmailNotificationService<LettingAgentPropertyDeactivatedNotificationEmail>,
     private val landlordEmailSender: EmailNotificationService<LandlordDeactivatedEmail>,
     private val propertyDeactivationEmailSender: EmailNotificationService<AutomatedPropertyDeactivationEmail>,
+    private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeactivationInviteeCancellationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun sendPropertyDeactivatedEmail(
@@ -72,6 +74,20 @@ class DeactivationEmailService(
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
+            )
+        }
+    }
+
+    fun sendInviteeCancellationEmail(
+        propertyOwnership: PropertyOwnership,
+        inviteeEmail: String,
+    ) {
+        NotificationHelper.sendNotificationAndLogFailures(
+            "the property deactivated invitee cancellation email for property ownership ${propertyOwnership.id}",
+        ) {
+            inviteeCancellationEmailSender.sendEmail(
+                inviteeEmail,
+                PropertyDeactivationInviteeCancellationEmail(multiLineAddress = propertyOwnership.address.toMultiLineAddress()),
             )
         }
     }
