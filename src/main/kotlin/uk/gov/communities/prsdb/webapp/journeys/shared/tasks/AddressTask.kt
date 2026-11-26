@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 // lives in SelfStatedRoutableTask; this class supplies the address steps, the AddressState data and the step flow.
 //
 // Structure only: makeSubJourney defines the step flow; content is left abstract. Content-specific subclasses
-// (e.g. LandlordAddressTask, TrusteeAddressTask) supply the content hooks with their message keys.
+// (e.g. PropertyRegistrationAddressTask, CorrespondenceAddressTask) supply the content hooks with their message keys.
 // Genuinely instance-specific content (e.g. the update flow's submit button/warning) is still supplied where the
 // task is added, by configuring the task's named steps in the routableTask DSL block.
 abstract class AddressTask(
@@ -39,8 +39,8 @@ abstract class AddressTask(
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
 
-    // Field-set content for the address steps, supplied by content-specific subclasses (e.g. LandlordAddressTask,
-    // TrusteeAddressTask) and applied to the relevant steps in makeSubJourney.
+    // Field-set content for the address steps, supplied by content-specific subclasses (e.g.
+    // PropertyRegistrationAddressTask, CorrespondenceAddressTask) and applied to the relevant steps in makeSubJourney.
     protected open val lookupAddressContentProperties: Map<String, Any?> = emptyMap()
     protected open val selectAddressContentProperties: Map<String, Any?> = emptyMap()
     protected open val manualAddressContentProperties: Map<String, Any?> = emptyMap()

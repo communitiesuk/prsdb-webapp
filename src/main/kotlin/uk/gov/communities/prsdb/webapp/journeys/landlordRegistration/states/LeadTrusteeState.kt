@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
 
 interface LeadTrusteeState : JourneyState {
     val leadTrusteeNameStep: LeadTrusteeNameStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
-    val trusteeAddressTask: AddressTask
+    val trusteeAddressTask: InternationalAddressTask
 }
