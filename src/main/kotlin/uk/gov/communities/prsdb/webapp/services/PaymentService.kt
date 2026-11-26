@@ -170,8 +170,7 @@ class PaymentService(
         }
     }
 
-    // This only creates the payment with GOV.UK Pay. The code using it must save the payment and pass the
-    // one-time token to Encoded, which collects the card details
+    // TODO PDJB-1863: Save the payment and pass the one-time token to Encoded
     fun createMotoPayment(
         amountInPence: Int,
         reference: String,

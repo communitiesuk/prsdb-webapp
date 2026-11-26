@@ -31,13 +31,12 @@ data class GovUkPayLink(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayAuthUrlPostLink(
-    val href: String,
-    val params: GovUkPayAuthUrlPostParams,
+    val params: GovUkPayAuthUrlPostParams? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GovUkPayAuthUrlPostParams(
-    @JsonProperty("one_time_token") val oneTimeToken: String,
+    @JsonProperty("one_time_token") val oneTimeToken: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

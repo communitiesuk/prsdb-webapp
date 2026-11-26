@@ -33,18 +33,7 @@ class GovUkPayClient(
     @Value("\${gov-uk-pay.payment-status-retry-delay}") private val paymentStatusRetryDelay: Duration,
 ) {
     fun createPayment(request: GovUkPayCreatePaymentRequest): GovUkPayCreatedPayment {
-        val payment =
-            sendWithRateLimitRetries {
-                client
-                    .post()
-                    .uri("/v1/payments")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .body(request)
-                    .retrieve()
-                    .requireStatus(HttpStatus.CREATED, "create payment")
-                    .body<GovUkPayPayment>()
-            } ?: throw GovUkPayException("GOV.UK Pay create payment response had no body")
+        val payment = postCreatePayment(client, request, "create payment")
         val nextUrl =
             payment.links.nextUrl?.href
                 ?: throw GovUkPayException("GOV.UK Pay create payment response for payment ${payment.paymentId} had no next_url")
@@ -53,18 +42,7 @@ class GovUkPayClient(
     }
 
     fun createMotoPayment(request: GovUkPayCreateMotoPaymentRequest): GovUkPayCreatedMotoPayment {
-        val payment =
-            sendWithRateLimitRetries {
-                motoClient
-                    .post()
-                    .uri("/v1/payments")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .body(request)
-                    .retrieve()
-                    .requireStatus(HttpStatus.CREATED, "create MOTO payment")
-                    .body<GovUkPayPayment>()
-            } ?: throw GovUkPayException("GOV.UK Pay create MOTO payment response had no body")
+        val payment = postCreatePayment(motoClient, request, "create MOTO payment")
         val oneTimeToken =
             payment.links.authUrlPost?.params?.oneTimeToken
                 ?: throw GovUkPayException(
@@ -131,6 +109,23 @@ class GovUkPayClient(
                 throw retryException
             }
         }
+
+    private fun postCreatePayment(
+        client: RestClient,
+        request: Any,
+        operation: String,
+    ): GovUkPayPayment =
+        sendWithRateLimitRetries {
+            client
+                .post()
+                .uri("/v1/payments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .requireStatus(HttpStatus.CREATED, operation)
+                .body<GovUkPayPayment>()
+        } ?: throw GovUkPayException("GOV.UK Pay $operation response had no body")
 
     private fun clientFor(account: GovUkPayAccount): RestClient =
         when (account) {

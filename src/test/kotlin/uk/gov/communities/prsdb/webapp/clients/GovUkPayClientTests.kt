@@ -576,12 +576,28 @@ class GovUkPayClientTests {
     }
 
     @Test
-    fun `createMotoPayment throws GovUkPayException when the created payment has no one-time token`() {
+    fun `createMotoPayment throws GovUkPayException when the created payment has no auth_url_post link`() {
         // Arrange
-        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse(includeOneTimeToken = false))
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse(authUrlPostParams = null))
 
-        // Act, Assert
-        assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay create MOTO payment response for payment $PAYMENT_ID had no one_time_token", exception.message)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `createMotoPayment throws GovUkPayException when the auth_url_post link has no one-time token`() {
+        // Arrange
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse(authUrlPostParams = "{}"))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay create MOTO payment response for payment $PAYMENT_ID had no one_time_token", exception.message)
         motoMockServer.verify()
     }
 
@@ -718,13 +734,13 @@ class GovUkPayClientTests {
     private fun createMotoPaymentRequest() =
         GovUkPayCreateMotoPaymentRequest(amount = AMOUNT, reference = REFERENCE, description = DESCRIPTION)
 
-    private fun createdMotoResponse(includeOneTimeToken: Boolean = true): DefaultResponseCreator {
+    private fun createdMotoResponse(authUrlPostParams: String? = """{ "one_time_token": "$ONE_TIME_TOKEN" }"""): DefaultResponseCreator {
         val authUrlPostLink =
-            if (includeOneTimeToken) {
+            if (authUrlPostParams != null) {
                 """
                 "auth_url_post": {
                     "type": "application/json",
-                    "params": { "one_time_token": "$ONE_TIME_TOKEN" },
+                    "params": $authUrlPostParams,
                     "href": "$AUTH_URL",
                     "method": "POST"
                 },
