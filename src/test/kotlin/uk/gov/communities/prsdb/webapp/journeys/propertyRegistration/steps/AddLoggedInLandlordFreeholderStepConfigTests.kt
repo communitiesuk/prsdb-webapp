@@ -96,7 +96,7 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
     }
 
     @Test
-    fun `adds the landlord again when every freeholder has been removed`() {
+    fun `adds the landlord using nextFreeholderId when the freeholders map is empty`() {
         // Arrange
         whenever(mockState.isJointFreeholder).thenReturn(true)
         whenever(mockState.freeholdersMap).thenReturn(emptyMap())
