@@ -4,10 +4,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
@@ -15,13 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.inOrder
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
-import uk.gov.communities.prsdb.webapp.exceptions.PropertyAlreadyReactivatedException
 import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentHandler
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -114,59 +109,15 @@ class PropertyReactivationPaymentHandlerTests {
             .thenReturn(PaymentStatus.SUCCEEDED)
 
         // Act
-        handler.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE)
-
-        // Assert
-        val applyPaidChanges = argumentCaptor<(Payment) -> Unit>()
-        verify(mockPaymentService).finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), applyPaidChanges.capture())
-        val payment = MockPaymentData.createReactivationPayment(paymentId = PAYMENT_ID)
-        applyPaidChanges.firstValue(payment)
-        verify(mockPropertyReactivationService).reactivatePropertyForPayment(payment, reactivationData)
-    }
-
-    @Test
-    fun `finalisePayment cancels any created payment for the property after the payment succeeds`() {
-        // Arrange
-        whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockPaymentService.finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), any<(Payment) -> Unit>()))
-            .thenReturn(PaymentStatus.SUCCEEDED)
-
-        // Act
         val status = handler.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE)
 
         // Assert
         assertEquals(PaymentStatus.SUCCEEDED, status)
-        inOrder(mockPaymentService, mockPropertyReactivationService) {
-            verify(mockPaymentService).finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), any<(Payment) -> Unit>())
-            verify(mockPropertyReactivationService).cancelCreatedPaymentAndLogFailures(PROPERTY_OWNERSHIP_ID)
-        }
-    }
-
-    @ParameterizedTest
-    @EnumSource(PaymentStatus::class, names = ["SUCCEEDED"], mode = EnumSource.Mode.EXCLUDE)
-    fun `finalisePayment doesn't cancel other payments when the payment didn't succeed`(finalStatus: PaymentStatus) {
-        // Arrange
-        whenever(mockPaymentService.finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), any<(Payment) -> Unit>()))
-            .thenReturn(finalStatus)
-
-        // Act
-        val status = handler.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE)
-
-        // Assert
-        assertEquals(finalStatus, status)
-        verify(mockPropertyReactivationService, never()).cancelCreatedPaymentAndLogFailures(any())
-    }
-
-    @Test
-    fun `finalisePayment doesn't cancel other payments when finalising throws`() {
-        // Arrange
-        whenever(mockPaymentService.finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), any<(Payment) -> Unit>()))
-            .thenThrow(PropertyAlreadyReactivatedException(PROPERTY_OWNERSHIP_ID))
-
-        // Act & Assert
-        assertThrows<PropertyAlreadyReactivatedException> { handler.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE) }
-
-        verify(mockPropertyReactivationService, never()).cancelCreatedPaymentAndLogFailures(any())
+        val applyPaidChanges = argumentCaptor<(Payment) -> Unit>()
+        verify(mockPaymentService).finalisePayment(eq(PAYMENT_ID), eq(PaymentStatus.CAPTURABLE), applyPaidChanges.capture())
+        val payment = MockPaymentData.createReactivationPayment(paymentId = PAYMENT_ID)
+        applyPaidChanges.firstValue(payment)
+        verify(mockPropertyReactivationService).reactivatePropertyWithPayment(payment, reactivationData)
     }
 
     @Test

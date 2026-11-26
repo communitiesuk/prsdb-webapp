@@ -319,7 +319,7 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
 
     private fun finaliseReactivationPayment(paymentId: String) =
         paymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE) {
-            propertyReactivationService.reactivatePropertyForPayment(it, PropertyReactivationDataModel())
+            propertyReactivationService.reactivatePropertyWithPayment(it, PropertyReactivationDataModel())
         }
 
     companion object {

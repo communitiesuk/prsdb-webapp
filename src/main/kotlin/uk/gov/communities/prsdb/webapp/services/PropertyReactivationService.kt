@@ -61,7 +61,7 @@ class PropertyReactivationService(
     }
 
     @Transactional(Transactional.TxType.MANDATORY)
-    fun reactivatePropertyForPayment(
+    fun reactivatePropertyWithPayment(
         payment: Payment,
         reactivationData: PropertyReactivationDataModel,
     ) {
@@ -95,7 +95,7 @@ class PropertyReactivationService(
 
     fun wasLastReactivationPaid(): Boolean = session.getAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID) == true
 
-    fun cancelCreatedPaymentAndLogFailures(propertyOwnershipId: Long) {
+    private fun cancelCreatedPaymentAndLogFailures(propertyOwnershipId: Long) {
         try {
             paymentReconciliationService.cancelCreatedPaymentForProperty(propertyOwnershipId)
         } catch (exception: Exception) {

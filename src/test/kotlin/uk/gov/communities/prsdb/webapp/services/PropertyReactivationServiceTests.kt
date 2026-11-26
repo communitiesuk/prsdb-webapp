@@ -376,7 +376,7 @@ class PropertyReactivationServiceTests {
     }
 
     @Nested
-    inner class ReactivatePropertyForPayment {
+    inner class ReactivatePropertyWithPayment {
         @Test
         fun `claims the property, saves the details, then reactivates it until the end of the paid period`() {
             // Arrange
@@ -387,7 +387,7 @@ class PropertyReactivationServiceTests {
             val licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null)
 
             // Act
-            propertyReactivationService.reactivatePropertyForPayment(
+            propertyReactivationService.reactivatePropertyWithPayment(
                 paymentForProperty(),
                 PropertyReactivationDataModel(licensing = licensing),
             )
@@ -413,7 +413,7 @@ class PropertyReactivationServiceTests {
                 .thenReturn(paidQuote)
 
             // Act
-            propertyReactivationService.reactivatePropertyForPayment(paymentForProperty(), PropertyReactivationDataModel())
+            propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
 
             // Assert
             verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
@@ -430,7 +430,7 @@ class PropertyReactivationServiceTests {
             // Act & Assert
             val exception =
                 assertThrows<ResponseStatusException> {
-                    propertyReactivationService.reactivatePropertyForPayment(paymentForProperty(), PropertyReactivationDataModel())
+                    propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
                 }
 
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
@@ -445,7 +445,7 @@ class PropertyReactivationServiceTests {
 
             // Act & Assert
             assertThrows<EntityExistsException> {
-                propertyReactivationService.reactivatePropertyForPayment(paymentForProperty(), PropertyReactivationDataModel())
+                propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
             }
 
             verifyNoInteractions(mockActivationService, mockPropertyOwnershipService, mockSession)
@@ -461,7 +461,7 @@ class PropertyReactivationServiceTests {
 
             // Act & Assert
             assertThrows<PropertyAlreadyReactivatedException> {
-                propertyReactivationService.reactivatePropertyForPayment(paymentForProperty(), PropertyReactivationDataModel())
+                propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
             }
 
             verify(mockActivationService, never()).reactivateClaimedProperty(any(), any(), anyOrNull())
@@ -492,7 +492,7 @@ class PropertyReactivationServiceTests {
 
             // Act & Assert
             assertThrows<PaymentQuoteExpiredException> {
-                propertyReactivationService.reactivatePropertyForPayment(payment, PropertyReactivationDataModel())
+                propertyReactivationService.reactivatePropertyWithPayment(payment, PropertyReactivationDataModel())
             }
 
             verify(mockActivationService, never()).reactivateClaimedProperty(any(), any(), anyOrNull())

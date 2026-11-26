@@ -36,14 +36,9 @@ class PropertyReactivationPaymentHandler(
         govUkPayStatus: PaymentStatus,
     ): PaymentStatus {
         val reactivationData = propertyReactivationDataModelFactory.fromJourneyState(state)
-        val status =
-            paymentService.finalisePayment(paymentId, govUkPayStatus) {
-                propertyReactivationService.reactivatePropertyForPayment(it, reactivationData)
-            }
-        if (status == PaymentStatus.SUCCEEDED) {
-            propertyReactivationService.cancelCreatedPaymentAndLogFailures(state.propertyOwnershipId)
+        return paymentService.finalisePayment(paymentId, govUkPayStatus) {
+            propertyReactivationService.reactivatePropertyWithPayment(it, reactivationData)
         }
-        return status
     }
 
     override fun isPropertyAlreadyRegistered(): Boolean {
