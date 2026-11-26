@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressInUkFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeNameFormPageUpdateOrganisationType
@@ -189,7 +189,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
         }
 
         @Test
-        fun `Clicking change link on lead trustee address row navigates to the lead trustee address lookup page`(page: Page) {
+        fun `Clicking change link on lead trustee address row navigates to the lead trustee address in UK page`(page: Page) {
             val cyaPage =
                 navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
                     trusteeName = LEAD_TRUSTEE_NAME,
@@ -198,7 +198,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
                 )
 
             cyaPage.leadTrusteeCard.summaryList.addressRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
+            assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
         }
 
         @Test

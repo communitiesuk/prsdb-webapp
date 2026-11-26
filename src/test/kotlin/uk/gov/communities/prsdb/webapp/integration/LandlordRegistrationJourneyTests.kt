@@ -35,9 +35,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeNonUkAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteePhoneFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
@@ -490,12 +492,30 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
         leadTrusteePhonePage.submitPhoneNumber("07123456789")
 
+        val leadTrusteeAddressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageLandlordRegistration::class)
+        leadTrusteeAddressInUkPage.submitYes()
+
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val leadTrusteeSelectAddressPage =
             assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Selecting no on lead trustee address in the UK goes to the non-UK address page then the registered charity page`(page: Page) {
+        val leadTrusteeAddressInUkPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+        leadTrusteeAddressInUkPage.submitNo()
+
+        val leadTrusteeNonUkAddressPage = assertPageIs(page, LeadTrusteeNonUkAddressFormPageLandlordRegistration::class)
+        leadTrusteeNonUkAddressPage.submitAddress(
+            addressLineOne = "1 Rue de Rivoli",
+            townOrCity = "Paris",
+            postcode = "75001",
+        )
 
         assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
     }
@@ -562,6 +582,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
         leadTrusteePhonePage.submitPhoneNumber("07123456789")
+
+        val leadTrusteeAddressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageLandlordRegistration::class)
+        leadTrusteeAddressInUkPage.submitYes()
 
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -719,6 +742,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
         leadTrusteePhonePage.submitPhoneNumber("07123456789")
+
+        val leadTrusteeAddressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageLandlordRegistration::class)
+        leadTrusteeAddressInUkPage.submitYes()
 
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")

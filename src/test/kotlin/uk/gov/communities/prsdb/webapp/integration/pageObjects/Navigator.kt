@@ -123,7 +123,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeNameFormPageLandlordRegistration
@@ -515,10 +515,10 @@ class Navigator(
         return createValidPage(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute(): LeadTrusteeAddressFormPageLandlordRegistration {
+    fun skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute(): LeadTrusteeAddressInUkFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteeAddress().build())
         navigateToLandlordRegistrationJourneyStep(TrusteeAddressTask.ROUTE_SEGMENT)
-        return createValidPage(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        return createValidPage(page, LeadTrusteeAddressInUkFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationLeadTrusteeDobPage(): LeadTrusteeDobFormPageLandlordRegistration {

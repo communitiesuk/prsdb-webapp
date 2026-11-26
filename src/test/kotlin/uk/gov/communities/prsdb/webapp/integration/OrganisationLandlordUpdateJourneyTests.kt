@@ -19,11 +19,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGover
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberNameFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyWhoToProvideFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeAddressInUkPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeAddressLookupPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeCyaPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeDobFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeEmailFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNonUkAddressPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityCyaPageUpdateLandlordDetails
@@ -40,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgSelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressInUkFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeNameFormPageUpdateOrganisationType
@@ -405,6 +408,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateOrganisationType::class)
         leadTrusteePhonePage.submitPhoneNumber(LEAD_TRUSTEE_PHONE)
 
+        val leadTrusteeAddressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
+        leadTrusteeAddressInUkPage.submitYes()
+
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
@@ -480,6 +486,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateOrganisationType::class)
         leadTrusteePhonePage.submitPhoneNumber(LEAD_TRUSTEE_PHONE)
+
+        val leadTrusteeAddressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
+        leadTrusteeAddressInUkPage.submitYes()
 
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -670,6 +679,10 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             val phonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateLeadTrustee::class)
             phonePage.submitPhoneNumber("07999888777")
 
+            // Lead Trustee Address in UK
+            val addressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkPageUpdateLeadTrustee::class)
+            addressInUkPage.submitYes()
+
             // Lead Trustee Address Lookup
             val addressLookupPage = assertPageIs(page, LeadTrusteeAddressLookupPageUpdateLeadTrustee::class)
             addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -691,6 +704,39 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
             updatedDetailsPage.tabs.goToOrganisationContacts()
             assertThat(updatedDetailsPage.leadTrusteeCard.summaryList.nameRow.value).containsText(newName)
+        }
+
+        @Test
+        fun `A trust org landlord can update the lead trustee address to a non-UK address`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.leadTrusteeCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+
+            assertPageIs(page, LeadTrusteeNameFormPageUpdateLeadTrustee::class).submitName("Updated Trustee Name")
+            assertPageIs(page, LeadTrusteeDobFormPageUpdateLeadTrustee::class).submitDate("15", "6", "1985")
+            assertPageIs(page, LeadTrusteeEmailFormPageUpdateLeadTrustee::class).submitEmail("updated.trustee@example.com")
+            assertPageIs(page, LeadTrusteePhoneFormPageUpdateLeadTrustee::class).submitPhoneNumber("07999888777")
+
+            val addressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkPageUpdateLeadTrustee::class)
+            addressInUkPage.submitNo()
+
+            val nonUkAddressPage = assertPageIs(page, LeadTrusteeNonUkAddressPageUpdateLeadTrustee::class)
+            nonUkAddressPage.submitAddress(
+                addressLineOne = "1 Rue de Rivoli",
+                townOrCity = "Paris",
+                postcode = "75001",
+            )
+
+            val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 Rue de Rivoli")
+            cyaPage.submit()
+
+            val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+            updatedDetailsPage.tabs.goToOrganisationContacts()
+            assertThat(updatedDetailsPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 Rue de Rivoli")
         }
     }
 }
