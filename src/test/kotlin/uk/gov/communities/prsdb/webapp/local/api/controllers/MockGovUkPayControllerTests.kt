@@ -8,7 +8,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.boot.env.YamlPropertySourceLoader
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
+import org.springframework.core.env.Profiles
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
+import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -22,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import java.time.Instant
 import java.util.Optional
+import kotlin.test.assertEquals
 
 class MockGovUkPayControllerTests {
     private lateinit var mvc: MockMvc
@@ -37,10 +43,11 @@ class MockGovUkPayControllerTests {
         cardEntryDelaySeconds: Long = 0,
         failingCallsFromCapture: Int = 0,
         failingCaptureTakesPayment: Boolean = true,
+        mockBaseUrl: String = "http://localhost:8080/local/gov-uk-pay",
     ) = MockMvcBuilders
         .standaloneSetup(
             MockGovUkPayController(
-                "8080",
+                mockBaseUrl,
                 cardEntryDelaySeconds,
                 failingCallsFromCapture,
                 failingCaptureTakesPayment,
@@ -92,6 +99,68 @@ class MockGovUkPayControllerTests {
             .andExpect(
                 jsonPath("$._links.next_url.href", startsWith("http://localhost:8080/local/gov-uk-pay/mock-card-page/")),
             )
+    }
+
+    @Test
+    fun `payment card link uses the configured app-hosted mock origin`() {
+        mvc = createMvc(mockBaseUrl = "https://nft.example.test/local/gov-uk-pay")
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+            .andExpect(status().isCreated)
+            .andExpect(
+                jsonPath("$._links.next_url.href", startsWith("https://nft.example.test/local/gov-uk-pay/mock-card-page/")),
+            )
+    }
+
+    @Test
+    fun `payment mock is limited to local or non-production NFT performance profiles`() {
+        for ((profiles, enabled) in listOf(
+            arrayOf("local") to true,
+            arrayOf("nft") to false,
+            arrayOf("performance-test") to false,
+            arrayOf("nft", "performance-test") to true,
+            arrayOf("nft", "performance-test", "production") to false,
+        )) {
+            AnnotationConfigApplicationContext().use { context ->
+                val environment = MockEnvironment()
+                environment.setActiveProfiles(*profiles)
+                environment.setProperty("server.port", "8080")
+                environment.setProperty("gov-uk-pay.mock-card-entry-delay-seconds", "0")
+                environment.setProperty("gov-uk-pay.mock-failing-calls-from-capture", "0")
+                environment.setProperty("gov-uk-pay.mock-failing-capture-takes-payment", "true")
+                environment.setProperty("gov-uk-pay.mock-base-url", "http://localhost:8080/local/gov-uk-pay")
+                context.setEnvironment(environment)
+                context.beanFactory.registerSingleton("objectMapper", objectMapper)
+                context.beanFactory.registerSingleton("paymentRepository", mockPaymentRepository)
+                context.register(MockGovUkPayController::class.java)
+                context.refresh()
+                assertEquals(enabled, context.getBeansOfType(MockGovUkPayController::class.java).isNotEmpty())
+            }
+        }
+    }
+
+    @Test
+    fun `performance payment configuration is limited to non-production local and NFT runs`() {
+        val source =
+            YamlPropertySourceLoader()
+                .load("performance-test", ClassPathResource("application-performance-test.yml"))
+                .single { it.getProperty("gov-uk-pay.api-key") == "performance-test" }
+        val activation = Profiles.of(source.getProperty("spring.config.activate.on-profile") as String)
+
+        for ((profiles, enabled) in listOf(
+            arrayOf("performance-test") to false,
+            arrayOf("integration", "performance-test") to false,
+            arrayOf("production", "performance-test") to false,
+            arrayOf("nft") to false,
+            arrayOf("local", "performance-test") to true,
+            arrayOf("nft", "performance-test") to true,
+            arrayOf("nft", "performance-test", "production") to false,
+        )) {
+            val environment = MockEnvironment()
+            environment.setActiveProfiles(*profiles)
+            assertEquals(enabled, environment.acceptsProfiles(activation), "Unexpected payment configuration activation")
+        }
     }
 
     @Test

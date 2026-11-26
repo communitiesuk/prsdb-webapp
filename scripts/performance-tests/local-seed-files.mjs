@@ -2,6 +2,7 @@ import {readFile, writeFile, mkdir, realpath, lstat} from 'node:fs/promises';
 import {isAbsolute, relative, resolve, join, dirname} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {deflateSync} from 'node:zlib';
+import {isSharedSeedCertificateKey} from './nft-shared.mjs';
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const requireCondition = (condition, message) => { if (!condition) throw new Error(message); };
@@ -85,6 +86,7 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
   const subjects = new Set();
   const properties = new Set();
   const files = new Map();
+  let sharedCertificate;
   for (const fixture of fixtures) {
     requireCondition(typeof fixture?.subject === 'string' && fixture.subject.trim() &&
       Number.isSafeInteger(fixture.propertyOwnershipId) && fixture.propertyOwnershipId > 0 &&
@@ -93,16 +95,34 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
     subjects.add(fixture.subject);
     properties.add(fixture.propertyOwnershipId);
     for (const file of fixture.files) {
-      requireCondition(/^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$/.test(file?.objectKey) &&
-        ['png', 'pdf'].includes(file.extension), 'Only seed-owned PNG/PDF certificate fixtures are supported');
-      requireCondition(!files.has(file.objectKey) || files.get(file.objectKey) === file.extension, 'Conflicting file fixture extensions');
-      files.set(file.objectKey, file.extension);
+      if (isSharedSeedCertificateKey(file?.objectKey)) {
+        requireCondition(file.extension === 'png' && typeof file.versionId === 'string' && file.versionId.trim() &&
+          (!sharedCertificate || (sharedCertificate.objectKey === file.objectKey && sharedCertificate.versionId === file.versionId)),
+          'The shared certificate fixture requires a PNG and nonblank version');
+        sharedCertificate = file;
+      } else {
+        requireCondition(/^certificateUpload\.seed-[0-9]+\.[a-z-]+\.member-[0-9]+$/.test(file?.objectKey) &&
+          ['png', 'pdf'].includes(file.extension), 'Only seed-owned PNG/PDF certificate fixtures are supported');
+      }
+      const existing = files.get(file.objectKey);
+      requireCondition(!existing || existing.extension === file.extension &&
+        (!isSharedSeedCertificateKey(file.objectKey) || existing.versionId === file.versionId),
+      'Conflicting file fixture extensions or versions');
+      files.set(file.objectKey, {extension: file.extension, versionId: file.versionId});
     }
   }
   const canonical = await (fs.realpath ?? realpath)(root);
   requireCondition(!contained(repository, canonical) && !contained(canonical, repository), 'Storage must remain isolated after resolving symlinks');
   const directory = join(canonical, '.local-uploads', 'safe');
-  for (const path of [join(canonical, '.local-uploads'), directory, ...[...files.keys()].map(key => join(directory, key))]) {
+  const filePath = key => join(directory, ...key.split('/'));
+  const pathsToCheck = [
+    join(canonical, '.local-uploads'),
+    directory,
+    ...[...files.keys()].flatMap(key => isSharedSeedCertificateKey(key)
+      ? [join(directory, 'seeding'), ...(key.includes('/certificate-references/') ? [join(directory, 'seeding', 'certificate-references')] : []), filePath(key)]
+      : [filePath(key)]),
+  ];
+  for (const path of pathsToCheck) {
     try {
       requireCondition(!(await (fs.lstat ?? lstat)(path)).isSymbolicLink(), 'Fixture storage must not contain symlinks');
     } catch (error) {
@@ -110,21 +130,23 @@ export async function prepareLocalSeedFiles(fixtures, storageRoot, fs = {readFil
     }
   }
   const bodies = {png: syntheticPng(), pdf: syntheticPdf()};
-  for (const [key, extension] of files) {
+  for (const [key, file] of files) {
     try {
-      requireCondition((await (fs.readFile ?? readFile)(join(directory, key))).equals(bodies[extension]),
+      requireCondition((await (fs.readFile ?? readFile)(filePath(key))).equals(bodies[file.extension]),
         'Refusing to overwrite an existing different file');
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
     }
   }
   await fs.mkdir(directory, {recursive: true, mode: 0o700});
-  for (const [key, extension] of files) {
+  for (const [key, file] of files) {
+    const path = filePath(key);
+    if (isSharedSeedCertificateKey(key)) await fs.mkdir(dirname(path), {recursive: true, mode: 0o700});
     try {
-      await fs.writeFile(join(directory, key), bodies[extension], {mode: 0o600, flag: 'wx'});
+      await fs.writeFile(path, bodies[file.extension], {mode: 0o600, flag: 'wx'});
     } catch (error) {
       if (error.code !== 'EEXIST') throw error;
-      requireCondition((await (fs.readFile ?? readFile)(join(directory, key))).equals(bodies[extension]),
+      requireCondition((await (fs.readFile ?? readFile)(path)).equals(bodies[file.extension]),
         'Refusing to overwrite an existing different file');
     }
   }

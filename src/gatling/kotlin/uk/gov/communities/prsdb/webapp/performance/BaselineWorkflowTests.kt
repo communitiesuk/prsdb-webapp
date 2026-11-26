@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.performance
 
 import org.junit.jupiter.api.Test
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.assertEquals
@@ -9,9 +10,9 @@ import kotlin.test.assertTrue
 class BaselineWorkflowTests {
     @Test
     fun `workflow ramp supplies all mandatory basic configuration`() {
+        val workflow = Files.readString(Path.of(".github/workflows/run-performance-tests.yml"))
         val command =
-            Files.readString(Path.of(".github/workflows/run-performance-tests.yml"))
-                .substringAfter("--simulation ${BaselineLoadSimulation::class.java.name}")
+            workflow.substringAfter("--simulation ${BaselineLoadSimulation::class.java.name}")
                 .substringBefore("\n      - name:")
         val arguments =
             command.lineSequence().map { it.trim().removeSuffix("\\").trim() }
@@ -23,6 +24,10 @@ class BaselineWorkflowTests {
         val config = BasicRunConfig.from(arguments)
         assertEquals(PerformanceTarget.NFT, config.target)
         assertTrue(config.landlordSubject.isNotBlank())
+        val simulatorOrigin = URI.create(arguments.getValue("gatling.council.simulatorUrl"))
+        val councilOrigin = URI.create(config.councilBaseUrl)
+        assertEquals(councilOrigin.scheme, simulatorOrigin.scheme)
+        assertEquals(councilOrigin.authority, simulatorOrigin.authority)
         val mandatory =
             listOf(
                 "gatling.basic.registrationSubject",
@@ -37,6 +42,12 @@ class BaselineWorkflowTests {
                 "gatling.operator.fixturePath",
                 "gatling.offboarding.fixturePath",
                 "gatling.registration.certificatePath",
+                "gatling.registration.fixturePath",
+                "gatling.registration.paymentBaseUrl",
+                "gatling.registration.fixtureOffset",
+                "gatling.council.fixturePath",
+                "gatling.council.simulatorUrl",
+                "gatling.council.fixtureOffset",
                 "gatling.certificate.downloadOrigin",
                 "gatling.ramp.rampMinutes",
                 "gatling.ramp.holdMinutes",
@@ -45,6 +56,8 @@ class BaselineWorkflowTests {
                 "gatling.ramp.additionalPerMinute",
                 "gatling.ramp.fixtureOffset",
                 "gatling.ramp.operatorFixtureOffset",
+                "gatling.ramp.paidRegistrationsPerMinute",
+                "gatling.ramp.councilReadsPerMinute",
             )
         mandatory.forEach { key -> assertTrue(!arguments[key].isNullOrBlank(), "Missing required workflow argument $key") }
         assertEquals("true", arguments["gatling.council.emailDeliveryStub"])
@@ -65,7 +78,48 @@ class BaselineWorkflowTests {
         assertTrue(operatorOffset >= config.iterations + 1, "Operator ramp must skip correctness actors")
         assertTrue(operatorOffset + operators <= 28, "Operator correctness and ramp must fit the minimum exported pool")
         assertTrue(team <= 17, "Organisation team ramp must fit its exclusive exported pool")
-        assertEquals(767, schedules.values.sum())
-        assertTrue("gatling.registration.paymentBaseUrl" !in arguments, "Baseline must not require the unfinished payment ingress")
+        assertEquals(767, schedules.filterKeys { it != BaselineFamily.PAID_REGISTRATION && it != BaselineFamily.COUNCIL_READ }.values.sum())
+        assertEquals(455, schedules.getValue(BaselineFamily.PAID_REGISTRATION))
+        assertEquals(17, schedules.getValue(BaselineFamily.COUNCIL_READ))
+        assertEquals(1239, schedules.values.sum())
+        assertEquals("1", arguments["gatling.registration.fixtureOffset"])
+        assertEquals("1", arguments["gatling.council.fixtureOffset"])
+        assertTrue(
+            arguments.getValue("gatling.registration.fixtureOffset").toInt() + schedules.getValue(BaselineFamily.PAID_REGISTRATION) <= 456,
+        )
+        assertTrue(arguments.getValue("gatling.council.fixtureOffset").toInt() + schedules.getValue(BaselineFamily.COUNCIL_READ) <= 18)
+    }
+
+    @Test
+    fun `workflow exports paid and council fixtures before the baseline ramp`() {
+        val workflow = Files.readString(Path.of(".github/workflows/run-performance-tests.yml"))
+        val rampStart = workflow.indexOf("id: rampedJourneys")
+        assertTrue(rampStart >= 0, "The expanded baseline ramp must have a stable step id")
+        val ramp = workflow.substring(rampStart).substringBefore("\n      - name:")
+
+        for ((id, mode) in listOf(
+            "exportPaidRegistrationFixtures" to "paid-registration-fixtures",
+            "exportCouncilReadFixtures" to "council-read-fixtures",
+        )) {
+            val exportStep = workflow.indexOf("id: $id")
+            assertTrue(exportStep >= 0 && exportStep < rampStart, "$id must be exported before the ramp")
+            val step = workflow.substring(exportStep, rampStart)
+            assertTrue("continue-on-error: true" in step)
+            assertTrue("mode: $mode" in step)
+            assertTrue("steps.$id.outcome == 'success'" in ramp, "$id must gate the ramp")
+        }
+
+        val rampCommand =
+            workflow.substringAfter(
+                "--simulation ${BaselineLoadSimulation::class.java.name}",
+            ).substringBefore("\n      - name:")
+        assertTrue("gatling.registration.fixturePath" in rampCommand)
+        assertTrue("gatling.registration.paymentBaseUrl" in rampCommand)
+        assertTrue("gatling.council.fixturePath" in rampCommand)
+        assertTrue("gatling.council.simulatorUrl" in rampCommand)
+
+        val summary = workflow.substringAfter("- name: Summarise journey outcomes")
+        assertTrue("EXPORT_PAID_REGISTRATION: \${{ steps.exportPaidRegistrationFixtures.outcome }}" in summary)
+        assertTrue("EXPORT_COUNCIL_READ: \${{ steps.exportCouncilReadFixtures.outcome }}" in summary)
     }
 }

@@ -9,31 +9,79 @@ export const cluster = 'nft-app';
 export const appName = 'nft-app';
 export const simulatorName = 'nft-one-login-simulator';
 export const appOrigin = 'https://nft.register-home-to-rent.test.communities.gov.uk';
+export const councilOrigin = 'https://nft.search-landlord-home-information.test.communities.gov.uk';
 export const simulatorOrigin = 'https://nft.lb.register-home-to-rent.test.communities.gov.uk';
 export const taskPrefix = `arn:aws:ecs:${region}:${account}:task-definition/`;
 // The approved digest is owned by infra (terraform/nft/ecs_task_definition) and published here so this
 // script has one source of truth to read at runtime, instead of a second hardcoded copy that can drift.
 export const simulatorDigestParameterName = 'nft-one-login-simulator-approved-image-digest';
 
+export class OperationTimeoutError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'OperationTimeoutError';
+    this.safeToLog = true;
+  }
+}
+
+function safeMessage(message) {
+  return String(message ?? '').replace(/[\x00-\x1f\x7f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+}
+
+function errorSummary(error) {
+  if (error instanceof AggregateError) {
+    const details = [...error.errors].map(errorSummary).filter(Boolean);
+    const context = error.safeContext ?? 'Multiple operations failed';
+    return details.length ? `${context}: ${details.join('; ')}` : context;
+  }
+  if (error?.safeToLog === true || error?.name === 'SafeRecoveryError') {
+    return safeMessage(error.message) || `${error.name} failed`;
+  }
+  return `${safeMessage(error?.name) || 'Error'} details redacted`;
+}
+
+export function formatSafeError(error) {
+  return errorSummary(error).slice(0, 1500);
+}
+
 export function requireCondition(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+export function isSharedSeedCertificateKey(key) {
+  return key === 'seeding/certificate_template.png' ||
+    (typeof key === 'string' && /^seeding\/certificate-references\/[1-9][0-9]*-[1-9][0-9]*\.png$/.test(key));
 }
 
 export function environment(container) {
   return Object.fromEntries((container.environment ?? []).map(({name, value}) => [name, value]));
 }
 
+export function registrationCopy(task) {
+  const copy = structuredClone(task);
+  for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
+    'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
+  return copy;
+}
+
 export function cloneForSimulator(task) {
   requireCondition(task.family === 'prsdb-webapp-nft', 'Unexpected app task family');
-  const copy = structuredClone(task);
+  const copy = registrationCopy(task);
   const container = copy.containerDefinitions.find(value => value.name === 'prsdb-webapp');
   requireCondition(container, 'App container missing');
   const profile = container.environment?.find(value => value.name === 'SPRING_PROFILES_ACTIVE');
   requireCondition(profile && profile.value.split(',').map(value => value.trim()).sort().join(',') === 'default,nft',
     'Unexpected app baseline profile');
-  profile.value += ',one-login-simulator';
-  for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
-    'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
+  profile.value += ',one-login-simulator,performance-test';
+  const overrides = {
+    GOV_UK_PAY_MOCK_BASE_URL: `${appOrigin}/local/gov-uk-pay`,
+    EPC_REGISTER_CLIENT_ID: 'performance-test',
+    EPC_REGISTER_CLIENT_SECRET: 'performance-test', // pragma: allowlist secret
+    PERFORMANCE_TEST_INTERNAL_ACCESS_PUBLIC_ORIGIN: councilOrigin,
+  };
+  container.environment = container.environment.filter(({name}) => !(name in overrides));
+  container.secrets = (container.secrets ?? []).filter(({name}) => !(name in overrides));
+  container.environment.push(...Object.entries(overrides).map(([name, value]) => ({name, value})));
   return copy;
 }
 
@@ -46,6 +94,7 @@ export async function awsCommand(service, operation, input = {}, awsRegion = reg
     // AWS errors can echo task environment values. Report the operation and status, never raw stdout/stderr.
     const code = error.stderr?.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1];
     const sanitized = new Error(`AWS ${service} ${operation} failed (status ${error.code ?? 'unknown'}${code ? `, ${code}` : ''})`);
+    sanitized.safeToLog = true;
     sanitized.awsCode = code;
     throw sanitized;
   }
@@ -77,7 +126,7 @@ export function waitFactory({now, sleep, timeoutMs, pollMs}) {
       if (now() >= deadline) break;
       await sleep(pollMs);
     } while (now() <= deadline);
-    throw new Error(`${description} timeout`);
+    throw new OperationTimeoutError(`${description} timeout`);
   };
 }
 
