@@ -32,12 +32,12 @@ class PaymentSummaryStepConfig(
         val quote = dependencies.paymentHandler.getQuote()
         state.paymentQuote = quote
 
-        val firstChargeableDate = paymentService.getFirstChargeableDate(quote.paymentStartDate)
+        val firstChargeableDate = paymentService.getFirstChargeableDate(quote.chargeablePeriodStartDate)
 
         return mapOf(
             "annualFee" to PaymentHelper.formatPence(paymentService.getAnnualFeeInPence()),
             "firstChargeableDate" to firstChargeableDate.format(DATE_FORMATTER),
-            "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.paymentStartDate),
+            "isPreGratisPeriod" to firstChargeableDate.isAfter(quote.chargeablePeriodStartDate),
             "summaryListRows" to getSummaryListRows(dependencies.paymentSummaryAddressLines, quote),
             "summaryInsetText" to dependencies.paymentContentKeys.summaryInsetText,
             "propertyFeeGuidanceUrl" to PROPERTY_FEE_GUIDANCE_URL,

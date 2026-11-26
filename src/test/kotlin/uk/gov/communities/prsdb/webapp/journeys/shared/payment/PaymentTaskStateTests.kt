@@ -48,7 +48,7 @@ class PaymentTaskStateTests {
     }
 
     @Test
-    fun `payment quote saved without a payment start date restores with the quote date as the payment start date`() {
+    fun `payment quote saved without a chargeable period start date restores with the quote date as the chargeable period start date`() {
         // Arrange
         val savedQuote = """{"amountInPence":1234,"quoteDate":"2027-10-10","renewalDate":"2028-03-01"}"""
 
@@ -56,7 +56,7 @@ class PaymentTaskStateTests {
         val restoredQuote = Json.decodeFromString<PropertyPaymentQuote>(savedQuote)
 
         // Assert
-        assertEquals(LocalDate.of(2027, 10, 10), restoredQuote.paymentStartDate)
+        assertEquals(LocalDate.of(2027, 10, 10), restoredQuote.chargeablePeriodStartDate)
     }
 
     private fun createTask(service: JourneyStateService) =

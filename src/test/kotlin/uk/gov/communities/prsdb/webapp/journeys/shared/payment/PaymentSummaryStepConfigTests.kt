@@ -130,13 +130,13 @@ class PaymentSummaryStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent uses the payment start date for the first chargeable date`() {
+    fun `getStepSpecificContent uses the chargeable period start date for the first chargeable date`() {
         // Arrange
-        val paymentStartDate = today.plusDays(30)
-        val quote = createQuote(today).copy(paymentStartDate = paymentStartDate)
+        val chargeablePeriodStartDate = today.plusDays(30)
+        val quote = createQuote(today).copy(chargeablePeriodStartDate = chargeablePeriodStartDate)
         whenever(mockPaymentHandler.getQuote(any())).thenReturn(quote)
         whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
-        whenever(mockPaymentService.getFirstChargeableDate(paymentStartDate)).thenReturn(paymentStartDate)
+        whenever(mockPaymentService.getFirstChargeableDate(chargeablePeriodStartDate)).thenReturn(chargeablePeriodStartDate)
         whenever(mockDependencies.paymentSummaryAddressLines).thenReturn(listOf("1 Example Road"))
 
         // Act
@@ -144,7 +144,10 @@ class PaymentSummaryStepConfigTests {
 
         // Assert
         assertEquals(false, content["isPreGratisPeriod"])
-        assertEquals(paymentStartDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)), content["firstChargeableDate"])
+        assertEquals(
+            chargeablePeriodStartDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)),
+            content["firstChargeableDate"],
+        )
     }
 
     @Test
@@ -307,7 +310,7 @@ class PaymentSummaryStepConfigTests {
         whenever(mockDependencies.paymentSummaryAddressLines).thenReturn(listOf("1 Example Road", "EG1 2AB"))
         whenever(mockPaymentHandler.getQuote(any())).thenReturn(quote)
         whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
-        whenever(mockPaymentService.getFirstChargeableDate(quote.paymentStartDate)).thenReturn(firstChargeableDate)
+        whenever(mockPaymentService.getFirstChargeableDate(quote.chargeablePeriodStartDate)).thenReturn(firstChargeableDate)
     }
 
     private fun stubSummaryDestination() {
