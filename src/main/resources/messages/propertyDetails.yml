@@ -29,8 +29,6 @@ lettingAgentView:
     heading: Tenancy details
   complianceCertificates:
     heading: Compliance certificates
-  feedback:
-    body: Once you have completed one or more of the actions on this page, please click here to provide feedback about your experience
 peopleResponsible:
   heading: People responsible for this property
   ownership:

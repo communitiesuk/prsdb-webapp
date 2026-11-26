@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
+package uk.gov.communities.prsdb.webapp.journeys.shared.payment
 
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PropertyRegistrationPaymentQuoteStateTests {
+class PaymentTaskStateTests {
     @Test
     fun `payment quote survives saving and restoring journey state in a new session`() {
         // Arrange
@@ -25,13 +25,13 @@ class PropertyRegistrationPaymentQuoteStateTests {
         val journeyStateService = JourneyStateService(MockHttpSession(), mock(), persistenceService)
         journeyStateService.initialiseJourneyWithId("journey-1")
         journeyStateService.setJourneyId("journey-1")
-        val journey = createJourney(journeyStateService)
+        val task = createTask(journeyStateService)
         val quote = createQuote(LocalDate.of(2027, 10, 10))
-        journey.paymentQuote = quote
+        task.paymentQuote = quote
         whenever(persistenceService.saveJourneyStateData(any(), eq("journey-1"))).thenReturn(mock())
 
         // Act
-        journey.save()
+        task.save()
         val stateCaptor = argumentCaptor<Any>()
         verify(persistenceService).saveJourneyStateData(stateCaptor.capture(), eq("journey-1"))
         val objectMapper = ObjectMapper()
@@ -40,15 +40,15 @@ class PropertyRegistrationPaymentQuoteStateTests {
         whenever(persistenceService.retrieveJourneyStateData("journey-1")).thenReturn(restoredState)
         val restoredService = JourneyStateService(MockHttpSession(), mock(), persistenceService)
         restoredService.setJourneyId("journey-1")
-        val restoredJourney = createJourney(restoredService)
+        val restoredTask = createTask(restoredService)
 
         // Assert
         assertTrue(serializedState.contains("paymentQuote"))
-        assertEquals(quote, restoredJourney.paymentQuote)
+        assertEquals(quote, restoredTask.paymentQuote)
     }
 
     @Test
-    fun `payment quote saved without a payment start date restores with the quote date as the payment start date`() {
+    fun `payment quote saved without a chargeable period start date restores with the quote date as the chargeable period start date`() {
         // Arrange
         val savedQuote = """{"amountInPence":1234,"quoteDate":"2027-10-10","renewalDate":"2028-03-01"}"""
 
@@ -56,38 +56,16 @@ class PropertyRegistrationPaymentQuoteStateTests {
         val restoredQuote = Json.decodeFromString<PropertyPaymentQuote>(savedQuote)
 
         // Assert
-        assertEquals(LocalDate.of(2027, 10, 10), restoredQuote.paymentStartDate)
+        assertEquals(LocalDate.of(2027, 10, 10), restoredQuote.chargeablePeriodStartDate)
     }
 
-    private fun createJourney(service: JourneyStateService) =
-        PropertyRegistrationJourney(
-            taskListStep = mock(),
-            licensingTask = mock(),
-            occupied = mock(),
-            propertyDetailsTask = mock(),
-            ownershipAndLandlordsTask = mock(),
-            ownershipAndLandlordsTaskBeforeAssociatedParties = mock(),
-            correspondenceTask = mock(),
-            tenancyDetailsTask = mock(),
-            whoProvidesDetailsTask = mock(),
-            gasSafetyTask = mock(),
-            electricalSafetyTask = mock(),
-            epcTask = mock(),
-            cyaStep = mock(),
-            finishCyaStep = mock(),
-            occupancyChangeRoutingStep = mock(),
-            occupancyChangeInterruptionStep = mock(),
-            hasMissingComplianceStep = mock(),
-            confirmMissingComplianceStep = mock(),
-            whoProvidesUpdateRoutingStep = mock(),
-            confirmChangeToLettingAgentStep = mock(),
-            savePropertyRegistrationDataStep = mock(),
+    private fun createTask(service: JourneyStateService) =
+        PaymentTask(
+            journeyStateService = service,
             paymentSummaryStep = mock(),
             paymentReturnStep = mock(),
             paymentStatusCheckStep = mock(),
             paymentFailedStep = mock(),
-            journeyStateService = service,
-            stateFactory = mock(),
         )
 
     private fun createQuote(quoteDate: LocalDate) =

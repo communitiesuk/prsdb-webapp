@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
 import java.net.URI
 import java.security.Principal
 import java.util.UUID

@@ -7,41 +7,42 @@
 <!--/*@thymesVar id="isPreGratisPeriod" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="propertyFeeGuidanceUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="quoteDate" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryInsetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{registerProperty.paymentSummary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{payment.summary.heading}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentSummary.heading}">
-        registerProperty.paymentSummary.heading
+    <h1 class="govuk-heading-l" th:text="#{payment.summary.heading}">
+        payment.summary.heading
     </h1>
 
-    <p class="govuk-body" th:text="#{registerProperty.paymentSummary.annualFee(${annualFee})}">
-        registerProperty.paymentSummary.annualFee
+    <p class="govuk-body" th:text="#{payment.summary.annualFee(${annualFee})}">
+        payment.summary.annualFee
     </p>
-    <p class="govuk-body" th:if="${isPreGratisPeriod}" th:text="#{registerProperty.paymentSummary.preGratisPeriod(${firstChargeableDate})}">
-        registerProperty.paymentSummary.preGratisPeriod
+    <p class="govuk-body" th:if="${isPreGratisPeriod}" th:text="#{payment.summary.preGratisPeriod(${firstChargeableDate})}">
+        payment.summary.preGratisPeriod
     </p>
-    <p class="govuk-body" th:unless="${isPreGratisPeriod}" th:text="#{registerProperty.paymentSummary.postGratisPeriod(${firstChargeableDate})}">
-        registerProperty.paymentSummary.postGratisPeriod
+    <p class="govuk-body" th:unless="${isPreGratisPeriod}" th:text="#{payment.summary.postGratisPeriod(${firstChargeableDate})}">
+        payment.summary.postGratisPeriod
     </p>
-    <p class="govuk-body" th:text="#{registerProperty.paymentSummary.renewalDateExplanation}">
-        registerProperty.paymentSummary.renewalDateExplanation
+    <p class="govuk-body" th:text="#{payment.summary.renewalDateExplanation}">
+        payment.summary.renewalDateExplanation
     </p>
     <p class="govuk-body">
-        <span th:text="#{registerProperty.paymentSummary.guidance.prefix}">registerProperty.paymentSummary.guidance.prefix</span>
+        <span th:text="#{payment.summary.guidance.prefix}">payment.summary.guidance.prefix</span>
         <a class="govuk-link" th:href="${propertyFeeGuidanceUrl}" rel="noreferrer noopener" target="_blank"
-           th:text="#{registerProperty.paymentSummary.guidance.link}">registerProperty.paymentSummary.guidance.link</a><span th:remove="tag" th:text="#{registerProperty.paymentSummary.guidance.afterLink}">registerProperty.paymentSummary.guidance.afterLink</span>
+           th:text="#{payment.summary.guidance.link}">payment.summary.guidance.link</a><span th:remove="tag" th:text="#{payment.summary.guidance.afterLink}">payment.summary.guidance.afterLink</span>
     </p>
 
-    <h2 class="govuk-heading-m" th:text="#{registerProperty.paymentSummary.summary.heading}">
-        registerProperty.paymentSummary.summary.heading
+    <h2 class="govuk-heading-m" th:text="#{payment.summary.summaryList.heading}">
+        payment.summary.summaryList.heading
     </h2>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListRows})}"></dl>
 
-    <div class="govuk-inset-text" th:text="#{registerProperty.paymentSummary.prnHint}">
-        registerProperty.paymentSummary.prnHint
+    <div class="govuk-inset-text" th:text="#{${summaryInsetText}}">
+        summaryInsetText
     </div>
 
     <input type="hidden" name="quoteDate" th:value="${quoteDate}"/>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.paymentSummary.button})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{payment.summary.button})}"></button>
 </th:block>
 </html>
