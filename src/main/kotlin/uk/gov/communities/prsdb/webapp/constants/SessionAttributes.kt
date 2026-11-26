@@ -22,6 +22,7 @@ const val LETTING_AGENT_AUTHORISED_ACCESS_TOKENS = "lettingAgentAuthorisedAccess
 
 const val LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS = "lettingAgentsRemovedThisSessionWithEmails"
 
+// TODO PDJB-2149: Remove this constant when the ACTIVE_INACTIVE flag is removed
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
 const val COOKIE_TOKENS = "cookieTokens"
@@ -60,6 +61,7 @@ const val LANDLORD_REACTIVATED_BY_LAST_JOINT_LANDLORD_INVITATION_ACCEPTANCE = "l
 
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 
+// TODO PDJB-2149: Remove this constant when the ACTIVE_INACTIVE flag is removed
 const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
 
 const val FEATURE_FLAG_OVERRIDES = "featureFlagOverrides"

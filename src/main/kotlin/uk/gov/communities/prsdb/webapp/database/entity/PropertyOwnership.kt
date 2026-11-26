@@ -250,6 +250,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
 
+    // TODO PDJB-2149: Remove this function when the ACTIVE_INACTIVE flag is removed
     fun isSolelyOwnedBy(landlord: Landlord): Boolean = ownershipLinks.singleOrNull()?.landlord?.id == landlord.id
 
     fun removeLandlord(landlord: Landlord) {

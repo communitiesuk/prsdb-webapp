@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+// TODO PDJB-2149: Remove this class when the ACTIVE_INACTIVE flag is removed
 data class LandlordWithPropertiesDeregistrationConfirmationEmail(
     val fullName: String,
     // TODO PDJB-1522: Remove legacy property-list placeholder support after v1 template retirement.

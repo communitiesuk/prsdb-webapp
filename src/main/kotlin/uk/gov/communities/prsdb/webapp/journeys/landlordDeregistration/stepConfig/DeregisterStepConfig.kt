@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
+// TODO PDJB-2149: Remove this file when the ACTIVE_INACTIVE flag is removed
 @JourneyFrameworkComponent
 class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+// TODO PDJB-2149: Remove this class when the ACTIVE_INACTIVE flag is removed
 data class OrganisationalLandlordDeregistrationConfirmationEmail(
     private val registrantName: String,
     private val organisationName: String,

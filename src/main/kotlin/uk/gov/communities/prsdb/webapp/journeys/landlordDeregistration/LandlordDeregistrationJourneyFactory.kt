@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
+// TODO PDJB-2149: Remove this file when the ACTIVE_INACTIVE flag is removed
 @PrsdbWebService
 class LandlordDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordDeregistrationJourney>,

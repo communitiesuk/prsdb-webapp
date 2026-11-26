@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordD
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
 
+// TODO PDJB-2149: Remove this file when the ACTIVE_INACTIVE flag is removed
 @JourneyFrameworkComponent("landlordDeregistrationReasonStepConfig")
 class ReasonStepConfig :
     AbstractRequestableStepConfig<Complete, LandlordDeregistrationReasonFormModel, LandlordDeregistrationJourneyState>() {
