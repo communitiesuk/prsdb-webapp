@@ -751,7 +751,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber() =
             beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber()
                 .withAcceptedEpcFoundByCertificateNumber()
-        
+
         fun beforeTenancyDetailsHouseholds() = beforeTenancyDetails().withHouseholds()
 
         fun beforeTenancyDetailsPeople() = beforeTenancyDetailsHouseholds().withPeople()
