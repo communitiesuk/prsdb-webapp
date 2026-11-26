@@ -706,11 +706,14 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
   if (state.maintenanceScheduleSnapshot && !state.originalApp && !state.stopAttempted &&
       !state.launchAttempted && !state.restorePassed && !state.asyncRegistrationAttempted &&
       !state.asyncSwitchAttempted && !state.environmentRestored) {
+    deps.log('Cleanup path: safe abort before destructive work; restoring maintenance schedules only.');
     await restoreMaintenanceSchedules({...config, safeAbort: true}, deps);
+    deps.log('Cleanup complete: maintenance restored; writer shutdown was not attempted.');
     return;
   }
   requireCondition(state.maintenancePaused === true,
     'NFT maintenance schedules are not safely isolated; refusing cleanup and reset');
+  deps.log('Cleanup path: full recovery; restoring owned resources and stopping writers before reset.');
   const errors = [];
   try {
     await stopRestoreTask(deps);
@@ -746,6 +749,7 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
   });
   requireCondition(latest.taskDefinitionArns?.[0] === state.originalApp.taskDefinition,
     'Latest app revision is not the reset baseline; refusing automatic reset');
+  deps.log('Cleanup complete: writers verified stopped; reset baseline revision verified.');
 }
 
 export function maintenanceRecoveryRequired(state) {
@@ -756,6 +760,25 @@ export function maintenanceRecoveryRequired(state) {
   const asyncShutdownUnresolved = state.asyncStopAttempted === true &&
     state.originalAsync?.desiredCount !== 0 && state.asyncRestored !== true;
   return scheduleMutationUnresolved || appShutdownUnresolved || asyncShutdownUnresolved;
+}
+
+function failureRecoveryGuidance(state) {
+  const progress = state?.maintenanceScheduleProgress;
+  const flags = ['recoveryStateUnknown', 'stopAttempted', 'appRestored', 'asyncStopAttempted',
+    'asyncRestored', 'launchAttempted', 'asyncRegistrationAttempted', 'asyncSwitchAttempted', 'readinessAttempted'];
+  if (!state || typeof state !== 'object' || Array.isArray(state) ||
+      flags.some(key => state[key] !== undefined && typeof state[key] !== 'boolean') ||
+      (progress !== undefined && (!progress || typeof progress !== 'object' || Array.isArray(progress) ||
+        Object.values(progress).some(value => !value || typeof value !== 'object' ||
+          ['pauseAttempted', 'restored'].some(key => value[key] !== undefined && typeof value[key] !== 'boolean'))))) {
+    return 'Recovery state is unavailable; inspect the private checkpoint and live state before changing writers or schedules.';
+  }
+  if (maintenanceRecoveryRequired(state) || state.launchAttempted === true ||
+      state.asyncRegistrationAttempted === true || state.asyncSwitchAttempted === true ||
+      state.readinessAttempted === true) {
+    return 'Recovery changes remain unresolved or destructive work may have started; leave paused schedules disabled and do not restart stopped writers until database and service state are verified.';
+  }
+  return 'No unresolved schedule or writer changes are recorded; do not assume the app was stopped. Verify current state before retrying.';
 }
 
 async function workerLogs(deps) {
@@ -1051,6 +1074,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const abort = () => controller.abort(new SafeRecoveryError('NFT restore interrupted'));
   process.on('SIGTERM', abort);
   process.on('SIGINT', abort);
+  let failureState;
   try {
     const command = process.argv[2];
     if (['resolve-task-definition', 'snapshot-maintenance', 'stop', 'run', 'start', 'start-async'].includes(command)) {
@@ -1078,6 +1102,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       }
       throw new SafeRecoveryError('NFT restore state is missing or unreadable; manual recovery required');
     });
+    failureState = state;
     if (command === 'start-async') config.taskDefinition = state.taskDefinition;
     if (['cleanup', 'pause-maintenance', 'restore-maintenance', 'mark-qa-verified', 'start-after-reset', 'restore-async'].includes(command)) {
       config.runId = recoveryOwner(state, {
@@ -1135,7 +1160,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     } else throw new SafeRecoveryError('Unknown NFT VPC lifecycle operation');
   } catch (error) {
     console.error(`NFT VPC restore details: ${formatSafeError(error)}`);
-    console.error('NFT VPC operation failed; keep the app stopped until recovery succeeds.');
+    console.error(`NFT VPC operation failed. ${failureRecoveryGuidance(failureState)}`);
     process.exitCode = 1;
   } finally {
     process.off('SIGTERM', abort);

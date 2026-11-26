@@ -501,6 +501,8 @@ test('writer shutdown refuses to proceed before maintenance isolation is complet
 
 test('cleanup restores a partial schedule pause only when destructive work never began', async () => {
   const deps = dependencies();
+  const messages = [];
+  deps.log = message => messages.push(message);
   const schedule = deps.schedules.get(maintenanceScheduleDefinitions[0][0]);
   deps.state.runId = config.runId;
   deps.state.taskDefinition = config.taskDefinition;
@@ -514,6 +516,8 @@ test('cleanup restores a partial schedule pause only when destructive work never
   assert.equal(deps.schedules.get(schedule.Name).State, 'ENABLED');
   assert.equal(deps.state.maintenanceRestored, true);
   assert.equal(deps.calls.some(([operation]) => operation === 'run-task' || operation === 'update-service'), false);
+  assert.match(messages.join('\n'), /Cleanup path: safe abort/);
+  assert.match(messages.join('\n'), /Cleanup complete: maintenance restored; writer shutdown was not attempted/);
 });
 
 test('maintenance schedules resume to exact original states only after reset, QA, and async verification', async () => {
@@ -1059,6 +1063,8 @@ test('waits for actual app tasks STOPPED even after ECS reports zero running', a
 
 test('attempts readiness cleanup even when stopping the restore worker fails and never resets', async () => {
   const deps = dependencies();
+  const messages = [];
+  deps.log = message => messages.push(message);
   Object.assign(deps.state, {runId: config.runId, taskDefinition: workerArn, launchAttempted: true});
   let ownedAccessChecked = false;
   deps.aws = async (service, operation) => {
@@ -1075,16 +1081,48 @@ test('attempts readiness cleanup even when stopping the restore worker fails and
   }, deps), /Cleanup incomplete/);
   assert.equal(ownedAccessChecked, true);
   assert.equal(deps.calls.some(([operation]) => operation === 'update-service'), false);
+  assert.match(messages.join('\n'), /Cleanup path: full recovery/);
+  assert.doesNotMatch(messages.join('\n'), /Cleanup complete:/);
 });
 
 test('can safely reset after app startup fails before preparation has changed anything', async () => {
   const deps = dependencies();
+  const messages = [];
+  deps.log = message => messages.push(message);
   Object.assign(deps.state, {runId: config.runId, taskDefinition: workerArn});
   const original = deps.aws;
   deps.aws = async (service, operation, input) => operation === 'list-task-definitions'
     ? {taskDefinitionArns: [appArn]} : original(service, operation, input);
   await cleanupNftEnvironment(config, async () => null, deps);
   assert.equal(deps.state.writersStopped, true);
+  assert.match(messages.join('\n'), /Cleanup path: full recovery/);
+  assert.match(messages.join('\n'), /Cleanup complete: writers verified stopped/);
+});
+
+test('CLI failure guidance distinguishes no mutations, unresolved recovery and unreadable state', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'nft-failure-guidance-'));
+  t.after(() => rm(directory, {recursive: true, force: true}));
+  const script = fileURLToPath(new URL('../../../scripts/performance-tests/nft-vpc-restore.mjs', import.meta.url));
+  const statePath = join(directory, 'state.json');
+  for (const [content, expected] of [
+    ['{}', /No unresolved schedule or writer changes are recorded/],
+    [JSON.stringify({maintenanceScheduleProgress: {schedule: {pauseAttempted: true, restored: true}}}),
+      /No unresolved schedule or writer changes are recorded/],
+    [JSON.stringify({stopAttempted: true}), /Recovery changes remain unresolved/],
+    [JSON.stringify({launchAttempted: true}), /Recovery changes remain unresolved/],
+    [JSON.stringify({stopAttempted: 'true'}), /Recovery state is unavailable/],
+    [JSON.stringify({maintenanceScheduleProgress: {schedule: null}}), /Recovery state is unavailable/],
+    ['{', /Recovery state is unavailable/],
+  ]) {
+    await writeFile(statePath, content);
+    const result = spawnSync(process.execPath, [script, 'unknown-operation'], {
+      encoding: 'utf8',
+      env: {PATH: process.env.PATH, NFT_RESTORE_STATE_PATH: statePath},
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, expected);
+    assert.doesNotMatch(result.stderr, /keep the app stopped until recovery succeeds/);
+  }
 });
 
 test('unreadable preparation state prevents reset but still attempts worker shutdown', async () => {
@@ -1439,7 +1477,7 @@ console.log(JSON.stringify(response));
       },
     });
     assert.equal(unexpected.status, 1);
-    assert.match(unexpected.stderr, /manual|recovery/i);
+    assert.match(unexpected.stderr, /No unresolved schedule or writer changes are recorded/);
     assert.doesNotMatch(unexpected.stdout + unexpected.stderr, /private-payload-canary/);
   } finally {
     await rm(root, {recursive: true, force: true});
