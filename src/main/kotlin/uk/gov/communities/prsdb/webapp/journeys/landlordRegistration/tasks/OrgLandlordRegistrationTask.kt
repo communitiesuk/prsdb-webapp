@@ -16,13 +16,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
     override val orgNameStep: OrgNameStep,
-    override val orgAddressTask: OrgInternationalAddressTask,
+    override val orgAddressTask: OrgAddressTask,
     override val orgEmailStep: OrgEmailStep,
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
@@ -41,7 +41,7 @@ class OrgLandlordRegistrationTask(
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
                 nextStep { journey.orgAddressTask.firstStep }
             }
-            task(journey.orgAddressTask, OrgInternationalAddressTask.ROUTE_SEGMENT) {
+            task(journey.orgAddressTask, OrgAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgNameStep.isComplete() }
                 nextStep { journey.orgEmailStep }
             }

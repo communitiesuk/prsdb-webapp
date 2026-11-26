@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
 @JourneyFrameworkComponent
-class OrgInternationalAddressTask(
+class OrgAddressTask(
     journeyStateService: JourneyStateService,
     addressInUkStep: AddressInUkStep,
     lookupAddressStep: LookupAddressStep,

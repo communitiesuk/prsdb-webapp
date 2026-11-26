@@ -10,11 +10,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadT
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgNameStep: OrgNameStep
-    val orgAddressTask: OrgInternationalAddressTask
+    val orgAddressTask: OrgAddressTask
     val orgEmailStep: OrgEmailStep
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep

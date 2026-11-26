@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import java.security.Principal
 
 @PrsdbWebService
@@ -57,7 +57,7 @@ class UpdateOrganisationAddressJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateOrganisationAddressJourney(
-    override val addressTask: OrgInternationalAddressTask,
+    override val addressTask: OrgAddressTask,
     override val completeOrganisationAddressUpdateStep: CompleteOrganisationAddressUpdateStep,
     journeyStateService: JourneyStateService,
     private val journeyName: String = "organisation-address",

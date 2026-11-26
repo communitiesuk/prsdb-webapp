@@ -52,7 +52,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class LandlordRegistrationTask(
@@ -236,10 +236,10 @@ class LandlordRegistrationTask(
                         checkAnswerStep(journey.orgLandlordRegistrationTask.orgNameStep, OrgNameStep.ROUTE_SEGMENT)
                     }
 
-                    "${OrgInternationalAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}" -> {
+                    "${OrgAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}" -> {
                         checkAnswerTask(
                             journey.orgLandlordRegistrationTask.orgAddressTask,
-                            OrgInternationalAddressTask.ROUTE_SEGMENT,
+                            OrgAddressTask.ROUTE_SEGMENT,
                         )
                     }
 

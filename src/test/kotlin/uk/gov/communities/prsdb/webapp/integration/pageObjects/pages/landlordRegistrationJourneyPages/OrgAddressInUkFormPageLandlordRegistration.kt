@@ -4,11 +4,11 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgInternationalAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 class OrgAddressInUkFormPageLandlordRegistration(
     page: Page,
 ) : PageWithYesNoRadios(
         page,
-        "$LANDLORD_REGISTRATION_ROUTE/${OrgInternationalAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+        "$LANDLORD_REGISTRATION_ROUTE/${OrgAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
     )
