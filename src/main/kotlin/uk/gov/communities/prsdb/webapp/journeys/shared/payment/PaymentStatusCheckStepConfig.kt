@@ -86,19 +86,27 @@ class PaymentStatusCheckStepConfig(
         defaultDestination: Destination,
     ): Destination {
         if (state.paymentOutcome == PaymentOutcome.SUCCESS) {
-            // Resolve the exit destination first: it depends on journey state that deleting the journey removes
-            val nextUrl =
-                checkNotNull(defaultDestination.toUrlStringOrNull()) {
-                    "No destination after payment for journey ${state.journeyId}"
-                }
-            state.deleteJourney()
-            return Destination.ExternalUrl(nextUrl)
+            try {
+                val nextUrl =
+                    checkNotNull(getSuccessUrlOrNull(defaultDestination)) {
+                        "No destination after payment for journey ${state.journeyId}"
+                    }
+                return Destination.ExternalUrl(nextUrl)
+            } finally {
+                state.deleteJourney()
+            }
         }
         if (state.paymentOutcome?.isUnsuccessful() == true && state.dependencies.isPropertyAlreadyRegistered == true) {
             return Destination(state.dependencies.alreadyRegisteredStep)
         }
         return defaultDestination
     }
+
+    private fun getSuccessUrlOrNull(defaultDestination: Destination): String? =
+        when (defaultDestination) {
+            is Destination.NavigationalStep -> defaultDestination.step.getNextDestination().toUrlStringOrNull()
+            else -> defaultDestination.toUrlStringOrNull()
+        }
 
     private fun PaymentOutcome.isUnsuccessful() = this == PaymentOutcome.FAILURE || this == PaymentOutcome.NOT_COMPLETED
 }

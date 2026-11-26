@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PaymentState
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
@@ -270,6 +271,33 @@ class PaymentStatusCheckStepConfigTests {
         inOrder.verify(defaultDestination).toUrlStringOrNull()
         inOrder.verify(mockState).deleteJourney()
         assertEquals("/confirmation", assertIs<Destination.ExternalUrl>(destination).externalUrl)
+    }
+
+    @Test
+    fun `resolveNextDestination on success uses the exit step's next destination without checking whether it is reachable`() {
+        // Arrange
+        whenever(mockState.paymentOutcome).thenReturn(PaymentOutcome.SUCCESS)
+        val mockExitStep = mock<InternalStep<*, *>>()
+        lenient().`when`(mockExitStep.isStepReachable).thenReturn(false)
+        whenever(mockExitStep.getNextDestination()).thenReturn(Destination.ExternalUrl("/confirmation"))
+
+        // Act
+        val destination = stepConfig.resolveNextDestination(mockState, Destination.NavigationalStep(mockExitStep))
+
+        // Assert
+        assertEquals("/confirmation", assertIs<Destination.ExternalUrl>(destination).externalUrl)
+        verify(mockState).deleteJourney()
+    }
+
+    @Test
+    fun `resolveNextDestination on success deletes the journey even when there is no next destination`() {
+        // Arrange
+        whenever(mockState.paymentOutcome).thenReturn(PaymentOutcome.SUCCESS)
+        whenever(mockState.journeyId).thenReturn(journeyId)
+
+        // Act & Assert
+        assertThrows<IllegalStateException> { stepConfig.resolveNextDestination(mockState, Destination.Nowhere()) }
+        verify(mockState).deleteJourney()
     }
 
     @ParameterizedTest
