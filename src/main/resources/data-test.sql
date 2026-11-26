@@ -534,9 +534,11 @@ SELECT * FROM (VALUES (1, 18, '2025-01-15'::timestamp),
 -- Only insert links for landlords that were actually seeded (see note above).
 WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
 ON CONFLICT DO NOTHING;
+-- Avoid rewriting already-correct landlords when this seed runs against the large NFT dataset.
 UPDATE landlord l
 SET has_registered_property = true
-WHERE EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
+WHERE l.has_registered_property IS DISTINCT FROM true
+  AND EXISTS (SELECT 1 FROM ownership_link ol WHERE ol.landlord_id = l.id);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  eicr_expiry_date, electrical_cert_type, eic_issue_date, epc_url, epc_expiry_date,
