@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 
 class OrgLandlordDetailsPage(
     page: Page,
@@ -27,7 +27,7 @@ class OrgLandlordDetailsPage(
     val organisationNameChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
     val organisationAddressChangeLink =
-        Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}']"))
+        Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${AddressInUkStep.ROUTE_SEGMENT}']"))
     val companiesHouseChangeLink =
         Link(page.locator("a[href='$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}']"))
     val organisationTypeChangeLink =

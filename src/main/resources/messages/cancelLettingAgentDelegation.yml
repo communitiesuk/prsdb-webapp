@@ -7,7 +7,7 @@ areYouSure:
       missing: Select if you want to remove this letting agent or property manager
 confirmation:
   banner:
-    heading: Letting agent or property manager can no longer provide details
+    heading: Letting agent or property manager removed
   paragraph:
     one: "You have removed this letting agent or property manager:"
     two: "This means they can no longer provide and update details for:"

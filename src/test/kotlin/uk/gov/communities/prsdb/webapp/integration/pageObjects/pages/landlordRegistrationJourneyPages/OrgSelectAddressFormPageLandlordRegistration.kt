@@ -10,5 +10,6 @@ class OrgSelectAddressFormPageLandlordRegistration(
     page: Page,
 ) : SelectAddressFormPage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ROUTE_SEGMENT}/" +
+            SelectAddressStep.ROUTE_SEGMENT,
     )

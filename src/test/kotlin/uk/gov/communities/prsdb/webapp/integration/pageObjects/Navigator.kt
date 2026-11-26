@@ -99,6 +99,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.EmailAddressPage
@@ -132,6 +133,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberNorthernIrelandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberScotlandFormPageLandlordRegistration
@@ -167,6 +169,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisatio
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.AreYouSureFormPageOrganisationalLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.CheckInvitationsPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
@@ -571,6 +574,12 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgName().build())
         navigateToLandlordRegistrationJourneyStep(OrgNameStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgNameFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationOrgAddressInUkPage(): OrgAddressInUkFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgAddressInUk().build())
+        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}")
+        return createValidPage(page, OrgAddressInUkFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationOrgAddressPage(): OrgAddressFormPageLandlordRegistration {
@@ -1580,6 +1589,11 @@ class Navigator(
         return createValidPage(page, LocalCouncilViewOrgLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
+    fun goToLandlordDetailsAsASystemOperator(id: Long): SystemOperatorViewLandlordDetailsPage {
+        navigate(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(id))
+        return createValidPage(page, SystemOperatorViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
+    }
+
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
         navigate("${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
@@ -1839,6 +1853,15 @@ class Navigator(
         return createValidPage(
             page,
             ConfirmPagePropertyDeactivation::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToPropertyDeactivationCheckInvitationsPage(propertyOwnershipId: Long): CheckInvitationsPagePropertyDeactivation {
+        navigate(DeactivatePropertyController.getPropertyDeactivationPath(propertyOwnershipId))
+        return createValidPage(
+            page,
+            CheckInvitationsPagePropertyDeactivation::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

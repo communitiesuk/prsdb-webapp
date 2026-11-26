@@ -28,6 +28,20 @@ class JointDecisionHttpContractTests {
     }
 
     @Test
+    fun `rejecting ends on rejection confirmation without adding invitee to property`() {
+        DecisionServer().use { server ->
+            val result = run(server)
+            assertEquals(0, result.exitCode, result.output)
+            assertEquals(setOf(101L, 102L), server.accepted)
+            assertEquals(server.accepted, server.roleChecks)
+            assertEquals(setOf(103L), server.rejectionConfirmations)
+            assertTrue(server.propertyLookups.contains(103L))
+            assertTrue(103L !in server.propertyReads)
+            assertTrue(server.posts.any { it["formData.isInviteAccepted"] == "false" })
+        }
+    }
+
+    @Test
     fun `joint invitation decision rejects missing csrf and an out of journey form action`() {
         for (scenario in listOf("missing-csrf", "wrong-action")) {
             DecisionServer(scenario).use { server ->
@@ -61,7 +75,11 @@ class JointDecisionHttpContractTests {
         val accepted = mutableSetOf<Long>()
         val propertyReads = mutableSetOf<Long>()
         val roleChecks = mutableSetOf<Long>()
+        val rejectionConfirmations = mutableSetOf<Long>()
+        val propertyLookups = mutableSetOf<Long>()
         private var confirmationAddress = ""
+        private var rejectedPropertyAddress = ""
+        private var rejectedInvitationId: Long? = null
 
         init {
             server.createContext("/") { exchange ->
@@ -104,8 +122,14 @@ class JointDecisionHttpContractTests {
                             101L -> "invitee-101@example.test"
                             else -> "invitee-${id ?: "unknown"}@example.test"
                         }
+                    val propertyAddress =
+                        when (id) {
+                            102L -> "2 Fixture Road"
+                            103L -> "3 Fixture Road"
+                            else -> "1 Fixture Road"
+                        }
                     body =
-                        """<main><h1>Accept or reject invitation</h1><p>${id?.let { if (it == 102L) "2 Fixture Road<br>Fixture Town" else "1 Fixture Road<br>Fixture Town" }}</p>
+                        """<main><h1>Accept or reject invitation</h1><p>$propertyAddress<br>Fixture Town</p>
                         ${form(action, "formData.isInviteAccepted", selectedScenario != "missing-csrf", radio = true)}</main>"""
                     if (exchange.requestMethod == "POST") {
                         val fields = parseForm(exchange)
@@ -114,6 +138,10 @@ class JointDecisionHttpContractTests {
                             code = 403
                         } else if (fields["formData.isInviteAccepted"] == "true") {
                             redirect("$invitationRoute/check-user-role?journeyId=decision-$id")
+                        } else if (fields["formData.isInviteAccepted"] == "false") {
+                            rejectedInvitationId = requireNotNull(id)
+                            rejectedPropertyAddress = if (id == 103L) "3 Fixture Road" else "1 Fixture Road"
+                            redirect("$invitationRoute/invitation-rejected-confirmation")
                         } else {
                             code = 400
                         }
@@ -141,8 +169,12 @@ class JointDecisionHttpContractTests {
                     }
                 } else if (path == "$invitationRoute/property-joined-confirmation") {
                     body = "<main><h1>Invitation accepted</h1><p>$confirmationAddress</p></main>"
+                } else if (path == "$invitationRoute/invitation-rejected-confirmation") {
+                    rejectedInvitationId?.let { rejectionConfirmations.add(it) }
+                    body = "<main><h1>Invite rejected</h1><p>$rejectedPropertyAddress</p></main>"
                 } else if (parts.getOrNull(2) == "property-details") {
                     val id = propertyId
+                    id?.let { propertyLookups.add(it) }
                     if (id == null || id !in accepted) {
                         code = 404
                     } else {

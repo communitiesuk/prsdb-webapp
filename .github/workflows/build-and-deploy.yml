@@ -104,22 +104,49 @@ jobs:
       - name: Start SSM port-forwarding Session
         id: start-session
         run: |
+          umask 077
+          if ! SSM_OUTPUT_FILE=$(mktemp "$RUNNER_TEMP/ssm-port-forward.XXXXXX"); then
+            echo "::error::Could not create a private SSM session output file."
+            exit 1
+          fi
+          trap 'rm -f -- "$SSM_OUTPUT_FILE"' EXIT
+
           BASTION_ID=$(aws ec2 describe-instances --output text --filters "Name=tag:Name,Values=${{ inputs.environment }}-bastion-1" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[].InstanceId | [0]")
 
           DB_URL=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-url" --query "Parameter.Value")
 
           DB_ENDPOINT="${DB_URL%:*}"
 
-          aws ssm start-session --region $AWS_REGION --target $BASTION_ID --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters host=$DB_ENDPOINT,portNumber="5432",localPortNumber="5432" > ssm_output.txt 2>&1 &
-          sleep 10 # Wait for command to output the session Id
-          cat ssm_output.txt
+          aws ssm start-session --region "$AWS_REGION" --target "$BASTION_ID" --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters "host=$DB_ENDPOINT,portNumber=5432,localPortNumber=5432" > "$SSM_OUTPUT_FILE" 2>&1 &
+          SSM_PID=$!
+          sleep 10
 
-          SESSION_ID=$(grep -oP 'SessionId: \K[a-zA-Z0-9-]+' ssm_output.txt | head -1)
+          SESSION_ID=''
+          SSM_ERROR_CODE=''
+          while IFS= read -r line; do
+            if [[ "$line" =~ SessionId:\ ([a-zA-Z0-9-]+) ]]; then
+              SESSION_ID="${BASH_REMATCH[1]}"
+            fi
+            if [[ "$line" =~ An\ error\ occurred\ \(([[:alnum:]]+)\)\ when\ calling\ the\ StartSession\ operation ]]; then
+              SSM_ERROR_CODE="${BASH_REMATCH[1]}"
+            fi
+          done < "$SSM_OUTPUT_FILE"
           if [ -z "$SESSION_ID" ]; then
-              echo "Session Id not found in the output."
-              exit 1
+            SSM_EXIT_STATUS=0
+            if kill -0 "$SSM_PID" 2>/dev/null; then
+              kill "$SSM_PID" 2>/dev/null || true
+            fi
+            if wait "$SSM_PID"; then :; else SSM_EXIT_STATUS=$?; fi
+            if [ -n "$SSM_ERROR_CODE" ]; then
+              echo "::error::AWS SSM StartSession failed ($SSM_ERROR_CODE). Check role permissions, the bastion target and target connectivity."
+            else
+              echo "::error::SSM port forwarding did not establish a session (exit $SSM_EXIT_STATUS). Check AWS SSM permissions, the bastion target and network connectivity."
+            fi
+            exit 1
           fi
-          echo "SSM_SESSION_ID=$SESSION_ID" >> $GITHUB_OUTPUT
+
+          echo "::add-mask::$SESSION_ID"
+          printf 'SSM_SESSION_ID=%s\n' "$SESSION_ID" >> "$GITHUB_OUTPUT"
 
       - name: Set DB username in ENV
         run: echo "FLYWAY_USER=$(aws ssm get-parameter --output text --name "${{ inputs.environment }}-prsdb-database-username" --query "Parameter.Value")" >> $GITHUB_ENV

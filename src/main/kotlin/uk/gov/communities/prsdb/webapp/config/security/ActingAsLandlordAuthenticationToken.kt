@@ -4,7 +4,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import uk.gov.communities.prsdb.webapp.constants.ROLE_ACTING_AS_LANDLORD
 
-// TODO PDJB-1903: Build this token for each request in the acting as landlord filter, from ActingAsLandlordService.getActingAsUserId()
 class ActingAsLandlordAuthenticationToken(
     private val actingAsUserId: String,
     landlordRoles: List<String>,

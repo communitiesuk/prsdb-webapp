@@ -103,9 +103,19 @@ class LandlordRegistrationCyaStepConfig(
                 organisationCharityRegisteredWith = charityRegulator,
                 organisationCharityNumber = getCharityNumber(state, charityRegulator),
                 organisationLeadTrusteeName =
-                    if (isTrust) org.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
+                    if (isTrust) {
+                        org.leadTrusteeTask.leadTrusteeNameStep.formModel
+                            .notNullValue(LeadTrusteeNameFormModel::name)
+                    } else {
+                        null
+                    },
                 organisationLeadTrusteeDateOfBirth =
-                    if (isTrust) org.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
+                    if (isTrust) {
+                        org.leadTrusteeTask.leadTrusteeDobStep.formModel
+                            .toLocalDateOrNull()
+                    } else {
+                        null
+                    },
                 organisationLeadTrusteeEmail =
                     if (isTrust) {
                         org.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(
@@ -163,9 +173,7 @@ class LandlordRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    private fun isOrgLandlord(state: LandlordRegistrationState): Boolean {
-        return state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
-    }
+    private fun isOrgLandlord(state: LandlordRegistrationState): Boolean = state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
 
     // Individual landlord content
     private fun getIndividualStepContent(state: LandlordRegistrationState): Map<String, Any?> =
@@ -364,8 +372,8 @@ class LandlordRegistrationCyaStepConfig(
                         .getAddress()
                         .singleLineAddress,
                     Destination.VisitableStep(
-                        org.orgAddressTask.lookupAddressStep,
-                        state.getCyaJourneyId(org.orgAddressTask.lookupAddressStep),
+                        org.orgAddressTask.addressInUkStep,
+                        state.getCyaJourneyId(org.orgAddressTask.addressInUkStep),
                     ),
                 ),
             )
@@ -450,7 +458,7 @@ class LandlordRegistrationCyaStepConfig(
         val org = state.orgLandlordRegistrationTask
         val headingKey = "registerAsALandlord.orgCheckAnswers.landlordDetails.charityNumber"
         return when (regulator) {
-            CharityRegulator.ENGLAND_AND_WALES ->
+            CharityRegulator.ENGLAND_AND_WALES -> {
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
                     org.charityTask.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(
@@ -461,8 +469,9 @@ class LandlordRegistrationCyaStepConfig(
                         state.getCyaJourneyId(org.charityTask.orgCharityNumberEnglandAndWalesStep),
                     ),
                 )
+            }
 
-            CharityRegulator.NORTHERN_IRELAND ->
+            CharityRegulator.NORTHERN_IRELAND -> {
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
                     org.charityTask.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(
@@ -473,18 +482,23 @@ class LandlordRegistrationCyaStepConfig(
                         state.getCyaJourneyId(org.charityTask.orgCharityNumberNorthernIrelandStep),
                     ),
                 )
+            }
 
-            CharityRegulator.SCOTLAND ->
+            CharityRegulator.SCOTLAND -> {
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
-                    org.charityTask.orgCharityNumberScotlandStep.formModel.notNullValue(OrgCharityNumberScotlandFormModel::charityNumber),
+                    org.charityTask.orgCharityNumberScotlandStep.formModel
+                        .notNullValue(OrgCharityNumberScotlandFormModel::charityNumber),
                     Destination.VisitableStep(
                         org.charityTask.orgCharityNumberScotlandStep,
                         state.getCyaJourneyId(org.charityTask.orgCharityNumberScotlandStep),
                     ),
                 )
+            }
 
-            CharityRegulator.NONE -> error("charityNumberRow should only be called for a regulator that issues a charity number")
+            CharityRegulator.NONE -> {
+                error("charityNumberRow should only be called for a regulator that issues a charity number")
+            }
         }
     }
 
@@ -497,27 +511,34 @@ class LandlordRegistrationCyaStepConfig(
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.name",
-                    org.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name),
+                    org.leadTrusteeTask.leadTrusteeNameStep.formModel
+                        .notNullValue(LeadTrusteeNameFormModel::name),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth",
-                    org.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull(),
+                    org.leadTrusteeTask.leadTrusteeDobStep.formModel
+                        .toLocalDateOrNull(),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.email",
-                    org.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress),
+                    org.leadTrusteeTask.leadTrusteeEmailStep.formModel
+                        .notNullValue(LeadTrusteeEmailFormModel::emailAddress),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.phoneNumber",
-                    org.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
+                    org.leadTrusteeTask.leadTrusteePhoneStep.formModel
+                        .notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.address",
-                    org.leadTrusteeTask.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
+                    org.leadTrusteeTask.trusteeAddressTask
+                        .getAddress()
+                        .toMultiLineAddress()
+                        .split("\n"),
                     Destination.Nowhere(),
                 ),
             )
@@ -577,22 +598,27 @@ class LandlordRegistrationCyaStepConfig(
     ): String? {
         val org = state.orgLandlordRegistrationTask
         return when (charityRegulator) {
-            CharityRegulator.ENGLAND_AND_WALES ->
+            CharityRegulator.ENGLAND_AND_WALES -> {
                 org.charityTask.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(
                     OrgCharityNumberEnglandAndWalesFormModel::charityNumber,
                 )
+            }
 
-            CharityRegulator.NORTHERN_IRELAND ->
+            CharityRegulator.NORTHERN_IRELAND -> {
                 org.charityTask.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(
                     OrgCharityNumberNorthernIrelandFormModel::charityNumber,
                 )
+            }
 
-            CharityRegulator.SCOTLAND ->
+            CharityRegulator.SCOTLAND -> {
                 org.charityTask.orgCharityNumberScotlandStep.formModel.notNullValue(
                     OrgCharityNumberScotlandFormModel::charityNumber,
                 )
+            }
 
-            CharityRegulator.NONE, null -> null
+            CharityRegulator.NONE, null -> {
+                null
+            }
         }
     }
 }

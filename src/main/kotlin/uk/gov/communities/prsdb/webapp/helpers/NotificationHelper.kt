@@ -19,7 +19,7 @@ class NotificationHelper {
             partyDescription: String,
             parties: List<T>,
             propertyOwnershipId: Long,
-            sendNotification: (T) -> AssociatedPartyNotificationOutcome?,
+            sendNotification: (T) -> AssociatedPartyNotificationOutcome,
         ) {
             parties.forEachIndexed { index, party ->
                 val partyLabel = "$partyDescription ${index + 1}"
