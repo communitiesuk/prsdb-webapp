@@ -1,0 +1,71 @@
+package uk.gov.communities.prsdb.webapp.performance
+
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+
+class RegistrationFixtureTests {
+    private val first =
+        """{"subject":"owner-a","address":"1 Fixture Road, FA1 1AA","postcode":"FA1 1AA","building":"1","localCouncilId":1,"uprn":901}"""
+    private val second =
+        first.replace(
+            "owner-a",
+            "owner-b",
+        ).replace("1 Fixture", "2 Fixture").replace("\"1\"", "\"2\"").replace("901", "902")
+
+    @Test
+    fun `allocates actors and free addresses once without cycling`() {
+        val fixtures = RegistrationFixture.parse("[$first,$second]", 2)
+        assertEquals(listOf("owner-a", "owner-b"), fixtures.map { it.subject })
+        assertEquals(listOf("1 Fixture Road, FA1 1AA", "2 Fixture Road, FA1 1AA"), fixtures.map { it.address })
+        assertEquals(listOf("FA1 1AA", "FA1 1AA"), fixtures.map { it.postcode })
+        assertEquals(listOf("1", "2"), fixtures.map { it.building })
+        assertEquals(listOf(1, 1), fixtures.map { it.localCouncilId })
+        assertEquals(listOf(901L, 902L), fixtures.map { it.uprn })
+    }
+
+    @Test
+    fun `rejects exhausted shared malformed and unsafe allocations before mutation`() {
+        for (json in listOf(
+            "[$first]", "[$first,$first]", "[$first,${second.replace("owner-b", "owner-a")}]",
+            "[$first,${second.replace("902", "901")}]",
+            "[$first,${second.replace("2 Fixture", " 1 fixture")}]",
+            "[$first,${second.replace("\"building\":\"2\"", "\"building\":2")}]",
+            "[$first,${second.replace(":1,", ":0,")}]", "[$first,${second.replace("902", "1.5")}]",
+            "[$first,${second.replace("FA1 1AA", "")}]", "[$first,${second.replace("owner-b", "../escape")}]",
+        )) {
+            assertFailsWith<IllegalArgumentException>(json) { RegistrationFixture.parse(json, 2) }
+        }
+    }
+
+    @Test
+    fun `rejects empty malformed and trailing JSON before allocating fixtures`() {
+        for (json in listOf("", " ", "{", "not-json", "[$first,$second] trailing")) {
+            val exception = assertFailsWith<IllegalArgumentException> { RegistrationFixture.parse(json, 1) }
+            assertEquals("Registration fixtures must be valid JSON", exception.message)
+        }
+    }
+
+    @Test
+    fun `bounds fixture capacity while retaining the normal calibration allocation`() {
+        fun fixtures(size: Int) =
+            (1..size).joinToString(prefix = "[", postfix = "]") { number ->
+                """{"subject":"owner-$number","address":"$number Fixture Road, FA1 1AA","postcode":"FA1 1AA",""" +
+                    """"building":"$number","localCouncilId":1,"uprn":${900000 + number}}"""
+            }
+
+        assertEquals(456, RegistrationFixture.parse(fixtures(456), 456).size)
+        assertFailsWith<IllegalArgumentException> { RegistrationFixture.parse(fixtures(457), 457) }
+    }
+
+    @Test
+    fun `allocates enough distinct property registration fixtures for the normal calibration run`() {
+        val fixtures =
+            (1..455).joinToString(prefix = "[", postfix = "]") { number ->
+                """{"subject":"owner-$number","address":"$number Fixture Road, FA1 1AA","postcode":"FA1 1AA",""" +
+                    """"building":"$number","localCouncilId":1,"uprn":${900000 + number}}"""
+            }
+
+        assertEquals(455, RegistrationFixture.parse(fixtures, 455).size)
+    }
+}

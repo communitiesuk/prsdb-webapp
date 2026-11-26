@@ -6,6 +6,12 @@ nonEnglandOrWalesAddress:
       beforeLink: 'If you made a mistake, '
       linkText: go back
       afterLink: .
+addressInUk:
+  organisationLandlordRegistration:
+    fieldSetHeading: Does your organisation have a UK address?
+    radios:
+      error:
+        missing: Select if the organisation is based in the UK
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?
@@ -20,7 +26,7 @@ lookupAddress:
     fieldSetHint: This should be an address within England
   organisationLandlordRegistration:
     fieldSetHeading: What is your organisation’s address?
-    fieldSetHint: Enter a UK postal address, not a PO Box
+    fieldSetHint: Do not enter a PO Box
   correspondence:
     heading: Where the council should send post about this property
     leadParagraph: The council will use this address if they need to send you anything by post.
@@ -98,7 +104,7 @@ manualAddress:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:
     fieldSetHeading: What is your organisation’s address?
-    fieldSetHint: Enter a UK postal address, not a PO Box
+    fieldSetHint: Do not enter a PO Box
   correspondence:
     fieldSetHeading: Enter a postal address
     preSubmitHeading: The council may send important documents to this address
@@ -123,4 +129,8 @@ manualAddress:
   postcode:
     label: Postcode
     error:
-      missing: Enter postcode
+      missing: 'Enter postcode — if your address does not have a postcode, enter ‘none’'
+  country:
+    label: Country
+    error:
+      missing: Enter country

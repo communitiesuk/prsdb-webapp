@@ -21,6 +21,7 @@ data class SuperiorLandlordDataModel(
     val manualTownOrCity: String? = null,
     val manualCounty: String? = null,
     val manualPostcode: String? = null,
+    val manualCountry: String? = null,
 ) {
     // We must post to a superior landlord with no email, but we are not allowed to store their address. So a named
     // superior landlord loaded from the database will have neither, while one added in the current journey will

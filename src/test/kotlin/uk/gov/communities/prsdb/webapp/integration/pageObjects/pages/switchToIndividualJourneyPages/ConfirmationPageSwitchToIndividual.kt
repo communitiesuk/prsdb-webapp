@@ -16,5 +16,5 @@ class ConfirmationPageSwitchToIndividual(
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)
-    val viewPropertyRecordLink = Link.byText(page, "View property record")
+    val goBackToPropertyRegistrationLink = Link.byText(page, "Go back to property registration")
 }

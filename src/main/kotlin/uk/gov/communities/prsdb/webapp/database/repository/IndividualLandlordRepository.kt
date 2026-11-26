@@ -11,6 +11,8 @@ interface IndividualLandlordRepository :
     LandlordSearchRepository {
     fun findByBaseUser_Id(subjectId: String): IndividualLandlord?
 
+    fun existsByBaseUser_Id(subjectId: String): Boolean
+
     fun findByBaseUser_IdIn(subjectIds: Collection<String>): List<IndividualLandlord>
 
     // TODO PDJB-2149: Remove this function when the ACTIVE_INACTIVE flag is removed

@@ -14,7 +14,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 
-// The landlord proxy is not a measurement of the forecast 26/minute paid property registrations.
 class BaselineLoadSimulation : Simulation() {
     init {
         val properties = System.getProperties().stringPropertyNames().associateWith { System.getProperty(it) }
@@ -36,10 +35,25 @@ class BaselineLoadSimulation : Simulation() {
         val agentTimes = times(BaselineFamily.AGENT)
         val operatorTimes = times(BaselineFamily.OPERATOR)
         val offboardingTimes = times(BaselineFamily.OFFBOARDING)
+        val paidRegistrationTimes = times(BaselineFamily.PAID_REGISTRATION)
+        val councilReadTimes = times(BaselineFamily.COUNCIL_READ)
         val offset = properties["gatling.ramp.fixtureOffset"]?.toInt() ?: 22
         require(offset >= 22) { "Baseline ramp fixtures must skip the correctness-stage allocations" }
         val operatorOffset = properties["gatling.ramp.operatorFixtureOffset"]?.toInt() ?: config.iterations + 1
         require(operatorOffset >= config.iterations + 1) { "Operator ramp fixtures must skip correctness-stage targets" }
+        val paidOffset = properties["gatling.registration.fixtureOffset"]?.toInt() ?: 1
+        val councilOffset = properties["gatling.council.fixtureOffset"]?.toInt() ?: 1
+        require(paidOffset >= 1 && councilOffset >= 1) { "Paid and council ramp fixtures must skip their warmup allocations" }
+        val paymentBase =
+            PaymentJourney.baseUrl(
+                properties["gatling.registration.paymentBaseUrl"] ?: "${config.baseUrl}/local/gov-uk-pay",
+                config.target,
+                config.baseUrl,
+            )
+        val councilSimulator =
+            requireNotNull(properties["gatling.council.simulatorUrl"]?.takeIf { it.isNotBlank() }) {
+                "gatling.council.simulatorUrl must identify the internal-access mock"
+            }
         require(properties["gatling.council.emailDeliveryStub"] == "true") {
             "Operator invitations require gatling.council.emailDeliveryStub=true"
         }
@@ -56,28 +70,37 @@ class BaselineLoadSimulation : Simulation() {
                 Path.of(requireNotNull(properties[key]?.takeIf { it.isNotBlank() }) { "$key must identify a read-only fixture export" }),
             )
 
-        val savedFixtures =
+        val savedPool =
             SavedRegistrationFixture.parse(fixtureJson("gatling.saved.fixturePath"), offset + updateTimes.size)
-                .drop(offset).take(updateTimes.size)
-        val propertyFixtures =
+        val savedFixtures = WorkloadReservations.window(savedPool, offset, updateTimes.size)
+        val propertyPool =
             CompletedPropertyFixture.parse(fixtureJson("gatling.property.fixturePath"), offset + propertyTimes.size + complianceTimes.size)
-                .drop(offset)
-        val organisationFixtures =
+        val propertyFixtures = WorkloadReservations.window(propertyPool, offset, propertyTimes.size + complianceTimes.size)
+        val organisationPool =
             OrganisationFixture.parse(fixtureJson("gatling.organisation.fixturePath"), offset + profileTimes.size)
-                .drop(offset).take(profileTimes.size)
+        val organisationFixtures = WorkloadReservations.window(organisationPool, offset, profileTimes.size)
         val teamFixtures = OrganisationFixture.parse(fixtureJson("gatling.organisation.operationsFixturePath"), teamTimes.size)
         require(teamFixtures.all { it.invitationToken != null }) { "Organisation team invitations must be prepared via HTTP" }
         val jointFixtures = JointLandlordFixture.parseInvitations(fixtureJson("gatling.joint.fixturePath"), jointTimes.size)
         val agentFixtures = AgentFixture.parseAccessFixtures(fixtureJson("gatling.agent.accessFixturePath"), agentTimes.size, false)
-        val operatorFixtures =
-            OperatorFixture.parse(fixtureJson("gatling.operator.fixturePath"), operatorOffset + operatorTimes.size).drop(operatorOffset)
+        val operatorPool = OperatorFixture.parse(fixtureJson("gatling.operator.fixturePath"), operatorOffset + operatorTimes.size)
+        val operatorFixtures = WorkloadReservations.window(operatorPool, operatorOffset, operatorTimes.size)
         val offboardingFixtures = OffboardingFixture.parse(fixtureJson("gatling.offboarding.fixturePath"), offboardingTimes.size)
+        val paidPool =
+            RegistrationFixture.parse(fixtureJson("gatling.registration.fixturePath"), paidOffset + paidRegistrationTimes.size)
+        val paidFixtures = WorkloadReservations.window(paidPool, paidOffset, paidRegistrationTimes.size)
+        val councilPool = CouncilFixture.parseReads(fixtureJson("gatling.council.fixturePath"), councilOffset + councilReadTimes.size)
+        val councilFixtures = WorkloadReservations.window(councilPool, councilOffset, councilReadTimes.size)
         val reservations = WorkloadReservations()
-        reservations.reserve(subjects = savedFixtures.map { it.subject })
-        reservations.reserve(subjects = propertyFixtures.map { it.subject }, properties = propertyFixtures.map { it.propertyOwnershipId })
+        reservations.reserve(subjects = savedPool.map { it.subject })
         reservations.reserve(
-            subjects = organisationFixtures.map { it.subject },
-            organisations = organisationFixtures.map { it.organisationId },
+            subjects = propertyPool.map { it.subject },
+            properties = propertyPool.map { it.propertyOwnershipId },
+            addresses = propertyPool.map { it.address },
+        )
+        reservations.reserve(
+            subjects = organisationPool.map { it.subject },
+            organisations = organisationPool.map { it.organisationId },
         )
         reservations.reserve(
             subjects =
@@ -89,22 +112,43 @@ class BaselineLoadSimulation : Simulation() {
                     )
                 },
             organisations = teamFixtures.map { it.organisationId },
+            invitations = teamFixtures.map { it.invitationToken },
         )
         reservations.reserve(
             subjects = jointFixtures.flatMap { listOf(it.ownerSubject, requireNotNull(it.inviteeSubject)) },
             properties = jointFixtures.map { it.propertyOwnershipId },
+            addresses = jointFixtures.map { it.address },
+            invitations = jointFixtures.map { it.token },
         )
         reservations.reserve(
             subjects = agentFixtures.map { it.ownerSubject },
             properties = agentFixtures.map { it.propertyOwnershipId },
+            addresses = agentFixtures.map { it.address },
+            invitations = agentFixtures.map { it.token },
         )
-        reservations.reserve(subjects = operatorFixtures.flatMap { listOf(it.subject, it.targetSubject) })
+        reservations.reserve(subjects = operatorPool.flatMap { listOf(it.subject, it.targetSubject) })
         reservations.reserve(
             subjects = offboardingFixtures.map { it.subject },
             properties = offboardingFixtures.map { it.propertyOwnershipId },
+            addresses = offboardingFixtures.map { it.address },
         )
         val registrationsData = registrationTimes.mapIndexed { index, _ -> BasicIterationData.forPass(registrationSubject, index + 1) }
         reservations.reserve(subjects = registrationsData.map { it.registrationSubject })
+        reservations.reserve(
+            subjects = paidPool.map { it.subject },
+            addresses =
+                paidPool.flatMap {
+                    listOf(it.address, "NFT registration ${it.uprn}, Performance Town, ${it.postcode}").distinct()
+                },
+            uprns = paidPool.map { it.uprn },
+        )
+        reservations.reserve(subjects = councilPool.map { it.subject })
+        reservations.observe(
+            subjects = councilPool.map { requireNotNull(it.landlordSubject) },
+            properties = councilPool.map { it.propertyId },
+            addresses = councilPool.map { it.address },
+            uprns = councilPool.map { it.uprn.toLong() },
+        )
 
         val registrations =
             registrationsData.zip(registrationTimes).mapIndexed { index, (data, at) ->
@@ -183,6 +227,29 @@ class BaselineLoadSimulation : Simulation() {
                     .exec(OffboardingJourney.chain(config, fixture, OFFBOARDING_PREFIX))
                     .arrive(at)
             }
+        val paidRegistrations =
+            paidFixtures.zip(paidRegistrationTimes).mapIndexed { index, (fixture, at) ->
+                scenario("Baseline paid registration ${index + 1}")
+                    .exec(OneLoginAuthentication.loginChain(config, fixture.subject, "Paid registration authentication", PAID_PREFIX))
+                    .exec(
+                        RegistrationJourney.chain(
+                            config,
+                            fixture,
+                            RegistrationVariant.VACANT_MANUAL_EXEMPT,
+                            paymentBase,
+                            null,
+                            PAID_PREFIX,
+                        ),
+                    )
+                    .arrive(at)
+            }
+        val councilReads =
+            councilFixtures.zip(councilReadTimes).mapIndexed { index, (fixture, at) ->
+                scenario("Baseline council read ${index + 1}")
+                    .exec(CouncilAuthentication.chain(config, fixture.subject, councilSimulator, COUNCIL_PREFIX))
+                    .exec(CouncilReadJourney.basicChain(config, fixture, COUNCIL_PREFIX))
+                    .arrive(at)
+            }
         val coverage =
             listOf(
                 details("$TEAM_PREFIX${OrganisationRegistrationJourney.requestNames("company").last()}")
@@ -206,8 +273,48 @@ class BaselineLoadSimulation : Simulation() {
                 ComplianceUpdateJourney.completedPropertyKinds.map {
                     details("$COMPLIANCE_PREFIX${ComplianceUpdateJourney.requestNames(it).last()}")
                         .successfulRequests().count().`is`(complianceTimes.size.toLong())
+                } +
+                RegistrationJourney.requiredRequests.map {
+                    details("$PAID_PREFIX$it").successfulRequests().count().`is`(paidRegistrationTimes.size.toLong())
+                } +
+                CouncilReadJourney.basicRequestNames.map {
+                    details("$COUNCIL_PREFIX$it").successfulRequests().count().`is`(councilReadTimes.size.toLong())
                 }
-        setUp(registrations + saved + completed + organisations + compliance + teams + joints + agents + operators + offboarding)
+        val measured =
+            registrations + saved + completed + organisations + compliance + teams + joints + agents + operators + offboarding +
+                paidRegistrations + councilReads
+        val warmup =
+            scenario("Baseline paid and council warmup")
+                .exec(
+                    OneLoginAuthentication.loginChain(
+                        config,
+                        paidPool[paidOffset - 1].subject,
+                        "Paid registration authentication",
+                        "Warm-up: $PAID_PREFIX",
+                    ),
+                )
+                .exec(
+                    RegistrationJourney.chain(
+                        config,
+                        paidPool[paidOffset - 1],
+                        RegistrationVariant.VACANT_MANUAL_EXEMPT,
+                        paymentBase,
+                        null,
+                        "Warm-up: $PAID_PREFIX",
+                    ),
+                )
+                .exec(flushCookieJar())
+                .exec(
+                    CouncilAuthentication.chain(
+                        config,
+                        councilPool[councilOffset - 1].subject,
+                        councilSimulator,
+                        "Warm-up: $COUNCIL_PREFIX",
+                    ),
+                )
+                .exec(CouncilReadJourney.basicChain(config, councilPool[councilOffset - 1], "Warm-up: $COUNCIL_PREFIX"))
+                .injectOpen(atOnceUsers(1))
+        setUp(warmup.andThen(*measured.toTypedArray()))
             .protocols(http.baseUrl(config.baseUrl).acceptHeader("text/html").userAgentHeader("PRSDB-Gatling-Performance-Tests"))
             .assertions(
                 listOf(
@@ -231,5 +338,7 @@ class BaselineLoadSimulation : Simulation() {
         const val AGENT_PREFIX = "Concurrent agent: "
         const val OPERATOR_PREFIX = "Concurrent operator: "
         const val OFFBOARDING_PREFIX = "Concurrent offboarding: "
+        const val PAID_PREFIX = "Concurrent paid registration: "
+        const val COUNCIL_PREFIX = "Concurrent council read: "
     }
 }

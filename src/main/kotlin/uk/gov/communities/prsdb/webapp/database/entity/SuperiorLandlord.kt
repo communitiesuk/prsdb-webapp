@@ -6,12 +6,14 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import org.hibernate.envers.Audited
 
 /**
  * Someone further up the ownership chain than the landlord. A row with no name means "no details known".
  * A row with a name but no email means they gave a postal address, which is used to notify them but not stored.
  */
 @Entity
+@Audited
 class SuperiorLandlord() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

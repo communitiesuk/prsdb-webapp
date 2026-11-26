@@ -54,9 +54,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
@@ -111,6 +111,9 @@ class PaymentServiceTests {
     @Mock
     private lateinit var mockPaymentReconciliationService: PaymentReconciliationService
 
+    @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
     private val registrationData = MockPropertyRegistrationData.createPropertyRegistrationDataModel()
 
     private val messageSource = YamlMessageSource("classpath:messages")
@@ -163,7 +166,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 228, g = 167, d = 365 -> 334.25
+            // chargeable days = 228, gratis days = 167, days in year = 365 -> 334.25
             assertEquals(334, fee)
         }
 
@@ -177,7 +180,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 79, g = 1, d = 365 -> 427.40
+            // chargeable days = 79, gratis days = 1, days in year = 365 -> 427.40
             assertEquals(427, fee)
         }
 
@@ -191,7 +194,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 78, g = 0, d = 365 -> 427.40
+            // chargeable days = 78, gratis days = 0, days in year = 365 -> 427.40
             assertEquals(427, fee)
         }
 
@@ -205,7 +208,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 182, g = 349, d = 365 -> negative, clamped to 0
+            // chargeable days = 182, gratis days = 349, days in year = 365 -> negative, clamped to 0
             assertEquals(0, fee)
         }
 
@@ -219,7 +222,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 365, d = 365 -> 0
+            // chargeable days = 365, gratis days = 365, days in year = 365 -> 0
             assertEquals(0, fee)
         }
 
@@ -233,7 +236,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 183, g = 0, d = 366 -> 1000.00 (would be 1002 with d = 365)
+            // chargeable days = 183, gratis days = 0, days in year = 366 -> 1000.00 (would be 1002 with days in year = 365)
             assertEquals(1000, fee)
         }
 
@@ -247,7 +250,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 90, g = 0, d = 365 -> 493.15 (would be 491 with d = 366)
+            // chargeable days = 90, gratis days = 0, days in year = 365 -> 493.15 (would be 491 with days in year = 366)
             assertEquals(493, fee)
         }
 
@@ -261,7 +264,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 307, g = 0, d = 366 -> 1677.60 (would be 1682 with d = 365)
+            // chargeable days = 307, gratis days = 0, days in year = 366 -> 1677.60 (would be 1682 with days in year = 365)
             assertEquals(1677, fee)
         }
 
@@ -275,7 +278,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 152, g = 45, d = 366 -> 584.70 (would be 586 with d = 365)
+            // chargeable days = 152, gratis days = 45, days in year = 366 -> 584.70 (would be 586 with days in year = 365)
             assertEquals(584, fee)
         }
 
@@ -289,7 +292,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 0, d = 365 -> 2000
+            // chargeable days = 365, gratis days = 0, days in year = 365 -> 2000
             assertEquals(2000, fee)
         }
 
@@ -303,7 +306,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 366, g = 0, d = 366 -> 2000
+            // chargeable days = 366, gratis days = 0, days in year = 366 -> 2000
             assertEquals(2000, fee)
         }
 
@@ -317,7 +320,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 1, g = 0, d = 365 -> 5.48
+            // chargeable days = 1, gratis days = 0, days in year = 365 -> 5.48
             assertEquals(5, fee)
         }
 
@@ -331,7 +334,7 @@ class PaymentServiceTests {
             val fee = paymentService.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 1, g = 1, d = 365 -> 0
+            // chargeable days = 1, gratis days = 1, days in year = 365 -> 0
             assertEquals(0, fee)
         }
 
@@ -369,7 +372,7 @@ class PaymentServiceTests {
             val fee = paymentServiceWithEarlierGratisPeriod.calculateProRatedFeeInPence(renewalDate, today)
 
             // Assert
-            // c = 365, g = 31, d = 365 -> 1830.14
+            // chargeable days = 365, gratis days = 31, days in year = 365 -> 1830.14
             assertEquals(1830, fee)
         }
     }
@@ -382,28 +385,28 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is within it`() {
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the chargeable period starts within it`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is the last gratis day`() {
+        fun `getFirstChargeableDate returns the day after the gratis period when the chargeable period starts on the last gratis day`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 14)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the quote date when it is the day after the gratis period ends`() {
+        fun `getFirstChargeableDate returns the chargeable period start date when it is the day after the gratis period ends`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 15)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the quote date when the gratis period has ended`() {
+        fun `getFirstChargeableDate returns the chargeable period start date when the gratis period has ended`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2028, 1, 10), service.getFirstChargeableDate(LocalDate.of(2028, 1, 10)))
@@ -429,6 +432,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(service.calculateProRatedFeeInPence(expectedRenewalDate, quoteDate), quote.amountInPence)
             assertEquals(quoteDate, quote.quoteDate)
+            assertEquals(quoteDate, quote.chargeablePeriodStartDate)
             assertEquals(expectedRenewalDate, quote.renewalDate)
             verifyNoInteractions(mockGovUkPayClient)
         }
@@ -483,6 +487,214 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class PropertyReactivationPaymentQuoteTests {
+        private val propertyOwnershipId = 1L
+
+        private fun setUpInactivePropertyForCurrentLandlord(
+            renewalDate: LocalDate,
+            anniversary: MonthDay?,
+            paidForUntil: LocalDate? = null,
+        ) {
+            val landlord = MockLandlordData.createIndividualLandlord().apply { anniversary?.let { setAnniversaryIfAbsent(it) } }
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = propertyOwnershipId,
+                    isActive = false,
+                    landlords = mutableSetOf(landlord),
+                    renewalDate = renewalDate,
+                    paidForUntil = paidForUntil,
+                )
+            whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+                .thenReturn(propertyOwnership)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote pro-rates from the quote date to the new renewal date when paidForUntil has passed`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2027, 12, 1), anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // chargeable days = 46, gratis days = 0, days in year = 366 -> 251.36
+            assertEquals(251, quote.amountInPence)
+            assertEquals(quoteDate, quote.quoteDate)
+            assertEquals(quoteDate, quote.chargeablePeriodStartDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote pro-rates from paidForUntil when it is after the quote date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 2, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = paidForUntil, anniversary = MonthDay.of(Month.JUNE, 15))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
+            assertEquals(737, quote.amountInPence)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
+            assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote excludes gratis days after the chargeable period start date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2027, 6, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2027, 8, 1), anniversary = MonthDay.of(Month.JANUARY, 15))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // period start 2027-08-01, renewal 2028-01-15: chargeable days = 167, gratis days = 106, days in year = 365 -> 334.25
+            assertEquals(334, quote.amountInPence)
+            assertEquals(LocalDate.of(2028, 1, 15), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when the new renewal date is earlier than the old one`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2028, 12, 1), anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when the renewal date is on the landlord's anniversary`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = renewalDate, anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when paidForUntil covers the new renewal date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 6, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 2, 1),
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing when paidForUntil is the new renewal date`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 2, 1),
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(paidForUntil, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing for an unpaid gap when the renewal date is unchanged`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2028, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = renewalDate,
+                anniversary = MonthDay.of(Month.MARCH, 1),
+                paidForUntil = LocalDate.of(2028, 2, 1),
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges an unpaid gap from paidForUntil when the renewal date moves later`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val paidForUntil = LocalDate.of(2028, 2, 1)
+            setUpInactivePropertyForCurrentLandlord(
+                renewalDate = LocalDate.of(2028, 3, 1),
+                anniversary = MonthDay.of(Month.JUNE, 15),
+                paidForUntil = paidForUntil,
+            )
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
+            assertEquals(737, quote.amountInPence)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
+            assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote charges nothing and keeps a past renewal date that is on the landlord's anniversary`() {
+            // Arrange
+            val quoteDate = LocalDate.of(2028, 1, 15)
+            val renewalDate = LocalDate.of(2026, 3, 1)
+            setUpInactivePropertyForCurrentLandlord(renewalDate = renewalDate, anniversary = MonthDay.of(Month.MARCH, 1))
+
+            // Act
+            val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
+
+            // Assert
+            assertEquals(0, quote.amountInPence)
+            assertEquals(renewalDate, quote.renewalDate)
+        }
+
+        @Test
+        fun `getPropertyReactivationPaymentQuote throws when the current landlord has no anniversary`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2028, 2, 1), anniversary = null)
+
+            // Act & Assert
+            assertThrows<IllegalStateException> {
+                paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, LocalDate.of(2028, 1, 15))
+            }
+        }
+    }
+
+    @Nested
     inner class CreatePropertyRegistrationPaymentTests {
         @Test
         fun `createPropertyRegistrationPayment requests a GOV UK Pay payment for the pro-rated fee`() {
@@ -525,7 +737,7 @@ class PaymentServiceTests {
                 .thenReturn(incompleteProperty)
             val expectedRenewalDate = LocalDate.of(2028, 3, 1)
             val quote =
-                PropertyRegistrationPaymentQuote(
+                PropertyPaymentQuote(
                     amountInPence = 1234,
                     quoteDate = LocalDate.of(2027, 10, 10),
                     renewalDate = expectedRenewalDate,
@@ -598,7 +810,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
+            assertEquals(PaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
         }
 
         @Test
@@ -728,7 +940,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
             verify(mockGovUkPayClient).cancelPayment("new-payment-id")
         }
 
@@ -751,7 +963,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
         }
 
         @Test
@@ -1342,6 +1554,7 @@ class PaymentServiceTests {
         mockSavedJourneyStateRepository,
         mockUserToLandlordService,
         mockPropertyRegistrationService,
+        mockPropertyOwnershipService,
         mockPaymentReconciliationService,
         mockAbsoluteUrlProvider,
         messageSource,
@@ -1465,11 +1678,11 @@ class PaymentServiceTests {
         @JvmStatic
         fun provideWorkedExamples() =
             listOf(
-                // c = 365, g = 335, d = 365 -> 534.25
+                // chargeable days = 365, gratis days = 335, days in year = 365 -> 534.25
                 Arguments.of(6500, LocalDate.of(2026, 12, 15), LocalDate.of(2027, 12, 15), 534),
-                // c = 365, g = 288, d = 365 -> 1371.23
+                // chargeable days = 365, gratis days = 288, days in year = 365 -> 1371.23
                 Arguments.of(6500, LocalDate.of(2027, 1, 31), LocalDate.of(2028, 1, 31), 1371),
-                // c = 366, g = 143, d = 366 -> 3960.38
+                // chargeable days = 366, gratis days = 143, days in year = 366 -> 3960.38
                 Arguments.of(6500, LocalDate.of(2027, 6, 25), LocalDate.of(2028, 6, 25), 3960),
             )
 

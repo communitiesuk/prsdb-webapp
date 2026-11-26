@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgAddressInUkFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityCyaPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberScotlandFormPageUpdateLandlordDetails
@@ -37,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNoAddressFoundFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNonUkAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgSelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
@@ -79,6 +81,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     fun `An organisation landlord can update their organisation address (selected) and return to details page`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitYes()
 
         val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
         lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -96,6 +99,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     fun `An organisation landlord can update their organisation address (manual) and return to details page`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitYes()
 
         val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
         lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -116,17 +120,36 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     }
 
     @Test
-    fun `Organisation address change link opens the address lookup page`(page: Page) {
+    fun `An organisation landlord can update their organisation address to a non-UK address and return to details page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitNo()
+
+        val newFirstLine = "1 Rue de Rivoli"
+        val newTown = "Paris"
+        val newPostcode = "75001"
+        val nonUkOrgAddressPage = assertPageIs(page, OrgNonUkAddressFormPageUpdateLandlordDetails::class)
+        BaseComponent.assertThat(nonUkOrgAddressPage.warning).isVisible()
+        nonUkOrgAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
+
+        val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
+        val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(updatedDetailsPage.mainContent).containsText(newSingleLineAddress.replace(", ", " "))
+    }
+
+    @Test
+    fun `Organisation address change link opens the organisation based in the UK page`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
 
-        assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class)
     }
 
     @Test
     fun `Submitting an empty organisation house number and postcode on the address lookup page shows validation errors`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitYes()
 
         val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
         lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("", "")
@@ -138,6 +161,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     fun `Submitting an empty organisation address, city and postcode on the manual address page shows validation errors`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitYes()
 
         val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
         lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("1", "1")
@@ -151,13 +175,16 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(manualOrgAddressPage.form.getErrorMessage("addressLineOne"))
             .containsText("Enter the first line of an address, typically the building and street")
         assertThat(manualOrgAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-        assertThat(manualOrgAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        assertThat(
+            manualOrgAddressPage.form.getErrorMessage("postcode"),
+        ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
     }
 
     @Test
     fun `Submitting the form with no option selected on organisation select address page shows a validation error`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+        assertPageIs(page, OrgAddressInUkFormPageUpdateLandlordDetails::class).submitYes()
 
         val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
         lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")

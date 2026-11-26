@@ -15,11 +15,12 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.ReactivatePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.TeamMembersController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
 import java.net.URI
 import java.security.Principal
 import java.util.UUID
@@ -47,7 +48,8 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
-    fun buildLandlordPrivacyNoticeDisplayUrl(): String =
+    // For printed letters only: without a scheme, this URL won't work as a link in emails, so use buildLandlordPrivacyNoticeUri there.
+    fun buildLandlordPrivacyNoticeLetterDisplayUrl(): String =
         buildLandlordPrivacyNoticeUri()
             .toString()
             .removePrefix("https://")
@@ -104,6 +106,13 @@ class AbsoluteUrlProvider(
 
     fun buildPropertyDetailsUri(propertyOwnershipId: Long): URI =
         uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
+
+    fun buildPropertyReactivationUri(propertyOwnershipId: Long): URI =
+        UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .replacePath(ReactivatePropertyController.getPropertyReactivationPath(propertyOwnershipId))
+            .build()
+            .toUri()
 
     private fun uriFromMethodCall(info: Any): URI {
         val methodCallUriComponents =

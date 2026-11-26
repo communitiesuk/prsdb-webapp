@@ -72,3 +72,5 @@ const val ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS =
     "organisationalLandlordInvitationTokenWithJourneyIds"
 
 const val ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL = "acceptedOrganisationalLandlordInvitationEmail"
+
+const val ACTING_AS_USER_ID = "actingAsUserId"

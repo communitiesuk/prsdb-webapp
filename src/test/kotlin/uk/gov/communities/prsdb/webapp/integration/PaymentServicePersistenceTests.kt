@@ -44,8 +44,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PaymentRequiresManualInterventionEmail
@@ -589,15 +589,15 @@ class PaymentServicePersistenceTests : IntegrationTestWithMutableData("data-loca
             // Act
             val results =
                 List(2) {
-                    executor.submit<PropertyRegistrationPaymentCreationResult> {
+                    executor.submit<PaymentCreationResult> {
                         JourneyTestHelper.setMockUser(USER_ID)
                         paymentService.createPropertyRegistrationPayment(JOURNEY_ID, "user@example.test", quote)
                     }
                 }.map { it.get(TIMEOUT_SECONDS, TimeUnit.SECONDS) }
 
             // Assert
-            assertEquals(1, results.count { it == PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted })
-            val newPayment = results.filterIsInstance<PropertyRegistrationPaymentCreationResult.NewPayment>().single()
+            assertEquals(1, results.count { it == PaymentCreationResult.ConcurrentPaymentStarted })
+            val newPayment = results.filterIsInstance<PaymentCreationResult.NewPayment>().single()
             val savedPaymentId = newPayment.nextUrl.removePrefix(NEXT_URL_PREFIX)
             val unsavedPaymentId = setOf("concurrent-payment-1", "concurrent-payment-2").minus(savedPaymentId).single()
             val incompleteProperty = landlordIncompletePropertiesRepository.findById(INCOMPLETE_PROPERTY_ID).get()

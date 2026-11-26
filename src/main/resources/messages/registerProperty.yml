@@ -79,36 +79,9 @@ deleteIncompleteProperties:
       text: Return to incomplete properties
 submitRegistration: Submit registration
 confirmMissingCompliance:
-  heading: Confirm missing compliance certificates
-  warning: You can be fined or prosecuted for not having these certificates.
-  intro: This property is occupied by tenants, but it’s missing compliance certificates. These certificates keep tenants safe and are required by law.
-  gas:
-    heading: Missing valid gas safety certificate
-    paragraph: A valid gas safety certificate shows that a Gas Safe engineer has checked the gas supply and appliances within the last 12 months.
-    withoutCertificate: 'Without this certificate, you can be:'
-    bullet:
-      one: fined an unlimited amount
-      two: sent to prison
-  electrical:
-    heading: Missing valid electrical safety certificate
-    paragraph: A valid electrical safety certificate shows that an electrician has checked the electrics in the last 5 years.
-    withoutCertificate: 'Without this certificate, you can be:'
-    bullet:
-      one: fined or prosecuted
-      two: ordered to fix electrical problems
-  epc:
-    heading: Missing valid EPC
-    paragraph: A valid EPC shows that the property meets the minimum energy efficiency standards for rental properties.
-    withoutCertificate: 'Without this certificate, you can be:'
-    bullet:
-      one: fined or prosecuted
-      two: unable to use grounds for possession to evict a tenant
   areYouSure:
     heading: Are you sure you want to submit this registration?
-    hint: The local council will be able to see that certificates are missing
   radios:
-    'yes': Yes (at risk of prosecution or fine)
-    'no': 'No, go back'
     error:
       missing: Select whether you want to submit this registration
   button: Confirm and submit
@@ -171,48 +144,12 @@ propertyManager:
     changeLink: Add, change or remove the property manager
 paymentDescription: Register your rental property
 paymentSummary:
-  heading: Property fee
-  annualFee: The annual property fee is {0}. You are paying an adjusted (pro-rated) fee.
-  preGratisPeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
-  postGratisPeriod: You are paying for {0} to your renewal date.
-  renewalDateExplanation: Your renewal date is 1 year from when you registered your first property.
-  guidance:
-    prefix: Find out more about
-    link: the annual property fee (opens in new tab)
-    afterLink: .
-  summary:
-    heading: Payment summary
-    address: Property address
-    payment: Payment
-    paymentDate: Payment date
-    renewalDate: Renewal date
   prnHint: Your property will be registered when you pay and you will be given a rental property number.
-  button: Go to payment
-paymentProcessing:
-  heading: Your payment is processing
-  js:
-    doNotClose: Do not close or refresh this tab.
-    redirect: When your payment is processed you will be automatically redirected.
-  noJs:
-    notConfirmed: We have not yet received confirmation that your payment was successful.
-    checkStatus: Select Check payment status to see if your payment has been completed.
-    button: Check payment status
-paymentTryAgainLink: Go back to try the payment again
 paymentFailed:
-  heading: Your payment has been declined
-  contactBank: Contact your bank for more details. No money has been taken from your account.
   notRegistered: Your property has not been registered. You must pay the property fee to complete your property registration.
-  getHelp: Get help with payment
 paymentNotCompleted:
-  heading: Your payment was not completed
-  canHappenIf: 'This can happen if:'
-  bullet:
-    one: you made a payment for this property in a different tab or window
-    two: there was a problem with GOV.UK Pay
   notRegistered: This means your property has not been registered.
-  insetText: Any money taken from your account will be refunded.
   whatYouNeedToDo:
-    heading: What you need to do
     paragraph: Try the payment again to complete your property registration.
 whoProvidesRentalDetails:
   heading: Who will provide details about how this property is rented out

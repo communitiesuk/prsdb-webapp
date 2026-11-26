@@ -19,6 +19,8 @@ data class AddressDataModel(
     val postcode: String? = null,
     val country: String = ENGLAND,
     val gss: String? = null,
+    // TODO: PDJB-2280: Use this to determine whether to insert the country at the end of the address
+    val isInternational: Boolean = false,
 ) {
     fun toMultiLineAddress(): String {
         val multiLineFromComponents = buildMultiLineAddressFromComponents()
@@ -66,7 +68,12 @@ data class AddressDataModel(
             ).toTypedArray()
         }
 
-    private fun significantCharacters(value: String): List<Char> = value.lowercase().filter { it.isLetterOrDigit() }.toList().sorted()
+    private fun significantCharacters(value: String): List<Char> =
+        value
+            .lowercase()
+            .filter { it.isLetterOrDigit() }
+            .toList()
+            .sorted()
 
     companion object {
         fun fromManualAddressData(
@@ -76,6 +83,7 @@ data class AddressDataModel(
             addressLineTwo: String? = null,
             county: String? = null,
             localCouncilId: Int? = null,
+            country: String? = null,
         ): AddressDataModel =
             AddressDataModel(
                 singleLineAddress =
@@ -83,8 +91,7 @@ data class AddressDataModel(
                 townName = townOrCity,
                 postcode = postcode,
                 localCouncilId = localCouncilId,
-                // TODO PDJB-2115: Pass in the country rather than hardcoding England
-                country = ENGLAND,
+                country = country ?: ENGLAND,
                 // TODO PDJB-2258: Match up a GSS code for manual addresses
                 gss = null,
             )

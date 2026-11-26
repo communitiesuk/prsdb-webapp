@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.ACTIVE_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEACTIVATED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.OrganisationalLandlordUserRole
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.DeactivatedPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.InactiveLandlordNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
@@ -600,6 +601,14 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails shows a back link to the root page for an LC user`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
+                model { attribute("backUrl", "/") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getLandlordDetails returns 404 when the landlord does not exist`() {
             val unknownLandlordId = landlord.id + 1
             whenever(landlordService.retrieveLandlordById(unknownLandlordId)).thenReturn(null)
@@ -656,6 +665,88 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetLandlordDetailsAsSystemOperatorTests {
+        private val individualLandlordId = 1L
+        private val orgLandlordId = 2L
+        private val unknownLandlordId = 3L
+
+        @BeforeEach
+        fun setUp() {
+            whenever(landlordService.retrieveLandlordById(individualLandlordId))
+                .thenReturn(MockLandlordData.createIndividualLandlord())
+            whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(MockLandlordData.createOrgLandlord())
+            whenever(landlordService.retrieveLandlordById(unknownLandlordId)).thenReturn(null)
+            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(any(), anyOrNull())).thenReturn(emptyList())
+        }
+
+        @Test
+        fun `getLandlordDetailsAsSystemOperator returns a redirect for an unauthenticated user`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `getLandlordDetailsAsSystemOperator returns 403 for an unauthorized user`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getLandlordDetailsAsSystemOperator returns 403 for a landlord`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER", "LOCAL_COUNCIL_ADMIN"])
+        fun `getLandlordDetailsAsSystemOperator returns 403 for a local council user`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator returns the LC view with a back link to the SO dashboard for an individual landlord`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isOk() }
+                view { name("localCouncilLandlordDetailsView") }
+                model {
+                    attributeExists("landlord", "lastModifiedDate", "registeredPropertiesList")
+                    attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator returns the LC org view with a back link to the SO dashboard for an org landlord`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(orgLandlordId)).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attribute("isLandlordView", false)
+                    attribute("showDeleteLandlordRecordLink", false)
+                    attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator returns 404 when the landlord does not exist`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(unknownLandlordId)).andExpect {
+                status { isNotFound() }
             }
         }
     }

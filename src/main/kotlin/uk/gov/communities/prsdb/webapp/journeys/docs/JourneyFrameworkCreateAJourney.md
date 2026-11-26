@@ -113,6 +113,12 @@ Override these hook functions on the config class for custom functionality, incl
 
 For a full list of overridable functions, see the base step config class - [`AbstractStepConfig`](../AbstractStepConfig.kt).
 
+#### Validation beyond the form model
+Primary validation rules belong on the form model. When validation needs more than the submitted fields, such as
+another step's answer, a service, or an error message that differs per journey, use the step config's validation hooks:
+- `enrichSubmittedDataBeforeValidation` adds values to the submitted data so the form model's validators can use them
+- `afterPrimaryValidation` adds further errors with `bindingResult.rejectValueWithMessageKey(fieldName, messageKey)`
+
 ### Define the JourneyStep
 Create a subclass of `RequestableStep` using your step config class as the StepConfig and register it as a `@JourneyFrameworkComponent`.
 

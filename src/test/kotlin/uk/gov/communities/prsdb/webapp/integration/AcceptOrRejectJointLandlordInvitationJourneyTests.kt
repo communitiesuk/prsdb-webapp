@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LandlordTypeFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LookupAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgAddressFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgAddressInUkFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgCompanyNumberFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgEmailFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgIsRegisteredCharityFormPageAcceptJointLandlordInvitation
@@ -35,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PropertyJoinedConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.SelectAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.time.LocalDate
@@ -43,6 +46,7 @@ import java.util.UUID
 class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
     private val alreadyOnPropertyToken = "aaaabbbb-cccc-dddd-eeee-ffff00004444"
+    private val invitedPropertyOwnershipId = 1L
 
     @Autowired
     lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
@@ -52,6 +56,11 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
     @Autowired
     lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    private fun invitedPropertyRegistrationNumber() =
+        RegistrationNumberDataModel
+            .fromRegistrationNumber(propertyOwnershipService.getPropertyOwnership(invitedPropertyOwnershipId).registrationNumber)
+            .toString()
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
@@ -66,8 +75,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         confirmYouAreALandlordForThisPropertyPage.form.submit()
 
         val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
-        assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
-        assertThat(confirmationPage.surveyLink.locator).isVisible()
+        assertThat(confirmationPage.propertyAddress).containsText("2 Fake Way")
+        assertEquals(invitedPropertyRegistrationNumber(), confirmationPage.registrationNumberText)
     }
 
     @Test
@@ -167,8 +176,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             confirmYouAreALandlordForThisPropertyPage.form.submit()
 
             val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
-            assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
-            assertThat(confirmationPage.surveyLink.locator).isVisible()
+            assertThat(confirmationPage.propertyAddress).containsText("2 Fake Way")
+            assertEquals(invitedPropertyRegistrationNumber(), confirmationPage.registrationNumberText)
         }
 
         @Test
@@ -208,6 +217,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val orgNamePage = assertPageIs(page, OrgNameFormPageAcceptJointLandlordInvitation::class)
             orgNamePage.submitName("Test Organisation Name")
 
+            val orgAddressInUkPage = assertPageIs(page, OrgAddressInUkFormPageAcceptJointLandlordInvitation::class)
+            orgAddressInUkPage.submitYes()
+
             val orgAddressPage = assertPageIs(page, OrgAddressFormPageAcceptJointLandlordInvitation::class)
             orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
@@ -245,8 +257,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             confirmYouAreALandlordForThisPropertyPage.form.submit()
 
             val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
-            assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
-            assertThat(confirmationPage.surveyLink.locator).isVisible()
+            assertThat(confirmationPage.propertyAddress).containsText("2 Fake Way")
+            assertEquals(invitedPropertyRegistrationNumber(), confirmationPage.registrationNumberText)
         }
     }
 }
