@@ -143,7 +143,7 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `starting a reactivation payment cancels another landlord's live payment for the property`() {
+    fun `starting a reactivation payment cancels another landlord's created payment for the property`() {
         paymentRepository.saveAndFlush(createStoredPropertyPayment("other-landlord-payment-id", payingUserId = LANDLORD_2_USER_ID))
         stubGovUkPayCreatePayment { "new-payment-id" }
         JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
@@ -167,7 +167,7 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
-    fun `reactivating without payment reactivates the property, then cancels another landlord's live payment for it`() {
+    fun `reactivating without payment reactivates the property, then cancels another landlord's created payment for it`() {
         paymentRepository.saveAndFlush(createStoredPropertyPayment("other-landlord-payment-id", payingUserId = LANDLORD_2_USER_ID))
         JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
 

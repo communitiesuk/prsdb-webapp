@@ -1055,12 +1055,12 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `createPropertyReactivationPayment cancels the property's live payment before creating a new one`() {
+        fun `createPropertyReactivationPayment cancels the property's created payment before creating a new one`() {
             // Arrange
             setUpInactivePropertyForCurrentLandlord()
             stubPayingUser()
             stubGovUkPayCreatePayment { stubReactivationPaymentReturnUrl() }
-            whenever(mockPaymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.CANCELLED)
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.CANCELLED)
             whenever(mockPropertyOwnershipService.isPropertyOwnershipInactive(PROPERTY_ID)).thenReturn(true)
 
             // Act
@@ -1068,15 +1068,15 @@ class PaymentServiceTests {
 
             // Assert
             val inOrder = inOrder(mockPaymentReconciliationService, mockGovUkPayClient)
-            inOrder.verify(mockPaymentReconciliationService).cancelLivePaymentForProperty(PROPERTY_ID)
+            inOrder.verify(mockPaymentReconciliationService).cancelCreatedPaymentForProperty(PROPERTY_ID)
             inOrder.verify(mockGovUkPayClient).createPayment(any())
         }
 
         @Test
-        fun `createPropertyReactivationPayment throws without creating a payment when the property's live payment has succeeded`() {
+        fun `createPropertyReactivationPayment throws without creating a payment when the created payment it cancels has succeeded`() {
             // Arrange
             setUpInactivePropertyForCurrentLandlord()
-            whenever(mockPaymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.SUCCEEDED)
 
             // Act, Assert
             assertThrows<PropertyAlreadyReactivatedException> {

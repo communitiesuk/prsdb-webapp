@@ -53,10 +53,10 @@ class PaymentReconciliationService(
         return getStoredPaymentStatus(paymentId)
     }
 
-    fun cancelLivePaymentForProperty(propertyOwnershipId: Long): PaymentStatus? {
-        val livePayment =
+    fun cancelCreatedPaymentForProperty(propertyOwnershipId: Long): PaymentStatus? {
+        val createdPayment =
             paymentRepository.findByAssociatedProperty_IdAndStatus(propertyOwnershipId, PaymentStatus.CREATED) ?: return null
-        return markForCancellation(livePayment.paymentId)
+        return markForCancellation(createdPayment.paymentId)
     }
 
     fun recordManualIntervention(

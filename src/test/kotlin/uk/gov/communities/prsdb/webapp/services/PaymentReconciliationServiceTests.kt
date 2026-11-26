@@ -129,29 +129,29 @@ class PaymentReconciliationServiceTests {
     }
 
     @Nested
-    inner class CancelLivePaymentForProperty {
+    inner class CancelCreatedPaymentForProperty {
         @Test
-        fun `cancelLivePaymentForProperty returns null and cancels nothing when the property has no live payment`() {
+        fun `cancelCreatedPaymentForProperty returns null and cancels nothing when the property has no created payment`() {
             // Arrange
             whenever(mockPaymentRepository.findByAssociatedProperty_IdAndStatus(PROPERTY_ID, PaymentStatus.CREATED)).thenReturn(null)
 
             // Act & Assert
-            assertNull(paymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID))
+            assertNull(paymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID))
             verify(mockGovUkPayClient, never()).cancelPayment(any())
         }
 
         @Test
-        fun `cancelLivePaymentForProperty marks the live payment for cancellation and returns its status`() {
+        fun `cancelCreatedPaymentForProperty marks the created payment for cancellation and returns its status`() {
             // Arrange
-            val livePayment = createReactivationPayment(paymentId = PAYMENT_ID)
+            val createdPayment = createReactivationPayment(paymentId = PAYMENT_ID)
             whenever(mockPaymentRepository.findByAssociatedProperty_IdAndStatus(PROPERTY_ID, PaymentStatus.CREATED))
-                .thenReturn(livePayment)
+                .thenReturn(createdPayment)
             stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.CANCELLING, rowsUpdated = 1)
             stubConditionalUpdate(PaymentStatus.CANCELLING, PaymentStatus.CANCELLED, rowsUpdated = 1)
             whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
 
             // Act & Assert
-            assertEquals(PaymentStatus.CANCELLED, paymentReconciliationService.cancelLivePaymentForProperty(PROPERTY_ID))
+            assertEquals(PaymentStatus.CANCELLED, paymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID))
             verify(mockGovUkPayClient).cancelPayment(PAYMENT_ID)
         }
     }

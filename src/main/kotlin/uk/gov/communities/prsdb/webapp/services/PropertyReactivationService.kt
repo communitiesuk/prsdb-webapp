@@ -29,7 +29,7 @@ class PropertyReactivationService(
     private val paymentReconciliationService: PaymentReconciliationService,
     private val transactionTemplate: TransactionTemplate,
 ) {
-    // Runs its own transaction so live payments are only cancelled once the reactivation has committed
+    // Runs its own transaction so created payments are only cancelled once the reactivation has committed
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     fun reactivatePropertyWithoutPayment(
         propertyOwnershipId: Long,
@@ -52,7 +52,7 @@ class PropertyReactivationService(
             recordReactivationAfterCommit(propertyOwnershipId, landlordWillBeReactivated, wasPaid = false)
         }
 
-        cancelLivePaymentAndLogFailures(propertyOwnershipId)
+        cancelCreatedPaymentAndLogFailures(propertyOwnershipId)
     }
 
     fun getLastPropertyOwnershipIdReactivatedThisSession(): Long? = session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID) as? Long
@@ -62,19 +62,17 @@ class PropertyReactivationService(
 
     fun wasLastReactivationPaid(): Boolean = session.getAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID) == true
 
-    // A payment left live can't be taken, because the paid path's claim would fail
-    private fun cancelLivePaymentAndLogFailures(propertyOwnershipId: Long) {
+    private fun cancelCreatedPaymentAndLogFailures(propertyOwnershipId: Long) {
         try {
-            paymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId)
+            paymentReconciliationService.cancelCreatedPaymentForProperty(propertyOwnershipId)
         } catch (exception: Exception) {
             println(
-                "Failed to cancel the live payment for reactivated property ownership $propertyOwnershipId: " +
+                "Failed to cancel the created payment for reactivated property ownership $propertyOwnershipId: " +
                     exception.stackTraceToString(),
             )
         }
     }
 
-    // The address is checked first because the claim's is_active update would itself violate the active address index
     private fun claimPropertyIfAddressAvailable(propertyOwnership: PropertyOwnership): PropertyOwnership {
         val uprn = propertyOwnership.address.uprn
         if (uprn != null && addressAvailabilityService.hasAnotherActiveRegistration(uprn, propertyOwnership.id)) {

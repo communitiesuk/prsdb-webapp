@@ -319,11 +319,11 @@ class PropertyReactivationServiceTests {
         }
 
         @Test
-        fun `cancels any live payment for the property after the reactivation transaction`() {
+        fun `cancels any created payment for the property after the reactivation transaction`() {
             // Arrange
             stubFreeReactivation()
             var wasCancelledInTransaction: Boolean? = null
-            whenever(mockPaymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId)).thenAnswer {
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(propertyOwnershipId)).thenAnswer {
                 wasCancelledInTransaction = isInTransaction
                 PaymentStatus.CANCELLED
             }
@@ -336,10 +336,10 @@ class PropertyReactivationServiceTests {
         }
 
         @Test
-        fun `still completes when cancelling a live payment for the property fails`() {
+        fun `still completes when cancelling a created payment for the property fails`() {
             // Arrange
             stubFreeReactivation()
-            whenever(mockPaymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId))
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(propertyOwnershipId))
                 .thenThrow(RuntimeException("Database unavailable"))
 
             // Act & Assert

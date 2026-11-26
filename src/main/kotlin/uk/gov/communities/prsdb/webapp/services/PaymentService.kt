@@ -149,8 +149,8 @@ class PaymentService(
         }
         val propertyOwnership = propertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId)
 
-        // Newest payment wins: the property's live payment is cancelled whichever landlord started it
-        if (paymentReconciliationService.cancelLivePaymentForProperty(propertyOwnershipId) == PaymentStatus.SUCCEEDED) {
+        // Newest payment wins: the property's created payment is cancelled whichever landlord started it
+        if (paymentReconciliationService.cancelCreatedPaymentForProperty(propertyOwnershipId) == PaymentStatus.SUCCEEDED) {
             throw PropertyAlreadyReactivatedException(propertyOwnershipId)
         }
 
