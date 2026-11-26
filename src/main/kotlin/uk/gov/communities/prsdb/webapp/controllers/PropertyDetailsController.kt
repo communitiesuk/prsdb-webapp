@@ -278,10 +278,11 @@ class PropertyDetailsController(
                 propertyOwnership.landlords,
                 landlordDetailsUrlProvider = { landlord ->
                     val landlordDetailsPath =
-                        if (viewType == PropertyDetailsCouncilViewType.SystemOperatorView) {
-                            LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)
-                        } else {
-                            LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                        when (viewType) {
+                            PropertyDetailsCouncilViewType.LocalCouncilView ->
+                                LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                            PropertyDetailsCouncilViewType.SystemOperatorView ->
+                                LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)
                         }
                     landlordDetailsPath.overrideBackLinkForUrl(backUrlKey)
                 },
@@ -319,7 +320,6 @@ class PropertyDetailsController(
         )
         model.addAttribute("isLandlordView", false)
 
-        // TODO PDJB-1910: Return system operators to the property search results
         val backUrl =
             when (viewType) {
                 PropertyDetailsCouncilViewType.LocalCouncilView -> LOCAL_COUNCIL_DASHBOARD_URL

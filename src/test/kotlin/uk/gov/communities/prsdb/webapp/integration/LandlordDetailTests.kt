@@ -348,7 +348,6 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
-        // TODO PDJB-1910: Check the back link returns to the system operator landlord search results
         @Test
         fun `the back link goes to the system operator dashboard`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsASystemOperator(1)

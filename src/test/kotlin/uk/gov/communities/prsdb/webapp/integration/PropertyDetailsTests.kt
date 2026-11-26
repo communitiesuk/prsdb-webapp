@@ -812,7 +812,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(actionLink).hasAttribute("target", "_blank")
         }
 
-        // TODO PDJB-1910: Check the back link returns to the system operator property search results
         @Test
         fun `the back link goes to the system operator dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsAsASystemOperator(1)
