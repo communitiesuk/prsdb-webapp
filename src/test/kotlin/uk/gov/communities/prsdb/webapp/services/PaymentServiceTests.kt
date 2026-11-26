@@ -718,7 +718,7 @@ class PaymentServiceTests {
 
             // Assert
             assertEquals(LocalDate.of(2028, 6, 1), quote.renewalDate)
-            assertEquals(LocalDate.of(2028, 3, 1), quote.paymentStartDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.chargeablePeriodStartDate)
             assertTrue(quote.amountInPence > 0)
             verifyNoInteractions(mockPropertyOwnershipService, mockUserToLandlordService)
         }
