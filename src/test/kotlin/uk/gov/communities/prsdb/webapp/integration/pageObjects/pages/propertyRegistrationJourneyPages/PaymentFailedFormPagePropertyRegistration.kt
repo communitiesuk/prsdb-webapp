@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentFailedStep
 
 class PaymentFailedFormPagePropertyRegistration(
     page: Page,
