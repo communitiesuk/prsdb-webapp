@@ -1647,7 +1647,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = false))
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -1656,7 +1656,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalCouncilView(id: Long): PropertyDetailsPageLocalCouncilView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = true))
+        navigate(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(id))
         return createValidPage(
             page,
             PropertyDetailsPageLocalCouncilView::class,

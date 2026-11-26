@@ -41,7 +41,7 @@ data class RegisteredPropertyLocalCouncilViewModel(
                         if (isSystemOperatorView) {
                             PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(propertyOwnership.id)
                         } else {
-                            PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
+                            PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id)
                         }
                     ).overrideBackLinkForUrl(currentUrlKey),
             )
@@ -67,7 +67,7 @@ data class RegisteredPropertyLandlordViewModel(
                         ).toString(),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)
+                        .getPropertyDetailsPath(propertyOwnership.id)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }
@@ -91,7 +91,7 @@ data class DeactivatedPropertyLandlordViewModel(
                         .toString(),
                 recordLink =
                     PropertyDetailsController
-                        .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)
+                        .getPropertyDetailsPath(propertyOwnership.id)
                         .overrideBackLinkForUrl(currentUrlKey),
             )
     }

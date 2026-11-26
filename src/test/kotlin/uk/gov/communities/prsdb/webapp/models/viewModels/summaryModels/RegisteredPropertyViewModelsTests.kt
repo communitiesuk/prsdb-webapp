@@ -39,7 +39,7 @@ class RegisteredPropertyViewModelsTests {
             val expectedPropertyLicence = "licensing.checkAnswers.noLicensing"
             val expectedIsTenantedMessageKey = "commonText.no"
             val expectedRecordLink =
-                PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
+                PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id)
 
             val expectedRegisteredPropertyViewModel =
                 RegisteredPropertyLocalCouncilViewModel(

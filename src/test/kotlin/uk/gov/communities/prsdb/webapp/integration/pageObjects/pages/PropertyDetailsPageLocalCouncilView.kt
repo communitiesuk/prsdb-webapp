@@ -9,8 +9,5 @@ class PropertyDetailsPageLocalCouncilView(
     urlArguments: Map<String, String>,
 ) : PropertyDetailsCouncilViewBasePage(
         page,
-        PropertyDetailsController.getPropertyDetailsPath(
-            urlArguments["propertyOwnershipId"]!!.toLong(),
-            isLocalCouncilView = true,
-        ),
+        PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(urlArguments["propertyOwnershipId"]!!.toLong()),
     )

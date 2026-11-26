@@ -386,13 +386,11 @@ class PropertyDetailsController(
         const val SYSTEM_OPERATOR_PROPERTY_DETAILS_ROUTE =
             "/$SYSTEM_OPERATOR_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
-        fun getPropertyDetailsPath(
-            propertyOwnershipId: Long,
-            isLocalCouncilView: Boolean = false,
-        ): String =
-            UriTemplate(if (isLocalCouncilView) LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE else LANDLORD_PROPERTY_DETAILS_ROUTE)
-                .expand(propertyOwnershipId)
-                .toASCIIString()
+        fun getPropertyDetailsPath(propertyOwnershipId: Long): String =
+            UriTemplate(LANDLORD_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getPropertyDetailsForLocalCouncilUserPath(propertyOwnershipId: Long): String =
+            UriTemplate(LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
         fun getPropertyDetailsForSystemOperatorPath(propertyOwnershipId: Long): String =
             UriTemplate(SYSTEM_OPERATOR_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
