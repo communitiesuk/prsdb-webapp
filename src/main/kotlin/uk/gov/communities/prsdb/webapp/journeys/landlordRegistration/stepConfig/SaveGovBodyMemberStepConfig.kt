@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
 class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovBodyMembersState>() {
@@ -30,13 +32,25 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
             DateTimeHelper.parseDateOrNull(dobFormModel.day, dobFormModel.month, dobFormModel.year)
                 ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
-        val address = state.govBodyMemberAddressTask.getAddress()
-        val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
-        // Set by both the select address and no address found steps, so it reflects the user's latest choice
-        val selectedAddress = state.govBodyMemberAddressTask.cachedSelectedAddress
-        val manualFormModel =
-            state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull
-                ?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
+        val lookupFormModel: LookupAddressFormModel?
+        val selectedAddress: String?
+        val manualFormModel: ManualAddressFormModel?
+
+        val addressTask = state.govBodyMemberAddressTask
+        val address = addressTask.getAddress()
+        val addressInUk = addressTask.addressInUk()
+
+        if (addressInUk == false) {
+            lookupFormModel = null
+            selectedAddress = null
+            manualFormModel = addressTask.internationalManualAddressStep.formModelOrNull
+        } else {
+            val ukAddressTask = addressTask.addressTask
+            lookupFormModel = ukAddressTask.lookupAddressStep.formModelOrNull
+            // Set by both the select address and no address found steps, so it reflects the user's latest choice
+            selectedAddress = ukAddressTask.cachedSelectedAddress
+            manualFormModel = ukAddressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
+        }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -53,6 +67,7 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 type = type,
                 dateOfBirth = dateOfBirth,
                 address = address,
+                addressInUk = addressInUk,
                 addressSearchPostcode = lookupFormModel?.postcode,
                 addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
                 selectedAddress = selectedAddress,

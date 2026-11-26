@@ -12,6 +12,7 @@ data class GoverningBodyMemberDataModel(
     val type: GoverningBodyMemberType,
     val dateOfBirth: LocalDate,
     val address: AddressDataModel,
+    val addressInUk: Boolean? = null,
     val addressSearchPostcode: String? = null,
     val addressSearchHouseNameOrNumber: String? = null,
     val selectedAddress: String? = null,

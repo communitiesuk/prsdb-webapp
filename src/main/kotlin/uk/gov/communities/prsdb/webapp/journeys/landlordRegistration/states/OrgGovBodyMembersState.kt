@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
 
 interface OrgGovBodyMembersState :
     JourneyState,
@@ -17,7 +17,7 @@ interface OrgGovBodyMembersState :
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val govBodyMemberAddressTask: AddressTask
+    val govBodyMemberAddressTask: InternationalAddressTask
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
     val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
     val saveGovBodyMemberStep: SaveGovBodyMemberStep

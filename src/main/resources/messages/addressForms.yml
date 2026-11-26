@@ -12,6 +12,11 @@ addressInUk:
     radios:
       error:
         missing: Select if the organisation is based in the UK
+  govBodyMemberRegistration:
+    fieldSetHeading: Is their contact address in the UK?
+    radios:
+      error:
+        missing: Select if their contact address is in the UK
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?

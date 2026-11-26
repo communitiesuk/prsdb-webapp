@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -38,6 +39,21 @@ class AddressInUkStepConfig : AbstractRequestableStepConfig<YesOrNo, AddressInUk
                 checkNotNull(missingAnswerErrorKey) { "AddressInUkStepConfig requires withMissingAnswerError to be called" }
             bindingResult.rejectValueWithMessageKey(AddressInUkFormModel::addressInUk.name, messageKey)
         }
+    }
+
+    override fun resolvePageContent(
+        state: JourneyState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val prefillAddressInUk = defaultContent[PREFILL_ADDRESS_IN_UK] as? Boolean ?: return defaultContent
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? AddressInUkFormModel ?: return defaultContent
+        if (formModel.addressInUk != null) return defaultContent
+        formModel.addressInUk = prefillAddressInUk
+        return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_ADDRESS_IN_UK = "addressInUkPrefill"
     }
 
     override fun mode(state: JourneyState) =
