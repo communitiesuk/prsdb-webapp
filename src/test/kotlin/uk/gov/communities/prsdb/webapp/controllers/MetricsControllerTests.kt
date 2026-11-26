@@ -247,8 +247,8 @@ class MetricsControllerTests(
                             "41.20%",
                             "Peak CPU utilisation",
                             "62.50%",
-                            "ElastiCache CPU utilisation",
-                            "18.90%",
+                            "ElastiCache ECPU consumption",
+                            "18.90",
                             "Client error rate (HTTP 4xx)",
                             "0.82%",
                             "Server error rate (HTTP 5xx)",
@@ -261,6 +261,7 @@ class MetricsControllerTests(
                             "0.17 USD",
                         ),
                     )
+                    string(not(containsString("18.90%")))
                 }
             }
 

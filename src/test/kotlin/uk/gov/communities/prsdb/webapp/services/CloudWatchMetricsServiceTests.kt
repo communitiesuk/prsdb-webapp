@@ -7,8 +7,10 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.cloudwatch.model.Dimension
 import software.amazon.awssdk.services.cloudwatch.model.Statistic
 import uk.gov.communities.prsdb.webapp.clients.CloudWatchMetricsClient
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
@@ -24,7 +26,11 @@ class CloudWatchMetricsServiceTests {
     private val period =
         ReportingPeriod(Instant.parse("2025-01-10T00:00:00Z"), Instant.parse("2025-01-20T23:59:59Z"))
 
-    private fun service() =
+    private fun service(
+        elastiCacheMetricName: String = "ElastiCacheProcessingUnits",
+        elastiCacheDimensionName: String = "clusterId",
+        elastiCacheStatistic: Statistic = Statistic.SUM,
+    ) =
         CloudWatchMetricsService(
             client,
             ecsNamespace = "AWS/ECS",
@@ -33,13 +39,43 @@ class CloudWatchMetricsServiceTests {
             ecsClusterName = "cluster",
             ecsServiceName = "service",
             elastiCacheNamespace = "AWS/ElastiCache",
-            elastiCacheCpuMetric = "CPUUtilization",
+            elastiCacheMetricName = elastiCacheMetricName,
+            elastiCacheDimensionName = elastiCacheDimensionName,
+            elastiCacheStatistic = elastiCacheStatistic,
             elastiCacheClusterId = "cache-cluster",
             cloudFrontNamespace = "AWS/CloudFront",
             cloudFrontClientErrorRateMetric = "4xxErrorRate",
             cloudFrontServerErrorRateMetric = "5xxErrorRate",
             cloudFrontDistributionId = "distribution",
         )
+
+    @Test
+    fun `getMetrics queries serverless ECPU sum using the cache name dimension`() {
+        service().getMetrics(period)
+
+        verify(client).getMetricStatistic(
+            eq("AWS/ElastiCache"),
+            eq("ElastiCacheProcessingUnits"),
+            eq(listOf(Dimension.builder().name("clusterId").value("cache-cluster").build())),
+            eq(Statistic.SUM),
+            eq(period),
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `getMetrics preserves maximum statistic for legacy Redis CPU metric`() {
+        service("CPUUtilization", "CacheClusterId", Statistic.MAXIMUM).getMetrics(period)
+
+        verify(client).getMetricStatistic(
+            eq("AWS/ElastiCache"),
+            eq("CPUUtilization"),
+            eq(listOf(Dimension.builder().name("CacheClusterId").value("cache-cluster").build())),
+            eq(Statistic.MAXIMUM),
+            eq(period),
+            anyOrNull(),
+        )
+    }
 
     @Test
     fun `getMetrics maps memory, cpu, elasticache and cloudfront error rate values`() {
@@ -67,7 +103,14 @@ class CloudWatchMetricsServiceTests {
             client.getMetricStatistic(eq("AWS/ECS"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
         ).thenReturn(62.5)
         whenever(
-            client.getMetricStatistic(eq("AWS/ElastiCache"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+            client.getMetricStatistic(
+                eq("AWS/ElastiCache"),
+                eq("ElastiCacheProcessingUnits"),
+                any(),
+                eq(Statistic.SUM),
+                any(),
+                anyOrNull(),
+            ),
         ).thenReturn(18.9)
         whenever(
             client.getMetricStatistic(eq("AWS/CloudFront"), eq("4xxErrorRate"), any(), eq(Statistic.AVERAGE), any(), eq(Region.US_EAST_1)),
@@ -81,7 +124,7 @@ class CloudWatchMetricsServiceTests {
         assertEquals(73.42, result.peakMemoryUtilisation)
         assertEquals(41.21, result.averageMemoryUtilisation)
         assertEquals(62.5, result.peakCpuUtilisation)
-        assertEquals(18.9, result.elastiCacheCpuUtilisation)
+        assertEquals(18.9, result.elastiCacheEcpuConsumption)
         assertEquals(0.82, result.cloudFrontClientErrorRate)
         assertEquals(0.05, result.cloudFrontServerErrorRate)
     }
@@ -95,7 +138,7 @@ class CloudWatchMetricsServiceTests {
         assertNull(result.peakMemoryUtilisation)
         assertNull(result.averageMemoryUtilisation)
         assertNull(result.peakCpuUtilisation)
-        assertNull(result.elastiCacheCpuUtilisation)
+        assertNull(result.elastiCacheEcpuConsumption)
         assertNull(result.cloudFrontClientErrorRate)
         assertNull(result.cloudFrontServerErrorRate)
     }
@@ -109,7 +152,7 @@ class CloudWatchMetricsServiceTests {
         assertNull(result.peakMemoryUtilisation)
         assertNull(result.averageMemoryUtilisation)
         assertNull(result.peakCpuUtilisation)
-        assertNull(result.elastiCacheCpuUtilisation)
+        assertNull(result.elastiCacheEcpuConsumption)
         assertNull(result.cloudFrontClientErrorRate)
         assertNull(result.cloudFrontServerErrorRate)
     }
