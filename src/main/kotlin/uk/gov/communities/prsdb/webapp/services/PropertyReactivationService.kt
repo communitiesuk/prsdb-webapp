@@ -47,6 +47,12 @@ class PropertyReactivationService(
             ) {
                 propertyReactivationEmailService.sendConfirmationEmail(propertyOwnershipId, landlordWillBeReactivated)
             }
+
+            NotificationHelper.sendNotificationAndLogFailures(
+                "the joint landlord notifications for the reactivation of property ownership $propertyOwnershipId",
+            ) {
+                propertyReactivationEmailService.sendJointLandlordNotifications(propertyOwnershipId)
+            }
         }
     }
 
