@@ -226,7 +226,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             addressInUkPage.submitNo()
 
             val nonUkAddressPage = assertPageIs(page, FreeholderNonUkAddressFormPagePropertyRegistration::class)
-            assertThat(nonUkAddressPage.heading).containsText("What is Test Freeholder’s address?")
+            assertThat(nonUkAddressPage.heading).containsText("What is Test Freeholder’s contact address?")
             nonUkAddressPage.submitAddress(
                 addressLineOne = "1 Rue Example",
                 townOrCity = "Paris",

@@ -49,6 +49,10 @@ class FreeholderAddressTask(
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
+    override val internationalManualAddressContentProperties: Map<String, Any?> =
+        manualAddressContentProperties +
+            ("fieldSetHeading" to "registerProperty.freeholders.address.nonUk.fieldSetHeading")
+
     companion object {
         const val ROUTE_SEGMENT = "freeholder-address"
     }
