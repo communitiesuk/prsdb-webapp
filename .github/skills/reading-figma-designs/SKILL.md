@@ -90,10 +90,11 @@ Template conventions:
 
 ## Email Designs
 
-Email templates are Notify markdown files in `src/main/resources/emails/`, not Thymeleaf templates. Map section
-headings in the email body to `##`. Designs often show these headings at a size between Notify's `#` and `##`, so treat
-ambiguous sizes as `##`. Only map a body section heading to `#` when the design or ticket explicitly says so, or there
-is a clear reason to, and call out that decision in the implementation spec.
+Email templates are Notify markdown files in `src/main/resources/emails/`, not Thymeleaf templates. Notify only
+supports `#` and `##` headings (there is no `###`). Map section headings in the email body to `#`, and reserve `##` for
+sub-headings nested under a `#` section heading. Designs often show headings at a size between Notify's `#` and `##`,
+so treat ambiguous sizes as `#`. Only map a heading that isn't a sub-heading to `##` when the design or ticket
+explicitly says so, or there is a clear reason to, and call out that decision in the implementation spec.
 
 ## Taking Screenshots for Validation
 

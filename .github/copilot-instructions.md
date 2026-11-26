@@ -199,9 +199,10 @@ Tests use Playwright (`@UsePlaywright`) with page object pattern and 35+ reusabl
 ### Email Templates
 Email templates are markdown files in `src/main/resources/emails/`. Template IDs for Notify service are configured in `emailTemplates.json`. Template files must not end with a trailing newline or blank lines.
 
-Use `##` for section headings in the email body. Designs are often ambiguous, showing headings at a size between
-Notify's `#` and `##`, so default to `##`. Only use `#` for a body section heading when the design or ticket explicitly
-specifies it, or there is a clear reason to (state the reason in the PR description).
+Use `#` for section headings in the email body. Notify only supports `#` and `##` (there is no `###`), so `##` is
+reserved for sub-headings nested under a `#` section heading. Designs are often ambiguous, showing headings at a size
+between Notify's `#` and `##`, so default to `#`. Only use `##` for a heading that isn't a sub-heading when the design
+or ticket explicitly specifies it, or there is a clear reason to (state the reason in the PR description).
 
 ### Spring Profiles
 - `local` - Local development with Docker Compose dependencies
