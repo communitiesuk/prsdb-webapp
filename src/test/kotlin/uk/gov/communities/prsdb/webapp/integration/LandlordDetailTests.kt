@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordInc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
@@ -318,6 +319,19 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             assertThat(detailsPage.leadTrusteeCard.getAction("Change")).isHidden()
             assertThat(detailsPage.governingBodyMembersLink).isHidden()
+        }
+    }
+
+    @Nested
+    inner class LandlordDetailsSystemOperatorView : NestedIntegrationTestWithImmutableData("data-local.sql") {
+        // TODO PDJB-1910: Check the back link returns to the system operator landlord search results
+        @Test
+        fun `the back link goes to the system operator dashboard`(page: Page) {
+            val detailsPage = navigator.goToLandlordDetailsAsASystemOperator(1)
+
+            detailsPage.backLink.clickAndWait()
+
+            assertPageIs(page, SystemOperatorDashboardPage::class)
         }
     }
 
