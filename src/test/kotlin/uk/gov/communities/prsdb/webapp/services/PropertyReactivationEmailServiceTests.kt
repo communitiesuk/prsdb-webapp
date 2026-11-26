@@ -40,6 +40,8 @@ class PropertyReactivationEmailServiceTests {
     @Mock
     private lateinit var mockJointLandlordEmailSender: EmailNotificationService<JointLandlordPropertyReactivatedNotification>
 
+    private lateinit var jointLandlordOwnership: PropertyOwnership
+
     private val propertyReactivationEmailService by lazy {
         PropertyReactivationEmailService(
             mockPropertyOwnershipService,
@@ -178,8 +180,6 @@ class PropertyReactivationEmailServiceTests {
         // Assert
         verify(mockJointLandlordEmailSender).sendEmailToLandlord(eq(otherLandlord), any())
     }
-
-    private lateinit var jointLandlordOwnership: PropertyOwnership
 
     private fun arrangeJointLandlordNotifications(landlords: MutableSet<Landlord>) {
         jointLandlordOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = landlords)
