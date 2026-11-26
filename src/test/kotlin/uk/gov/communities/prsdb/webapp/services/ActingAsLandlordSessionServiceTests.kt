@@ -15,14 +15,14 @@ import uk.gov.communities.prsdb.webapp.constants.ACTING_AS_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 
-class ActingAsLandlordServiceTests {
+class ActingAsLandlordSessionServiceTests {
     private lateinit var session: MockHttpSession
-    private lateinit var actingAsLandlordService: ActingAsLandlordService
+    private lateinit var actingAsLandlordSessionService: ActingAsLandlordSessionService
 
     @BeforeEach
     fun setup() {
         session = MockHttpSession()
-        actingAsLandlordService = ActingAsLandlordService(session)
+        actingAsLandlordSessionService = ActingAsLandlordSessionService(session)
         SecurityContextHolder.clearContext()
     }
 
@@ -37,13 +37,13 @@ class ActingAsLandlordServiceTests {
         session.setAttribute(ACTING_AS_USER_ID, "landlord-user-id")
 
         // Act, Assert
-        assertEquals("landlord-user-id", actingAsLandlordService.getActingAsUserId())
+        assertEquals("landlord-user-id", actingAsLandlordSessionService.getActingAsUserId())
     }
 
     @Test
     fun `getActingAsUserId returns null when the session holds no acting as user ID`() {
         // Act, Assert
-        assertNull(actingAsLandlordService.getActingAsUserId())
+        assertNull(actingAsLandlordSessionService.getActingAsUserId())
     }
 
     @Test
@@ -52,19 +52,19 @@ class ActingAsLandlordServiceTests {
         session.setAttribute(ACTING_AS_USER_ID, "landlord-user-id")
 
         // Act, Assert
-        assertTrue(actingAsLandlordService.isActingAsLandlord())
+        assertTrue(actingAsLandlordSessionService.isActingAsLandlord())
     }
 
     @Test
     fun `isActingAsLandlord returns false when the session holds no acting as user ID`() {
         // Act, Assert
-        assertFalse(actingAsLandlordService.isActingAsLandlord())
+        assertFalse(actingAsLandlordSessionService.isActingAsLandlord())
     }
 
     @Test
     fun `setActingAsUserId stores the user ID in the session`() {
         // Act
-        actingAsLandlordService.setActingAsUserId("landlord-user-id")
+        actingAsLandlordSessionService.setActingAsUserId("landlord-user-id")
 
         // Assert
         assertEquals("landlord-user-id", session.getAttribute(ACTING_AS_USER_ID))
@@ -77,7 +77,7 @@ class ActingAsLandlordServiceTests {
         session.setAttribute("otherAttribute", "other value")
 
         // Act
-        actingAsLandlordService.clearActingAsUserId()
+        actingAsLandlordSessionService.clearActingAsUserId()
 
         // Assert
         assertNull(session.getAttribute(ACTING_AS_USER_ID))
@@ -95,7 +95,7 @@ class ActingAsLandlordServiceTests {
             )
 
         // Act, Assert
-        assertEquals("system-operator-id", actingAsLandlordService.getActingSystemOperatorId())
+        assertEquals("system-operator-id", actingAsLandlordSessionService.getActingSystemOperatorId())
     }
 
     @Test
@@ -105,12 +105,12 @@ class ActingAsLandlordServiceTests {
             TestingAuthenticationToken("system-operator-id", null, ROLE_SYSTEM_OPERATOR)
 
         // Act, Assert
-        assertNull(actingAsLandlordService.getActingSystemOperatorId())
+        assertNull(actingAsLandlordSessionService.getActingSystemOperatorId())
     }
 
     @Test
     fun `getActingSystemOperatorId returns null when there is no authentication`() {
         // Act, Assert
-        assertNull(actingAsLandlordService.getActingSystemOperatorId())
+        assertNull(actingAsLandlordSessionService.getActingSystemOperatorId())
     }
 }

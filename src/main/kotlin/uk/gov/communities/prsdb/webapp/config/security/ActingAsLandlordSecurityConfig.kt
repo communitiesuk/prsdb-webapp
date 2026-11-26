@@ -14,13 +14,13 @@ import uk.gov.communities.prsdb.webapp.config.filters.ActingAsLandlordFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_ACTING_AS_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordService
+import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordSessionService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
 class ActingAsLandlordSecurityConfig(
-    private val actingAsLandlordService: ActingAsLandlordService,
+    private val actingAsLandlordSessionService: ActingAsLandlordSessionService,
     private val userRolesService: UserRolesService,
     private val csrfTokenRepository: CsrfTokenRepository,
     private val securityContextRepository: SecurityContextRepository,
@@ -43,7 +43,7 @@ class ActingAsLandlordSecurityConfig(
             }.exceptionHandling { exceptions ->
                 exceptions.authenticationEntryPoint(LoginUrlAuthenticationEntryPoint("/oauth2/authorization/one-login"))
             }.addFilterAfter(
-                ActingAsLandlordFilter(actingAsLandlordService, userRolesService),
+                ActingAsLandlordFilter(actingAsLandlordSessionService, userRolesService),
                 SecurityContextHolderFilter::class.java,
             )
 
