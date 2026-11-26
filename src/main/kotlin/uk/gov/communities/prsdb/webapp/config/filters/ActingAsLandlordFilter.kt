@@ -8,11 +8,11 @@ import org.springframework.web.filter.OncePerRequestFilter
 import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthenticationToken
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordService
+import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordSessionService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 class ActingAsLandlordFilter(
-    private val actingAsLandlordService: ActingAsLandlordService,
+    private val actingAsLandlordSessionService: ActingAsLandlordSessionService,
     private val userRolesService: UserRolesService,
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
@@ -27,7 +27,7 @@ class ActingAsLandlordFilter(
         }
 
         val isSystemOperator = user.authorities.any { it.authority == ROLE_SYSTEM_OPERATOR }
-        val actingAsUserId = if (isSystemOperator) actingAsLandlordService.getActingAsUserId() else null
+        val actingAsUserId = if (isSystemOperator) actingAsLandlordSessionService.getActingAsUserId() else null
         if (actingAsUserId == null) {
             response.sendRedirect(SYSTEM_OPERATOR_DASHBOARD_URL)
             return

@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_ACTING_AS_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordService
+import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordSessionService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.time.Instant
 import kotlin.test.assertEquals
@@ -33,9 +33,9 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class ActingAsLandlordFilterTests {
-    private val actingAsLandlordService: ActingAsLandlordService = mock()
+    private val actingAsLandlordSessionService: ActingAsLandlordSessionService = mock()
     private val userRolesService: UserRolesService = mock()
-    private val filter = ActingAsLandlordFilter(actingAsLandlordService, userRolesService)
+    private val filter = ActingAsLandlordFilter(actingAsLandlordSessionService, userRolesService)
 
     private var chainInvoked = false
     private var contextInChain: SecurityContext? = null
@@ -58,7 +58,7 @@ class ActingAsLandlordFilterTests {
         val systemOperatorToken = createOneLoginToken(SYSTEM_OPERATOR_USER_ID, ROLE_SYSTEM_OPERATOR)
         val systemOperatorContext = SecurityContextImpl(systemOperatorToken)
         SecurityContextHolder.setContext(systemOperatorContext)
-        whenever(actingAsLandlordService.getActingAsUserId()).thenReturn(LANDLORD_USER_ID)
+        whenever(actingAsLandlordSessionService.getActingAsUserId()).thenReturn(LANDLORD_USER_ID)
         whenever(userRolesService.getLandlordRolesForSubjectId(LANDLORD_USER_ID)).thenReturn(listOf(ROLE_INDIVIDUAL_LANDLORD))
 
         // Act
@@ -101,7 +101,7 @@ class ActingAsLandlordFilterTests {
         // Assert
         assertEquals(SYSTEM_OPERATOR_DASHBOARD_URL, response.redirectedUrl)
         assertFalse(chainInvoked)
-        verifyNoInteractions(userRolesService, actingAsLandlordService)
+        verifyNoInteractions(userRolesService, actingAsLandlordSessionService)
     }
 
     @Test
@@ -116,7 +116,7 @@ class ActingAsLandlordFilterTests {
         assertTrue(chainInvoked)
         assertNull(authenticationInChain)
         assertNull(response.redirectedUrl)
-        verifyNoInteractions(userRolesService, actingAsLandlordService)
+        verifyNoInteractions(userRolesService, actingAsLandlordSessionService)
     }
 
     private fun createOneLoginToken(

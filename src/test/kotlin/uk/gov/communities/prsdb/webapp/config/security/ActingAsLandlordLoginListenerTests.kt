@@ -5,11 +5,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent
-import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordService
+import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordSessionService
 
 class ActingAsLandlordLoginListenerTests {
-    private val actingAsLandlordService: ActingAsLandlordService = mock()
-    private val listener = ActingAsLandlordLoginListener(actingAsLandlordService)
+    private val actingAsLandlordSessionService: ActingAsLandlordSessionService = mock()
+    private val listener = ActingAsLandlordLoginListener(actingAsLandlordSessionService)
 
     // TODO PDJB-1907: Integration test that signing in again ends acting as a landlord
     @Test
@@ -21,6 +21,6 @@ class ActingAsLandlordLoginListenerTests {
         listener.onApplicationEvent(event)
 
         // Assert
-        verify(actingAsLandlordService).clearActingAsUserId()
+        verify(actingAsLandlordSessionService).clearActingAsUserId()
     }
 }

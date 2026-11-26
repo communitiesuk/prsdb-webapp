@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthentic
 import uk.gov.communities.prsdb.webapp.constants.ACTING_AS_USER_ID
 
 @PrsdbWebService
-class ActingAsLandlordService(
+class ActingAsLandlordSessionService(
     private val session: HttpSession,
 ) {
     fun getActingAsUserId(): String? = session.getAttribute(ACTING_AS_USER_ID) as? String
