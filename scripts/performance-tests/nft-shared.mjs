@@ -9,6 +9,7 @@ export const cluster = 'nft-app';
 export const appName = 'nft-app';
 export const simulatorName = 'nft-one-login-simulator';
 export const appOrigin = 'https://nft.register-home-to-rent.test.communities.gov.uk';
+export const councilOrigin = 'https://nft.search-landlord-home-information.test.communities.gov.uk';
 export const simulatorOrigin = 'https://nft.lb.register-home-to-rent.test.communities.gov.uk';
 export const taskPrefix = `arn:aws:ecs:${region}:${account}:task-definition/`;
 // The approved digest is owned by infra (terraform/nft/ecs_task_definition) and published here so this
@@ -19,21 +20,40 @@ export function requireCondition(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+export function isSharedSeedCertificateKey(key) {
+  return key === 'seeding/certificate_template.png' ||
+    (typeof key === 'string' && /^seeding\/certificate-references\/[1-9][0-9]*-[1-9][0-9]*\.png$/.test(key));
+}
+
 export function environment(container) {
   return Object.fromEntries((container.environment ?? []).map(({name, value}) => [name, value]));
 }
 
+function registrationCopy(task) {
+  const copy = structuredClone(task);
+  for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
+    'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
+  return copy;
+}
+
 export function cloneForSimulator(task) {
   requireCondition(task.family === 'prsdb-webapp-nft', 'Unexpected app task family');
-  const copy = structuredClone(task);
+  const copy = registrationCopy(task);
   const container = copy.containerDefinitions.find(value => value.name === 'prsdb-webapp');
   requireCondition(container, 'App container missing');
   const profile = container.environment?.find(value => value.name === 'SPRING_PROFILES_ACTIVE');
   requireCondition(profile && profile.value.split(',').map(value => value.trim()).sort().join(',') === 'default,nft',
     'Unexpected app baseline profile');
-  profile.value += ',one-login-simulator';
-  for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
-    'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
+  profile.value += ',one-login-simulator,performance-test';
+  const overrides = {
+    GOV_UK_PAY_MOCK_BASE_URL: `${appOrigin}/local/gov-uk-pay`,
+    EPC_REGISTER_CLIENT_ID: 'performance-test',
+    EPC_REGISTER_CLIENT_SECRET: 'performance-test', // pragma: allowlist secret
+    PERFORMANCE_TEST_INTERNAL_ACCESS_PUBLIC_ORIGIN: councilOrigin,
+  };
+  container.environment = container.environment.filter(({name}) => !(name in overrides));
+  container.secrets = (container.secrets ?? []).filter(({name}) => !(name in overrides));
+  container.environment.push(...Object.entries(overrides).map(([name, value]) => ({name, value})));
   return copy;
 }
 

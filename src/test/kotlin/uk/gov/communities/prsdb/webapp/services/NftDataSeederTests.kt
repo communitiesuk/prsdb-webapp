@@ -68,6 +68,8 @@ class NftDataSeederTests(
 ) {
     private val numOfLandlords = 200
     private val numOfProperties = 300
+    private val testCertificateObjectKey = "seeding/certificate-references/1234-1.png"
+    private val testCertificateObjectVersionId = "test-certificate-version"
 
     private fun newSeeder(
         landlords: Int = numOfLandlords,
@@ -77,6 +79,7 @@ class NftDataSeederTests(
         randomSeed: Long = 239L,
         minimumFreeAddresses: Int = 0,
         incompleteProperties: Int = properties / 10,
+        certificateObjectVersionId: String = testCertificateObjectVersionId,
     ) = NftDataSeeder(
         sessionFactory = sessionFactory,
         localCouncilRepository = localCouncilRepository,
@@ -95,6 +98,8 @@ class NftDataSeederTests(
         numOfGeneratedAddresses = generatedAddresses,
         minimumFreeAddresses = minimumFreeAddresses,
         numOfIncompleteProperties = incompleteProperties,
+        certificateObjectVersionId = certificateObjectVersionId,
+        certificateObjectKey = testCertificateObjectKey,
     )
 
     @BeforeEach
@@ -294,6 +299,61 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `property allocations exclude ambiguous active labels but permit inactive duplicates`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, local_council_id, is_active)
+            VALUES (1, current_timestamp, 1, 'Ambiguous address', 'TE1 1ST', 1, true),
+                   (2, current_timestamp, 2, 'Ambiguous address', 'TE1 1ST', 1, true),
+                   (3, current_timestamp, 3, 'Selectable address', 'TE1 1ST', 1, true),
+                   (4, current_timestamp, 4, 'Selectable address', 'TE1 1ST', 1, false),
+                   (5, current_timestamp, 5, 'Unique address', 'TE1 1ST', 1, true)
+            """.trimIndent(),
+        )
+
+        sessionFactory.openStatelessSession().use { session ->
+            val transaction = session.beginTransaction()
+            try {
+                session.doWork { connection ->
+                    val dao = NftDataSeederDao(session, connection)
+                    dao.snapshotUnavailablePropertyAddresses()
+                    assertEquals(2, dao.countAvailableAddresses(restrictToAvailable = true))
+                    assertEquals(listOf(3L, 5L), dao.findAvailablePropertyAddresses(100, 0).map { it.id })
+                }
+            } finally {
+                transaction.rollback()
+            }
+        }
+    }
+
+    @Test
+    fun `seedDatabase reserves headroom from unambiguous addresses only`() {
+        jdbcTemplate.execute(
+            """
+            INSERT INTO address (id, created_date, uprn, single_line_address, postcode, local_council_id, is_active)
+            VALUES (1, current_timestamp, 1, 'Ambiguous address', 'TE1 1ST', 1, true),
+                   (2, current_timestamp, 2, 'Ambiguous address', 'TE1 1ST', 1, true),
+                   (3, current_timestamp, 3, 'Unique address', 'TE1 1ST', 1, true)
+            """.trimIndent(),
+        )
+
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                newSeeder(
+                    landlords = 0,
+                    properties = 1,
+                    incompleteProperties = 1,
+                    generatedAddresses = 0,
+                    minimumFreeAddresses = 1,
+                ).seedDatabase()
+            }
+
+        assertTrue(exception.message!!.contains("1 free addresses must remain"))
+        assertEquals(3L, countRows("address"))
+        assertEquals(0L, landlordRepository.count())
+    }
+
+    @Test
     fun `seedDatabase fails instead of accepting fewer properties than requested`() {
         val exception =
             assertThrows(IllegalStateException::class.java) {
@@ -353,6 +413,21 @@ class NftDataSeederTests(
         assertTrue(countRows("file_upload") > 0, "Expected certificate file upload metadata")
         assertTrue(countRows("gas_safety_uploads") > 0, "Expected gas safety certificate relationships")
         assertTrue(countRows("electrical_safety_uploads") > 0, "Expected electrical certificate relationships")
+
+        val uploads = jdbcTemplate.queryForList("SELECT object_key, e_tag, extension, version_id FROM file_upload")
+        assertTrue(uploads.all { it["object_key"] == testCertificateObjectKey })
+        assertTrue(uploads.all { it["extension"] == "png" })
+        assertTrue(uploads.all { it["version_id"] == testCertificateObjectVersionId })
+        assertEquals(uploads.size, uploads.map { it["e_tag"] }.toSet().size)
+    }
+
+    @Test
+    fun `seedDatabase rejects a blank certificate version before inserting data`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            newSeeder(certificateObjectVersionId = "").seedDatabase()
+        }
+
+        assertEquals(0, countRows("file_upload"))
     }
 
     @Test
@@ -810,6 +885,28 @@ class NftDataSeederTests(
         assertEquals(ukSnapshot, utcSnapshot)
     }
 
+    @Test
+    fun `seed snapshot is independent of upload storage order`() {
+        newSeeder().seedDatabase()
+        val uploads = captureSeedSnapshot().uploads
+
+        val indexes =
+            listOf(
+                Triple("test_file_upload_reverse_id", "file_upload", "id"),
+                Triple("test_gas_upload_reverse_id", "gas_safety_uploads", "gas_safety_file_uploads_id"),
+                Triple("test_electrical_upload_reverse_id", "electrical_safety_uploads", "electrical_safety_file_uploads_id"),
+            )
+        try {
+            indexes.forEach { (name, table, column) ->
+                jdbcTemplate.execute("CREATE INDEX $name ON $table ($column DESC)")
+                jdbcTemplate.execute("CLUSTER $table USING $name")
+            }
+            assertEquals(uploads, captureSeedSnapshot().uploads)
+        } finally {
+            indexes.forEach { (name) -> jdbcTemplate.execute("DROP INDEX IF EXISTS $name") }
+        }
+    }
+
     // The snapshot is captured in the original time zone, as JDBC converts dates using the default time zone
     private fun seedWithDefaultTimeZone(timeZoneId: String): SeedSnapshot {
         val originalTimeZone = TimeZone.getDefault()
@@ -879,7 +976,7 @@ class NftDataSeederTests(
                     FROM file_upload fu
                     LEFT JOIN gas_safety_uploads g ON g.gas_safety_file_uploads_id = fu.id
                     LEFT JOIN electrical_safety_uploads e ON e.electrical_safety_file_uploads_id = fu.id
-                    ORDER BY fu.object_key
+                    ORDER BY fu.id
                     """.trimIndent(),
                 ),
         )
@@ -996,7 +1093,7 @@ class NftDataSeederTests(
             val expectedFiles =
                 jdbcTemplate.queryForList(
                     """
-                    SELECT DISTINCT f.object_key, f.extension
+                    SELECT DISTINCT f.object_key, f.extension, f.version_id
                     FROM property_compliance pc
                     LEFT JOIN gas_safety_uploads g ON g.property_compliance_id = pc.id
                     LEFT JOIN electrical_safety_uploads e ON e.property_compliance_id = pc.id
@@ -1006,11 +1103,12 @@ class NftDataSeederTests(
                     fixture.getValue("propertyOwnershipId").jsonPrimitive.content.toLong(),
                 )
             assertEquals(
-                expectedFiles.map { "${it["object_key"]}.${it["extension"]}" }.toSet(),
+                expectedFiles.map { Triple(it["object_key"], it["extension"], it["version_id"]) }.toSet(),
                 files.map {
                     val objectKey = it.jsonObject.getValue("objectKey").jsonPrimitive.content
                     val extension = it.jsonObject.getValue("extension").jsonPrimitive.content
-                    "$objectKey.$extension"
+                    val versionId = it.jsonObject.getValue("versionId").jsonPrimitive.content
+                    Triple(objectKey, extension, versionId)
                 }.toSet(),
             )
             assertEquals(

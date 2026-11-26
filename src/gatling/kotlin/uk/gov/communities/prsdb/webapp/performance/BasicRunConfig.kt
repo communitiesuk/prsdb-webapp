@@ -27,6 +27,7 @@ data class BasicRunConfig(
     val target: PerformanceTarget,
     val mode: MeasurementMode,
     val baseUrl: String,
+    val councilBaseUrl: String,
     val simulatorUrl: String,
     val landlordSubject: String,
     val limits: ResponseTimeLimits?,
@@ -36,6 +37,8 @@ data class BasicRunConfig(
     val thinkTime: Duration = Duration.ZERO,
 ) {
     companion object {
+        private const val NFT_COUNCIL_ORIGIN = "https://nft.search-landlord-home-information.test.communities.gov.uk"
+
         fun from(properties: Map<String, String>): BasicRunConfig {
             val targetValue = requiredProperty(properties, "gatling.target")
             val target =
@@ -70,6 +73,28 @@ data class BasicRunConfig(
                     }
                 }
 
+            val baseUrl =
+                targetOriginUrl(
+                    properties,
+                    "gatling.baseUrl",
+                    target,
+                    "https://nft.register-home-to-rent.test.communities.gov.uk",
+                )
+            val simulatorUrl =
+                targetOriginUrl(
+                    properties,
+                    "gatling.simulatorUrl",
+                    target,
+                    "https://nft.lb.register-home-to-rent.test.communities.gov.uk",
+                )
+            val councilBaseUrl =
+                properties["gatling.council.baseUrl"]?.let {
+                    targetOriginUrl(properties, "gatling.council.baseUrl", target, NFT_COUNCIL_ORIGIN)
+                } ?: if (target == PerformanceTarget.NFT) {
+                    NFT_COUNCIL_ORIGIN
+                } else {
+                    baseUrl
+                }
             val certificateDownloadOrigin =
                 properties["gatling.certificate.downloadOrigin"]?.let {
                     val origin = originUrl(properties, "gatling.certificate.downloadOrigin")
@@ -79,7 +104,7 @@ data class BasicRunConfig(
                             PerformanceTarget.NFT ->
                                 uri.scheme == "https" && uri.port == -1 && uri.host.endsWith(".s3.eu-west-2.amazonaws.com")
                             PerformanceTarget.LOCAL -> uri.host in setOf("localhost", "127.0.0.1", "[::1]")
-                        } && uri.host != URI.create(originUrl(properties, "gatling.baseUrl")).host,
+                        } && uri.host != URI.create(baseUrl).host,
                     ) { "Certificate downloads require a separate NFT S3 bucket host or local loopback host" }
                     origin
                 }
@@ -87,8 +112,9 @@ data class BasicRunConfig(
             return BasicRunConfig(
                 target = target,
                 mode = mode,
-                baseUrl = originUrl(properties, "gatling.baseUrl"),
-                simulatorUrl = originUrl(properties, "gatling.simulatorUrl"),
+                baseUrl = baseUrl,
+                councilBaseUrl = councilBaseUrl,
+                simulatorUrl = simulatorUrl,
                 landlordSubject = requiredProperty(properties, "gatling.basic.landlordSubject"),
                 limits = limits,
                 iterations = iterations,
@@ -123,6 +149,22 @@ data class BasicRunConfig(
             val value = properties[key]?.toIntOrNull() ?: if (key in properties) null else default
             require(value != null && value > 0) { "$key must be a positive integer" }
             return value
+        }
+
+        private fun targetOriginUrl(
+            properties: Map<String, String>,
+            key: String,
+            target: PerformanceTarget,
+            nftOrigin: String,
+        ): String {
+            val origin = originUrl(properties, key)
+            require(
+                when (target) {
+                    PerformanceTarget.LOCAL -> URI.create(origin).host in setOf("localhost", "127.0.0.1", "[::1]")
+                    PerformanceTarget.NFT -> origin == nftOrigin
+                },
+            ) { "$key must match the approved ${target.propertyValue} origin" }
+            return origin
         }
 
         private fun originUrl(
