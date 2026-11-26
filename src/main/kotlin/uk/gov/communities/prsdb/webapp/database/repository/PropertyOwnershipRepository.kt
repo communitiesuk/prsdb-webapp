@@ -32,7 +32,7 @@ interface PropertyOwnershipRepository :
     fun existsByIdAndIsActiveFalse(id: Long): Boolean
 
     // Postgres re-checks is_active after waiting for a concurrent claim's row lock, so only one claim can succeed.
-    @Modifying(flushAutomatically = true)
+    @Modifying
     @Query("UPDATE PropertyOwnership po SET po.isActive = true WHERE po.id = :id AND po.isActive = false")
     fun claimForReactivation(
         @Param("id") id: Long,
