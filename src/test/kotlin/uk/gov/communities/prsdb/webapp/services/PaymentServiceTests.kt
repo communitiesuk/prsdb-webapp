@@ -1599,7 +1599,7 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePaymentApplyingChanges applies the changes to the claimed payment then captures it`() {
+        fun `finalisePayment applies the given changes to the claimed payment then captures it`() {
             // Arrange
             stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1608,7 +1608,7 @@ class PaymentServiceTests {
             val changedPayments = mutableListOf<Payment>()
 
             // Act
-            val status = paymentService.finalisePaymentApplyingChanges(PAYMENT_ID, PaymentStatus.CAPTURABLE) { changedPayments.add(it) }
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE) { changedPayments.add(it) }
 
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
@@ -1621,7 +1621,7 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `finalisePaymentApplyingChanges cancels the payment without capturing it and rethrows when already reactivated`() {
+        fun `finalisePayment cancels the payment without capturing it and rethrows when the given changes find it already reactivated`() {
             // Arrange
             stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
             stubTransaction()
@@ -1630,7 +1630,7 @@ class PaymentServiceTests {
 
             // Act, Assert
             assertThrows<PropertyAlreadyReactivatedException> {
-                paymentService.finalisePaymentApplyingChanges(PAYMENT_ID, PaymentStatus.CAPTURABLE) {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE) {
                     throw PropertyAlreadyReactivatedException(PROPERTY_ID)
                 }
             }

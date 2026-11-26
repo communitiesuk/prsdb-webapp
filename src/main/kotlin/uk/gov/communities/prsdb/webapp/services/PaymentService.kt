@@ -300,11 +300,11 @@ class PaymentService(
         paymentId: String,
         govUkPayStatus: PaymentStatus,
         registrationData: PropertyRegistrationDataModel,
-    ): PaymentStatus = finalisePaymentApplyingChanges(paymentId, govUkPayStatus) { registerPropertyForPayment(it, registrationData) }
+    ): PaymentStatus = finalisePayment(paymentId, govUkPayStatus) { registerPropertyWithPayment(it, registrationData) }
 
     // applyPaidChanges runs before the payment is captured, so if it throws the payment is cancelled instead
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
-    fun finalisePaymentApplyingChanges(
+    fun finalisePayment(
         paymentId: String,
         govUkPayStatus: PaymentStatus,
         applyPaidChanges: (Payment) -> Unit,
@@ -424,7 +424,7 @@ class PaymentService(
             },
         )
 
-    private fun registerPropertyForPayment(
+    private fun registerPropertyWithPayment(
         storedPayment: Payment,
         registrationData: PropertyRegistrationDataModel,
     ) {
