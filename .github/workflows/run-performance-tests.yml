@@ -87,6 +87,7 @@ jobs:
     if: needs.changes.outputs.run == 'true'
     outputs:
       restore-task-definition: ${{ steps.resolve_restore.outputs.task_definition }}
+      recovery-required: ${{ steps.recovery_status.outputs.recovery_required }}
     environment: nft
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -161,6 +162,12 @@ jobs:
       - name: Store restore state privately, including partial failure
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state
+      - name: Report whether recovery changes remain
+        id: recovery_status
+        if: always()
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+        run: node scripts/performance-tests/nft-vpc-restore.mjs report-recovery-status
 
   performance-tests:
     name: Prepare simulator and run Gatling on one allowlisted runner
@@ -967,6 +974,8 @@ jobs:
   stop-writers-for-reset:
     name: Restore environment and stop actual writers before reset
     needs: [changes, restore-dataset, performance-tests]
+    outputs:
+      recovery-required: ${{ steps.recovery_status.outputs.recovery_required }}
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
@@ -1008,6 +1017,13 @@ jobs:
       - name: Store cleanup recovery checkpoint privately, including partial failure
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+      - name: Report whether recovery changes remain
+        id: recovery_status
+        if: always()
+        env:
+          NFT_RESTORE_STATE_PATH: ${{ runner.temp }}/nft-restore-state.json
+          NFT_RECOVERY_STATE_REQUIRED: 'true'
+        run: node scripts/performance-tests/nft-vpc-restore.mjs report-recovery-status
 
   reset-database:
     name: Reset NFT database
@@ -1169,23 +1185,31 @@ jobs:
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
       needs.restore-maintenance-schedules.result != 'success' &&
-      needs.restore-dataset.outputs.restore-task-definition != ''
+      needs.restore-dataset.outputs.restore-task-definition != '' &&
+      (
+        needs.stop-writers-for-reset.outputs.recovery-required == 'true' ||
+        (needs.stop-writers-for-reset.outputs.recovery-required == '' &&
+          needs.restore-dataset.outputs.recovery-required == 'true')
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require operator recovery
         env:
           NFT_RESTORE_OUTCOME: ${{ needs.restore-dataset.result }}
+          NFT_RESET_OUTCOME: ${{ needs.reset-database.result }}
         run: |
           {
             echo '### NFT maintenance recovery required'
-            echo 'The seven maintenance schedules were not verified in their exact original states. If database reset, app QA, or async recovery failed, leave any paused schedules disabled.'
-            echo 'Use this run’s private recovery checkpoint and the NFT recovery procedure; do not enable schedules against an unverified schema.'
+            echo 'Maintenance or writer recovery remains incomplete. Leave paused schedules disabled and do not restart writers until the current database and service state are verified.'
+            echo "Use this run's private recovery checkpoint and the NFT recovery procedure before restoring schedules or writers."
             if [ "$NFT_RESTORE_OUTCOME" != 'success' ]; then
-              echo 'The NFT seed restore failed, so the QA database reset was not run and the database state is unverified. Do not restart the app or async worker, or re-enable paused schedules, until manual recovery verifies the database. Use the private checkpoint and NFT recovery procedure before restarting writers.'
+              echo 'The NFT seed restore job did not complete successfully. Check the private checkpoint to determine whether the restore task started, and verify database state before restarting writers.'
+            elif [ "$NFT_RESET_OUTCOME" != 'success' ]; then
+              echo 'The NFT database reset job did not complete successfully. Verify database state before restarting writers.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-          echo '::error::NFT maintenance schedule recovery is incomplete; operator action is required.'
+          echo '::error::NFT maintenance or writer recovery is incomplete; operator action is required.'
           exit 1
 
   marker:

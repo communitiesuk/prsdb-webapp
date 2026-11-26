@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url';
 import {dirname, join} from 'node:path';
 import {isDeepStrictEqual} from 'node:util';
 import {
-  account, appName, awsCommand, cluster, region, servicesFactory, stable, taskPrefix, waitFactory,
+  account, appName, awsCommand, cluster, formatSafeError, region, servicesFactory, stable, taskPrefix, waitFactory,
 } from './nft-shared.mjs';
 import {cloneForScanWorker, scanQueueArn, scanQueueName, scanQueueUrl} from './nft-scan-worker.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
@@ -734,14 +734,28 @@ export async function cleanupNftEnvironment(config, loadReadiness, overrides = {
       errors.push(error);
     }
   }
-  if (errors.length) throw new AggregateError(errors,
-    `Cleanup incomplete; refusing database reset: ${errors.map(error => error.message).join('; ')}`);
+  if (errors.length) {
+    const aggregate = new AggregateError(errors,
+      `Cleanup incomplete; refusing database reset: ${errors.map(error => error.message).join('; ')}`);
+    aggregate.safeContext = 'Cleanup incomplete; refusing database reset';
+    throw aggregate;
+  }
   await stopNftWriters(config, deps);
   const latest = await deps.aws('ecs', 'list-task-definitions', {
     familyPrefix: 'prsdb-webapp-nft', status: 'ACTIVE', sort: 'DESC', maxResults: 1,
   });
   requireCondition(latest.taskDefinitionArns?.[0] === state.originalApp.taskDefinition,
     'Latest app revision is not the reset baseline; refusing automatic reset');
+}
+
+export function maintenanceRecoveryRequired(state) {
+  if (state.recoveryStateUnknown === true) return true;
+  const scheduleMutationUnresolved = Object.values(state.maintenanceScheduleProgress ?? {})
+    .some(progress => progress.pauseAttempted === true && progress.restored !== true);
+  const appShutdownUnresolved = state.stopAttempted === true && state.appRestored !== true;
+  const asyncShutdownUnresolved = state.asyncStopAttempted === true &&
+    state.originalAsync?.desiredCount !== 0 && state.asyncRestored !== true;
+  return scheduleMutationUnresolved || appShutdownUnresolved || asyncShutdownUnresolved;
 }
 
 async function workerLogs(deps) {
@@ -1034,7 +1048,7 @@ export async function markQaVerified(config, overrides = {}) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const controller = new AbortController();
-  const abort = () => controller.abort(new Error('NFT restore interrupted'));
+  const abort = () => controller.abort(new SafeRecoveryError('NFT restore interrupted'));
   process.on('SIGTERM', abort);
   process.on('SIGINT', abort);
   try {
@@ -1057,6 +1071,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     };
     const state = await readFile(path, 'utf8').then(JSON.parse).catch(error => {
       if (['resolve-task-definition', 'snapshot-maintenance', 'stop'].includes(command) && error.code === 'ENOENT') return {};
+      if (command === 'report-recovery-status') {
+        return error.code === 'ENOENT' && process.env.NFT_RECOVERY_STATE_REQUIRED !== 'true'
+          ? {}
+          : {recoveryStateUnknown: true};
+      }
       throw new SafeRecoveryError('NFT restore state is missing or unreadable; manual recovery required');
     });
     if (command === 'start-async') config.taskDefinition = state.taskDefinition;
@@ -1085,6 +1104,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       requireCondition(process.env.GITHUB_OUTPUT, 'GITHUB_OUTPUT is required to publish the managed restore revision');
       await writeFile(process.env.GITHUB_OUTPUT, `task_definition=${taskDefinition}\n`, {flag: 'a'});
     }
+    else if (command === 'report-recovery-status') {
+      requireCondition(process.env.GITHUB_OUTPUT, 'GITHUB_OUTPUT is required to publish recovery status');
+      const required = maintenanceRecoveryRequired(state);
+      await writeFile(process.env.GITHUB_OUTPUT, `recovery_required=${required}\n`, {flag: 'a'});
+    }
     else if (command === 'snapshot-maintenance') await snapshotMaintenanceSchedules(config, deps);
     else if (command === 'pause-maintenance') await pauseMaintenanceSchedules(config, deps);
     else if (command === 'restore-maintenance') await restoreMaintenanceSchedules(config, deps);
@@ -1110,7 +1134,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       }, deps);
     } else throw new SafeRecoveryError('Unknown NFT VPC lifecycle operation');
   } catch (error) {
-    if (error instanceof SafeRecoveryError) console.log(`NFT VPC restore details: ${error.message}`);
+    console.error(`NFT VPC restore details: ${formatSafeError(error)}`);
     console.error('NFT VPC operation failed; keep the app stopped until recovery succeeds.');
     process.exitCode = 1;
   } finally {

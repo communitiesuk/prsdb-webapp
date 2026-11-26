@@ -34,7 +34,10 @@ if (args[0] === 's3api') {
   writeFileSync(destination, content);
 }
 if (args[0] !== 's3api') process.stdout.write('${marker}');
-if (process.env.AWS_FAKE_FAILURE === 'true') process.exit(1);
+if (process.env.AWS_FAKE_FAILURE === 'true') {
+  process.stderr.write('An error occurred (AccessDenied) when calling the UploadPart operation: private-detail');
+  process.exit(1);
+}
 `);
   await chmod(runner, 0o700);
   return {directory, bin, log};
@@ -131,6 +134,8 @@ test('failed private checkpoint upload sanitizes AWS output and errors', async t
   assert.equal(result.status, 1);
   assert.doesNotMatch(result.stdout, new RegExp(marker));
   assert.doesNotMatch(result.stderr, new RegExp(marker));
+  assert.match(result.stderr, /AccessDenied/);
+  assert.doesNotMatch(result.stderr, /private-detail/);
   assert.match(result.stderr, /operator recovery may be required/);
 });
 
@@ -223,11 +228,12 @@ test('failed seed restore requires actionable operator recovery without restarti
   assert.match(recoveryCondition, /needs\.restore-dataset\.outputs\.restore-task-definition != ''/,
     'recovery warning should be limited to restore attempts that resolved their owned task');
   assert.match(recoveryCondition, /needs\.restore-maintenance-schedules\.result != 'success'/);
-  assert.doesNotMatch(recoveryCondition,
-    /!\(needs\.restore-dataset\.result != 'success' && needs\.stop-writers-for-reset\.result == 'success'\)/,
-    'a successful stop-writer cleanup must not suppress the recovery warning after restore failure');
-  assert.match(recoveryStep, /NFT seed restore failed.*QA database reset was not run/);
-  assert.match(recoveryStep, /database state is unverified\. Do not restart/);
+  assert.match(recoveryCondition, /needs\.stop-writers-for-reset\.outputs\.recovery-required == 'true'/,
+    'the warning must reflect whether cleanup left environment changes unresolved');
+  assert.match(recoveryCondition, /needs\.restore-dataset\.outputs\.recovery-required == 'true'/,
+    'failed cleanup without a readable checkpoint must fall back to the restore job status');
+  assert.match(recoveryStep, /NFT seed restore job did not complete successfully/);
+  assert.match(recoveryStep, /verify database state before restarting writers/);
 
   assert.match(workflowJob(workflow, 'reset-database'), /needs\.restore-dataset\.result == 'success'/,
     'QA reset must remain gated on a verified seed restore');

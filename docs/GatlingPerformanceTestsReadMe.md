@@ -113,6 +113,15 @@ keys. The generated certificate is synthetic and not valid for any real complian
 
 ## NFT workflow and recovery
 
+When a new baseline is needed (for example, no suitable baseline for an initial run, changed fixtures
+or certificate handling, or schema changes incompatible with the existing baseline), deploy compatible
+app/seeder/dump and NFT infrastructure prerequisites, then run
+[**Generate NFT seed dump**](https://github.com/communitiesuk/prsdb-infra/actions/workflows/generate-nft-seed.yml)
+from infra `main`. Verify and select the matching manifest-bound restore baseline before running
+performance tests; the Action does not switch it automatically. A suitable existing baseline can be
+reused with compatible migrations, so not every first run or schema change requires regeneration.
+Preserve the old usable baseline until the replacement is verified.
+
 Dispatch **Run Performance Tests** from `nft`. It checks for changes, compiles Gatling, stops actual
 writers, restores the pinned dump in the VPC, migrates and verifies it, starts the app and prepares
 the simulator. It exports bounded, distinct saved-registration owners, sole-property owners and
@@ -172,7 +181,12 @@ managed restore task revision and immutable dump identity. Its environment must 
 dump fields. The certificate key must be `seeding/certificate_template.png` or
 `seeding/certificate-references/<positive-run-id>-<positive-attempt>.png`. The workflow checks the
 exact certificate version in `prsdb-uploaded-files-nft` before schedule changes and again before
-launch; unavailable or mismatched identities stop the run.
+launch; unavailable or mismatched identities stop the run before schedules or writers are changed.
+This preflight also gates the first live run when the selected revision uses the legacy shared
+certificate key: the exact pinned version must still exist and its published dump binding must match.
+There is no fallback to another certificate version. If the check fails, an authorised operator must
+publish a matching seed manifest and update the managed restore revision before retrying. Local tests
+exercise the fail-closed check but cannot verify the currently deployed AWS task definition or object.
 
 The seed generator copies the versioned template to a run-owned key and publishes a private,
 versioned manifest binding that copy to the exact dump upload. Deploy an application version that
@@ -184,8 +198,8 @@ The existing baseline uses a historically verified legacy certificate identity; 
 establish that version's current availability.
 
 The 700-day retention period starts when a certificate version becomes noncurrent, not when its dump
-is restored. If the pinned version has expired or is inaccessible, verify access and regenerate the
-seed with matching published metadata when necessary; do not substitute the latest object. The
+is restored. If the pinned version has expired or is inaccessible, publish a regenerated seed with
+matching metadata; do not substitute the latest object. The
 NFT-only orchestrator policy extension requires separate approval and application; local mocks do not
 prove live queue, listener or access readiness.
 An approved operator must check the exclusive test window, absence of incoming or unowned work, and

@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
-import {cleanupNftEnvironment, resolveRestoreTaskDefinition, restoreAsyncWorker, restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
+import {cleanupNftEnvironment, maintenanceRecoveryRequired, resolveRestoreTaskDefinition, restoreAsyncWorker, restoreInVpc, startNftApp, stopNftWriters, stopRestoreTask} from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 import {restoreEnvironment} from '../../../scripts/performance-tests/nft-restore.mjs';
 import * as lifecycle from '../../../scripts/performance-tests/nft-vpc-restore.mjs';
 
@@ -704,6 +704,85 @@ test('workflow resolves one active restore revision and reuses it without an env
   assert.doesNotMatch(workflow, /refs\/heads\/feat\/PDJB-553-complete-performance-coverage/);
 });
 
+test('maintenance recovery warning only reports unresolved schedule or writer mutations', async () => {
+  const cases = [
+    [{}, false],
+    [{maintenanceScheduleSnapshot: [], maintenanceScheduleProgress: {}}, false],
+    [{maintenancePaused: true}, false],
+    [{maintenanceScheduleProgress: {schedule: {pauseAttempted: true}}}, true],
+    [{maintenanceScheduleProgress: {schedule: {pauseAttempted: true, restored: true}}}, false],
+    [{stopAttempted: true}, true],
+    [{asyncStopAttempted: true, originalAsync: {desiredCount: 1}}, true],
+    [{asyncStopAttempted: true}, true],
+    [{asyncStopAttempted: true, originalAsync: {desiredCount: 0}}, false],
+    [{maintenancePaused: true, maintenanceRestored: true}, false],
+  ];
+
+  for (const [state, expected] of cases) {
+    assert.equal(maintenanceRecoveryRequired(state), expected, JSON.stringify(state));
+  }
+});
+
+test('workflow suppresses maintenance warning after safe abort and requires it after unresolved mutation', async () => {
+  const workflow = await readFile(new URL('../../../.github/workflows/run-performance-tests.yml', import.meta.url), 'utf8');
+  const restore = workflow.split('  restore-dataset:')[1]?.split('\n  performance-tests:')[0];
+  const cleanup = workflow.split('  stop-writers-for-reset:')[1]?.split('\n  reset-database:')[0];
+  const warning = workflow.split('  maintenance-recovery-required:')[1]?.split('\n  marker:')[0];
+
+  assert.ok(restore);
+  assert.ok(cleanup);
+  assert.ok(warning);
+  assert.match(restore, /recovery-required: \$\{\{ steps\.recovery_status\.outputs\.recovery_required \}\}/);
+  assert.match(cleanup, /recovery-required: \$\{\{ steps\.recovery_status\.outputs\.recovery_required \}\}/);
+  assert.match(cleanup, /id: recovery_status[\s\S]*nft-vpc-restore\.mjs report-recovery-status/);
+  assert.match(warning, /needs\.stop-writers-for-reset\.outputs\.recovery-required == 'true'/);
+  assert.match(warning, /needs\.restore-dataset\.outputs\.recovery-required == 'true'/);
+});
+
+test('recovery status command reports safe aborts and flags missing or unresolved state', async t => {
+  const script = fileURLToPath(new URL('../../../scripts/performance-tests/nft-vpc-restore.mjs', import.meta.url));
+  const directory = await mkdtemp(join(tmpdir(), 'nft-recovery-status-'));
+  t.after(() => rm(directory, {recursive: true, force: true}));
+  const statePath = join(directory, 'nft-restore-state.json');
+  const outputPath = join(directory, 'github-output');
+
+  for (const [state, expected] of [
+    [{maintenanceRestored: true, maintenanceScheduleProgress: {schedule: {pauseAttempted: true, restored: true}}}, 'false'],
+    [{maintenanceScheduleProgress: {schedule: {pauseAttempted: true}}}, 'true'],
+  ]) {
+    await writeFile(statePath, JSON.stringify(state));
+    await writeFile(outputPath, '');
+    const result = spawnSync(process.execPath, [script, 'report-recovery-status'], {
+      encoding: 'utf8',
+      env: {
+        PATH: process.env.PATH,
+        NFT_RESTORE_STATE_PATH: statePath,
+        GITHUB_OUTPUT: outputPath,
+        GITHUB_RUN_ID: '123',
+        GITHUB_RUN_ATTEMPT: '1',
+      },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal((await readFile(outputPath, 'utf8')).trim(), `recovery_required=${expected}`);
+  }
+
+  await rm(statePath);
+  await writeFile(outputPath, '');
+  const missingState = spawnSync(process.execPath, [script, 'report-recovery-status'], {
+    encoding: 'utf8',
+    env: {
+      PATH: process.env.PATH,
+      NFT_RESTORE_STATE_PATH: statePath,
+      NFT_RECOVERY_STATE_REQUIRED: 'true',
+      GITHUB_OUTPUT: outputPath,
+      GITHUB_RUN_ID: '123',
+      GITHUB_RUN_ATTEMPT: '1',
+    },
+  });
+  assert.equal(missingState.status, 0, missingState.stderr);
+  assert.equal((await readFile(outputPath, 'utf8')).trim(), 'recovery_required=true');
+});
+
 test('does not restart the baseline worker after reset until app migration and QA are verified', async () => {
   const deps = dependencies();
   await stopNftWriters(config, deps);
@@ -1324,7 +1403,7 @@ test('new restore attempts fail before state lookup or AWS while recovery remain
     env: {PATH: process.env.PATH, GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '2'},
   });
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /fresh workflow run/i);
+  assert.match(result.stdout + result.stderr, /fresh workflow run/i);
 });
 
 test('CLI reports controlled validation failures without exposing unexpected filesystem errors', async () => {
@@ -1334,7 +1413,7 @@ test('CLI reports controlled validation failures without exposing unexpected fil
     env: {PATH: process.env.PATH, GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '1'},
   });
   assert.equal(validation.status, 1);
-  assert.match(validation.stdout, /NFT_RESTORE_STATE_PATH is required/);
+  assert.match(validation.stdout + validation.stderr, /NFT_RESTORE_STATE_PATH is required/);
 
   const root = await mkdtemp(join(tmpdir(), 'restore-cli-'));
   try {

@@ -2,8 +2,15 @@ import {execFileSync} from 'node:child_process';
 import {mkdir, readFile, readdir, rename, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {formatSafeError} from './nft-shared.mjs';
 
-export class SafeRecoveryError extends Error {}
+export class SafeRecoveryError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'SafeRecoveryError';
+    this.safeToLog = true;
+  }
+}
 
 function requireCondition(condition, message) {
   if (!condition) throw new SafeRecoveryError(message);
@@ -42,8 +49,14 @@ function storageContext(options) {
 function runAws(args, runner) {
   try {
     return runner('aws', args, {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
-  } catch {
-    throw new SafeRecoveryError('Private recovery checkpoint operation failed');
+  } catch (error) {
+    const operation = /^[a-z0-9-]+$/.test(args[1] ?? '') ? args[1] : 'operation';
+    const status = Number.isSafeInteger(error?.code) ? String(error.code) :
+      /^[A-Z0-9_-]+$/.test(error?.code ?? '') ? error.code : 'unknown';
+    const code = error?.stderr?.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1];
+    throw new SafeRecoveryError(
+      `Private recovery ${operation} failed (status ${status}${code ? `, ${code}` : ''})`,
+    );
   }
 }
 
@@ -200,8 +213,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       } else throw new SafeRecoveryError('Unknown recovery operation');
     }
   } catch (error) {
-    if (error instanceof SafeRecoveryError) console.error(`NFT recovery details: ${error.message}`);
-    console.error('NFT recovery checkpoint validation failed; operator recovery may be required.');
+    console.error(`NFT recovery details: ${formatSafeError(error)}`);
+    console.error('NFT recovery checkpoint operation failed; operator recovery may be required.');
     process.exitCode = 1;
   }
 }
