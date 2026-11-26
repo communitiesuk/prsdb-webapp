@@ -22,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
@@ -121,7 +123,7 @@ class PropertyDetailsControllerTests(
 
         @Test
         fun `getPropertyDetails returns a redirect for an unauthenticated user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -129,7 +131,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetails returns 403 for an unauthorized user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -137,7 +139,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `getPropertyDetails returns 403 for an unauthorized user with local council admin role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -145,7 +147,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getPropertyDetails returns 403 for an unauthorized user with local council user role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -163,7 +165,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { status { isOk() } }
                 }
@@ -180,7 +182,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("pendingInvitations") }
@@ -201,7 +203,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
@@ -229,7 +231,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(expectedCards)
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("freeholderSummaryCards", expectedCards) }
@@ -260,7 +262,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(expectedCards)
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("superiorLandlordSummaryCards", expectedCards) }
@@ -288,7 +290,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     content { string(containsString("correspondence@example.com")) }
@@ -309,7 +311,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("inviteJointLandlordUrl") }
@@ -327,7 +329,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("markedJointLandlord", false) }
@@ -345,7 +347,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("markedJointLandlord", true) }
@@ -368,7 +370,7 @@ class PropertyDetailsControllerTests(
             val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnership.id)
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("isActiveInactiveEnabled", true) }
@@ -394,7 +396,7 @@ class PropertyDetailsControllerTests(
             val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnership.id)
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("isActiveInactiveEnabled", false) }
@@ -416,7 +418,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)) {
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id)) {
                     flashAttr("deactivationSuccessBanner", "propertyDetails.deactivationSuccessBanner.propertyDeactivated")
                 }.andExpect {
                     status { isOk() }
@@ -435,7 +437,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model {
@@ -458,7 +460,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeDoesNotExist("switchToIndividualLink") }
@@ -484,7 +486,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeDoesNotExist("switchToIndividualLink") }
@@ -502,7 +504,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("landlordSummaryCards") }
@@ -523,7 +525,7 @@ class PropertyDetailsControllerTests(
             whenever(propertyManagerSummaryCardHelper.getSummaryCard(propertyManager)).thenReturn(expectedCard)
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("propertyManagerSummaryCard", expectedCard) }
@@ -540,7 +542,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeDoesNotExist("propertyManagerSummaryCard") }
@@ -565,7 +567,7 @@ class PropertyDetailsControllerTests(
                     .thenReturn(Pair(emptyList(), emptyList()))
 
                 mvc
-                    .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                    .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                     .andExpect {
                         status { isOk() }
                         model { attributeDoesNotExist("propertyManagerSummaryCard") }
@@ -586,7 +588,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("landlordCount", 2) }
@@ -606,7 +608,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("landlordSummaryCards") }
@@ -626,7 +628,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("landlordCount", 2) }
@@ -648,7 +650,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("delegatesToLettingAgent", true) }
@@ -668,7 +670,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("delegatesToLettingAgent", false) }
@@ -687,7 +689,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id)).andExpect {
                 status { isOk() }
                 model { attributeExists("lettingAgentPanelLink") }
             }
@@ -704,7 +706,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("propertyIsOccupied", false) }
@@ -723,7 +725,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("propertyIsOccupied", true) }
@@ -738,7 +740,7 @@ class PropertyDetailsControllerTests(
         private val inactivePropertyOwnership =
             createPropertyOwnership(id = 2, isActive = false, landlords = mutableSetOf(landlord))
         private val path =
-            PropertyDetailsController.getPropertyDetailsPath(inactivePropertyOwnership.id, isLocalCouncilView = false)
+            PropertyDetailsController.getPropertyDetailsPath(inactivePropertyOwnership.id)
 
         @BeforeEach
         fun setUpDeactivated() {
@@ -824,7 +826,7 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(activePropertyOwnership.id, isLocalCouncilView = false))
+                .get(PropertyDetailsController.getPropertyDetailsPath(activePropertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeDoesNotExist("isDeactivated") }
@@ -837,7 +839,7 @@ class PropertyDetailsControllerTests(
     inner class GetPropertyDetailsLocalCouncilViewTests {
         @Test
         fun `getPropertyDetailsLocalCouncilView returns a redirect for an unauthenticated user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -845,7 +847,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser
         fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -853,7 +855,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getPropertyDetailsLocalCouncilView returns 403 for an unauthorized user with only the landlord role`() {
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { status { isForbidden() } }
             }
         }
@@ -870,7 +872,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { status { isOk() } }
             }
         }
@@ -887,7 +889,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { status { isOk() } }
             }
         }
@@ -902,7 +904,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { isOk() }
                 model { attributeExists("pendingInvitations") }
                 model { attributeExists("expiredInvitations") }
@@ -921,7 +923,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { isOk() }
                 model { attributeDoesNotExist("lettingAgentPanelLink") }
             }
@@ -941,7 +943,7 @@ class PropertyDetailsControllerTests(
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
                 status { isOk() }
                 content { string(containsString("correspondence@example.com")) }
                 content { string(containsString("25 Contact Road")) }
@@ -973,7 +975,7 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("freeholderSummaryCards", expectedCards) }
@@ -999,7 +1001,7 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("freeholderSummaryCards", emptyList<SummaryCardViewModel>()) }
@@ -1029,7 +1031,7 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("superiorLandlordSummaryCards", expectedCards) }
@@ -1055,7 +1057,7 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("superiorLandlordSummaryCards", emptyList<SummaryCardViewModel>()) }
@@ -1077,7 +1079,7 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attribute("propertyManagerSummaryCard", expectedCard) }
@@ -1096,11 +1098,46 @@ class PropertyDetailsControllerTests(
 
             // Act & Assert
             mvc
-                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                 .andExpect {
                     status { isOk() }
                     model { attributeDoesNotExist("propertyManagerSummaryCard") }
                 }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView links landlord cards to the local council landlord record`() {
+            val propertyOwnership = createPropertyOwnership()
+            val landlord = propertyOwnership.landlords.first()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
+                status { isOk() }
+                content {
+                    string(containsString(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)))
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView sets the back link to the local council dashboard`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andExpect {
+                status { isOk() }
+                model { attribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL) }
+            }
         }
 
         // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
@@ -1128,13 +1165,98 @@ class PropertyDetailsControllerTests(
 
                 // Act & Assert
                 mvc
-                    .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
+                    .get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id))
                     .andExpect {
                         status { isOk() }
                         model { attributeDoesNotExist("freeholderSummaryCards") }
                         model { attributeDoesNotExist("superiorLandlordSummaryCards") }
                         model { attributeDoesNotExist("propertyManagerSummaryCard") }
                     }
+            }
+        }
+    }
+
+    @Nested
+    inner class GetPropertyDetailsSystemOperatorViewTests {
+        private val propertyOwnership = createPropertyOwnership()
+
+        @BeforeEach
+        fun setUpPropertyOwnership() {
+            whenever(propertyOwnershipService.getPropertyOwnership(eq(1))).thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+        }
+
+        @Test
+        fun `getPropertyDetailsSystemOperatorView returns a redirect for an unauthenticated user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER", "LOCAL_COUNCIL_ADMIN"])
+        fun `getPropertyDetailsSystemOperatorView returns 403 for a local council user`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetailsSystemOperatorView returns 403 for a landlord`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isForbidden() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView returns the council view of a property in any council`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
+                model {
+                    attribute("isLandlordView", false)
+                    attributeExists("propertyDetails", "landlordSummaryCards")
+                }
+            }
+
+            verify(propertyOwnershipService).getPropertyOwnership(1L)
+            verify(propertyOwnershipService, never()).getPropertyOwnershipIfCurrentUserAuthorized(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView sets the back link to the system operator dashboard`() {
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                model { attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView links landlord cards to the system operator landlord record`() {
+            val landlord = propertyOwnership.landlords.first()
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andExpect {
+                status { isOk() }
+                content {
+                    string(containsString(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)))
+                    string(not(containsString(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id))))
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView returns 404 when the property is not found`() {
+            whenever(propertyOwnershipService.getPropertyOwnership(eq(2)))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(2L)).andExpect {
+                status { isNotFound() }
             }
         }
     }

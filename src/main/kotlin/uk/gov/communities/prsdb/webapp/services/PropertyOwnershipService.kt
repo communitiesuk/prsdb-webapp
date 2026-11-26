@@ -291,6 +291,7 @@ class PropertyOwnershipService(
     fun getRegisteredPropertiesForLandlord(
         landlordId: Long,
         currentUrlFragment: String? = null,
+        isSystemOperatorView: Boolean = false,
     ): List<RegisteredPropertyLocalCouncilViewModel> =
         propertyOwnershipRepository
             .findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)
@@ -298,6 +299,7 @@ class PropertyOwnershipService(
                 RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                     propertyOwnership,
                     currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
+                    isSystemOperatorView = isSystemOperatorView,
                 )
             }
 

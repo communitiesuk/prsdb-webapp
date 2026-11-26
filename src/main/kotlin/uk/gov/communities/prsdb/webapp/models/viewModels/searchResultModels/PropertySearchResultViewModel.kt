@@ -28,7 +28,7 @@ data class PropertySearchResultViewModel(
                     ?.name,
             recordLink =
                 PropertyDetailsController
-                    .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
+                    .getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id)
                     .overrideBackLinkForUrl(currentUrlKey),
         )
     }
