@@ -76,6 +76,13 @@ Every page's title should match its h1 (see "Page Titles" in `frontend.instructi
 
 Long titles are fine. Matching the h1 matters more than length.
 
+## Email Templates
+
+Section headings in the body of email templates (`src/main/resources/emails/*.md`) should use `##`. A new or changed
+email template that uses `#` for a body section heading is a review finding, unless the design or ticket explicitly
+specifies `#` or the PR gives a clear reason for it. Existing templates are inconsistent, so don't treat their use of
+`#` as an established pattern.
+
 ## Validation
 
 The project uses a custom prioritised validation framework rather than standard Bean Validation annotations like
