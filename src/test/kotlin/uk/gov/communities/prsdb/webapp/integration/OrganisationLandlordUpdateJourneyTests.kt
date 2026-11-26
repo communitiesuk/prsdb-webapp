@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.GoverningBodyCyaPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberAddressInUkFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberDobFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberListFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody
@@ -598,6 +599,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             BaseComponent.assertThat(dobPage.form.yearInput).hasValue("1974")
             dobPage.submitDate("19", "4", "1980")
 
+            val addressInUkPage = assertPageIs(page, OrgGovBodyMemberAddressInUkFormPageUpdateGoverningBody::class)
+            addressInUkPage.submitYes()
+
             val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody::class)
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
@@ -631,6 +635,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
             val dobChangePage = assertPageIs(page, OrgGovBodyMemberDobFormPageUpdateGoverningBody::class)
             dobChangePage.submitDate("1", "1", "1990")
+
+            val addressInUkChangePage = assertPageIs(page, OrgGovBodyMemberAddressInUkFormPageUpdateGoverningBody::class)
+            addressInUkChangePage.submitYes()
 
             val lookupAddressChangePage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody::class)
             lookupAddressChangePage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
