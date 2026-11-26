@@ -25,11 +25,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SuperiorLandlordsListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FreeholderAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.SuperiorLandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AddressInUkFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyoneInOwnershipChainFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholdTypeFormModel
@@ -147,6 +149,14 @@ interface AssociatedPartiesStateBuilder<SelfType : AssociatedPartiesStateBuilder
     fun withFreeholderContactType(contactType: FreeholderContactType = FreeholderContactType.EMAIL): SelfType {
         val freeholderContactTypeFormModel = FreeholderContactTypeFormModel(contactType = contactType)
         withSubmittedValue(FreeholderContactTypeStep.ROUTE_SEGMENT, freeholderContactTypeFormModel)
+        return self()
+    }
+
+    fun withFreeholderAddressInUk(addressInUk: Boolean = true): SelfType {
+        withSubmittedValue(
+            "${FreeholderAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { this.addressInUk = addressInUk },
+        )
         return self()
     }
 

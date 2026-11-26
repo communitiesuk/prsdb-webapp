@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveFreeholderFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
@@ -297,6 +298,30 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
     }
 
     @Nested
+    inner class FreeholderAddressInUkStep {
+        @Test
+        fun `The heading includes the freeholder name`() {
+            val addressInUkPage = navigator.skipToPropertyRegistrationFreeholderAddressInUkPage(freeholderName = "James Hassan")
+            assertThat(addressInUkPage.heading).containsText("Is James Hassan’s contact address in the UK?")
+        }
+
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val addressInUkPage = navigator.skipToPropertyRegistrationFreeholderAddressInUkPage()
+            addressInUkPage.form.submit()
+            assertThat(addressInUkPage.form.getErrorMessage())
+                .containsText("Select if their contact address is in the UK")
+        }
+
+        @Test
+        fun `Back link returns to the freeholder contact type page`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationFreeholderAddressInUkPage()
+            addressInUkPage.backLink.clickAndWait()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class FreeholderLookupAddressStep {
         @Test
         fun `The heading includes the freeholder name`() {
@@ -305,10 +330,10 @@ class PropertyRegistrationFreeholdersSinglePageTests : IntegrationTestWithImmuta
         }
 
         @Test
-        fun `Back link returns to the freeholder contact type page`(page: Page) {
+        fun `Back link returns to the freeholder address in UK page`(page: Page) {
             val lookupAddressPage = navigator.skipToPropertyRegistrationFreeholderLookupAddressPage()
             lookupAddressPage.backLink.clickAndWait()
-            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
+            assertPageIs(page, FreeholderAddressInUkFormPagePropertyRegistration::class)
         }
     }
 

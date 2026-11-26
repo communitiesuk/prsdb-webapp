@@ -156,18 +156,30 @@ class AssociatedPartyNotificationService(
         name: String,
         address: AddressDataModel,
     ): LetterAddressDataModel {
-        val addressLines = listOf(name) + address.toMultiLineAddress().lines()
+        val formattedAddressLines = address.toMultiLineAddress().lines()
+        val addressLines =
+            listOf(name) +
+                formattedAddressLines +
+                address.country
+                    .takeIf { address.isInternational && it.isNotBlank() && formattedAddressLines.lastOrNull() != it }
+                    ?.let(::listOf)
+                    .orEmpty()
 
-        // Notify accepts at most seven lines; condense the middle while keeping the final postcode line separate.
+        // Notify accepts at most seven lines; keep the postcode and international country on separate lines.
         if (addressLines.size <= LetterAddressDataModel.MAX_ADDRESS_LINES) {
             return LetterAddressDataModel(addressLines)
         }
 
-        val linesToCondense = addressLines.drop(LetterAddressDataModel.MAX_ADDRESS_LINES - 2)
+        val trailingLinesToPreserve = if (address.isInternational) 2 else 1
+        val leadingLinesToPreserve = LetterAddressDataModel.MAX_ADDRESS_LINES - trailingLinesToPreserve - 1
+        val linesToCondense =
+            addressLines
+                .drop(leadingLinesToPreserve)
+                .dropLast(trailingLinesToPreserve)
         val condensedAddressLines =
-            addressLines.take(LetterAddressDataModel.MAX_ADDRESS_LINES - 2) +
-                linesToCondense.dropLast(1).joinToString(", ") +
-                linesToCondense.last()
+            addressLines.take(leadingLinesToPreserve) +
+                linesToCondense.joinToString(", ") +
+                addressLines.takeLast(trailingLinesToPreserve)
         return LetterAddressDataModel(condensedAddressLines)
     }
 }

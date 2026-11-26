@@ -196,6 +196,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderLookupAddressFormPagePropertyRegistration
@@ -349,6 +350,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Super
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.propertyManager.StartPropertyManagerUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -1118,6 +1120,20 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationFreeholderAddressInUkPage(
+        freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
+    ): FreeholderAddressInUkFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderAddressInUk(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}")
+        return createValidPage(page, FreeholderAddressInUkFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationFreeholderLookupAddressPage(

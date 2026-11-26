@@ -300,6 +300,10 @@ freeholders:
       error:
         missing: Select which contact information you can provide
   address:
+    inUk:
+      fieldSetHeading: Is {0}’s contact address in the UK?
+      error:
+        missing: Select if their contact address is in the UK
     lookup:
       fieldSetHeading: What is {0}’s address?
     select:
