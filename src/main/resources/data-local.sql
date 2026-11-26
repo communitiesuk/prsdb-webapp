@@ -646,15 +646,15 @@ VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a',
        ('jl.pending.one@example.com', 13, '2234abcd-5678-abcd-1234-567abcd4444a', 'Inviting landlord', current_date),
        ('jl.pending.org@example.com', 48, '2234abcd-5678-abcd-1234-567abcd5555a', 'Local Organisation Landlord', current_date);
 
-INSERT INTO letting_agent_access (invited_email, property_ownership_id, token, encoded_password, created_date)
-VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111a', NULL, current_date),
+INSERT INTO letting_agent_access (invited_email, property_ownership_id, token, encoded_password, password_set_date, created_date)
+VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111a', NULL, NULL, current_date),
        -- encoded_password is a randomly-salted argon2id hash (for local testing only); the password 'Password123!' verifies against it
        ('letting.agent.two@example.com', 5, '3334abcd-5678-abcd-1234-567abcd2222b',
-        '$argon2id$v=19$m=16384,t=2,p=1$6q7zmXD5tXZGyg9Ir8+TDQ$sbyg7lcP/hX+6CBQrqDbmnOOp1LtNEs5YhKKer8U9K4', current_date - 10),
-       ('letting-agent@example.com', 49, '3334abcd-5678-abcd-1234-567abcd1111c', NULL, current_date),
-       ('letting.agent.details@example.com', 39, '3334abcd-5678-abcd-1234-567abcd2222a', NULL, current_date),
-       ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, current_date),
-       ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, current_date);
+        '$argon2id$v=19$m=16384,t=2,p=1$6q7zmXD5tXZGyg9Ir8+TDQ$sbyg7lcP/hX+6CBQrqDbmnOOp1LtNEs5YhKKer8U9K4', current_date - 10, current_date - 10),
+       ('letting-agent@example.com', 49, '3334abcd-5678-abcd-1234-567abcd1111c', NULL, NULL, current_date),
+       ('letting.agent.details@example.com', 39, '3334abcd-5678-abcd-1234-567abcd2222a', NULL, NULL, current_date),
+       ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222d', NULL, NULL, current_date),
+       ('letting.agent.details@example.com', 50, '3334abcd-5678-abcd-1234-567abcd2222c', NULL, NULL, current_date);
 
 -- Property-record freeholder and superior landlord card fixtures used by integration tests and seeded locally.
 INSERT INTO registration_number (id, created_date, number, type)
@@ -720,6 +720,15 @@ FROM (VALUES ('Sam Superior', 'superior.landlord@example.com', 57),
              (NULL, NULL, 57),
              ('Sam Superior', 'superior.landlord@example.com', 55)) AS v(name, email, property_ownership_id)
 WHERE NOT EXISTS (SELECT 1 FROM superior_landlord s WHERE s.property_ownership_id = v.property_ownership_id);
+
+-- Searchable addresses sharing postcode UK1 1AA in England (with and without a local council), Wales and Scotland,
+-- for testing address search region restrictions
+INSERT INTO address (id, created_date, uprn, single_line_address, local_council_id, postcode, building_number, street_name, country)
+VALUES (67, current_timestamp, 990000000001, '1 English Council Road, UK1 1AA', 1, 'UK1 1AA', '1', 'English Council Road', 'England'),
+       (68, current_timestamp, 990000000002, '2 English No Council Road, UK1 1AA', NULL, 'UK1 1AA', '2', 'English No Council Road', 'England'),
+       (69, current_timestamp, 990000000003, '3 Welsh Road, UK1 1AA', NULL, 'UK1 1AA', '3', 'Welsh Road', 'Wales'),
+       (70, current_timestamp, 990000000004, '4 Scottish Road, UK1 1AA', NULL, 'UK1 1AA', '4', 'Scottish Road', 'Scotland')
+ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));

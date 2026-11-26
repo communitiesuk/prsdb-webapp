@@ -7,8 +7,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.system.CapturedOutput
 import org.springframework.boot.test.system.OutputCaptureExtension
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.SmsSendException
-import uk.gov.communities.prsdb.webapp.exceptions.SmsSendFailureReason
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.smsModels.SmsTemplateModel
 import kotlin.test.assertEquals
@@ -43,7 +43,7 @@ class SmsNotificationStubServiceTests {
 
         // Act & Assert
         val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", mock()) }
-        assertEquals(SmsSendFailureReason.TECHNICAL, exception.reason)
+        assertEquals(NotificationSendFailureReason.TECHNICAL, exception.reason)
     }
 
     @Test
@@ -54,6 +54,6 @@ class SmsNotificationStubServiceTests {
 
         // Act & Assert
         val exception = assertThrows<SmsSendException> { service.sendSms("+447700900123", mock()) }
-        assertEquals(SmsSendFailureReason.MINUTE_LIMIT, exception.reason)
+        assertEquals(NotificationSendFailureReason.MINUTE_LIMIT, exception.reason)
     }
 }

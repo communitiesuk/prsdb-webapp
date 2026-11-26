@@ -27,3 +27,29 @@ checkAnswers:
   insetText: You’ll be able to change the property’s other details after reactivating its registration.
   warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
   submitButton: Confirm details
+confirmation:
+  heading: Property reactivated
+  youHaveReactivated: 'You have reactivated:'
+  prn: 'Property Registration Number: {0}'
+  emailSent: We’ve sent you a confirmation email which includes your Property Registration Number.
+  reactivationDetails:
+    heading: Reactivation details
+    paymentSummary:
+      heading: Payment summary
+    jointLandlords:
+      heading: Joint landlords
+      paragraph: We have notified all joint landlords that the property has been reactivated.
+    landlordAccount:
+      heading: Your landlord account
+      individual: Your landlord account is now active.
+      organisation: Your organisation’s landlord account is now active.
+  whatToDoNext:
+    heading: What to do next
+    paragraph: Check that the rest of this property’s registration details are still correct.
+    goToPropertyRecord: Go to this property’s registration
+confirmMissingCompliance:
+  areYouSure:
+    heading: Are you sure you want to continue?
+  radios:
+    error:
+      missing: Select whether you want to continue

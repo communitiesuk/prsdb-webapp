@@ -368,6 +368,87 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
+    fun `editing an existing postal freeholder leaves contact type and address lookup blank`(page: Page) {
+        val existingFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        freeholderRepository.save(
+            Freeholder(
+                propertyOwnership = existingFreeholder.propertyOwnership,
+                name = "Postal Freeholder",
+            ),
+        )
+
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+            .getSummaryCard("Postal Freeholder")
+            .getAction("Change")
+            .link
+            .clickAndWait()
+
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+        val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
+        assertNull(contactTypePage.form.radios.selectedValue)
+        contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("")
+    }
+
+    @Test
+    fun `editing a postal freeholder added during the update pre-fills its contact type and address`(page: Page) {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        propertyDetailsPage.freeholderUpdateLink.clickAndWait()
+
+        var freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        freeholdersListPage.addAnotherButton.click()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).submitName("Current Journey Postal Freeholder")
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
+        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+        val manualAddressPage = assertPageIs(page, FreeholderManualAddressFormPageFreeholdersUpdate::class, urlArguments)
+        manualAddressPage.submitAddress(
+            addressLineOne = "2 Current Journey Street",
+            addressLineTwo = "Example Court",
+            townOrCity = "Example City",
+            county = "Exampleshire",
+            postcode = "EG1 2AA",
+        )
+
+        freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        freeholdersListPage.getSummaryCard("Current Journey Postal Freeholder").getAction("Change").link.clickAndWait()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+
+        val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
+        assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
+        contactTypePage.form.submit()
+
+        val refilledLookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(refilledLookupAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+        assertThat(refilledLookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+        refilledLookupAddressPage.form.submit()
+
+        val refilledSelectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
+        assertEquals(MANUAL_ADDRESS_CHOSEN, refilledSelectAddressPage.form.addressRadios.selectedValue)
+        refilledSelectAddressPage.form.submit()
+
+        val refilledManualAddressPage = assertPageIs(page, FreeholderManualAddressFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(refilledManualAddressPage.form.addressLineOneInput).hasValue("2 Current Journey Street")
+        assertThat(refilledManualAddressPage.form.addressLineTwoInput).hasValue("Example Court")
+        assertThat(refilledManualAddressPage.form.townOrCityInput).hasValue("Example City")
+        assertThat(refilledManualAddressPage.form.countyInput).hasValue("Exampleshire")
+        assertThat(refilledManualAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+    }
+
+    @Test
     fun `resuming an abandoned freeholder update after another property update discards earlier progress`(page: Page) {
         val landlordAccountEmail = "alex.surname@example.com"
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
@@ -493,7 +574,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
     }
 
     @Test
-    fun `editing a saved freeholder updates the existing record without adding a record`(page: Page) {
+    fun `editing a saved freeholder preselects email and updates the existing record without adding a record`(page: Page) {
         val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
         originalFreeholder.name = "Existing Freeholder"
         originalFreeholder.email = "existing@example.com"
@@ -512,7 +593,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         namePage.submitName("Updated Freeholder")
         val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
         assertEquals(FreeholderContactType.EMAIL.name, contactTypePage.form.radios.selectedValue)
-        contactTypePage.submitContactType(FreeholderContactType.EMAIL)
+        contactTypePage.form.submit()
         val emailPage = FreeholderEmailFormPagePropertyRegistration(page)
         assertEquals("existing@example.com", emailPage.form.emailInput.locator.inputValue())
         emailPage.submitEmail("updated@example.com")

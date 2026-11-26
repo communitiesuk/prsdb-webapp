@@ -528,7 +528,6 @@ class PropertyOwnershipService(
             propertyOwnership.propertyManager = propertyManagerService.createPropertyManager(propertyManager.name, propertyManager.email)
         }
         propertyOwnershipRepository.save(propertyOwnership)
-        // TODO PDJB-1991: Email the property manager when they are added or their details change
     }
 
     @Transactional
@@ -720,6 +719,7 @@ class PropertyOwnershipService(
         propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
         landlord.markAsHavingRegisteredProperty()
+        landlord.setAnniversaryIfAbsent(MonthDay.now(DateTimeHelper.UK_ZONE))
         landlordRepository.save(landlord)
         activationService.reactivateLandlordIfInactive(landlord)
     }

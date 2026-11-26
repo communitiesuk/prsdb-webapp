@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordDeactivationReason
+import uk.gov.communities.prsdb.webapp.constants.enums.ReactivationTaskType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.NotifyTemplateMetadataFactory
@@ -152,6 +153,18 @@ class EmailTemplateModelsTests {
                             ),
                     ),
                     "/emails/PropertyRegistrationConfirmationWithPayment.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    AutomatedPropertyDeactivationEmail(
+                        landlordName = "James",
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNE1 2EB",
+                        prn = "P-XXX-YYY",
+                        reactivationUrl = "https://example.test/landlord/reactivate",
+                        reasons = listOf(ReactivationTaskType.GAS_SAFETY),
+                        landlordDeactivated = true,
+                    ),
+                    "/emails/AutomatedPropertyDeactivation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
@@ -450,19 +463,10 @@ class EmailTemplateModelsTests {
                         multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
                         landlordDeactivated = false,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
+                        propertyRecordUrl = "https://example.com/property",
                     ),
                     "/emails/PropertyDeactivationConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    PropertyDeactivationConfirmationEmail(
-                        recipientName = "Alice",
-                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
-                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
-                        landlordDeactivated = true,
-                        dashboardUrl = "https://example.com/landlord/dashboard",
-                    ),
-                    "/emails/PropertyDeactivationConfirmationAccountDeactivated.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LandlordDeactivatedEmail(
@@ -502,6 +506,17 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/PropertyReactivationConfirmationWithPayment.md",
                     allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
+                    PropertyManagerAddedToPropertyEmail(
+                        propertyManagerName = "James Smith",
+                        propertyManagerEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)", "Janie Jameson (janie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.com/landlord/privacy-notice",
+                    ),
+                    "/emails/PropertyManagerAddedToProperty.md",
                 ),
                 EmailTemplateTestData(
                     CancelDelegationLandlordConfirmationEmail(
@@ -615,6 +630,12 @@ class EmailTemplateModelsTests {
                     "/emails/LettingAgentPropertyDeactivatedNotification.md",
                 ),
                 EmailTemplateTestData(
+                    PropertyDeactivationInviteeCancellationEmail(
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                    ),
+                    "/emails/PropertyDeactivationInviteeCancellation.md",
+                ),
+                EmailTemplateTestData(
                     ChangeOrgTeamMemberAccessLevelEmail(
                         memberName = "Anita Locke",
                         roleName = "administrator",
@@ -650,6 +671,32 @@ class EmailTemplateModelsTests {
                         organisationName = "Keystone Living Group",
                     ),
                     "/emails/RemoveOrgTeamMemberNotification.md",
+                ),
+                EmailTemplateTestData(
+                    FreeholderAddedToPropertyEmail(
+                        freeholderName = "Sarah Thompson",
+                        freeholderEmail = "sarah@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/FreeholderAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
+                    SuperiorLandlordAddedToPropertyEmail(
+                        superiorLandlordName = "James Smith",
+                        superiorLandlordEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/SuperiorLandlordAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
+                    PassphraseEmail("time anything costume"),
+                    "/emails/Passphrase.md",
                 ),
             )
     }

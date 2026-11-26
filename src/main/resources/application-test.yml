@@ -43,6 +43,12 @@ features:
     - name: "pdjb-2227-passphrase-sms"
       enabled: true
       expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-email"
+      enabled: true
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1899-act-as-landlord"
+      enabled: true
+      expiry-date: "2027-01-01"
 
 argon2:
   iterations: 2

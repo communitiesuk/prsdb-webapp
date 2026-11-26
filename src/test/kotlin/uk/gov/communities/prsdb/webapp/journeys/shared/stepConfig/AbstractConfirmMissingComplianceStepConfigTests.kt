@@ -1,21 +1,24 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ReactivationConfirmMissingComplianceFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class ConfirmMissingComplianceStepConfigTests {
+class AbstractConfirmMissingComplianceStepConfigTests {
     @Mock
-    lateinit var mockState: PropertyRegistrationJourneyState
+    lateinit var mockState: MissingComplianceState
 
-    private val routeSegment = ConfirmMissingComplianceStep.ROUTE_SEGMENT
+    private val routeSegment = "confirm-missing-compliance"
 
     @Test
     fun `mode returns null when form model is not present`() {
@@ -81,8 +84,38 @@ class ConfirmMissingComplianceStepConfigTests {
         assertEquals("forms/confirmMissingCompliance", result)
     }
 
-    private fun setupStepConfig(): ConfirmMissingComplianceStepConfig {
-        val stepConfig = ConfirmMissingComplianceStepConfig()
+    @Test
+    fun `getStepSpecificContent includes the missing certificate flags`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.isGasCertMissing).thenReturn(true)
+        whenever(mockState.isElectricalCertMissing).thenReturn(false)
+        whenever(mockState.isEpcMissing).thenReturn(true)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        // Assert
+        assertEquals(true, content["isGasMissing"])
+        assertEquals(false, content["isElectricalMissing"])
+        assertEquals(true, content["isEpcMissing"])
+    }
+
+    @Test
+    fun `afterStepIsReached throws when answers changed since confirmation`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.answersChangedSinceConfirmation).thenReturn(true)
+
+        // Act & Assert
+        assertThrows<CyaDataHasChangedException> { stepConfig.afterStepIsReached(mockState) }
+    }
+
+    private fun setupStepConfig(): AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel> {
+        val stepConfig =
+            object : AbstractConfirmMissingComplianceStepConfig<ReactivationConfirmMissingComplianceFormModel>() {
+                override val formModelClass = ReactivationConfirmMissingComplianceFormModel::class
+            }
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

@@ -14,6 +14,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.NotificationSendFailureReason
 import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -41,7 +42,7 @@ class EmailQueueListenerTests {
     @Test
     fun `receiveEmail re-sends to the fallback address when the recipient is not on the Notify allowlist`() {
         whenever(emailDeliveryService.deliverEmail(eq("recipient@example.com"), any()))
-            .thenThrow(NotifyAllowlistException("not allowlisted"))
+            .thenThrow(NotifyAllowlistException(NotificationSendFailureReason.TECHNICAL, "not allowlisted"))
 
         listener().receiveEmail(payload)
 
@@ -51,7 +52,7 @@ class EmailQueueListenerTests {
     @Test
     fun `receiveEmail acknowledges an allowlist rejection when no fallback address is configured`() {
         whenever(emailDeliveryService.deliverEmail(any(), any()))
-            .thenThrow(NotifyAllowlistException("not allowlisted"))
+            .thenThrow(NotifyAllowlistException(NotificationSendFailureReason.TECHNICAL, "not allowlisted"))
 
         assertDoesNotThrow { listener(fallbackAddress = "").receiveEmail(payload) }
         verify(emailDeliveryService, times(1)).deliverEmail(any(), any())
@@ -60,9 +61,9 @@ class EmailQueueListenerTests {
     @Test
     fun `receiveEmail rethrows when the fallback send fails so the message is retried`() {
         whenever(emailDeliveryService.deliverEmail(eq("recipient@example.com"), any()))
-            .thenThrow(NotifyAllowlistException("not allowlisted"))
+            .thenThrow(NotifyAllowlistException(NotificationSendFailureReason.TECHNICAL, "not allowlisted"))
         whenever(emailDeliveryService.deliverEmail(eq("fallback@example.com"), any()))
-            .thenThrow(TransientEmailSentException("rate limited"))
+            .thenThrow(TransientEmailSentException(NotificationSendFailureReason.MINUTE_LIMIT, "rate limited"))
 
         assertThrows<TransientEmailSentException> { listener().receiveEmail(payload) }
     }
@@ -81,8 +82,8 @@ class EmailQueueListenerTests {
         @JvmStatic
         fun deliveryFailures() =
             listOf(
-                TransientEmailSentException("rate limited"),
-                PersistentEmailSendException("bad request"),
+                TransientEmailSentException(NotificationSendFailureReason.MINUTE_LIMIT, "rate limited"),
+                PersistentEmailSendException(NotificationSendFailureReason.INVALID_REQUEST, "bad request"),
             )
     }
 }

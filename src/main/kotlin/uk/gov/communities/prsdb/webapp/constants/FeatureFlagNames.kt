@@ -36,6 +36,12 @@ const val INTERNATIONAL_ADDRESSES = "pdjb-1878-international-addresses"
 
 const val PASSPHRASE_SMS = "pdjb-2227-passphrase-sms"
 
+const val PASSPHRASE_EMAIL = "pdjb-2227-passphrase-email"
+
+// TODO PDJB-1907: Gate the start and stop acting endpoints behind this flag
+// TODO PDJB-2288: Remove this flag once acting as a landlord has been released
+const val ACT_AS_LANDLORD = "pdjb-1899-act-as-landlord"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -52,4 +58,6 @@ val featureFlagNames =
         ACTIVE_INACTIVE,
         INTERNATIONAL_ADDRESSES,
         PASSPHRASE_SMS,
+        PASSPHRASE_EMAIL,
+        ACT_AS_LANDLORD,
     )

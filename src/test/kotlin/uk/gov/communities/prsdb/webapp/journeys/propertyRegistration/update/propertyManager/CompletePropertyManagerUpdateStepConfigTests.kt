@@ -3,9 +3,11 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.pro
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -20,8 +22,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyManagerDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyManagerDetailsFormModel
+import uk.gov.communities.prsdb.webapp.services.AssociatedPartyNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertSame
 
 @ExtendWith(MockitoExtension::class)
@@ -31,6 +35,9 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
     @Mock
     private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
+
+    @Mock
+    private lateinit var mockAssociatedPartyNotificationService: AssociatedPartyNotificationService
 
     @Mock
     private lateinit var mockState: UpdatePropertyManagerJourneyState
@@ -50,9 +57,16 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
     private val updatedBullets = listOf("The property manager responsible for the property")
 
+    private val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
     @BeforeEach
     fun createStepConfig() {
-        stepConfig = CompletePropertyManagerUpdateStepConfig(mockPropertyOwnershipService, mockPropertyUpdateEmailService)
+        stepConfig =
+            CompletePropertyManagerUpdateStepConfig(
+                mockPropertyOwnershipService,
+                mockPropertyUpdateEmailService,
+                mockAssociatedPartyNotificationService,
+            )
     }
 
     @Nested
@@ -75,7 +89,46 @@ class CompletePropertyManagerUpdateStepConfigTests {
                 eq(PropertyManagerDataModel("New Agent", "new@example.com")),
                 any(),
             )
-            // TODO PDJB-1991: Assert the new property manager email is sent only when the property manager changed
+            verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
+        }
+
+        @Test
+        fun `afterStepIsReached emails the property manager when one is added`() {
+            givenTheRecordWillBeUpdated()
+            givenOriginalPropertyManager(null)
+            givenUsingPropertyManager("New Agent", "new@example.com")
+            givenThePropertyOwnershipCanBeRetrieved()
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockAssociatedPartyNotificationService).sendNotificationToPropertyManagerAddedToProperty(
+                PropertyManagerDataModel("New Agent", "new@example.com"),
+                propertyOwnership,
+            )
+        }
+
+        @Test
+        fun `afterStepIsReached does not email the property manager when an existing property manager is updated`() {
+            givenTheRecordWillBeUpdated()
+            givenOriginalPropertyManager(PropertyManagerDataModel("Agent Ltd", "agent@example.com"))
+            givenUsingPropertyManager("New Agent", "new@example.com")
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verifyNoInteractions(mockAssociatedPartyNotificationService)
+        }
+
+        @Test
+        fun `afterStepIsReached still completes when the property manager email fails to send`() {
+            givenTheRecordWillBeUpdated()
+            givenOriginalPropertyManager(null)
+            givenUsingPropertyManager("New Agent", "new@example.com")
+            givenThePropertyOwnershipCanBeRetrieved()
+            whenever(mockAssociatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(any(), any()))
+                .thenThrow(RuntimeException("Email failed to send"))
+
+            assertDoesNotThrow { stepConfig.afterStepIsReached(mockState) }
+
             verify(mockPropertyUpdateEmailService).sendUpdateEmails(propertyId, updatedBullets)
         }
 
@@ -93,6 +146,16 @@ class CompletePropertyManagerUpdateStepConfigTests {
         }
 
         @Test
+        fun `afterStepIsReached does not send the property manager added email when the answer is no`() {
+            givenTheRecordWillBeUpdated()
+            whenever(mockPropertyManagerStep.outcome).thenReturn(YesOrNo.NO)
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockAssociatedPartyNotificationService, never()).sendNotificationToPropertyManagerAddedToProperty(any(), any())
+        }
+
+        @Test
         fun `afterStepIsReached deletes the journey and rethrows when updating the property manager conflicts`() {
             givenTheRecordWillBeUpdated()
             givenUsingPropertyManager("New Agent", "new@example.com")
@@ -103,6 +166,7 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
             verify(mockState).deleteJourney()
             verify(mockPropertyUpdateEmailService, never()).sendUpdateEmails(any(), any())
+            verifyNoInteractions(mockAssociatedPartyNotificationService)
         }
 
         @Test
@@ -116,6 +180,7 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
             verify(mockState).deleteJourney()
             verify(mockPropertyUpdateEmailService, never()).sendUpdateEmails(any(), any())
+            verifyNoInteractions(mockAssociatedPartyNotificationService)
         }
     }
 
@@ -127,6 +192,14 @@ class CompletePropertyManagerUpdateStepConfigTests {
 
         assertSame(defaultDestination, result)
         verify(mockState).deleteJourney()
+    }
+
+    private fun givenOriginalPropertyManager(propertyManager: PropertyManagerDataModel?) {
+        whenever(mockState.originalPropertyManager).thenReturn(propertyManager)
+    }
+
+    private fun givenThePropertyOwnershipCanBeRetrieved() {
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
     }
 
     private fun givenTheRecordWillBeUpdated() {

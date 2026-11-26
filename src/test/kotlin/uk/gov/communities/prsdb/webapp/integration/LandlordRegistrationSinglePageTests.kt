@@ -297,7 +297,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             var noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
             BaseComponent
                 .assertThat(noAddressFoundPage.heading)
-                .containsText("No matching address in England or Wales found for $postcode and $houseNumber")
+                .containsText("No matching address in the UK found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
@@ -337,7 +337,9 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
             assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
-            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+            assertThat(
+                manualAddressPage.form.getErrorMessage("postcode"),
+            ).containsText("Enter postcode — if your address does not have a postcode, enter ‘none’")
         }
     }
 

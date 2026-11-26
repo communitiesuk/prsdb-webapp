@@ -11,6 +11,7 @@ Follow [Notify's formatting guidance for emails and letters](https://www.notific
 when writing markdown templates. Notify supports a limited set of Markdown features, and support differs between emails and letters:
 - Use `# Heading` for headings in both emails and letters. `## Subheading` is supported for emails, not letters.
 - Both support bullet points and numbered steps.
+- Use `^ Inset text` for the grey sidebar in emails; Inset text is not supported in letters.
 - Use `***` on its own line to insert a page break in a letter.
 - Bold, italics and underlined text are not supported.
 
@@ -67,6 +68,14 @@ It's set from the `<environment>-prsdb-notify-allowlist-fallback-email-address` 
 If it's not set, those emails are dropped.
 
 Locally, ElasticMQ (started by `docker-compose.local.yml`) is used in place of SQS, and the app processes the queue itself.
+
+### Always sending emails synchronously
+Use `EmailNotificationService.sendEmailSynchronously(recipientAddress, email)` when queueing is not appropriate.
+This method always calls the existing delivery service directly, regardless of `pdjb-973-asynchronous-email-sending`.
+There is no queue, automatic retry or allowlist fallback; delivery exceptions propagate to the caller.
+
+Use this method when the user requires realtime feedback on submitting the email to Notify and can take manual action
+if a retry is needed.
 
 ### Testing
 

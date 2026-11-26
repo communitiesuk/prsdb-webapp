@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 
 @PrsdbWebService
 class ActivationService(
@@ -15,11 +16,20 @@ class ActivationService(
     private val landlordRepository: LandlordRepository,
 ) {
     @Transactional
-    fun reactivateProperty(propertyOwnershipId: Long) {
+    fun reactivateProperty(
+        propertyOwnershipId: Long,
+        reactivatingLandlord: Landlord,
+    ) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         check(!propertyOwnership.isActive) { "Property ownership $propertyOwnershipId is already active" }
+        val reactivatingLandlordAnniversary =
+            checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
 
         propertyOwnership.reactivate()
+        // TODO PDJB-2076: Use the renewal date from the payment quote, so reactivating on a later day can't move it past what was paid for
+        propertyOwnership.updateRenewalDate(
+            RenewalDateHelper.getRenewalDateAlignedToAnniversary(propertyOwnership.renewalDate, reactivatingLandlordAnniversary),
+        )
         propertyOwnershipRepository.save(propertyOwnership)
 
         propertyOwnership.landlords.forEach { reactivateLandlordIfInactive(it) }

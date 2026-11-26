@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
+import uk.gov.communities.prsdb.webapp.constants.INTERNATIONAL_ADDRESSES
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -12,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.AddressService
 @JourneyFrameworkComponent
 class LookupAddressStepConfig(
     private val addressService: AddressService,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<LookupAddressMode, LookupAddressFormModel, AddressSearchState>() {
     override val formModelClass = LookupAddressFormModel::class
 
@@ -56,15 +60,24 @@ class LookupAddressStepConfig(
         val formModel = getFormModelFromState(state)
         val houseNameOrNumber = formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber)
         val postcode = formModel.notNullValue(LookupAddressFormModel::postcode)
-        state.cachedAddresses = addressService.searchForAddresses(houseNameOrNumber, postcode, restrictToEngland)
+        state.cachedAddresses = addressService.searchForAddresses(houseNameOrNumber, postcode, regionToSearch())
     }
 
-    private var restrictToEngland: Boolean = false
+    private var region: AddressSearchRegion = AddressSearchRegion.UK
 
-    fun restrictToEngland(): LookupAddressStepConfig {
-        this.restrictToEngland = true
+    fun restrictToRegion(region: AddressSearchRegion): LookupAddressStepConfig {
+        this.region = region
         return this
     }
+
+    // Without international addresses, England and Wales searches aren't restricted
+    // TODO: PDJB-2259: Remove this method replace its usage with `region`
+    private fun regionToSearch() =
+        if (region == AddressSearchRegion.ENGLAND_AND_WALES && !featureFlagManager.checkFeature(INTERNATIONAL_ADDRESSES)) {
+            AddressSearchRegion.UK
+        } else {
+            region
+        }
 
     private var template: String = DEFAULT_TEMPLATE
 

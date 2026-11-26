@@ -1857,7 +1857,10 @@ class PropertyRegistrationServiceTests {
                 address = AddressDataModel("Flat 3, 18 Market Street, Bristol, BS1 4DJ"),
             )
         val superiorLandlordWithEmail = SuperiorLandlordDataModel(detailsKnown = true, name = "Sam Lee", email = "sam@example.com")
+        val propertyManager = PropertyManagerDataModel("Pat Manager", "pat@example.com")
         stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        whenever(mockPropertyManagerService.createPropertyManager("Pat Manager", "pat@example.com"))
+            .thenReturn(PropertyManager("Pat Manager", "pat@example.com"))
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
         val currentUserEmail = "admin@example.com"
         whenever(mockCurrentUserService.getCurrentEmail()).thenReturn(currentUserEmail)
@@ -1874,6 +1877,7 @@ class PropertyRegistrationServiceTests {
             registrationDataWithInvitations.copy(
                 freeholders = listOf(freeholderWithAddress, freeholderWithEmail),
                 superiorLandlords = listOf(superiorLandlordWithAddress, superiorLandlordWithEmail),
+                propertyManager = propertyManager,
             ),
         )
         TransactionSynchronizationManager.getSynchronizations().forEach { it.afterCommit() }
@@ -1890,6 +1894,8 @@ class PropertyRegistrationServiceTests {
             .sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlordWithAddress, propertyOwnership)
         verify(mockAssociatedPartyNotificationService)
             .sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlordWithEmail, propertyOwnership)
+        verify(mockAssociatedPartyNotificationService)
+            .sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
             eq(propertyOwnership),
             eq(landlord.name),
@@ -1908,7 +1914,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty still returns the property and sends other notifications when a notification fails to send`() {
+    fun `registerProperty still returns the property and sends other notifications when notifications fail to send`() {
         // Arrange
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
@@ -1931,11 +1937,18 @@ class PropertyRegistrationServiceTests {
             .thenAnswer { }
         whenever(mockAssociatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(any(), any()))
             .thenThrow(RuntimeException("Letter failed to send"))
+        whenever(mockPropertyManagerService.createPropertyManager("Pat Manager", "pat@example.com"))
+            .thenReturn(PropertyManager("Pat Manager", "pat@example.com"))
+        whenever(mockAssociatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(any(), any()))
+            .thenThrow(RuntimeException("Email failed to send"))
 
         // Act
         val registeredPropertyOwnership =
             propertyRegistrationService.registerProperty(
-                registrationDataWithInvitations.copy(freeholders = listOf(freeholder)),
+                registrationDataWithInvitations.copy(
+                    freeholders = listOf(freeholder),
+                    propertyManager = PropertyManagerDataModel("Pat Manager", "pat@example.com"),
+                ),
             )
 
         // Assert
@@ -1953,6 +1966,23 @@ class PropertyRegistrationServiceTests {
             propertyOwnership,
             landlord,
         )
+    }
+
+    @Test
+    fun `registerProperty does not send the property manager notification when no property manager was given`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+        stubPropertyOwnershipCreation(landlord, propertyOwnership)
+        stubConfirmationEmailDependencies()
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            MockPropertyRegistrationData.createPropertyRegistrationDataModel(propertyManager = null),
+        )
+
+        // Assert
+        verify(mockAssociatedPartyNotificationService, never()).sendNotificationToPropertyManagerAddedToProperty(any(), any())
     }
 
     @Test

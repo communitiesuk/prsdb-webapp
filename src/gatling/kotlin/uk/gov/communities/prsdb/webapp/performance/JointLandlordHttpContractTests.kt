@@ -189,7 +189,7 @@ class JointLandlordHttpContractTests {
                                     "check-joint-landlords", "check-invitations" ->
                                         form(null, includeCsrf = scenario != "missing-csrf")
                                     "confirmation" ->
-                                        """<main><h1>Joint landlord invitations sent</h1>""" +
+                                        """<main><h1>Invitations sent</h1>""" +
                                             """<a href="/landlord/property-details/$id#landlord-details">Go back</a></main>"""
                                     else -> {
                                         code = 404

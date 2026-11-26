@@ -11,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -158,6 +159,7 @@ class SaveSuperiorLandlordStepConfigTests {
                 townOrCity = "Manual Town"
                 county = "Manual County"
                 postcode = "MA1 1AA"
+                country = "England"
             }
         setupAddressAnswers(selectedAddress = MANUAL_ADDRESS_CHOSEN, manualFormModel = manualFormModel)
         val manualAddress = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA")
@@ -183,6 +185,7 @@ class SaveSuperiorLandlordStepConfigTests {
                 manualTownOrCity = "Manual Town",
                 manualCounty = "Manual County",
                 manualPostcode = "MA1 1AA",
+                manualCountry = "England",
             )
         assertEquals(mapOf(1 to expectedSuperiorLandlord), captureSavedMap())
     }
@@ -219,7 +222,7 @@ class SaveSuperiorLandlordStepConfigTests {
         whenever(mockState.nextSuperiorLandlordId).thenReturn(1)
 
         // Act
-        NoAddressFoundStepConfig().afterStepDataIsAdded(addressTask)
+        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(addressTask)
         stepConfig.afterStepIsReached(mockState)
 
         // Assert

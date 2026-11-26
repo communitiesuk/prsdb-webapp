@@ -146,6 +146,7 @@ class OrgGovBodyMembersTask(
                                 ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingMember.manualTownOrCity,
                                 ManualAddressStepConfig.PREFILL_COUNTY to editingMember.manualCounty,
                                 ManualAddressStepConfig.PREFILL_POSTCODE to editingMember.manualPostcode,
+                                ManualAddressStepConfig.PREFILL_COUNTRY to editingMember.manualCountry,
                             )
                         } else {
                             emptyMap()

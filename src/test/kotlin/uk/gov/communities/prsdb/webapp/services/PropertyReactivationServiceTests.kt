@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
 import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -15,6 +17,7 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -53,11 +56,15 @@ class PropertyReactivationServiceTests {
     @Mock
     private lateinit var mockPropertyReactivationEmailService: PropertyReactivationEmailService
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var propertyReactivationService: PropertyReactivationService
 
     private val propertyOwnershipId = 1L
     private val uprn = 2L
+    private val landlord = MockLandlordData.createIndividualLandlord()
 
     private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, isActive = false)
 
@@ -83,6 +90,7 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(
@@ -96,7 +104,7 @@ class PropertyReactivationServiceTests {
             verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
             verify(mockPropertyOwnershipService).saveReactivationTenancyDetails(propertyOwnership, tenancyDetails)
             verify(mockPropertyComplianceService).saveReactivationComplianceData(propertyOwnership, gasSafety, electricalSafety, epc)
-            verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+            verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         }
     }
 
@@ -106,6 +114,7 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -114,7 +123,7 @@ class PropertyReactivationServiceTests {
         verify(mockPropertyOwnershipService, never()).saveReactivationLicensing(any(), any())
         verify(mockPropertyOwnershipService, never()).saveReactivationTenancyDetails(any(), any())
         verifyNoInteractions(mockPropertyComplianceService)
-        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
     }
 
     @Test
@@ -123,12 +132,14 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
 
         // Assert
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+        verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, false)
     }
 
     @Test
@@ -152,14 +163,48 @@ class PropertyReactivationServiceTests {
         // Arrange
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
 
         // Assert
-        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+        verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, false)
         verifyNoInteractions(mockAddressAvailabilityService)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable stores that the landlord was reactivated when the current landlord was inactive`() {
+        // Arrange
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, null, PropertyReactivationDataModel())
+
+        // Assert
+        verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, true)
+    }
+
+    @Test
+    fun `wasLandlordReactivatedByLastReactivation returns true when the session flag is true`() {
+        // Arrange
+        whenever(mockSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION)).thenReturn(true)
+
+        // Act, Assert
+        assertTrue(propertyReactivationService.wasLandlordReactivatedByLastReactivation())
+    }
+
+    @Test
+    fun `wasLandlordReactivatedByLastReactivation returns false when the session flag is missing`() {
+        // Arrange
+        whenever(mockSession.getAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION)).thenReturn(null)
+
+        // Act, Assert
+        assertFalse(propertyReactivationService.wasLandlordReactivatedByLastReactivation())
     }
 
     @Test
@@ -169,6 +214,7 @@ class PropertyReactivationServiceTests {
         whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -184,6 +230,7 @@ class PropertyReactivationServiceTests {
         whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
@@ -191,7 +238,7 @@ class PropertyReactivationServiceTests {
         // Assert
         val inOrder = inOrder(mockLandlordActiveStatusService, mockActivationService)
         inOrder.verify(mockLandlordActiveStatusService).isCurrentLandlordInactive()
-        inOrder.verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        inOrder.verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         verify(mockPropertyReactivationEmailService).sendConfirmationEmail(propertyOwnershipId, landlordReactivated = true)
     }
 
@@ -201,13 +248,14 @@ class PropertyReactivationServiceTests {
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
         whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockPropertyReactivationEmailService.sendConfirmationEmail(any(), any())).thenThrow(RuntimeException("Notify is down"))
 
         // Act & Assert
         assertDoesNotThrow {
             propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
         }
-        verify(mockActivationService).reactivateProperty(propertyOwnershipId)
+        verify(mockActivationService).reactivateProperty(propertyOwnershipId, landlord)
         verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
     }
 }

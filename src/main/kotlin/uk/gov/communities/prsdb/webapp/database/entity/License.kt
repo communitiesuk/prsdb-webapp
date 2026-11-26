@@ -5,9 +5,11 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import org.hibernate.envers.Audited
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 
 @Entity
+@Audited
 class License(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
