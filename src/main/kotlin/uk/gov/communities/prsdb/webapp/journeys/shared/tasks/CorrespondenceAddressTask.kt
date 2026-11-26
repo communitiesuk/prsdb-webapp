@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.AddressSearchRegion
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -22,6 +23,8 @@ class CorrespondenceAddressTask(
         manualAddressStep,
     ) {
     override val lookupAddressTemplate = "forms/correspondenceLookupAddressForm"
+
+    override val searchRegion = AddressSearchRegion.ENGLAND_AND_WALES
 
     override val selectAddressContentProperties: Map<String, Any?> =
         mapOf(

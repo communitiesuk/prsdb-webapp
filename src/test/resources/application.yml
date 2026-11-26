@@ -55,6 +55,9 @@ base-url:
   landlord: example.com
   local-council: example.com
 
+gds:
+  start-page-url: https://example.com/gds-start-page
+
 aws:
   s3:
     quarantineBucket: 'quarantine-bucket'
@@ -148,5 +151,11 @@ features:
       enabled: true
       expiry-date: "2027-01-01"
     - name: "pdjb-2227-passphrase-sms"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-2227-passphrase-email"
+      enabled: false
+      expiry-date: "2027-01-01"
+    - name: "pdjb-1899-act-as-landlord"
       enabled: false
       expiry-date: "2027-01-01"

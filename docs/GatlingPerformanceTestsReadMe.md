@@ -3,8 +3,9 @@
 The NFT workflow runs basic landlord journeys, saved-registration resume/deletion, completed-property
 and organisation updates, gas/electrical certificates, organisation registration/team operations,
 joint invitations/acceptance, agent access/property updates, operator operations and property
-deregistration. Ten families run concurrently; preparation and sequential checks also exercise the
-restored journeys. Landlord registration is a proxy, not paid property-registration capacity.
+deregistration, plus paid property registration and basic council reads. Twelve families run
+concurrently; preparation and sequential checks also exercise the restored journeys. Landlord
+registration is a proxy; the paid-registration family exercises a single synthetic variant.
 
 ## Merge and release order
 
@@ -237,9 +238,12 @@ configuration is appropriate before an approved run. Run
 The concurrent mix retains the landlord-registration proxy at 26/minute and saved, completed-property
 and organisation-profile updates at 4/minute each. Six additional families run at provisional 1/minute:
 gas/electrical compliance, organisation registration/team, joint acceptance, agent access/update,
-operator and deregistration. Organisation registration/team share one arrival. This is 44 arrivals/minute
-at hold and 767 starts overall; the added rates are assumptions, not measured production traffic.
-The 26/minute planning forecast concerns paid property registrations, which the proxy does not prove.
+operator and deregistration. Organisation registration/team share one arrival. Paid vacant/manual/exempt
+property registration adds 26/minute and basic council reads add 1/minute. This is 71 arrivals/minute
+at hold and 1,239 measured starts over the five-minute ramp and fifteen-minute hold: 767 in the original
+ten families, 455 paid registrations and 17 council reads. One paid and one council warm-up precede
+the measured ramp. The added rates are assumptions, not measured production traffic; the landlord
+proxy alone does not establish paid-registration capacity.
 
 Previously successful **local real-application Gatling runs** recorded:
 
@@ -254,12 +258,13 @@ Previously successful **local real-application Gatling runs** recorded:
 These are historical sequential results, not expanded concurrent or NFT acceptance. Fresh fixture/HTTP
 contracts validate restored code; a subsequent approved NFT run must validate the combined workload.
 Joint rejection and existing-password agent variants are not claimed: preserved simulations support
-acceptance and unclaimed invitations. Council execution, paid property registration, the failing public
-EPC readiness path and EPC-dependent scenarios remain excluded. Gas/electrical checks remain included.
+acceptance and unclaimed invitations. Exhaustive paid-registration and council variants, the failing
+public EPC readiness path and EPC-dependent scenarios remain excluded. Gas/electrical checks remain included.
 
 NFT run 43063425738 passed its then-supported correctness checks and QA recovery, but two of 31,257
 ramp requests failed at simulator OAuth authorization because WAF `SQLi_QUERYARGUMENTS` matched nonce/state.
 It did not run the restored extended families. Earlier expanded NFT attempts stopped in preparation;
 skipped journeys are not demonstrated failures. Public EPC readiness failure does not establish an
-internal loopback EPC failure; the payment roundtrip was skipped rather than proven failing.
+internal loopback EPC failure; the payment roundtrip in those earlier attempts was skipped rather than
+proven failing.
 No agreed latency SLO, successful combined NFT acceptance or paid-registration capacity is claimed.

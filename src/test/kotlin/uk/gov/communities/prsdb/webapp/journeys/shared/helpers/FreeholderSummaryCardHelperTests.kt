@@ -82,6 +82,29 @@ class FreeholderSummaryCardHelperTests {
     }
 
     @Test
+    fun `custom unknown details message applies only to unknown freeholders`() {
+        // Arrange
+        val propertyOwnership = createPropertyOwnership()
+        val unknown = createFreeholder(propertyOwnership)
+        val postal = createFreeholder(propertyOwnership, name = "Casey Address", id = 2L)
+        val email = createFreeholder(propertyOwnership, name = "Jordan Email", email = "jordan@example.com", id = 3L)
+
+        // Act
+        val cards =
+            helper
+                .getSummaryCards(listOf(unknown, postal, email), FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY)
+                .associateBy { it.title }
+
+        // Assert
+        assertEquals(
+            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY,
+            cards.getValue("registerProperty.freeholders.list.unknownFreeholder.title").bodyTextKey,
+        )
+        assertEquals(FreeholderSummaryCardHelper.POSTAL_ADDRESS_NOTE_KEY, cards.getValue("Casey Address").bodyTextKey)
+        assertNull(cards.getValue("Jordan Email").bodyTextKey)
+    }
+
+    @Test
     fun `freeholder with a postal address has a card titled with their name and a multi-line postal address row`() {
         // Arrange
         val freeholder =

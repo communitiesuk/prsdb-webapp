@@ -885,6 +885,28 @@ class NftDataSeederTests(
         assertEquals(ukSnapshot, utcSnapshot)
     }
 
+    @Test
+    fun `seed snapshot is independent of upload storage order`() {
+        newSeeder().seedDatabase()
+        val uploads = captureSeedSnapshot().uploads
+
+        val indexes =
+            listOf(
+                Triple("test_file_upload_reverse_id", "file_upload", "id"),
+                Triple("test_gas_upload_reverse_id", "gas_safety_uploads", "gas_safety_file_uploads_id"),
+                Triple("test_electrical_upload_reverse_id", "electrical_safety_uploads", "electrical_safety_file_uploads_id"),
+            )
+        try {
+            indexes.forEach { (name, table, column) ->
+                jdbcTemplate.execute("CREATE INDEX $name ON $table ($column DESC)")
+                jdbcTemplate.execute("CLUSTER $table USING $name")
+            }
+            assertEquals(uploads, captureSeedSnapshot().uploads)
+        } finally {
+            indexes.forEach { (name) -> jdbcTemplate.execute("DROP INDEX IF EXISTS $name") }
+        }
+    }
+
     // The snapshot is captured in the original time zone, as JDBC converts dates using the default time zone
     private fun seedWithDefaultTimeZone(timeZoneId: String): SeedSnapshot {
         val originalTimeZone = TimeZone.getDefault()
@@ -954,7 +976,7 @@ class NftDataSeederTests(
                     FROM file_upload fu
                     LEFT JOIN gas_safety_uploads g ON g.gas_safety_file_uploads_id = fu.id
                     LEFT JOIN electrical_safety_uploads e ON e.electrical_safety_file_uploads_id = fu.id
-                    ORDER BY fu.object_key
+                    ORDER BY fu.id
                     """.trimIndent(),
                 ),
         )

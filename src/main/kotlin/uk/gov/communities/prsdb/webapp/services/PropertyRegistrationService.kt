@@ -192,6 +192,14 @@ class PropertyRegistrationService(
             associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(superiorLandlord, propertyOwnership)
         }
 
+        registrationData.propertyManager?.let { propertyManager ->
+            sendNotificationAndLogFailures(
+                "the property manager added-to-property notification for property ownership ${propertyOwnership.id}",
+            ) {
+                associatedPartyNotificationService.sendNotificationToPropertyManagerAddedToProperty(propertyManager, propertyOwnership)
+            }
+        }
+
         lettingAgentInvitation?.let { invitation ->
             sendNotificationAndLogFailures("the letting agent invitation email for property ownership ${propertyOwnership.id}") {
                 sendLettingAgentInvitationEmail(invitation, landlord)

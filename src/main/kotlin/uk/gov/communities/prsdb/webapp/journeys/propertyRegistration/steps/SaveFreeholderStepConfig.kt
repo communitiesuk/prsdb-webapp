@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.clearFreeholderFormData
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 
@@ -59,11 +60,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state.editingFreeholderId = null
 
         // Clear the individual step form data so the next freeholder starts fresh
-        state.freeholderProvideDetailsStep.clearFormData()
-        state.freeholderNameStep.clearFormData()
-        state.freeholderContactTypeStep.clearFormData()
-        state.freeholderEmailStep.clearFormData()
-        state.freeholderAddressTask.clearFormData()
+        state.clearFreeholderFormData()
     }
 
     private fun buildFreeholderWithEmail(
@@ -102,6 +99,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
             manualTownOrCity = manualFormModel?.townOrCity,
             manualCounty = manualFormModel?.county,
             manualPostcode = manualFormModel?.postcode,
+            manualCountry = manualFormModel?.country,
         )
     }
 }

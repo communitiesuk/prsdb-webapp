@@ -58,7 +58,7 @@ class ConfirmDeactivationStepConfig(
                     registrationNumber =
                         RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                     landlordDeactivated = landlordWillBeDeactivated,
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                    propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(state.propertyOwnershipId).toString(),
                 ),
             )
         }

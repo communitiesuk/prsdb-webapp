@@ -8,6 +8,8 @@ const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
 const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REGISTRATION = "landlordReactivatedByLastPropertyRegistration"
 
+const val LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION = "landlordReactivatedByLastPropertyReactivation"
+
 const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDeregisteredThisSessionWithAddresses"
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
@@ -28,7 +30,7 @@ const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
 
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
 
-const val PASSPHRASE_FOR_SMS = "passphraseForSms"
+const val PENDING_PASSPHRASE = "pendingPassphrase"
 
 const val SUBMITTED_PASSCODE = "submittedPasscode"
 
@@ -68,3 +70,5 @@ const val ORGANISATIONAL_LANDLORD_INVITATION_TOKEN_WITH_JOURNEY_IDS =
     "organisationalLandlordInvitationTokenWithJourneyIds"
 
 const val ACCEPTED_ORGANISATIONAL_LANDLORD_INVITATION_EMAIL = "acceptedOrganisationalLandlordInvitationEmail"
+
+const val ACTING_AS_USER_ID = "actingAsUserId"

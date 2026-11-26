@@ -1,27 +1,28 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.MissingComplianceState
 
 @JourneyFrameworkComponent
 class HasMissingComplianceStepConfig :
-    AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
-    override fun mode(state: PropertyRegistrationJourneyState): ConfirmMissingComplianceCheckResult {
-        val anyInvalid =
-            isGasCertInvalid(state.gasSafetyTask) ||
-                isElectricalCertInvalid(state.electricalSafetyTask) ||
-                isEpcInvalid(state.epcTask)
-        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent()) {
+    AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, MissingComplianceState>() {
+    override fun mode(state: MissingComplianceState): ConfirmMissingComplianceCheckResult =
+        if (state.isMissingComplianceCheckApplicable &&
+            (state.isGasCertMissing || state.isElectricalCertMissing || state.isEpcMissing)
+        ) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED
         }
-    }
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
@@ -62,7 +63,7 @@ class HasMissingComplianceStepConfig :
 @JourneyFrameworkComponent
 class HasMissingComplianceStep(
     stepConfig: HasMissingComplianceStepConfig,
-) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>(stepConfig)
+) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, MissingComplianceState>(stepConfig)
 
 enum class ConfirmMissingComplianceCheckResult {
     UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,

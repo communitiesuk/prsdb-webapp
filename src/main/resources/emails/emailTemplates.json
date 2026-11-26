@@ -1,5 +1,12 @@
 [
   {
+    "test_id": "7b9404c0-e507-48ad-833e-4ae107026632",
+    "prod_id": "9342ce96-2d49-45c5-887d-2f99010d6343",
+    "enumName": "AUTOMATED_PROPERTY_DEACTIVATION",
+    "subject": "Property deactivated",
+    "bodyLocation": "/emails/AutomatedPropertyDeactivation.md"
+  },
+  {
     "test_id": "6a9b40c1-ede1-4851-b10b-5bc40026813f",
     "prod_id": "0012a96e-9ad9-48b8-99dd-d19baebda534",
     "enumName": "LOCAL_COUNCIL_INVITATION_EMAIL",
@@ -303,18 +310,11 @@
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmationAccountDeactivated.md"
   },
   {
-    "test_id": "b94f36f7-98f8-49a4-8492-7ebac9b8bfe0",
-    "prod_id": "351fdb3e-3dbf-46a3-9039-6a5650f637ad",
+    "test_id": "84643434-6a6b-409f-a5bf-4d17fe13ccbc",
+    "prod_id": "17be9d0e-229e-4528-a35f-ecf8fd3c93e9",
     "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION",
     "subject": "Property deactivated",
     "bodyLocation": "/emails/PropertyDeactivationConfirmation.md"
-  },
-  {
-    "test_id": "1cbfb48f-2905-47f5-acae-b792df5effb3",
-    "prod_id": "b09afdd9-c525-4393-8816-983b9e95042a",
-    "enumName": "PROPERTY_DEACTIVATION_CONFIRMATION_ACCOUNT_DEACTIVATED",
-    "subject": "Property deactivated",
-    "bodyLocation": "/emails/PropertyDeactivationConfirmationAccountDeactivated.md"
   },
   {
     "test_id": "3881a1b9-6f69-457a-8848-3c861ac00156",
@@ -378,6 +378,13 @@
     "enumName": "LETTING_AGENT_PROPERTY_DEACTIVATED_NOTIFICATION_EMAIL",
     "subject": "You can no longer update ((single line address))",
     "bodyLocation": "/emails/LettingAgentPropertyDeactivatedNotification.md"
+  },
+  {
+    "test_id": "70155b2c-453f-41a3-9226-d39eb7eab0ee",
+    "prod_id": "4282d1fb-1b25-4dc5-89cd-a53dcdca6d49",
+    "enumName": "PROPERTY_DEACTIVATION_INVITEE_CANCELLATION",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/PropertyDeactivationInviteeCancellation.md"
   },
   {
     "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
@@ -483,5 +490,33 @@
     "enumName": "LANDLORD_DEACTIVATED_NO_PROPERTIES_REGISTERED",
     "subject": "Landlord account deactivated",
     "bodyLocation": "/emails/LandlordDeactivatedNoPropertiesRegistered.md"
+  },
+  {
+    "test_id": "c756832d-a680-4167-af65-dc4a3cc8e903",
+    "prod_id": "20bef3a0-ce93-4eca-b22c-158ab5b94333",
+    "enumName": "FREEHOLDER_ADDED_TO_PROPERTY_EMAIL",
+    "subject": "You’ve been listed as a freeholder of a rental property",
+    "bodyLocation": "/emails/FreeholderAddedToPropertyEmail.md"
+  },
+  {
+    "test_id": "084cf861-bae6-4d9f-aa17-1f21247dc1ce",
+    "prod_id": "fc0c3011-e644-4045-a1f7-e0588c6ce13b",
+    "enumName": "SUPERIOR_LANDLORD_ADDED_TO_PROPERTY_EMAIL",
+    "subject": "You’ve been listed as part of the ownership chain of a rental property",
+    "bodyLocation": "/emails/SuperiorLandlordAddedToPropertyEmail.md"
+  },
+  {
+    "test_id": "fdfc9429-ea11-4042-a681-10c42201e1e7",
+    "prod_id": "89ad7bb0-4c8f-4461-9c7e-24266791e4ca",
+    "enumName": "PASSPHRASE_EMAIL",
+    "subject": "Your passphrase to speak with us",
+    "bodyLocation": "/emails/Passphrase.md"
+  },
+  {
+    "test_id": "c57968bf-3aa7-40a1-893a-108ae52d9c72",
+    "prod_id": "1ff4411e-17b0-4515-acf9-e0039fbde109",
+    "enumName": "PROPERTY_MANAGER_ADDED_TO_PROPERTY",
+    "subject": "You’ve been listed as the property manager of a rental property",
+    "bodyLocation": "/emails/PropertyManagerAddedToProperty.md"
   }
 ]

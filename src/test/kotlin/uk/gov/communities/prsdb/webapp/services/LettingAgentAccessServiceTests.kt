@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -91,25 +89,25 @@ class LettingAgentAccessServiceTests {
     @Nested
     inner class AuthorisedAccessTokens {
         @Test
-        fun `getTokenIsValid returns false for a non-UUID string`() {
-            assertFalse(lettingAgentAccessService.getTokenIsValid("not-a-uuid"))
+        fun `getAccessIdForTokenOrNull returns null for a non-UUID string`() {
+            assertNull(lettingAgentAccessService.getAccessIdForTokenOrNull("not-a-uuid"))
         }
 
         @Test
-        fun `getTokenIsValid returns false when no invitation exists for the token`() {
+        fun `getAccessIdForTokenOrNull returns null when no invitation exists for the token`() {
             val token = UUID.randomUUID()
             whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
 
-            assertFalse(lettingAgentAccessService.getTokenIsValid(token.toString()))
+            assertNull(lettingAgentAccessService.getAccessIdForTokenOrNull(token.toString()))
         }
 
         @Test
-        fun `getTokenIsValid returns true for a known invitation token`() {
+        fun `getAccessIdForTokenOrNull returns the access id for a known invitation token`() {
             val token = UUID.randomUUID()
             whenever(lettingAgentAccessRepository.findByToken(token))
-                .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token))
+                .thenReturn(MockLettingAgentData.createLettingAgentAccess(id = 42L, token = token))
 
-            assertTrue(lettingAgentAccessService.getTokenIsValid(token.toString()))
+            assertEquals(42L, lettingAgentAccessService.getAccessIdForTokenOrNull(token.toString()))
         }
     }
 }

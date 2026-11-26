@@ -1,9 +1,9 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyReactivation
+package uk.gov.communities.prsdb.webapp.constants.enums
 
 import kotlinx.serialization.Serializable
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
-// The optional reactivation tasks. The order of these entries matters: it is the order the tasks appear in the journey.
+// Property reactivation tasks. The order of these entries matters: it is the order the tasks appear in the property reactivation journey.
 @Serializable
 enum class ReactivationTaskType {
     LICENSING,

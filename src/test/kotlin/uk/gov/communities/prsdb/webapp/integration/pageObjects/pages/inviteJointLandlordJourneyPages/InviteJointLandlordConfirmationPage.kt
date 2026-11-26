@@ -16,5 +16,5 @@ class InviteJointLandlordConfirmationPage(
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)
-    val goBackToPropertyRecordLink = Link.byText(page, "Go back to the property record")
+    val goBackToPropertyRecordLink = Link.byText(page, "Go back to the property registration")
 }

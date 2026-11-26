@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRea
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasCertUploadsFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.CheckGasSafetyAnswersFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyReactivation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmMissingComplianceFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.ConfirmationPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicExpiredFormPagePropertyReactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReactivationJourneyPages.EicIssueDateFormPagePropertyReactivation
@@ -148,6 +149,11 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.tenancySummaryList.numberOfHouseholdsRow.value).containsText("1")
         assertThat(checkAnswersPage.tenancySummaryList.rentAmountRow.value).containsText("400")
         checkAnswersPage.submit()
+
+        val confirmMissingCompliancePage =
+            assertPageIs(page, ConfirmMissingComplianceFormPagePropertyReactivation::class, urlArguments)
+        assertThat(confirmMissingCompliancePage.electricalSectionHeading).isVisible()
+        confirmMissingCompliancePage.submitYes()
 
         assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
@@ -338,7 +344,9 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
         infoPage.submit()
 
-        assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyReactivation::class, noDetailsUrlArguments)
+        assertThat(confirmationPage.jointLandlordsHeading).isHidden()
+        assertThat(confirmationPage.landlordAccountHeading).isHidden()
         assertEquals(true, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER))
         verify(confirmationEmailSender).sendEmail(any(), argThat { !landlordReactivated && paymentDetails == null })
     }
@@ -456,6 +464,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
 
         checkAnswersPage.submit()
+        assertPageIs(page, ConfirmMissingComplianceFormPagePropertyReactivation::class, urlArguments).submitYes()
 
         assertPageIs(page, AlreadyRegisteredPagePropertyReactivation::class, urlArguments)
         assertEquals(false, isPropertyActive(jdbcTemplate, INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER))
@@ -540,12 +549,7 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
         val propertyId = INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER
-        jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = false WHERE id = ?", propertyId)
-        jdbcTemplate.update(
-            "UPDATE property_compliance SET gas_safety_cert_provide_later = false, " +
-                "electrical_safety_cert_provide_later = false, epc_provide_later = false WHERE property_ownership_id = ?",
-            propertyId,
-        )
+        setLicensingAsTheOnlyDetailToProvideLater(jdbcTemplate, propertyId)
         navigator.goToPropertyReactivationInfoPage(propertyId).submit()
         val typePage = assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
         typePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -561,6 +565,25 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
         checkAnswers.backLink.clickAndWait()
         assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+    }
+
+    @Test
+    fun `a landlord skips the confirm missing compliance page when only licensing and tenancy details are required`(
+        page: Page,
+        @Autowired jdbcTemplate: JdbcTemplate,
+    ) {
+        val propertyId = INACTIVE_PROPERTY_WITH_ALL_DETAILS_TO_PROVIDE_LATER
+        setNoComplianceDetailsToProvideLater(jdbcTemplate, propertyId)
+        navigator.goToPropertyReactivationInfoPage(propertyId).submit()
+        assertPageIs(page, LicensingTypeFormPagePropertyReactivation::class, urlArguments)
+            .submitLicensingType(LicensingType.NO_LICENSING)
+
+        completeTenancyDetailsTask(page)
+
+        assertPageIs(page, CheckAnswersPagePropertyReactivation::class, urlArguments).submit()
+
+        assertPageIs(page, ConfirmationPagePropertyReactivation::class, urlArguments)
+        assertEquals(true, isPropertyActive(jdbcTemplate, propertyId))
     }
 
     @Test
@@ -589,6 +612,51 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, HasEpcFormPagePropertyReactivation::class, urlArguments)
             verify(epcRegisterClient, never()).getByUprn(any())
+        }
+    }
+
+    @Nested
+    inner class WithInactiveLandlord :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-mockuser-inactive-landlord.sql", "data-overlay-inactive-landlord-has-deactivated-property.sql"),
+        ) {
+        private val deactivatedPropertyId = 1L
+
+        @Test
+        fun `the confirmation page tells the landlord their account was reactivated`(page: Page) {
+            val infoPage = navigator.goToPropertyReactivationInfoPage(deactivatedPropertyId)
+            infoPage.submit()
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to deactivatedPropertyId.toString()),
+                )
+            assertThat(confirmationPage.reactivationDetailsHeading).isVisible()
+            assertThat(confirmationPage.landlordAccountText).hasText("Your landlord account is now active.")
+            assertThat(confirmationPage.jointLandlordsHeading).isHidden()
+        }
+    }
+
+    @Nested
+    inner class WithJointLandlord :
+        NestedIntegrationTestWithMutableData(
+            listOf("data-local.sql", "data-overlay-inactive-property-has-joint-landlord.sql"),
+        ) {
+        @Test
+        fun `the confirmation page tells the landlord their joint landlords were notified`(page: Page) {
+            val infoPage = navigator.goToPropertyReactivationInfoPage(INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER)
+            infoPage.submit()
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyReactivation::class,
+                    mapOf("propertyOwnershipId" to INACTIVE_PROPERTY_WITH_NO_DETAILS_TO_PROVIDE_LATER.toString()),
+                )
+            assertThat(confirmationPage.jointLandlordsHeading).isVisible()
+            assertThat(confirmationPage.landlordAccountHeading).isHidden()
         }
     }
 
@@ -717,6 +785,25 @@ class PropertyReactivationJourneyTests : IntegrationTestWithMutableData("data-lo
             CertificateType.Eicr -> assertPageIs(page, CheckEicrUploadsFormPagePropertyReactivation::class, urlArguments)
             else -> throw IllegalArgumentException("Unexpected certificate type: $certificateType")
         }
+
+    private fun setLicensingAsTheOnlyDetailToProvideLater(
+        jdbcTemplate: JdbcTemplate,
+        propertyOwnershipId: Long,
+    ) {
+        jdbcTemplate.update("UPDATE property_ownership SET tenancy_provide_later = false WHERE id = ?", propertyOwnershipId)
+        setNoComplianceDetailsToProvideLater(jdbcTemplate, propertyOwnershipId)
+    }
+
+    private fun setNoComplianceDetailsToProvideLater(
+        jdbcTemplate: JdbcTemplate,
+        propertyOwnershipId: Long,
+    ) {
+        jdbcTemplate.update(
+            "UPDATE property_compliance SET gas_safety_cert_provide_later = false, " +
+                "electrical_safety_cert_provide_later = false, epc_provide_later = false WHERE property_ownership_id = ?",
+            propertyOwnershipId,
+        )
+    }
 
     private fun isPropertyActive(
         jdbcTemplate: JdbcTemplate,

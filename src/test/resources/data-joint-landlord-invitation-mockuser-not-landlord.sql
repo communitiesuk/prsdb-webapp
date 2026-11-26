@@ -20,7 +20,6 @@ VALUES (3, '05/02/25', '05/02/25', 1013, '1 PRSDB Square, EG1 2AA', 2, 'EG1 2AA'
        (7, '05/02/25', '05/02/25', 1017, '5 PRSDB Square, EG1 2AA', 2, 'EG1 2AA', '5');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
--- TODO PDJB-2028: has_registered_property is left at its default (false); set it for landlords with properties if tests rely on it
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES  (2, '09/13/24', '09/13/24', 3, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',

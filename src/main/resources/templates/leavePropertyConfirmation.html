@@ -1,16 +1,22 @@
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{leaveProperty.confirmation.banner.heading(${address})}, ~{::main/content()}, false, null, null)}">
+<html th:replace="~{fragments/layout :: layout(#{leaveProperty.confirmation.banner.heading}, ~{::main/content()}, false, null, null)}">
 <main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{leaveProperty.confirmation.banner.heading(${address})}, null)}">
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{leaveProperty.confirmation.banner.heading}, null)}">
         </div>
         <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.one}">
             leaveProperty.confirmation.paragraph.one
         </p>
+        <p id="property-address" class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressLines})}"></th:block>
+        </p>
         <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.two}">
             leaveProperty.confirmation.paragraph.two
+        </p>
+        <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.three}">
+            leaveProperty.confirmation.paragraph.three
         </p>
         <p class="govuk-body">
             <a class="govuk-link"

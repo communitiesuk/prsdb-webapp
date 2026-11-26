@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsContro
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -26,15 +28,11 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    // The landlord's ownership information moves from the property record tab to the people
-    // responsible tab when the flag is on.
-    // TODO PDJB-1999: give the local council view its own ownership section on the people
-    //  responsible tab. Until then it keeps the single legacy row on the property record tab.
+    // The ownership information moves from the property record tab to the people responsible tab
+    // when the flag is on.
     // TODO PDJB-2016: remove this property, showOwnershipSectionOnPropertyDetailsTab and the
-    //  th:if blocks they drive in propertyDetailsView.html and fragments/landlordDetails.html.
-    //  Once PDJB-1999 is done both views always use the flag-on version.
-    val showPeopleResponsibleOwnership: Boolean =
-        viewType.isLandlordView && associatedPartiesEnabled
+    //  th:if blocks they drive in propertyDetailsView.html and fragments/peopleResponsible.html.
+    val showPeopleResponsibleOwnership: Boolean = associatedPartiesEnabled
 
     val showOwnershipSectionOnPropertyDetailsTab: Boolean = !showPeopleResponsibleOwnership
 
@@ -61,6 +59,13 @@ class PropertyDetailsViewModel(
 
     val showFreeholderSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
 
+    val unknownFreeholderBodyTextKey: String =
+        if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+            FreeholderSummaryCardHelper.COUNCIL_UNKNOWN_FREEHOLDER_BODY_KEY
+        } else {
+            FreeholderSummaryCardHelper.LANDLORD_UNKNOWN_FREEHOLDER_BODY_KEY
+        }
+
     val freeholderSectionUpdateUrl: String =
         UpdateFreeholdersController.getUpdateFreeholdersFirstStepRoute(propertyOwnership.id)
 
@@ -70,6 +75,13 @@ class PropertyDetailsViewModel(
     val hasSuperiorLandlords: Boolean = propertyOwnership.superiorLandlords.isNotEmpty()
 
     val showSuperiorLandlordSectionUpdateLink: Boolean = viewType == PropertyDetailsViewType.LANDLORD
+
+    val unknownSuperiorLandlordBodyTextKey: String =
+        if (viewType == PropertyDetailsViewType.LOCAL_COUNCIL) {
+            SuperiorLandlordSummaryCardHelper.COUNCIL_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY
+        } else {
+            SuperiorLandlordSummaryCardHelper.LANDLORD_UNKNOWN_SUPERIOR_LANDLORD_BODY_KEY
+        }
 
     val superiorLandlordSectionUpdateUrl: String =
         UpdateSuperiorLandlordsController.getUpdateSuperiorLandlordsFirstStepRoute(propertyOwnership.id)
@@ -84,7 +96,6 @@ class PropertyDetailsViewModel(
             ),
         )
 
-    // TODO PDJB-1999: show the property manager on the local council view's people responsible tab.
     // TODO PDJB-2016: Remove showPropertyManagerSection, its guard in PropertyDetailsController and the th:if it
     //  drives in fragments/peopleResponsible.html when the ASSOCIATED_PARTIES flag is removed.
     val showPropertyManagerSection: Boolean = showPeopleResponsibleOwnership
@@ -114,6 +125,7 @@ class PropertyDetailsViewModel(
     val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
 
+    // TODO PDJB-2016: remove this legacy ownership section when the ASSOCIATED_PARTIES flag is removed.
     val ownershipSectionBeforePdjb955: List<SummaryListRowViewModel> =
         if (showOwnershipSectionOnPropertyDetailsTab) listOf(ownershipTypeRowBeforePdjb955()) else emptyList()
 

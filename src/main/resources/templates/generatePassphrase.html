@@ -2,11 +2,14 @@
 <html th:replace="~{fragments/layout :: layout(#{generatePassphrase.heading}, ~{::main/content()}, ${hasErrors}, null, null)}">
 <main>
     <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
-        <th:block th:object="${formModel}">
+        <th:block th:object="${smsFormModel}">
+            <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
+        </th:block>
+        <th:block th:object="${emailFormModel}">
             <div th:replace="~{fragments/forms/errorSummary :: errorSummary}"></div>
         </th:block>
         <h1 class="govuk-heading-l" th:text="#{generatePassphrase.heading}">generatePassphrase.heading</h1>
-        <div th:if="${smsStatus != null}" class="govuk-inset-text" role="status" th:text="#{${smsStatus}}">smsStatus</div>
+        <div th:if="${status != null}" class="govuk-inset-text" role="status" th:text="#{${status}}">status</div>
         <div id="passphrase-preview" class="govuk-inset-text">
             <span th:text="#{generatePassphrase.passphrase.label}" th:remove="tag">generatePassphrase.passphrase.label</span>
             <br>
@@ -16,14 +19,24 @@
         <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${generatePassphraseUrl}}, #{generatePassphrase.generateAnother})}">
             generatePassphrase.generateAnother
         </a>
-        <form th:if="${smsEnabled && !#strings.isEmpty(formModel.passphraseToken)}"
-              th:action="@{${generatePassphraseUrl}}" method="post" novalidate th:object="${formModel}">
+        <form th:if="${emailEnabled && !#strings.isEmpty(emailFormModel.passphraseToken)}"
+              th:action="@{${generatePassphraseUrl}}" method="post" novalidate th:object="${emailFormModel}">
+            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.email.heading}">generatePassphrase.email.heading</h2>
+            <input type="hidden" name="channel" value="email">
+            <input type="hidden" id="emailPassphraseToken" th:field="*{passphraseToken}">
+            <div th:replace="~{fragments/forms/emailInput :: emailInput(#{generatePassphrase.email.emailAddress.label}, 'emailAddress', #{generatePassphrase.email.emailAddress.hint})}"></div>
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePassphrase.email.send})}"></button>
+        </form>
+        <form th:if="${smsEnabled && !#strings.isEmpty(smsFormModel.passphraseToken)}"
+              th:action="@{${generatePassphraseUrl}}" method="post" novalidate th:object="${smsFormModel}">
             <h2 class="govuk-heading-m" th:text="#{generatePassphrase.sms.heading}">generatePassphrase.sms.heading</h2>
-            <input type="hidden" th:field="*{passphraseToken}">
+            <input type="hidden" name="channel" value="sms">
+            <input type="hidden" id="smsPassphraseToken" th:field="*{passphraseToken}">
             <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(#{generatePassphrase.sms.phoneNumber.label}, 'phoneNumber', #{generatePassphrase.sms.phoneNumber.hint})}"></div>
             <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePassphrase.sms.send})}"></button>
         </form>
-        <section id="passphrase-letter-guidance" th:if="${attemptedPassphrase == null && (!smsEnabled || !#strings.isEmpty(formModel.passphraseToken))}">
+        <section id="passphrase-letter-guidance"
+                 th:if="${attemptedPassphrase == null && ((!emailEnabled && !smsEnabled) || !#strings.isEmpty(emailFormModel.passphraseToken) || !#strings.isEmpty(smsFormModel.passphraseToken))}">
             <h2 class="govuk-heading-m" th:text="#{generatePassphrase.letter.heading}">generatePassphrase.letter.heading</h2>
             <p class="govuk-body" th:text="#{generatePassphrase.letter.body}">generatePassphrase.letter.body</p>
         </section>
