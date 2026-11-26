@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.AwsSecurityAgentDomainVerificationController.Companion.AWS_SECURITY_AGENT_DOMAIN_VERIFICATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
@@ -48,6 +49,8 @@ class DefaultSecurityConfig(
                     .requestMatchers("/")
                     .permitAll()
                     .requestMatchers(HEALTHCHECK_ROUTE)
+                    .permitAll()
+                    .requestMatchers(AWS_SECURITY_AGENT_DOMAIN_VERIFICATION_ROUTE)
                     .permitAll()
                     .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
                     .permitAll()
