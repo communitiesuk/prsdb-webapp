@@ -38,7 +38,6 @@ const val PASSPHRASE_SMS = "pdjb-2227-passphrase-sms"
 
 const val PASSPHRASE_EMAIL = "pdjb-2227-passphrase-email"
 
-// TODO PDJB-1907: Gate the start and stop acting endpoints behind this flag
 // TODO PDJB-2288: Remove this flag once acting as a landlord has been released
 const val ACT_AS_LANDLORD = "pdjb-1899-act-as-landlord"
 
