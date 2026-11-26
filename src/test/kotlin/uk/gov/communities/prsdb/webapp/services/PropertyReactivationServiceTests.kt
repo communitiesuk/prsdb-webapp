@@ -243,6 +243,37 @@ class PropertyReactivationServiceTests {
     }
 
     @Test
+    fun `reactivatePropertyIfAddressAvailable notifies joint landlords of the reactivation`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        // Act
+        propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+
+        // Assert
+        verify(mockPropertyReactivationEmailService).sendJointLandlordNotifications(propertyOwnershipId)
+    }
+
+    @Test
+    fun `reactivatePropertyIfAddressAvailable still sends the confirmation email when the joint landlord notifications fail`() {
+        // Arrange
+        whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockPropertyReactivationEmailService.sendJointLandlordNotifications(any())).thenThrow(RuntimeException("Notify is down"))
+
+        // Act & Assert
+        assertDoesNotThrow {
+            propertyReactivationService.reactivatePropertyIfAddressAvailable(propertyOwnershipId, uprn, PropertyReactivationDataModel())
+        }
+        verify(mockPropertyReactivationEmailService).sendConfirmationEmail(propertyOwnershipId, landlordReactivated = false)
+    }
+
+    @Test
     fun `reactivatePropertyIfAddressAvailable still reactivates the property when the confirmation email fails to send`() {
         // Arrange
         whenever(mockAddressAvailabilityService.isAddressOwned(uprn)).thenReturn(false)
