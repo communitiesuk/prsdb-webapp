@@ -38,7 +38,15 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
 
         // Assert
         verify(mockState).freeholdersMap =
-            mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Ind Landlord", email = "ind@example.com"))
+            mapOf(
+                1 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Ind Landlord",
+                        email = "ind@example.com",
+                        suppressNotification = true,
+                    ),
+            )
         verify(mockState).nextFreeholderId = 2
     }
 
@@ -56,7 +64,7 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
 
         // Assert
         verify(mockState).freeholdersMap =
-            mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Org Ltd", email = "org@example.com"))
+            mapOf(1 to FreeholderDataModel(detailsKnown = true, name = "Org Ltd", email = "org@example.com", suppressNotification = true))
         verify(mockState).nextFreeholderId = 2
     }
 
@@ -101,7 +109,15 @@ class AddLoggedInLandlordFreeholderStepConfigTests {
 
         // Assert
         verify(mockState).freeholdersMap =
-            mapOf(3 to FreeholderDataModel(detailsKnown = true, name = "Ind Landlord", email = "ind@example.com"))
+            mapOf(
+                3 to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = "Ind Landlord",
+                        email = "ind@example.com",
+                        suppressNotification = true,
+                    ),
+            )
     }
 
     private fun stepConfig() = AddLoggedInLandlordFreeholderStepConfig(mockUserToLandlordService)

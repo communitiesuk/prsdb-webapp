@@ -10,7 +10,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 // Adds the logged-in landlord to the freeholders list when a joint freeholder reaches it with no freeholders, so the list
-// matches what CYA and the property record will show. Once added, the card is treated like any other freeholder.
+// matches what CYA and the property record will show. Once added, the card is treated like any other freeholder, except
+// that the landlord isn't notified about being added.
 @JourneyFrameworkComponent
 class AddLoggedInLandlordFreeholderStepConfig(
     private val userToLandlordService: UserToLandlordService,
@@ -24,7 +25,15 @@ class AddLoggedInLandlordFreeholderStepConfig(
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val nextKey = state.nextFreeholderId ?: 1
         state.freeholdersMap =
-            mapOf(nextKey to FreeholderDataModel(detailsKnown = true, name = landlord.name, email = landlord.getDisplayEmail()))
+            mapOf(
+                nextKey to
+                    FreeholderDataModel(
+                        detailsKnown = true,
+                        name = landlord.name,
+                        email = landlord.getDisplayEmail(),
+                        suppressNotification = true,
+                    ),
+            )
         state.nextFreeholderId = nextKey + 1
     }
 }
