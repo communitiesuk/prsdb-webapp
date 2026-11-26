@@ -410,6 +410,8 @@ class PaymentService(
                 val storedPayment = checkNotNull(paymentRepository.findByIdOrNull(paymentId)) { "Payment $paymentId not found" }
                 entityManager.refresh(storedPayment)
                 applyPaidChanges(storedPayment)
+                // Flushed so failing writes throw before the payment is captured
+                entityManager.flush()
                 check(!transactionStatus.isRollbackOnly) { "Transaction finalising payment $paymentId is marked for rollback" }
 
                 onCaptureAttempted()
