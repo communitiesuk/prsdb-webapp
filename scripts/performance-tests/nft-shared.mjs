@@ -16,6 +16,34 @@ export const taskPrefix = `arn:aws:ecs:${region}:${account}:task-definition/`;
 // script has one source of truth to read at runtime, instead of a second hardcoded copy that can drift.
 export const simulatorDigestParameterName = 'nft-one-login-simulator-approved-image-digest';
 
+export class OperationTimeoutError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'OperationTimeoutError';
+    this.safeToLog = true;
+  }
+}
+
+function safeMessage(message) {
+  return String(message ?? '').replace(/[\x00-\x1f\x7f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+}
+
+function errorSummary(error) {
+  if (error instanceof AggregateError) {
+    const details = [...error.errors].map(errorSummary).filter(Boolean);
+    const context = error.safeContext ?? 'Multiple operations failed';
+    return details.length ? `${context}: ${details.join('; ')}` : context;
+  }
+  if (error?.safeToLog === true || error?.name === 'SafeRecoveryError') {
+    return safeMessage(error.message) || `${error.name} failed`;
+  }
+  return `${safeMessage(error?.name) || 'Error'} details redacted`;
+}
+
+export function formatSafeError(error) {
+  return errorSummary(error).slice(0, 1500);
+}
+
 export function requireCondition(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -29,7 +57,7 @@ export function environment(container) {
   return Object.fromEntries((container.environment ?? []).map(({name, value}) => [name, value]));
 }
 
-function registrationCopy(task) {
+export function registrationCopy(task) {
   const copy = structuredClone(task);
   for (const key of ['taskDefinitionArn', 'revision', 'status', 'registeredAt', 'registeredBy',
     'requiresAttributes', 'compatibilities', 'deregisteredAt']) delete copy[key];
@@ -66,6 +94,7 @@ export async function awsCommand(service, operation, input = {}, awsRegion = reg
     // AWS errors can echo task environment values. Report the operation and status, never raw stdout/stderr.
     const code = error.stderr?.match(/An error occurred \(([A-Za-z0-9]+)\)/)?.[1];
     const sanitized = new Error(`AWS ${service} ${operation} failed (status ${error.code ?? 'unknown'}${code ? `, ${code}` : ''})`);
+    sanitized.safeToLog = true;
     sanitized.awsCode = code;
     throw sanitized;
   }
@@ -97,7 +126,7 @@ export function waitFactory({now, sleep, timeoutMs, pollMs}) {
       if (now() >= deadline) break;
       await sleep(pollMs);
     } while (now() <= deadline);
-    throw new Error(`${description} timeout`);
+    throw new OperationTimeoutError(`${description} timeout`);
   };
 }
 

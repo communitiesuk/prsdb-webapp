@@ -21,7 +21,7 @@ class PropertySearchResultViewModelTests {
                         .toString(),
                 localCouncil =
                     propertyOwnership.address.localCouncil?.name,
-                recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true),
+                recordLink = PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id),
             )
 
         val propertySearchResultViewModel = PropertySearchResultViewModel.fromPropertyOwnership(propertyOwnership)

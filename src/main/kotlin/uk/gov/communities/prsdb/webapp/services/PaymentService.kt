@@ -27,10 +27,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedMotoPayment
@@ -82,26 +82,27 @@ class PaymentService(
             checkNotNull(reactivatingLandlord.anniversary) { "Reactivating landlord ${reactivatingLandlord.id} has no anniversary" }
 
         val newRenewalDate = RenewalDateHelper.getRenewalDateAlignedToAnniversary(propertyOwnership.renewalDate, anniversary, quoteDate)
-        val paymentStartDate = maxOf(quoteDate, propertyOwnership.paidForUntil)
-        val isUnpaidPeriodAdded = newRenewalDate.isAfter(propertyOwnership.renewalDate) && newRenewalDate.isAfter(paymentStartDate)
+        val chargeablePeriodStartDate = maxOf(quoteDate, propertyOwnership.paidForUntil)
+        val isUnpaidPeriodAdded = newRenewalDate.isAfter(propertyOwnership.renewalDate) && newRenewalDate.isAfter(chargeablePeriodStartDate)
 
         return PropertyPaymentQuote(
-            amountInPence = if (isUnpaidPeriodAdded) calculateProRatedFeeInPence(newRenewalDate, paymentStartDate) else 0,
+            amountInPence = if (isUnpaidPeriodAdded) calculateProRatedFeeInPence(newRenewalDate, chargeablePeriodStartDate) else 0,
             quoteDate = quoteDate,
             renewalDate = newRenewalDate,
-            paymentStartDate = paymentStartDate,
+            chargeablePeriodStartDate = chargeablePeriodStartDate,
         )
     }
 
     fun getAnnualFeeInPence(): Int = annualFeeInPence
 
-    fun getFirstChargeableDate(quoteDate: LocalDate): LocalDate = maxOf(quoteDate, gratisPeriodEndDate.plusDays(1))
+    fun getFirstChargeableDate(chargeablePeriodStartDate: LocalDate): LocalDate =
+        maxOf(chargeablePeriodStartDate, gratisPeriodEndDate.plusDays(1))
 
     fun createPropertyRegistrationPayment(
         journeyId: String,
         email: String,
         quote: PropertyPaymentQuote,
-    ): PropertyRegistrationPaymentCreationResult {
+    ): PaymentCreationResult {
         val incompleteProperty = getIncompletePropertyForCurrentUser(journeyId)
 
         val renewalDate = quote.renewalDate
@@ -130,11 +131,11 @@ class PaymentService(
             paymentRepository.saveAndFlush(
                 Payment.fromGovUkPay(createdGovUkPayPayment.payment, quote.quoteDate, renewalDate, incompleteProperty),
             )
-            PropertyRegistrationPaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
+            PaymentCreationResult.NewPayment(createdGovUkPayPayment.nextUrl)
         } catch (exception: DataIntegrityViolationException) {
             if (!exception.isViolationOf(ONE_CREATED_PAYMENT_PER_DRAFT_CONSTRAINT)) throw exception
             cancelUnsavedPayment(createdGovUkPayPayment.payment.paymentId, journeyId)
-            PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted
+            PaymentCreationResult.ConcurrentPaymentStarted
         }
     }
 

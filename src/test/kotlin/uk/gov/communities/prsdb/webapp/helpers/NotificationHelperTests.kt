@@ -65,4 +65,28 @@ class NotificationHelperTests {
             outContent.toString().trim(),
         )
     }
+
+    @Test
+    fun `sendAddedToPropertyNotifications reports a notification skipped because the party is a landlord`() {
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+
+        System.setOut(PrintStream(outContent))
+        try {
+            sendAddedToPropertyNotifications("freeholder", listOf("landlord", "sent"), 1L) { party ->
+                if (party == "landlord") {
+                    AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD
+                } else {
+                    AssociatedPartyNotificationOutcome.EMAIL_SENT
+                }
+            }
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        assertEquals(
+            "Not sending freeholder 1 added-to-property notification for property ownership 1: they are a landlord on the property",
+            outContent.toString().trim(),
+        )
+    }
 }

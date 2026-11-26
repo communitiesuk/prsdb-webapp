@@ -55,9 +55,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyRegistrationPaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
@@ -388,28 +388,28 @@ class PaymentServiceTests {
         }
 
         @Test
-        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is within it`() {
+        fun `getFirstChargeableDate returns the day after the gratis period ends when the chargeable period starts within it`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2026, 12, 16)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the day after the gratis period ends when the quote date is the last gratis day`() {
+        fun `getFirstChargeableDate returns the day after the gratis period when the chargeable period starts on the last gratis day`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 14)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the quote date when it is the day after the gratis period ends`() {
+        fun `getFirstChargeableDate returns the chargeable period start date when it is the day after the gratis period ends`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2027, 11, 15), service.getFirstChargeableDate(LocalDate.of(2027, 11, 15)))
         }
 
         @Test
-        fun `getFirstChargeableDate returns the quote date when the gratis period has ended`() {
+        fun `getFirstChargeableDate returns the chargeable period start date when the gratis period has ended`() {
             val service = createPaymentService(gratisPeriodEndDate = "2027-11-14")
 
             assertEquals(LocalDate.of(2028, 1, 10), service.getFirstChargeableDate(LocalDate.of(2028, 1, 10)))
@@ -435,7 +435,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(service.calculateProRatedFeeInPence(expectedRenewalDate, quoteDate), quote.amountInPence)
             assertEquals(quoteDate, quote.quoteDate)
-            assertEquals(quoteDate, quote.paymentStartDate)
+            assertEquals(quoteDate, quote.chargeablePeriodStartDate)
             assertEquals(expectedRenewalDate, quote.renewalDate)
             verifyNoInteractions(mockGovUkPayClient)
         }
@@ -525,7 +525,7 @@ class PaymentServiceTests {
             // chargeable days = 46, gratis days = 0, days in year = 366 -> 251.36
             assertEquals(251, quote.amountInPence)
             assertEquals(quoteDate, quote.quoteDate)
-            assertEquals(quoteDate, quote.paymentStartDate)
+            assertEquals(quoteDate, quote.chargeablePeriodStartDate)
             assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
             verifyNoInteractions(mockGovUkPayClient)
         }
@@ -543,12 +543,12 @@ class PaymentServiceTests {
             // Assert
             // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
             assertEquals(737, quote.amountInPence)
-            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
             assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
         }
 
         @Test
-        fun `getPropertyReactivationPaymentQuote excludes gratis days after the payment start date`() {
+        fun `getPropertyReactivationPaymentQuote excludes gratis days after the chargeable period start date`() {
             // Arrange
             val quoteDate = LocalDate.of(2027, 6, 1)
             setUpInactivePropertyForCurrentLandlord(renewalDate = LocalDate.of(2027, 8, 1), anniversary = MonthDay.of(Month.JANUARY, 15))
@@ -557,7 +557,7 @@ class PaymentServiceTests {
             val quote = paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, quoteDate)
 
             // Assert
-            // payment start 2027-08-01, renewal 2028-01-15: chargeable days = 167, gratis days = 106, days in year = 365 -> 334.25
+            // period start 2027-08-01, renewal 2028-01-15: chargeable days = 167, gratis days = 106, days in year = 365 -> 334.25
             assertEquals(334, quote.amountInPence)
             assertEquals(LocalDate.of(2028, 1, 15), quote.renewalDate)
         }
@@ -607,7 +607,7 @@ class PaymentServiceTests {
 
             // Assert
             assertEquals(0, quote.amountInPence)
-            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
             assertEquals(LocalDate.of(2028, 3, 1), quote.renewalDate)
         }
 
@@ -666,7 +666,7 @@ class PaymentServiceTests {
             // Assert
             // chargeable days = 135, gratis days = 0, days in year = 366 -> 737.70
             assertEquals(737, quote.amountInPence)
-            assertEquals(paidForUntil, quote.paymentStartDate)
+            assertEquals(paidForUntil, quote.chargeablePeriodStartDate)
             assertEquals(LocalDate.of(2028, 6, 15), quote.renewalDate)
         }
 
@@ -813,7 +813,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
+            assertEquals(PaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
         }
 
         @Test
@@ -943,7 +943,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
             verify(mockGovUkPayClient).cancelPayment("new-payment-id")
         }
 
@@ -966,7 +966,7 @@ class PaymentServiceTests {
                 )
 
             // Assert
-            assertEquals(PropertyRegistrationPaymentCreationResult.ConcurrentPaymentStarted, result)
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
         }
 
         @Test

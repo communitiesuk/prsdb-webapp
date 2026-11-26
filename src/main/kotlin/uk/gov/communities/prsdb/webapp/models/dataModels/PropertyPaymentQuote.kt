@@ -12,5 +12,5 @@ data class PropertyPaymentQuote(
     @Serializable(with = LocalDateSerializer::class)
     val renewalDate: LocalDate,
     @Serializable(with = LocalDateSerializer::class)
-    val paymentStartDate: LocalDate = quoteDate,
+    val chargeablePeriodStartDate: LocalDate = quoteDate,
 )

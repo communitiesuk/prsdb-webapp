@@ -16,10 +16,7 @@ class PropertyDetailsPageLandlordView(
     urlArguments: Map<String, String>,
 ) : PropertyDetailsBasePage(
         page,
-        PropertyDetailsController.getPropertyDetailsPath(
-            urlArguments["propertyOwnershipId"]!!.toLong(),
-            isLocalCouncilView = false,
-        ),
+        PropertyDetailsController.getPropertyDetailsPath(urlArguments["propertyOwnershipId"]!!.toLong()),
     ) {
     val deregisterPropertyLink = Link.byText(page, "Deregister property")
     val deactivatePropertyLink = Link.byText(page, "Deactivate this property")

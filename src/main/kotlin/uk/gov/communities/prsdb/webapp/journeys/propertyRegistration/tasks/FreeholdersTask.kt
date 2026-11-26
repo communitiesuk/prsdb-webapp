@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddLoggedInLandlordFreeholderStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdersInfoStep
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 class FreeholdersTask(
     journeyStateService: JourneyStateService,
     override val freeholdersInfoStep: FreeholdersInfoStep,
+    override val addLoggedInLandlordFreeholderStep: AddLoggedInLandlordFreeholderStep,
     override val freeholdersDetailsTask: FreeholdersDetailsTask,
     override val freeholdersBackRoutingStep: FreeholdersBackRoutingStep,
 ) : Task<FreeholdersState, FreeholdersDependencies>(journeyStateService),
@@ -35,11 +37,15 @@ class FreeholdersTask(
         subJourney(state) {
             step(journey.freeholdersInfoStep) {
                 routeSegment(FreeholdersInfoStep.ROUTE_SEGMENT)
-                nextStep { journey.freeholdersDetailsTask.firstStep }
+                nextStep { journey.addLoggedInLandlordFreeholderStep }
                 savable()
             }
-            task(journey.freeholdersDetailsTask) {
+            step(journey.addLoggedInLandlordFreeholderStep) {
                 parents { journey.freeholdersInfoStep.isComplete() }
+                nextStep { journey.freeholdersDetailsTask.firstStep }
+            }
+            task(journey.freeholdersDetailsTask) {
+                parents { journey.addLoggedInLandlordFreeholderStep.isComplete() }
                 backDestination { Destination(journey.freeholdersInfoStep) }
                 nextStep { journey.freeholdersBackRoutingStep }
                 withDependencies {
