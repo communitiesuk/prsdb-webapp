@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRep
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -25,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.Organisati
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
+import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import kotlin.String
@@ -50,6 +54,24 @@ class LandlordService(
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
     fun getAnniversary(landlordId: Long): MonthDay? = retrieveLandlordById(landlordId)?.anniversary
+
+    @Transactional
+    fun updateSystemOperatorNotes(
+        landlordId: Long,
+        notes: String,
+        initialLastModifiedDate: Instant,
+    ) {
+        val landlord =
+            retrieveLandlordById(landlordId)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $landlordId not found")
+
+        if (landlord.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException("The landlord record has been updated since this update session started.")
+        }
+
+        landlord.updateSystemOperatorNotes(notes.ifBlank { null })
+        landlordRepository.save(landlord)
+    }
 
     @Transactional
     fun createIndividualLandlord(

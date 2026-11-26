@@ -66,6 +66,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
@@ -100,6 +101,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorLandlordNotesFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
@@ -1578,6 +1580,11 @@ class Navigator(
     fun goToLandlordDetailsAsASystemOperator(id: Long): SystemOperatorViewLandlordDetailsPage {
         navigate(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(id))
         return createValidPage(page, SystemOperatorViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
+    }
+
+    fun goToSystemOperatorLandlordNotesForm(id: Long): SystemOperatorLandlordNotesFormPage {
+        navigate(UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(id))
+        return createValidPage(page, SystemOperatorLandlordNotesFormPage::class, mapOf("id" to id.toString()))
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {

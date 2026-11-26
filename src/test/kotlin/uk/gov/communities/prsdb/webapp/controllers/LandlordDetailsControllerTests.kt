@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordV
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationPermissionsProvider
@@ -39,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -563,6 +565,17 @@ class LandlordDetailsControllerTests(
                 model { attributeExists("landlord") }
             }
         }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails does not show the system operator notes row to local council users`() {
+            landlord.updateSystemOperatorNotes("Some notes")
+
+            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails
+            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+        }
     }
 
     @Nested
@@ -603,6 +616,17 @@ class LandlordDetailsControllerTests(
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails does not show the system operator notes row to local council users for an organisation landlord`() {
+            orgLandlord.updateSystemOperatorNotes("Some notes")
+
+            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails
+            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
         }
     }
 
@@ -699,6 +723,52 @@ class LandlordDetailsControllerTests(
             mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(unknownLandlordId)).andExpect {
                 status { isNotFound() }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows an empty system operator notes row with an add link for an individual landlord`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(landlordService.retrieveLandlordById(individualLandlordId)).thenReturn(landlord)
+
+            val result =
+                mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andReturn()
+
+            val notesRow = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails.last()
+            assertEquals("landlordDetails.systemOperatorNotes.key", notesRow.fieldHeading)
+            assertEquals("landlordDetails.systemOperatorNotes.notAdded", notesRow.fieldValue)
+            assertEquals(
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.add",
+                        UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
+                    ),
+                ),
+                notesRow.actions,
+            )
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows the notes split into lines with a change link for an organisational landlord`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord()
+            orgLandlord.updateSystemOperatorNotes("Line one\nLine two")
+            whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(orgLandlord)
+
+            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(orgLandlordId)).andReturn()
+
+            val notesRow = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails.last()
+            assertEquals("landlordDetails.systemOperatorNotes.key", notesRow.fieldHeading)
+            assertEquals(listOf("Line one", "Line two"), notesRow.fieldValue)
+            assertEquals(
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(orgLandlord.id),
+                    ),
+                ),
+                notesRow.actions,
+            )
         }
     }
 }

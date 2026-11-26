@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class LandlordViewModel(
     private val landlord: IndividualLandlord,
     private val withChangeLinks: Boolean = true,
+    private val withSystemOperatorNotes: Boolean = false,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
@@ -114,5 +115,6 @@ class LandlordViewModel(
                         withActionLink = withChangeLinks,
                     )
                 }
+                if (withSystemOperatorNotes) addSystemOperatorNotesRow(landlord)
             }.toList()
 }

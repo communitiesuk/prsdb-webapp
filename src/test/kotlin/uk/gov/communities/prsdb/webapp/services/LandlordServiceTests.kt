@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -41,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRep
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
@@ -1278,6 +1280,48 @@ class LandlordServiceTests {
                 ),
             ),
         )
+    }
+
+    @Nested
+    inner class UpdateSystemOperatorNotesTests {
+        @Test
+        fun `updateSystemOperatorNotes saves the notes on the landlord`() {
+            val landlord = createIndividualLandlord()
+            whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+            landlordService.updateSystemOperatorNotes(landlord.id, "Changed email at landlord's request", landlord.getMostRecentlyUpdated())
+
+            assertEquals("Changed email at landlord's request", landlord.systemOperatorNotes)
+            verify(mockLandlordRepository).save(landlord)
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["", "   ", "\n\t"])
+        fun `updateSystemOperatorNotes stores blank notes as null`(notes: String) {
+            val landlord = createIndividualLandlord()
+            landlord.updateSystemOperatorNotes("Existing notes")
+            whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+            landlordService.updateSystemOperatorNotes(landlord.id, notes, landlord.getMostRecentlyUpdated())
+
+            assertNull(landlord.systemOperatorNotes)
+        }
+
+        @Test
+        fun `updateSystemOperatorNotes throws an UpdateConflictException if the landlord has been updated since the journey started`() {
+            val landlord = createIndividualLandlord()
+            whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+            assertThrows<UpdateConflictException> {
+                landlordService.updateSystemOperatorNotes(landlord.id, "notes", landlord.getMostRecentlyUpdated().minusSeconds(60))
+            }
+            verify(mockLandlordRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateSystemOperatorNotes is annotated with @Transactional`() {
+            assertTrue(landlordService::updateSystemOperatorNotes.hasAnnotation<Transactional>())
+        }
     }
 
     companion object {

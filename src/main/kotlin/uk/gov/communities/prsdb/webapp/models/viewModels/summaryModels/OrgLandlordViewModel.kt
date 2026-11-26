@@ -27,6 +27,7 @@ class OrgLandlordViewModel(
     landlord: OrganisationalLandlord,
     messageSource: MessageSource,
     withChangeLinks: Boolean = true,
+    withSystemOperatorNotes: Boolean = false,
 ) {
     val name: String = landlord.name
 
@@ -112,6 +113,7 @@ class OrgLandlordViewModel(
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
                 }
+                if (withSystemOperatorNotes) addSystemOperatorNotesRow(landlord)
             }.toList()
 
     companion object {

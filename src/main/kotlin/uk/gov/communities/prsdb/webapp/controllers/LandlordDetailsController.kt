@@ -242,7 +242,14 @@ class LandlordDetailsController(
         val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
         model.addAttribute("lastModifiedDate", lastModifiedDate)
-        model.addAttribute("landlord", LandlordViewModel(landlord, withChangeLinks = false))
+        model.addAttribute(
+            "landlord",
+            LandlordViewModel(
+                landlord,
+                withChangeLinks = false,
+                withSystemOperatorNotes = viewType == LandlordDetailsViewType.SystemOperatorView,
+            ),
+        )
 
         addLocalCouncilLandlordDetailsSharedAttributes(landlord.id, model, viewType)
 
@@ -254,7 +261,15 @@ class LandlordDetailsController(
         model: Model,
         viewType: LandlordDetailsViewType,
     ): String {
-        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = false))
+        model.addAttribute(
+            "orgLandlord",
+            OrgLandlordViewModel(
+                orgLandlord,
+                messageSource,
+                withChangeLinks = false,
+                withSystemOperatorNotes = viewType == LandlordDetailsViewType.SystemOperatorView,
+            ),
+        )
         model.addAttribute(
             "orgLandlordContacts",
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers, withChangeLinks = false),

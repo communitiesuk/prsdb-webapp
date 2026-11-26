@@ -69,6 +69,10 @@ abstract class Landlord : ModifiableAuditableEntity() {
     open var lastDeactivatedDate: LocalDate? = null
         protected set
 
+    @Column(name = "system_operator_notes")
+    open var systemOperatorNotes: String? = null
+        protected set
+
     val anniversary: MonthDay?
         get() {
             val day = anniversaryDay
@@ -101,5 +105,9 @@ abstract class Landlord : ModifiableAuditableEntity() {
     fun reactivate() {
         isActive = true
         lastDeactivatedDate = null
+    }
+
+    fun updateSystemOperatorNotes(notes: String?) {
+        systemOperatorNotes = notes
     }
 }
