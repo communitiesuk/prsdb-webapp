@@ -14,7 +14,6 @@
             <li th:text="#{forms.orgGovBodyDetails.bullet.three}">forms.orgGovBodyDetails.bullet.three</li>
             <li th:text="#{forms.orgGovBodyDetails.bullet.four}">forms.orgGovBodyDetails.bullet.four</li>
         </ul>
-        <div class="govuk-inset-text" th:text="#{forms.orgGovBodyDetails.insetText}">forms.orgGovBodyDetails.insetText</div>
         <details id="details" th:replace="~{fragments/details :: details(#{forms.orgGovBodyDetails.details.summary}, ~{::#details/content()})}">
             <div class="govuk-details__text">
                 <p class="govuk-body">
@@ -22,6 +21,7 @@
                     <a class="govuk-link" th:href="@{${landlordTypeUrl}}" th:text="#{forms.orgGovBodyDetails.details.body.one.link}">forms.orgGovBodyDetails.details.body.one.link</a><span th:remove="tag" th:text="#{forms.orgGovBodyDetails.details.body.one.afterLink}">forms.orgGovBodyDetails.details.body.one.afterLink</span>
                 </p>
                 <p class="govuk-body" th:text="#{forms.orgGovBodyDetails.details.body.two}">forms.orgGovBodyDetails.details.body.two</p>
+                <p class="govuk-body" th:utext="#{forms.orgGovBodyDetails.details.body.three}">forms.orgGovBodyDetails.details.body.three</p>
             </div>
         </details>
     </th:block>
