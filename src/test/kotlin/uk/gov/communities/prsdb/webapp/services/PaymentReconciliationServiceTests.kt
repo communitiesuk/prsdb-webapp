@@ -112,7 +112,7 @@ class PaymentReconciliationServiceTests {
 
             // Assert
             assertEquals(storedStatus, result)
-            verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any(), any())
         }
 
         @Test
@@ -200,7 +200,7 @@ class PaymentReconciliationServiceTests {
             assertEquals(0, failureCount)
             verify(mockPaymentRepository)
                 .updateStatusIfCurrentStatusIs(eq(PAYMENT_ID), eq(PaymentStatus.CANCELLING), eq(PaymentStatus.CANCELLED), any())
-            verify(mockGovUkPayClient, never()).getPaymentWithRetry(any())
+            verify(mockGovUkPayClient, never()).getPaymentWithRetry(any(), any())
         }
 
         @ParameterizedTest

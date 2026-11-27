@@ -22,6 +22,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.DefaultResponseCreator
 import org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent
 import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -29,6 +30,8 @@ import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayAccount
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLink
@@ -45,6 +48,8 @@ import java.time.LocalDate
 class GovUkPayClientTests {
     private lateinit var mockServer: MockRestServiceServer
     private lateinit var restClient: RestClient
+    private lateinit var motoMockServer: MockRestServiceServer
+    private lateinit var motoRestClient: RestClient
     private lateinit var govUkPayClient: GovUkPayClient
 
     @BeforeEach
@@ -52,7 +57,10 @@ class GovUkPayClientTests {
         val builder = RestClient.builder().baseUrl(BASE_URL)
         mockServer = MockRestServiceServer.bindTo(builder).build()
         restClient = builder.build()
-        govUkPayClient = GovUkPayClient(restClient, RATE_LIMIT_RETRY_DELAYS_MS, Duration.ZERO)
+        val motoBuilder = RestClient.builder().baseUrl(BASE_URL)
+        motoMockServer = MockRestServiceServer.bindTo(motoBuilder).build()
+        motoRestClient = motoBuilder.build()
+        govUkPayClient = GovUkPayClient(restClient, motoRestClient, RATE_LIMIT_RETRY_DELAYS_MS, Duration.ZERO)
     }
 
     @Test
@@ -447,7 +455,7 @@ class GovUkPayClientTests {
     @Test
     fun `getPayment does not retry a 429 response when no rate limit retry delays are configured`() {
         // Arrange
-        val clientWithoutRetries = GovUkPayClient(restClient, emptyList(), Duration.ZERO)
+        val clientWithoutRetries = GovUkPayClient(restClient, motoRestClient, emptyList(), Duration.ZERO)
         mockServer
             .expect(ExpectedCount.once(), requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
             .andRespond(errorResponse(HttpStatus.TOO_MANY_REQUESTS, "P0900", "Too many requests"))
@@ -523,6 +531,154 @@ class GovUkPayClientTests {
         mockServer.verify()
     }
 
+    @Test
+    fun `createMotoPayment posts a deferred moto_api payment request through the MOTO account`() {
+        // Arrange
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments"))
+            .andExpect(method(HttpMethod.POST))
+            .andExpect(header(HttpHeaders.CONTENT_TYPE, startsWith(MediaType.APPLICATION_JSON_VALUE)))
+            .andExpect(
+                content().json(
+                    """
+                    {
+                        "amount": $AMOUNT,
+                        "reference": "$REFERENCE",
+                        "description": "$DESCRIPTION",
+                        "authorisation_mode": "moto_api",
+                        "delayed_capture": true
+                    }
+                    """,
+                    JsonCompareMode.STRICT,
+                ),
+            ).andRespond(createdMotoResponse())
+
+        // Act
+        govUkPayClient.createMotoPayment(createMotoPaymentRequest())
+
+        // Assert
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `createMotoPayment returns the created payment and its one-time token`() {
+        // Arrange
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse())
+
+        // Act
+        val createdPayment = govUkPayClient.createMotoPayment(createMotoPaymentRequest())
+
+        // Assert
+        assertEquals(PAYMENT_ID, createdPayment.payment.paymentId)
+        assertEquals(GovUkPayPaymentStatus.CREATED, createdPayment.payment.state.status)
+        assertEquals(ONE_TIME_TOKEN, createdPayment.oneTimeToken)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `createMotoPayment throws GovUkPayException when the created payment has no auth_url_post link`() {
+        // Arrange
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse(authUrlPostParams = null))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay create MOTO payment response for payment $PAYMENT_ID had no one_time_token", exception.message)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `createMotoPayment throws GovUkPayException when the auth_url_post link has no one-time token`() {
+        // Arrange
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments")).andRespond(createdMotoResponse(authUrlPostParams = "{}"))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+
+        // Assert
+        assertEquals("GOV.UK Pay create MOTO payment response for payment $PAYMENT_ID had no one_time_token", exception.message)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `createMotoPayment throws GovUkPayException with the error details from an error response`() {
+        // Arrange
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments"))
+            .andRespond(errorResponse(HttpStatus.UNPROCESSABLE_ENTITY, "P0102", "Invalid attribute value: authorisation_mode"))
+
+        // Act
+        val exception = assertThrows(GovUkPayException::class.java) { govUkPayClient.createMotoPayment(createMotoPaymentRequest()) }
+
+        // Assert
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.httpStatus?.value())
+        assertEquals("P0102", exception.errorCode)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `getPayment gets a MOTO payment through the MOTO account`() {
+        // Arrange
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPayment(PAYMENT_ID, GovUkPayAccount.MOTO)
+
+        // Assert
+        assertEquals(PAYMENT_ID, payment.paymentId)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `getPaymentWithRetry retries a MOTO payment through the MOTO account`() {
+        // Arrange
+        motoMockServer.expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID")).andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE))
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andRespond(withSuccess(paymentBody(), MediaType.APPLICATION_JSON))
+
+        // Act
+        val payment = govUkPayClient.getPaymentWithRetry(PAYMENT_ID, GovUkPayAccount.MOTO)
+
+        // Assert
+        assertEquals(GovUkPayPaymentStatus.SUCCESS, payment.state.status)
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `capturePayment captures a MOTO payment through the MOTO account`() {
+        // Arrange
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/capture"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withNoContent())
+
+        // Act
+        govUkPayClient.capturePayment(PAYMENT_ID, GovUkPayAccount.MOTO)
+
+        // Assert
+        motoMockServer.verify()
+    }
+
+    @Test
+    fun `cancelPayment cancels a MOTO payment through the MOTO account`() {
+        // Arrange
+        motoMockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID/cancel"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withNoContent())
+
+        // Act
+        govUkPayClient.cancelPayment(PAYMENT_ID, GovUkPayAccount.MOTO)
+
+        // Assert
+        motoMockServer.verify()
+    }
+
     private fun createPaymentRequest(email: String? = null) =
         GovUkPayCreatePaymentRequest(
             amount = AMOUNT,
@@ -573,6 +729,48 @@ class GovUkPayClientTests {
                 }
             }
             """
+    }
+
+    private fun createMotoPaymentRequest() =
+        GovUkPayCreateMotoPaymentRequest(amount = AMOUNT, reference = REFERENCE, description = DESCRIPTION)
+
+    private fun createdMotoResponse(authUrlPostParams: String? = """{ "one_time_token": "$ONE_TIME_TOKEN" }"""): DefaultResponseCreator {
+        val authUrlPostLink =
+            if (authUrlPostParams != null) {
+                """
+                "auth_url_post": {
+                    "type": "application/json",
+                    "params": $authUrlPostParams,
+                    "href": "$AUTH_URL",
+                    "method": "POST"
+                },
+                """
+            } else {
+                ""
+            }
+        return withStatus(HttpStatus.CREATED)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                """
+                {
+                    "amount": $AMOUNT,
+                    "description": "$DESCRIPTION",
+                    "reference": "$REFERENCE",
+                    "language": "en",
+                    "state": { "status": "created", "finished": false },
+                    "payment_id": "$PAYMENT_ID",
+                    "payment_provider": "sandbox",
+                    "created_date": "$CREATED_DATE",
+                    "delayed_capture": true,
+                    "moto": true,
+                    "authorisation_mode": "moto_api",
+                    "_links": {
+                        $authUrlPostLink
+                        "self": { "href": "$BASE_URL/v1/payments/$PAYMENT_ID", "method": "GET" }
+                    }
+                }
+                """,
+            )
     }
 
     private fun paymentBody(
@@ -645,5 +843,7 @@ class GovUkPayClientTests {
         private const val EMAIL = "landlord@example.com"
         private const val CREATED_DATE = "2026-09-28T13:11:29.019Z"
         private const val CAPTURED_DATE = "2026-09-28"
+        private const val ONE_TIME_TOKEN = "f3e5a0ad-0fa6-4c4a-a2e1-2b3bd5c5c3d0"
+        private const val AUTH_URL = "https://publicapi.payments.service.gov.uk/v1/auth"
     }
 }

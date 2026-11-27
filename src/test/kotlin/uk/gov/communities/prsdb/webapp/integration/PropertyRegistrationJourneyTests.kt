@@ -315,7 +315,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
         }
         govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+        whenever(govUkPayClient.getPayment(any(), any())).thenAnswer { invocation ->
             MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
         }
     }
@@ -490,7 +490,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
@@ -572,7 +572,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(paymentFailedPage.tryAgainLink).isVisible()
             assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
             verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
@@ -630,7 +630,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val payment = getCreatedPayment()
             assertEquals(PaymentStatus.CANCELLED, payment.status)
             verify(govUkPayClient).cancelPayment(payment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
             verify(propertyOwnershipRepository, never()).save(any())
         }
     }
@@ -761,7 +761,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
             verify(govUkPayClient).cancelPayment(payment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
