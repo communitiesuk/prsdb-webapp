@@ -7,15 +7,20 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig.CanDeactivateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig.CannotDeactivateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig.CheckCanDeactivateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeactivation.stepConfig.ConfirmDeactivationStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 
 @PrsdbWebService
 class PropertyDeactivationJourneyFactory(
@@ -32,7 +37,7 @@ class PropertyDeactivationJourneyFactory(
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextStep { mode ->
                     when (mode) {
-                        CanDeactivateMode.SINGLE_LANDLORD -> journey.confirmDeactivationStep
+                        CanDeactivateMode.SINGLE_LANDLORD -> journey.hasPendingInvitationsStep
                         CanDeactivateMode.HAS_JOINT_LANDLORDS -> journey.cannotDeactivateStep
                     }
                 }
@@ -42,9 +47,30 @@ class PropertyDeactivationJourneyFactory(
                 parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.HAS_JOINT_LANDLORDS) }
                 noNextDestination()
             }
+            step(journey.hasPendingInvitationsStep) {
+                routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
+                parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.SINGLE_LANDLORD) }
+                nextStep { mode ->
+                    when (mode) {
+                        HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
+                        HasPendingInvitationsMode.NO -> journey.confirmDeactivationStep
+                    }
+                }
+            }
+            step(journey.checkPendingInvitationsStep) {
+                routeSegment(CheckPendingInvitationsStep.ROUTE_SEGMENT)
+                withAdditionalContentProperty { "messagePrefix" to "deactivateProperty" }
+                parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
+                nextStep { journey.confirmDeactivationStep }
+            }
             step(journey.confirmDeactivationStep) {
                 routeSegment(ConfirmDeactivationStep.ROUTE_SEGMENT)
-                parents { journey.checkCanDeactivateStep.hasOutcome(CanDeactivateMode.SINGLE_LANDLORD) }
+                parents {
+                    OrParents(
+                        journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.NO),
+                        journey.checkPendingInvitationsStep.isComplete(),
+                    )
+                }
                 nextDestination {
                     Destination
                         .ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
@@ -64,6 +90,8 @@ class PropertyDeactivationJourneyFactory(
 class PropertyDeactivationJourney(
     override val checkCanDeactivateStep: CheckCanDeactivateStep,
     override val cannotDeactivateStep: CannotDeactivateStep,
+    override val hasPendingInvitationsStep: HasPendingInvitationsStep,
+    override val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     override val confirmDeactivationStep: ConfirmDeactivationStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
@@ -87,5 +115,7 @@ class PropertyDeactivationJourney(
 interface PropertyDeactivationJourneyState : PropertyOwnershipJourneyState {
     val checkCanDeactivateStep: CheckCanDeactivateStep
     val cannotDeactivateStep: CannotDeactivateStep
+    val hasPendingInvitationsStep: HasPendingInvitationsStep
+    val checkPendingInvitationsStep: CheckPendingInvitationsStep
     val confirmDeactivationStep: ConfirmDeactivationStep
 }

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FreeholderAddedToPropertyEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyManagerAddedToPropertyEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SuperiorLandlordAddedToPropertyEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.FreeholderAddedToPropertyLetter
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplate
 import uk.gov.communities.prsdb.webapp.models.viewModels.letterModels.LetterTemplateModel
@@ -223,6 +223,24 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `freeholder with notifications suppressed does not receive a notification`() {
+        // Arrange
+        val freeholder =
+            FreeholderDataModel(detailsKnown = true, name = "Jamie Jameson", email = "jamie@example.com", suppressNotification = true)
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                createPropertyOwnership(),
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD, outcome)
+        verifyNoInteractions(emailNotificationService, letterNotificationService)
+    }
+
+    @Test
     fun `freeholder with both contact methods throws without sending a notification`() {
         // Arrange
         val freeholder =
@@ -330,22 +348,38 @@ class AssociatedPartyNotificationServiceTests {
         verifyNoInteractions(emailNotificationService, letterNotificationService)
     }
 
-    // TODO PDJB-1989: Update this test to expect an email once superior-landlord email support is implemented.
     @Test
-    fun `superior landlord added to property notification sends nothing yet to a superior landlord with only an email address`() {
+    fun `superior landlord with an email receives an added-to-property email with a full privacy notice link`() {
         // Arrange
         val superiorLandlord = createSuperiorLandlordModel(name = "Daniel Roberts", email = "daniel.roberts@example.com")
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        val expectedEmail =
+            SuperiorLandlordAddedToPropertyEmail(
+                superiorLandlordName = "Daniel Roberts",
+                superiorLandlordEmail = "daniel.roberts@example.com",
+                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                gdsStartPageUrl = GDS_START_PAGE_URL,
+                privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeUri())
+            .thenReturn(URI("https://www.example.test/landlord/privacy-notice"))
 
         // Act
         val outcome =
             associatedPartyNotificationService.sendNotificationToSuperiorLandlordAddedToProperty(
                 superiorLandlord,
-                createPropertyOwnership(),
+                propertyOwnership,
             )
 
         // Assert
-        assertNull(outcome)
-        verifyNoInteractions(emailNotificationService, letterNotificationService)
+        assertEquals(AssociatedPartyNotificationOutcome.EMAIL_SENT, outcome)
+        verify(emailNotificationService).sendEmail("daniel.roberts@example.com", expectedEmail)
+        verifyNoInteractions(letterNotificationService)
     }
 
     @Test

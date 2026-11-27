@@ -1,31 +1,31 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="serverGeneratedNonce" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{registerProperty.paymentProcessing.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
+<html th:replace="~{fragments/layout :: layout(#{payment.processing.heading}, ~{::main/content()}, false, ${backUrl}, null)}">
 <main>
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <h1 class="govuk-heading-l" th:text="#{registerProperty.paymentProcessing.heading}">
-            registerProperty.paymentProcessing.heading
+        <h1 class="govuk-heading-l" th:text="#{payment.processing.heading}">
+            payment.processing.heading
         </h1>
         <div aria-live="polite">
             <div id="payment-status-js-content" hidden>
-                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.js.doNotClose}">
-                    registerProperty.paymentProcessing.js.doNotClose
+                <p class="govuk-body" th:text="#{payment.processing.js.doNotClose}">
+                    payment.processing.js.doNotClose
                 </p>
-                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.js.redirect}">
-                    registerProperty.paymentProcessing.js.redirect
+                <p class="govuk-body" th:text="#{payment.processing.js.redirect}">
+                    payment.processing.js.redirect
                 </p>
             </div>
             <div id="payment-status-no-js-content" class="moj-js-hidden">
-                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.noJs.notConfirmed}">
-                    registerProperty.paymentProcessing.noJs.notConfirmed
+                <p class="govuk-body" th:text="#{payment.processing.noJs.notConfirmed}">
+                    payment.processing.noJs.notConfirmed
                 </p>
-                <p class="govuk-body" th:text="#{registerProperty.paymentProcessing.noJs.checkStatus}">
-                    registerProperty.paymentProcessing.noJs.checkStatus
+                <p class="govuk-body" th:text="#{payment.processing.noJs.checkStatus}">
+                    payment.processing.noJs.checkStatus
                 </p>
                 <form th:action="@{''}" method="post" novalidate>
-                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.paymentProcessing.noJs.button})}"></button>
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{payment.processing.noJs.button})}"></button>
                 </form>
             </div>
         </div>

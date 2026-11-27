@@ -51,7 +51,7 @@ object OrganisationProfileJourney {
 
     private fun addressUpdateNames(manual: Boolean): List<String> =
         (
-            listOf("details", "start", "lookup form", "lookup", "selection form", "select") +
+            listOf("details", "start", "in UK form", "in UK", "lookup form", "lookup", "selection form", "select") +
                 (if (manual) listOf("manual form", "submit manual") else emptyList()) +
                 "saved details"
         ).map { "Organisation address (${if (manual) "manual" else "selected"}): $it" }
@@ -143,6 +143,7 @@ object OrganisationProfileJourney {
             } else {
                 SELECTED_ADDRESS
             }
+        val inUkRoute = "$ADDRESS_ROUTE/address-in-uk"
         val lookupRoute = "$ADDRESS_ROUTE/lookup-address"
         val selectRoute = "$ADDRESS_ROUTE/select-address"
         val manualRoute = "$ADDRESS_ROUTE/manual-address"
@@ -155,16 +156,32 @@ object OrganisationProfileJourney {
                     .check(status().`is`(200))
                     .check(css("h1").transform { it.trim() }.`is`(NAME))
                     .check(css(row("Organisation address")).exists())
-                    .check(css("a[href^='$lookupRoute']", "href").saveAs("orgAddressNext")),
+                    .check(css("a[href^='$inUkRoute']", "href").saveAs("orgAddressNext")),
             ).exitHereIfFailed()
                 .exec(
                     http(names.next()).get { session ->
-                        scoped(requireNotNull(session.getString("orgAddressNext")), config, lookupRoute)
+                        scoped(requireNotNull(session.getString("orgAddressNext")), config, inUkRoute)
                     }.disableFollowRedirect()
                         .check(status().`is`(302))
-                        .check(header("Location").transform { scoped(it, config, lookupRoute) }.saveAs("orgAddressNext")),
+                        .check(header("Location").transform { scoped(it, config, inUkRoute) }.saveAs("orgAddressNext")),
                 ).exitHereIfFailed()
                 .exec(
+                    formPage(
+                        config,
+                        names.next(),
+                        inUkRoute,
+                        fields = setOf("addressInUk"),
+                        nextKey = "orgAddressNext",
+                    ),
+                ).exec(
+                    submitForm(
+                        config,
+                        names.next(),
+                        inUkRoute,
+                        mapOf("addressInUk" to "true"),
+                        nextRoute = lookupRoute,
+                    ),
+                ).exec(
                     formPage(
                         config,
                         names.next(),

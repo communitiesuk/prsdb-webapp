@@ -81,10 +81,15 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
 
             assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
-            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
-            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
-            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText("Unknown freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+            freeholdersListPage.addAnotherButton.click()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Unknown freeholder")
             freeholdersListPage.submit()
             val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
             propertyManagerPage.submitNo()
@@ -150,9 +155,61 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
     @Nested
     inner class FreeholdersTests {
         @Test
+        fun `A joint freeholder sees their own card when they first reach the freeholders list`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+            val landlordCard = freeholdersListPage.getSummaryCard(0)
+            assertThat(landlordCard.title).hasText(LOGGED_IN_LANDLORD_NAME)
+            assertThat(landlordCard.summaryList).containsText(LOGGED_IN_LANDLORD_EMAIL)
+            assertThat(landlordCard.getAction("Change")).isVisible()
+            assertThat(landlordCard.getAction("Remove")).isVisible()
+        }
+
+        @Test
+        fun `The landlord's card is not added again when returning to the freeholders info page`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+
+            freeholdersListPage.backLink.clickAndWait()
+            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
+
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+            assertEquals(1, page.locator(".govuk-summary-card").count())
+        }
+
+        @Test
+        fun `The landlord's card is added again after all freeholders are removed and the task is restarted`(page: Page) {
+            navigator.skipToPropertyRegistrationFreeholdersInfoPage().submit()
+            var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+
+            freeholdersListPage
+                .getSummaryCard(0)
+                .getAction("Remove")
+                .link
+                .clickAndWait()
+            val removeFreeholderPage = assertPageIs(page, ConfirmRemoveFreeholderFormPagePropertyRegistration::class)
+            assertThat(removeFreeholderPage.heading).containsText("Are you sure you want to remove $LOGGED_IN_LANDLORD_NAME?")
+            removeFreeholderPage.submitYes()
+
+            assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
+
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+            assertThat(freeholdersListPage.getSummaryCard(0).summaryList).containsText(LOGGED_IN_LANDLORD_EMAIL)
+        }
+
+        @Test
         fun `Choosing email as the freeholder contact type goes through the email page before leaving the task`(page: Page) {
             val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage()
             freeholdersPage.submit()
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).addAnotherButton.click()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Test Freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).submitContactType(FreeholderContactType.EMAIL)
@@ -222,6 +279,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         fun `Choosing not to provide freeholder details skips the freeholder detail pages before leaving the task`(page: Page) {
             val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage()
             freeholdersPage.submit()
+            assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).addAnotherButton.click()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
             assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class).submit()
             assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -231,10 +289,14 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         fun `Adding several freeholders shows each of them in the list`(page: Page) {
             val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage()
             freeholdersPage.submit()
-            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
 
             var freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+            freeholdersListPage.addAnotherButton.click()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
+
+            freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
             freeholdersListPage.addAnotherButton.click()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).submitName("Email freeholder")
@@ -242,7 +304,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, FreeholderEmailFormPagePropertyRegistration::class).submitEmail("email.freeholder@example.com")
 
             freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(freeholdersListPage.heading).containsText("added 2 joint freeholders")
+            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
             freeholdersListPage.addAnotherButton.click()
             assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
             val secondNamePage = assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class)
@@ -256,12 +318,14 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                 .selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
 
             freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
-            assertThat(freeholdersListPage.heading).containsText("added 3 joint freeholders")
-            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText("Unknown freeholder")
-            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Email freeholder")
-            assertThat(freeholdersListPage.getSummaryCard(1).summaryList).containsText("email.freeholder@example.com")
-            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Address freeholder")
-            assertThat(freeholdersListPage.getSummaryCard(2).summaryList).containsText("1 Fictional Road")
+            assertThat(freeholdersListPage.heading).containsText("added 4 joint freeholders")
+            assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
+            assertThat(freeholdersListPage.getSummaryCard(0).summaryList).containsText(LOGGED_IN_LANDLORD_EMAIL)
+            assertThat(freeholdersListPage.getSummaryCard(1).title).hasText("Unknown freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(2).title).hasText("Email freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(2).summaryList).containsText("email.freeholder@example.com")
+            assertThat(freeholdersListPage.getSummaryCard(3).title).hasText("Address freeholder")
+            assertThat(freeholdersListPage.getSummaryCard(3).summaryList).containsText("1 Fictional Road")
         }
 
         @Test
@@ -294,7 +358,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `editing another freeholder after abandoning an edit uses that freeholder's details`(page: Page) {
+        fun `Editing another freeholder after abandoning an edit uses that freeholder's details`(page: Page) {
             var freeholdersListPage =
                 navigator.skipToPropertyRegistrationFreeholdersListPage(
                     freeholders =
@@ -358,7 +422,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
-        fun `editing a freeholder whose address we have in the state preselects postal contact type and pre-fills their address`(
+        fun `Editing a freeholder whose address we have in the state preselects postal contact type and pre-fills their address`(
             page: Page,
         ) {
             val freeholdersListPage =
@@ -849,5 +913,11 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             hasJointLandlordsPage.submitHasNoJointLandlords()
             assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
         }
+    }
+
+    companion object {
+        // The logged-in mock user's landlord record in data-local.sql
+        private const val LOGGED_IN_LANDLORD_NAME = "Alexander Smith"
+        private const val LOGGED_IN_LANDLORD_EMAIL = "alex.surname@example.com"
     }
 }

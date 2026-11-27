@@ -232,8 +232,11 @@ object OrganisationRegistrationJourney {
         step("landlord type", listOf("input[name=landlordType][value=ORGANISATION]"), "organisation-name") {
             listOf("landlordType" to "ORGANISATION")
         }
-        step("organisation name", listOf("input[name=orgName]"), "organisation-address/lookup-address") {
+        step("organisation name", listOf("input[name=orgName]"), "organisation-address/address-in-uk") {
             listOf("orgName" to values.organisationName)
+        }
+        step("organisation based in UK", listOf("input[name=addressInUk][value=true]"), "organisation-address/lookup-address") {
+            listOf("addressInUk" to "true")
         }
         address("organisation address", "organisation-address", "organisation-email")
         step("organisation email", listOf("input[name=emailAddress]"), "organisation-phone-number") {

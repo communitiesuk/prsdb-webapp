@@ -157,6 +157,11 @@ sourceSets.named("gatling") {
 
 gatling {
     includeTestOutput = false
+    if (System.getProperty("gatling.target") == "nft") {
+        jvmArgs =
+            jvmArgs.filterNot { it.startsWith("-Xmx") || it == "-XX:+HeapDumpOnOutOfMemoryError" } +
+            listOf("-Xmx4g", "-XX:-HeapDumpOnOutOfMemoryError")
+    }
     // Contract simulations use fake servers and must not be offered as real performance runs.
     excludes = listOf("uk.gov.communities.prsdb.webapp.performance.*ContractSimulation")
     systemProperties =

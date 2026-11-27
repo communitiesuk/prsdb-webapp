@@ -39,7 +39,7 @@ class RegisteredPropertyViewModelsTests {
             val expectedPropertyLicence = "licensing.checkAnswers.noLicensing"
             val expectedIsTenantedMessageKey = "commonText.no"
             val expectedRecordLink =
-                PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
+                PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(propertyOwnership.id)
 
             val expectedRegisteredPropertyViewModel =
                 RegisteredPropertyLocalCouncilViewModel(
@@ -54,6 +54,16 @@ class RegisteredPropertyViewModelsTests {
             val result = RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership)
 
             assertEquals(expectedRegisteredPropertyViewModel, result)
+        }
+
+        @Test
+        fun `Returns a record link to the system operator view of the property when isSystemOperatorView is true`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            val result =
+                RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(propertyOwnership, isSystemOperatorView = true)
+
+            assertEquals(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(propertyOwnership.id), result.recordLink)
         }
 
         @ParameterizedTest

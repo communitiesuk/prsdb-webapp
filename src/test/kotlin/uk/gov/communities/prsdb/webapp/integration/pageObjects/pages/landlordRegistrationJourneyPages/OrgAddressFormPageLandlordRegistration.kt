@@ -10,5 +10,6 @@ class OrgAddressFormPageLandlordRegistration(
     page: Page,
 ) : LookupAddressFormPage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ROUTE_SEGMENT}/" +
+            LookupAddressStep.ROUTE_SEGMENT,
     )
