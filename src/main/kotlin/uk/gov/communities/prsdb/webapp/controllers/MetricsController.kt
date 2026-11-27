@@ -104,7 +104,7 @@ class MetricsController(
             percentRow("metrics.rows.peakMemoryUtilisation", cloudWatch.peakMemoryUtilisation),
             percentRow("metrics.rows.averageMemoryUtilisation", cloudWatch.averageMemoryUtilisation),
             percentRow("metrics.rows.peakCpuUtilisation", cloudWatch.peakCpuUtilisation),
-            percentRow("metrics.rows.elastiCacheCpuUtilisation", cloudWatch.elastiCacheCpuUtilisation),
+            numberRow("metrics.rows.elastiCacheEcpuConsumption", cloudWatch.elastiCacheEcpuConsumption),
             percentRow("metrics.rows.cloudFrontClientErrorRate", cloudWatch.cloudFrontClientErrorRate),
             percentRow("metrics.rows.cloudFrontServerErrorRate", cloudWatch.cloudFrontServerErrorRate),
             countRow("metrics.rows.totalTransactions", totalTransactions),
@@ -119,6 +119,22 @@ class MetricsController(
         SummaryListRowViewModel(
             fieldHeading = headingKey,
             fieldValue = value?.let { String.format(Locale.UK, "%.2f%%", it) } ?: "metrics.saveAndReturn.noData",
+        )
+
+    private fun numberRow(
+        headingKey: String,
+        value: Double?,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel(
+            fieldHeading = headingKey,
+            fieldValue =
+                value?.let {
+                    NumberFormat.getNumberInstance(Locale.UK).apply {
+                        isGroupingUsed = true
+                        minimumFractionDigits = 2
+                        maximumFractionDigits = 2
+                    }.format(it)
+                } ?: "metrics.saveAndReturn.noData",
         )
 
     private fun completionRateRow(

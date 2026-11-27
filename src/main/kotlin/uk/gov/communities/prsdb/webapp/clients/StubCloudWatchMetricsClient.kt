@@ -19,7 +19,7 @@ class StubCloudWatchMetricsClient : CloudWatchMetricsClient {
         region: Region?,
     ): Double =
         when {
-            namespace.contains("ElastiCache", ignoreCase = true) -> STUB_ELASTICACHE_CPU_UTILISATION
+            namespace.contains("ElastiCache", ignoreCase = true) -> STUB_ELASTICACHE_ECPU_CONSUMPTION
             namespace.contains("CloudFront", ignoreCase = true) && metricName.startsWith("4xx") -> STUB_CLIENT_ERROR_RATE
             namespace.contains("CloudFront", ignoreCase = true) -> STUB_SERVER_ERROR_RATE
             metricName.contains("Cpu", ignoreCase = true) -> STUB_PEAK_CPU_UTILISATION
@@ -32,7 +32,7 @@ class StubCloudWatchMetricsClient : CloudWatchMetricsClient {
         private const val STUB_PEAK_MEMORY_UTILISATION = 73.4
         private const val STUB_AVERAGE_MEMORY_UTILISATION = 41.2
         private const val STUB_PEAK_CPU_UTILISATION = 62.5
-        private const val STUB_ELASTICACHE_CPU_UTILISATION = 18.9
+        private const val STUB_ELASTICACHE_ECPU_CONSUMPTION = 18.9
         private const val STUB_CLIENT_ERROR_RATE = 0.82
         private const val STUB_SERVER_ERROR_RATE = 0.05
     }

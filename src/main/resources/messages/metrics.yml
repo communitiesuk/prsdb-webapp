@@ -25,7 +25,7 @@ rows:
   peakMemoryUtilisation: Peak memory utilisation
   averageMemoryUtilisation: Average memory utilisation
   peakCpuUtilisation: Peak CPU utilisation
-  elastiCacheCpuUtilisation: ElastiCache CPU utilisation
+  elastiCacheEcpuConsumption: ElastiCache ECPU consumption
   cloudFrontClientErrorRate: Client error rate (HTTP 4xx)
   cloudFrontServerErrorRate: Server error rate (HTTP 5xx)
   totalTransactions: Total number of transactions
