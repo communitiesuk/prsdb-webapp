@@ -61,7 +61,6 @@ class UpdateSystemOperatorLandlordNotesJourneyFactory(
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
-// Reuses the property ownership update base class for its outdated-state handling; the Long in the seed is the landlord id
 @JourneyFrameworkComponent
 class UpdateSystemOperatorLandlordNotesJourney(
     override val notesStep: SystemOperatorLandlordNotesStep,

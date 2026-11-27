@@ -19,7 +19,7 @@ class SystemOperatorLandlordNotesJourneyTests : IntegrationTestWithMutableData("
         val notesRow = detailsPage.personalDetailsSummaryList.systemOperatorNotesRow
         assertThat(notesRow.value).containsText("Not added")
 
-        notesRow.clickNamedActionLinkAndWait("Add")
+        notesRow.clickNamedActionLinkAndWait("Change")
         val notesPage = assertPageIs(page, SystemOperatorLandlordNotesFormPage::class, urlArguments)
         notesPage.submitNotes("Changed email at the landlord's request\nTicket 123")
 

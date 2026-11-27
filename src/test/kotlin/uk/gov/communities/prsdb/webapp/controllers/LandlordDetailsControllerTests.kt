@@ -496,6 +496,32 @@ class LandlordDetailsControllerTests(
                 status { isOk() }
             }
         }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails does not show the system operator notes row to an individual landlord`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            landlord.updateSystemOperatorNotes("Some notes")
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+            val result = mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails
+            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+        }
+
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getUserLandlordDetails does not show the system operator notes row to an organisation landlord`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
+            orgLandlord.updateSystemOperatorNotes("Some notes")
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+
+            val result = mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails
+            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+        }
     }
 
     @Nested
@@ -727,44 +753,102 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `getLandlordDetailsAsSystemOperator shows an empty system operator notes row with an add link for an individual landlord`() {
+        fun `getLandlordDetailsAsSystemOperator shows not added in the notes row when an individual landlord has no notes`() {
             val landlord = MockLandlordData.createIndividualLandlord()
             whenever(landlordService.retrieveLandlordById(individualLandlordId)).thenReturn(landlord)
 
-            val result =
-                mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andReturn()
+            val notesRow = getIndividualLandlordNotesRow()
 
-            val notesRow = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails.last()
-            assertEquals("landlordDetails.systemOperatorNotes.key", notesRow.fieldHeading)
-            assertEquals("landlordDetails.systemOperatorNotes.notAdded", notesRow.fieldValue)
-            assertEquals(
-                listOf(
-                    SummaryListRowActionsViewModel(
-                        "forms.links.add",
-                        UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
-                    ),
-                ),
-                notesRow.actions,
-            )
+            assertIsNotesRowWithChangeLink(notesRow, "landlordDetails.systemOperatorNotes.notAdded", landlord.id)
         }
 
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-        fun `getLandlordDetailsAsSystemOperator shows the notes split into lines with a change link for an organisational landlord`() {
+        fun `getLandlordDetailsAsSystemOperator shows the notes split into lines when an individual landlord has notes`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            landlord.updateSystemOperatorNotes("Line one\nLine two")
+            whenever(landlordService.retrieveLandlordById(individualLandlordId)).thenReturn(landlord)
+
+            val notesRow = getIndividualLandlordNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Line one", "Line two"), landlord.id)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows not added in the notes row when an organisational landlord has no notes`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord()
+            whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(orgLandlord)
+
+            val notesRow = getOrgLandlordNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, "landlordDetails.systemOperatorNotes.notAdded", orgLandlord.id)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows the notes split into lines when an organisational landlord has notes`() {
             val orgLandlord = MockLandlordData.createOrgLandlord()
             orgLandlord.updateSystemOperatorNotes("Line one\nLine two")
             whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(orgLandlord)
 
-            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(orgLandlordId)).andReturn()
+            val notesRow = getOrgLandlordNotesRow()
 
-            val notesRow = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails.last()
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Line one", "Line two"), orgLandlord.id)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows the notes row with a change link when an individual landlord is inactive`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            landlord.updateSystemOperatorNotes("Some notes")
+            whenever(landlordService.retrieveLandlordById(individualLandlordId)).thenReturn(landlord)
+            whenever(landlordActiveStatusService.isLandlordInactive(landlord)).thenReturn(true)
+
+            val notesRow = getIndividualLandlordNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Some notes"), landlord.id)
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator shows the notes row with a change link when an organisational landlord is inactive`() {
+            // TODO PDJB-2149: Remove this stub when the ACTIVE_INACTIVE feature flag is removed
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val orgLandlord = MockLandlordData.createOrgLandlord().apply { deactivate(LocalDate.of(2026, 1, 1)) }
+            orgLandlord.updateSystemOperatorNotes("Some notes")
+            whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(orgLandlord)
+            whenever(landlordActiveStatusService.isLandlordInactive(orgLandlord)).thenReturn(true)
+
+            val notesRow = getOrgLandlordNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Some notes"), orgLandlord.id)
+        }
+
+        private fun getIndividualLandlordNotesRow(): SummaryListRowViewModel {
+            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andReturn()
+            return (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails.last()
+        }
+
+        private fun getOrgLandlordNotesRow(): SummaryListRowViewModel {
+            val result = mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(orgLandlordId)).andReturn()
+            return (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails.last()
+        }
+
+        private fun assertIsNotesRowWithChangeLink(
+            notesRow: SummaryListRowViewModel,
+            expectedValue: Any,
+            landlordId: Long,
+        ) {
             assertEquals("landlordDetails.systemOperatorNotes.key", notesRow.fieldHeading)
-            assertEquals(listOf("Line one", "Line two"), notesRow.fieldValue)
+            assertEquals(expectedValue, notesRow.fieldValue)
             assertEquals(
                 listOf(
                     SummaryListRowActionsViewModel(
                         "forms.links.change",
-                        UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(orgLandlord.id),
+                        UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlordId),
                     ),
                 ),
                 notesRow.actions,

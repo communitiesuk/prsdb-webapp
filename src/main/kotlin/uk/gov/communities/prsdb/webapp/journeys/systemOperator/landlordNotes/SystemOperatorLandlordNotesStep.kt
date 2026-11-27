@@ -15,9 +15,9 @@ class SystemOperatorLandlordNotesStepConfig(
 
     override fun getStepSpecificContent(state: UpdateSystemOperatorLandlordNotesJourneyState): Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.systemOperatorNotes.fieldSetHeading",
-            "fieldSetHint" to "forms.systemOperatorNotes.fieldSetHint",
-            "submitButtonText" to "forms.buttons.saveNotes",
+            "fieldSetHeading" to "systemOperator.landlordNotes.fieldSetHeading",
+            "fieldSetHint" to "systemOperator.landlordNotes.fieldSetHint",
+            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
         )
 
     override fun chooseTemplate(state: UpdateSystemOperatorLandlordNotesJourneyState): String = "forms/systemOperatorNotesForm"

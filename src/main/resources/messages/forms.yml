@@ -26,9 +26,7 @@ buttons:
   findAddress: Find address
   continueWithChange: Continue with the change
   continueToOtherSections: Continue to other sections
-  saveNotes: Save notes
 links:
-  add: Add
   change: Change
   remove: Remove
   cancel: Cancel
@@ -479,11 +477,6 @@ reason:
     fieldSetHeading: Why are you deleting your account? (optional)
     error:
       tooLong: Your reason for deleting your account must be 200 characters or fewer.
-systemOperatorNotes:
-  fieldSetHeading: Notes on this landlord record
-  fieldSetHint: Record what you changed, why, and who asked you to make the change. Only system operators can see these notes.
-  error:
-    tooLong: Notes must be 5,000 characters or fewer
 gasSafety:
   error:
     missing: Select whether you have a gas safety certificate

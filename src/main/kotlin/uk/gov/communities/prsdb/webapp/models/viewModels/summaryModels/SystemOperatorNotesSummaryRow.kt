@@ -9,7 +9,7 @@ fun MutableList<SummaryListRowViewModel>.addSystemOperatorNotesRow(landlord: Lan
     addRow(
         key = "landlordDetails.systemOperatorNotes.key",
         value = notes?.lines() ?: "landlordDetails.systemOperatorNotes.notAdded",
-        actionText = if (notes == null) "forms.links.add" else "forms.links.change",
+        actionText = "forms.links.change",
         actionLink = UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
     )
 }
