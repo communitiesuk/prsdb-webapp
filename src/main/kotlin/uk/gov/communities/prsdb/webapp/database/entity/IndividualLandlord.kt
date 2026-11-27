@@ -9,6 +9,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import org.hibernate.envers.Audited
 import org.hibernate.envers.RelationTargetAuditMode
+import uk.gov.communities.prsdb.webapp.constants.DEPRECATED
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import java.time.LocalDate
@@ -41,10 +42,12 @@ class IndividualLandlord() : Landlord() {
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     override lateinit var address: Address
 
+    // TODO PDJB-2309: drop this column - always DEPRECATED since individual landlords moved to the international address task
     @Column(name = "individual_country_of_residence")
     lateinit var countryOfResidence: String
         private set
 
+    // TODO PDJB-2309: drop this column - always null since individual landlords moved to the international address task
     @Column(name = "individual_non_england_or_wales_address", length = 1000)
     var nonEnglandOrWalesAddress: String? = null
         private set
@@ -86,5 +89,6 @@ class IndividualLandlord() : Landlord() {
         this.dateOfBirth = dateOfBirth
     }
 
-    fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
+    // TODO PDJB-2309: remove with the individual_country_of_residence column
+    fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES || countryOfResidence == DEPRECATED
 }

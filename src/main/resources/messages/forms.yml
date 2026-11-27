@@ -194,11 +194,6 @@ confirmDetails:
       two: .
       link: contact GOV.UK One Login (opens in new tab)
     oneLoginUrl: 'https://home.account.gov.uk/contact-gov-uk-one-login'
-countryOfResidence:
-  fieldSetHeading: Do you live in England or Wales?
-  radios:
-    error:
-      missing: Select an option
 selectLocalCouncil:
   error:
     missing: Select a local council to continue

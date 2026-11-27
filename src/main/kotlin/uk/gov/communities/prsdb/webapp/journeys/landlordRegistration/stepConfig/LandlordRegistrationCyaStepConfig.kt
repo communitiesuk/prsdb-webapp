@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.DEPRECATED
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
@@ -153,10 +152,12 @@ class LandlordRegistrationCyaStepConfig(
                     state.phoneNumberStep.formModel.notNullValue(
                         PhoneNumberFormModel::phoneNumber,
                     ),
-                address = state.individualLandlordLocationTask.addressTask.getAddress(),
-                countryOfResidence = ENGLAND_OR_WALES,
+                address = state.individualLandlordAddressTask.getAddress(),
+                // TODO PDJB-2309: remove once the individual_country_of_residence column is dropped
+                countryOfResidence = DEPRECATED,
                 isVerified = state.identityTask.getIsIdentityVerified(),
                 hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
+                // TODO PDJB-2309: remove once the individual_non_england_or_wales_address column is dropped
                 nonEnglandOrWalesAddress = null,
                 dateOfBirth = state.identityTask.getDateOfBirth(),
             )
@@ -257,23 +258,11 @@ class LandlordRegistrationCyaStepConfig(
     private fun getAddressRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
-                state.individualLandlordLocationTask.countryOfResidenceStep.formModel.notNullValue(
-                    CountryOfResidenceFormModel::livesInEnglandOrWales,
-                ),
-                Destination.VisitableStep(
-                    state.individualLandlordLocationTask.countryOfResidenceStep,
-                    state.getCyaJourneyId(state.individualLandlordLocationTask.countryOfResidenceStep),
-                ),
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.homeAddress",
-                state.individualLandlordLocationTask.addressTask
-                    .getAddress()
-                    .singleLineAddress,
+                state.individualLandlordAddressTask.getAddress().singleLineAddress,
                 Destination.VisitableStep(
-                    state.individualLandlordLocationTask.addressTask.lookupAddressStep,
-                    state.getCyaJourneyId(state.individualLandlordLocationTask.addressTask.lookupAddressStep),
+                    state.individualLandlordAddressTask.addressInUkStep,
+                    state.getCyaJourneyId(state.individualLandlordAddressTask.addressInUkStep),
                 ),
             ),
         )

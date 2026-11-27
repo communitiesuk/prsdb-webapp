@@ -1,12 +1,9 @@
-nonEnglandOrWalesAddress:
-  heading: This private beta is only available to landlords who live in England or Wales
-  paragraph:
-    one: You cannot currently test this service without a contact address in England or Wales.
-    two:
-      beforeLink: 'If you made a mistake, '
-      linkText: go back
-      afterLink: .
 addressInUk:
+  landlordRegistration:
+    fieldSetHeading: Do you live in the UK?
+    radios:
+      error:
+        missing: Select if you live in the UK
   organisationLandlordRegistration:
     fieldSetHeading: Does your organisation have a UK address?
     radios:
@@ -14,7 +11,7 @@ addressInUk:
         missing: Select if the organisation is based in the UK
 lookupAddress:
   landlordRegistration:
-    fieldSetHeading: What is your home address?
+    fieldSetHeading: What is your contact address?
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
     fieldSetHint: Use an address where the trustee can receive correspondence
@@ -95,7 +92,7 @@ noAddressFound:
     text: Enter address manually
 manualAddress:
   landlordRegistration:
-    fieldSetHeading: What is your home address?
+    fieldSetHeading: What is your contact address?
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
   govBodyMemberRegistration:

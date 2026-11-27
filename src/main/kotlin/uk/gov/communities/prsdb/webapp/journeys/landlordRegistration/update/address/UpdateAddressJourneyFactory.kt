@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 import java.security.Principal
 
@@ -30,20 +30,18 @@ class UpdateAddressJourneyFactory(
             task(journey.addressTask) {
                 initialStep()
                 nextStep { journey.completeAddressUpdateStep }
-                configureStep(journey.addressTask.selectAddressStep) {
-                    withAdditionalContentProperties {
-                        mapOf(
-                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            "showWarning" to true,
-                        )
-                    }
-                }
-                configureStep(journey.addressTask.manualAddressStep) {
-                    withAdditionalContentProperties {
-                        mapOf(
-                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                            "showWarning" to true,
-                        )
+                listOf(
+                    journey.addressTask.addressTask.selectAddressStep,
+                    journey.addressTask.addressTask.manualAddressStep,
+                    journey.addressTask.internationalManualAddressStep,
+                ).forEach { finalStep ->
+                    configureStep(finalStep) {
+                        withAdditionalContentProperties {
+                            mapOf(
+                                "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                                "showWarning" to true,
+                            )
+                        }
                     }
                 }
             }
@@ -75,6 +73,6 @@ class UpdateAddressJourney(
 }
 
 interface UpdateAddressJourneyState : JourneyState {
-    val addressTask: AddressTask
+    val addressTask: InternationalAddressTask
     val completeAddressUpdateStep: CompleteAddressUpdateStep
 }

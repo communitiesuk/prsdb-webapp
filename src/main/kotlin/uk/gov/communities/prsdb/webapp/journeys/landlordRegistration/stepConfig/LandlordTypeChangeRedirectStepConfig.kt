@@ -16,7 +16,7 @@ class LandlordTypeChangeRedirectStepConfig :
                 LandlordTypeMode.ORGANISATION ->
                     state.orgLandlordRegistrationTask to LandlordTypeChangeDestination.ORGANISATION_TASK
                 LandlordTypeMode.INDIVIDUAL ->
-                    state.individualLandlordLocationTask to LandlordTypeChangeDestination.INDIVIDUAL_TASK
+                    state.individualLandlordAddressTask to LandlordTypeChangeDestination.INDIVIDUAL_TASK
                 null -> throw UnrecoverableJourneyStateException(
                     state.journeyId,
                     "Cannot determine landlord type change destination: no landlord type has been selected",

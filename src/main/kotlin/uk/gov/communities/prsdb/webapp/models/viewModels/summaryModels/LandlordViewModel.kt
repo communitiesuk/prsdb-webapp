@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -21,6 +21,7 @@ class LandlordViewModel(
     private val landlord: IndividualLandlord,
     private val withChangeLinks: Boolean = true,
 ) {
+    // TODO PDJB-2309: remove this and the non-England/Wales branch below once the country of residence columns are dropped
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
     private val changeLinkMessageKey = "forms.links.change"
@@ -80,12 +81,14 @@ class LandlordViewModel(
                     "$UPDATE_PHONE_NUMBER_ROUTE/${PhoneNumberStep.ROUTE_SEGMENT}",
                     withActionLink = withChangeLinks,
                 )
+
+                // TODO PDJB-2309: remove else branch individual_country_of_residence and individual_non_england_or_wales_address are dropped
                 if (isEnglandOrWalesResident) {
                     addRow(
                         "landlordDetails.personalDetails.homeAddress",
                         landlord.address.singleLineAddress,
                         changeLinkMessageKey,
-                        "$UPDATE_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",
+                        "$UPDATE_ADDRESS_ROUTE/${AddressInUkStep.ROUTE_SEGMENT}",
                         withActionLink = withChangeLinks,
                     )
                 } else {
