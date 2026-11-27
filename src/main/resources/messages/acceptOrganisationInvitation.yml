@@ -38,6 +38,9 @@ userIsAlreadyLandlord:
   signOutLink:
     link: Sign out of GOV.UK One Login
 email:
+  hint:
+    admin: As an <strong>administrator</strong>, you’ll get updates about all your organisation’s registrations
+    editor: As an <strong>editor</strong>, you’ll get email confirmations after updating a registration
   error:
     missing: Enter your email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
