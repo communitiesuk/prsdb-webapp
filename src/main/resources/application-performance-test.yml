@@ -16,6 +16,7 @@ spring:
 gov-uk-pay:
   base-url: http://localhost:${server.port:8080}/local/gov-uk-pay
   api-key: performance-test
+  moto-api-key: performance-test
   mock-base-url: ${GOV_UK_PAY_MOCK_BASE_URL:http://localhost:${server.port:8080}/local/gov-uk-pay}
   mock-card-entry-delay-seconds: 0
   mock-failing-calls-from-capture: 0

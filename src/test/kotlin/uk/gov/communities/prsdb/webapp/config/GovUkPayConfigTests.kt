@@ -73,6 +73,29 @@ class GovUkPayConfigTests {
     }
 
     @Test
+    fun `govUkPayMotoRestClient sends requests to the configured base URL with the MOTO API key as a bearer token`() {
+        // Arrange
+        val builder = createConfig().govUkPayMotoRestClient().mutate()
+        val mockServer = MockRestServiceServer.bindTo(builder).build()
+        mockServer
+            .expect(requestTo("$BASE_URL/v1/payments/$PAYMENT_ID"))
+            .andExpect(method(HttpMethod.GET))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer $MOTO_API_KEY"))
+            .andRespond(withSuccess())
+
+        // Act
+        builder
+            .build()
+            .get()
+            .uri("/v1/payments/{paymentId}", PAYMENT_ID)
+            .retrieve()
+            .toBodilessEntity()
+
+        // Assert
+        mockServer.verify()
+    }
+
+    @Test
     fun `govUkPayRestClient leaves error responses to the default RestClient error handling`() {
         // Arrange
         val builder = createConfig().govUkPayRestClient().mutate()
@@ -129,6 +152,7 @@ class GovUkPayConfigTests {
         GovUkPayConfig().apply {
             baseUrl = BASE_URL
             apiKey = API_KEY
+            motoApiKey = MOTO_API_KEY
             connectTimeout = Duration.ofSeconds(1)
             readTimeout = Duration.ofSeconds(1)
         }
@@ -136,6 +160,7 @@ class GovUkPayConfigTests {
     companion object {
         private const val BASE_URL = "https://gov-uk-pay.test"
         private const val API_KEY = "test-api-key"
+        private const val MOTO_API_KEY = "test-moto-api-key"
         private const val PAYMENT_ID = "hu20sqlact5260q2nanm0q8u93"
     }
 }

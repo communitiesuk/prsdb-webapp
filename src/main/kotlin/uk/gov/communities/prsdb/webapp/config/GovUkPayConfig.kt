@@ -17,6 +17,9 @@ class GovUkPayConfig {
     @Value("\${gov-uk-pay.api-key}")
     lateinit var apiKey: String
 
+    @Value("\${gov-uk-pay.moto-api-key}")
+    lateinit var motoApiKey: String
+
     @Value("\${gov-uk-pay.connect-timeout}")
     lateinit var connectTimeout: Duration
 
@@ -25,13 +28,18 @@ class GovUkPayConfig {
 
     // RestClient only treats 4xx and 5xx responses as errors, so we also reject other non-2xx responses (e.g. redirects)
     @Bean("gov-uk-pay-client")
-    fun govUkPayRestClient(): RestClient =
+    fun govUkPayRestClient(): RestClient = createRestClient(apiKey)
+
+    @Bean("gov-uk-pay-moto-client")
+    fun govUkPayMotoRestClient(): RestClient = createRestClient(motoApiKey)
+
+    private fun createRestClient(bearerToken: String): RestClient =
         RestClient
             .builder()
             .baseUrl(baseUrl)
             .requestFactory(createRequestFactory())
             .requestInterceptor { request, body, execution ->
-                request.headers.setBearerAuth(apiKey)
+                request.headers.setBearerAuth(bearerToken)
                 execution.execute(request, body)
             }.defaultStatusHandler({ !it.is2xxSuccessful && !it.isError }) { _, response ->
                 throw GovUkPayException("GOV.UK Pay responded with unexpected HTTP status ${response.statusCode.value()}")
