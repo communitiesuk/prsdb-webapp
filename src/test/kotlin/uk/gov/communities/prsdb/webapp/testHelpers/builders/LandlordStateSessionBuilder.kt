@@ -296,6 +296,14 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgGovBodyMemberAddressInUk(addressInUk: Boolean = true): LandlordStateSessionBuilder {
+        withSubmittedValue(
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { this.addressInUk = addressInUk },
+        )
+        return self()
+    }
+
     fun withOrgGovBodyMemberLookupAddress(
         houseNameOrNumber: String = "4",
         postcode: String = "EG1 2AB",
@@ -431,7 +439,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgGovBodyMemberDob() = beforeOrgGovBodyMemberName().withOrgGovBodyMemberName()
 
-        fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
+        fun beforeOrgGovBodyMemberAddressInUk() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
+
+        fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberAddressInUk().withOrgGovBodyMemberAddressInUk()
 
         fun beforeOrgGovBodyMemberSelectAddress() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberLookupAddress()
 

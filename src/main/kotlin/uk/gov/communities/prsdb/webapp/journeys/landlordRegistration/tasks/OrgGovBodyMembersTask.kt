@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
@@ -115,7 +116,12 @@ class OrgGovBodyMembersTask(
             task(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.saveGovBodyMemberStep }
-                configureStep(journey.govBodyMemberAddressTask.lookupAddressStep) {
+                configureStep(journey.govBodyMemberAddressTask.addressInUkStep) {
+                    withAdditionalContentProperties {
+                        mapOf(AddressInUkStepConfig.PREFILL_ADDRESS_IN_UK to journey.editingGovBodyMember?.addressInUk)
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.addressTask.lookupAddressStep) {
                     withAdditionalContentProperties {
                         val editingMember = journey.editingGovBodyMember
                         if (editingMember != null) {
@@ -128,7 +134,7 @@ class OrgGovBodyMembersTask(
                         }
                     }
                 }
-                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                configureStep(journey.govBodyMemberAddressTask.addressTask.selectAddressStep) {
                     withAdditionalContentProperties {
                         val editingMember = journey.editingGovBodyMember
                         mapOf(
@@ -136,21 +142,16 @@ class OrgGovBodyMembersTask(
                         )
                     }
                 }
-                configureStep(journey.govBodyMemberAddressTask.manualAddressStep) {
+                configureStep(journey.govBodyMemberAddressTask.addressTask.manualAddressStep) {
                     withAdditionalContentProperties {
                         val editingMember = journey.editingGovBodyMember
-                        if (editingMember?.manualAddressLineOne != null) {
-                            mapOf(
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingMember.manualAddressLineOne,
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingMember.manualAddressLineTwo,
-                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingMember.manualTownOrCity,
-                                ManualAddressStepConfig.PREFILL_COUNTY to editingMember.manualCounty,
-                                ManualAddressStepConfig.PREFILL_POSTCODE to editingMember.manualPostcode,
-                                ManualAddressStepConfig.PREFILL_COUNTRY to editingMember.manualCountry,
-                            )
-                        } else {
-                            emptyMap()
-                        }
+                        if (editingMember?.addressInUk == true) manualAddressPrefill(editingMember) else emptyMap()
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.internationalManualAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember = journey.editingGovBodyMember
+                        if (editingMember?.addressInUk == false) manualAddressPrefill(editingMember) else emptyMap()
                     }
                 }
             }
@@ -167,4 +168,14 @@ class OrgGovBodyMembersTask(
                 }
             }
         }
+
+    private fun manualAddressPrefill(member: GoverningBodyMemberDataModel): Map<String, Any?> =
+        mapOf(
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to member.manualAddressLineOne,
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to member.manualAddressLineTwo,
+            ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to member.manualTownOrCity,
+            ManualAddressStepConfig.PREFILL_COUNTY to member.manualCounty,
+            ManualAddressStepConfig.PREFILL_POSTCODE to member.manualPostcode,
+            ManualAddressStepConfig.PREFILL_COUNTRY to member.manualCountry,
+        )
 }

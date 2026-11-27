@@ -225,6 +225,9 @@ class OrganisationRegistrationHttpContractTests {
                             "OTHER",
                         ).joinToString("") { """<input type="radio" name="whoToProvide" value="$it">""" }
                     "organisation-main-contact" -> """<input name="name"><input name="emailAddress"><input name="phoneNumber">"""
+                    "organisation-governing-body-member-address/address-in-uk" ->
+                        """<input type="radio" name="addressInUk" value="true">""" +
+                            """<input type="radio" name="addressInUk" value="false">"""
                     "check-answers" -> answers.values.flatten().joinToString("") { "<p>$it</p>" }
                     else ->
                         when {
@@ -308,7 +311,9 @@ class OrganisationRegistrationHttpContractTests {
                                 "members",
                             ) { mutableListOf() }.add(post.first("name")!!)
                         }
-                    "organisation-governing-body-member-dob" -> "organisation-governing-body-member-address/lookup-address"
+                    "organisation-governing-body-member-dob" -> "organisation-governing-body-member-address/address-in-uk"
+                    "organisation-governing-body-member-address/address-in-uk" ->
+                        "organisation-governing-body-member-address/lookup-address".takeIf { post.first("addressInUk") == "true" }
                     "organisation-governing-body-member-list" -> "organisation-main-contact"
                     "organisation-main-contact" ->
                         "check-answers".also {

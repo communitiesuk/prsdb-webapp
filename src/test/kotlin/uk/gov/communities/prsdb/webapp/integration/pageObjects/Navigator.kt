@@ -142,6 +142,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberListFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
@@ -678,6 +679,14 @@ class Navigator(
         return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
     }
 
+    fun skipToOrgLandlordRegistrationGovBodyMemberAddressInUkPage(): OrgGovBodyMemberAddressInUkFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddressInUk().build())
+        navigateToLandlordRegistrationJourneyStep(
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+        )
+        return createValidPage(page, OrgGovBodyMemberAddressInUkFormPageLandlordRegistration::class)
+    }
+
     fun skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage(): OrgGovBodyMemberLookupAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
         navigateToLandlordRegistrationJourneyStep(
@@ -1106,10 +1115,11 @@ class Navigator(
         jointFreeholders: Boolean = true,
     ): FreeholderContactTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderContactType(
-                freeholderName = freeholderName,
-                jointFreeholders = jointFreeholders,
-            ).build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationFreeholderContactType(
+                    freeholderName = freeholderName,
+                    jointFreeholders = jointFreeholders,
+                ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderContactTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderContactTypeFormPagePropertyRegistration::class)
@@ -1121,11 +1131,12 @@ class Navigator(
         jointFreeholders: Boolean = true,
     ): FreeholderEmailFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderEmail(
-                freeholderName = freeholderName,
-                existingFreeholders = existingFreeholders,
-                jointFreeholders = jointFreeholders,
-            ).build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationFreeholderEmail(
+                    freeholderName = freeholderName,
+                    existingFreeholders = existingFreeholders,
+                    jointFreeholders = jointFreeholders,
+                ).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
@@ -1136,10 +1147,11 @@ class Navigator(
         jointFreeholders: Boolean = true,
     ): FreeholderLookupAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderLookupAddress(
-                freeholderName = freeholderName,
-                jointFreeholders = jointFreeholders,
-            ).build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationFreeholderLookupAddress(
+                    freeholderName = freeholderName,
+                    jointFreeholders = jointFreeholders,
+                ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
@@ -1150,10 +1162,11 @@ class Navigator(
         jointFreeholders: Boolean = true,
     ): FreeholderSelectAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderSelectAddress(
-                freeholderName = freeholderName,
-                jointFreeholders = jointFreeholders,
-            ).build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationFreeholderSelectAddress(
+                    freeholderName = freeholderName,
+                    jointFreeholders = jointFreeholders,
+                ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
@@ -1164,10 +1177,11 @@ class Navigator(
         jointFreeholders: Boolean = true,
     ): FreeholderManualAddressFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderManualAddress(
-                freeholderName = freeholderName,
-                jointFreeholders = jointFreeholders,
-            ).build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationFreeholderManualAddress(
+                    freeholderName = freeholderName,
+                    jointFreeholders = jointFreeholders,
+                ).build(),
         )
         navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, FreeholderManualAddressFormPagePropertyRegistration::class)

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GoverningBodyMemberNameFormModel
@@ -46,7 +48,13 @@ class SaveGovBodyMemberStepConfigTests {
     lateinit var orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
 
     @Mock
-    lateinit var govBodyMemberAddressTask: AddressTask
+    lateinit var govBodyMemberAddressTask: InternationalAddressTask
+
+    @Mock
+    lateinit var ukAddressTask: AddressTask
+
+    @Mock
+    lateinit var internationalManualAddressStep: ManualAddressStep
 
     @Mock
     lateinit var lookupAddressStep: LookupAddressStep
@@ -137,17 +145,18 @@ class SaveGovBodyMemberStepConfigTests {
         val previousSelection = "2 Old Road, Old Town, OT1 1OT"
         val stepConfig = setupStepConfig(selectedAddress = previousSelection)
         val selectFormModel = SelectAddressFormModel().apply { address = previousSelection }
-        whenever(govBodyMemberAddressTask.selectAddressStep).thenReturn(selectAddressStep)
+        whenever(ukAddressTask.selectAddressStep).thenReturn(selectAddressStep)
         whenever(selectAddressStep.formModelOrNull).thenReturn(selectFormModel)
-        whenever(govBodyMemberAddressTask.cachedAddresses).thenReturn(emptyList())
-        whenever(govBodyMemberAddressTask.getMatchingAddress(any())).thenCallRealMethod()
-        whenever(govBodyMemberAddressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(ukAddressTask.cachedAddresses).thenReturn(emptyList())
+        whenever(ukAddressTask.getMatchingAddress(any())).thenCallRealMethod()
+        whenever(ukAddressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(ukAddressTask.getAddress()).thenCallRealMethod()
         whenever(govBodyMemberAddressTask.getAddress()).thenCallRealMethod()
 
         var cachedSelectedAddress: String? = previousSelection
-        whenever(govBodyMemberAddressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
+        whenever(ukAddressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
         doAnswer { cachedSelectedAddress = it.getArgument(0) }
-            .whenever(govBodyMemberAddressTask)
+            .whenever(ukAddressTask)
             .cachedSelectedAddress = anyOrNull()
 
         whenever(mockState.editingGovBodyMemberId).thenReturn(null)
@@ -155,7 +164,7 @@ class SaveGovBodyMemberStepConfigTests {
         whenever(mockState.nextGoverningBodyMemberId).thenReturn(1)
 
         // Act
-        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(govBodyMemberAddressTask)
+        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(ukAddressTask)
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
@@ -169,7 +178,52 @@ class SaveGovBodyMemberStepConfigTests {
         assertEquals("TT1 1TT", savedMember.manualPostcode)
     }
 
-    private fun setupStepConfig(selectedAddress: String = "1 Test Street, Test Town, TT1 1TT"): SaveGovBodyMemberStepConfig {
+    @Test
+    fun `afterStepIsReached saves that the address is in the UK`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.editingGovBodyMemberId).thenReturn(null)
+        whenever(mockState.governingBodyMembersMap).thenReturn(emptyMap())
+        whenever(mockState.nextGoverningBodyMemberId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
+        verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
+        assertEquals(true, updatedMapCaptor.firstValue.getValue(1).addressInUk)
+    }
+
+    @Test
+    fun `afterStepIsReached saves the non-UK address answers when the address is not in the UK`() {
+        // Arrange
+        val stepConfig = setupStepConfig(addressInUk = false)
+        whenever(mockState.editingGovBodyMemberId).thenReturn(null)
+        whenever(mockState.governingBodyMembersMap).thenReturn(emptyMap())
+        whenever(mockState.nextGoverningBodyMemberId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
+        verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
+        val savedMember = updatedMapCaptor.firstValue.getValue(1)
+        assertEquals(false, savedMember.addressInUk)
+        assertEquals("1 Rue de Rivoli", savedMember.manualAddressLineOne)
+        assertEquals("Paris", savedMember.manualTownOrCity)
+        assertEquals("75001", savedMember.manualPostcode)
+        assertEquals("France", savedMember.manualCountry)
+        assertNull(savedMember.addressSearchPostcode)
+        assertNull(savedMember.addressSearchHouseNameOrNumber)
+        assertNull(savedMember.selectedAddress)
+    }
+
+    private fun setupStepConfig(
+        selectedAddress: String = "1 Test Street, Test Town, TT1 1TT",
+        addressInUk: Boolean = true,
+    ): SaveGovBodyMemberStepConfig {
         val stepConfig = SaveGovBodyMemberStepConfig()
         stepConfig.urlPath = "save-governing-body-member"
         stepConfig.validator = AlwaysTrueValidator()
@@ -204,11 +258,25 @@ class SaveGovBodyMemberStepConfigTests {
         whenever(orgGovBodyMemberDobStep.formModelOrNull).thenReturn(dobFormModel)
         whenever(mockState.govBodyMemberAddressTask).thenReturn(govBodyMemberAddressTask)
         whenever(govBodyMemberAddressTask.getAddress()).thenReturn(address)
-        whenever(govBodyMemberAddressTask.lookupAddressStep).thenReturn(lookupAddressStep)
-        whenever(lookupAddressStep.formModelOrNull).thenReturn(lookupFormModel)
-        whenever(govBodyMemberAddressTask.cachedSelectedAddress).thenReturn(selectedAddress)
-        whenever(govBodyMemberAddressTask.manualAddressStep).thenReturn(manualAddressStep)
-        whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
+        whenever(govBodyMemberAddressTask.addressInUk()).thenReturn(addressInUk)
+        if (addressInUk) {
+            whenever(govBodyMemberAddressTask.addressTask).thenReturn(ukAddressTask)
+            whenever(ukAddressTask.lookupAddressStep).thenReturn(lookupAddressStep)
+            whenever(lookupAddressStep.formModelOrNull).thenReturn(lookupFormModel)
+            whenever(ukAddressTask.cachedSelectedAddress).thenReturn(selectedAddress)
+            whenever(ukAddressTask.manualAddressStep).thenReturn(manualAddressStep)
+            whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
+        } else {
+            whenever(govBodyMemberAddressTask.internationalManualAddressStep).thenReturn(internationalManualAddressStep)
+            whenever(internationalManualAddressStep.formModelOrNull).thenReturn(
+                ManualAddressFormModel().apply {
+                    addressLineOne = "1 Rue de Rivoli"
+                    townOrCity = "Paris"
+                    postcode = "75001"
+                    country = "France"
+                },
+            )
+        }
 
         return stepConfig
     }
