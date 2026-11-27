@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.Comment
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.UNASSIGNED
+import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader.Companion.DATA_PACKAGE_VERSION_COMMENT_PREFIX
 
@@ -95,12 +95,7 @@ class Address() : ModifiableAuditableEntity() {
             } else {
                 singleLineAddress.replace(", ", "\n")
             }
-        return appendCountry(multiLineAddress)
-    }
-
-    private fun appendCountry(multiLineAddress: String): String {
-        val displayCountry = country.trim().takeUnless { it.isEmpty() || it == UNASSIGNED } ?: return multiLineAddress
-        return "$multiLineAddress\n$displayCountry"
+        return AddressHelper.appendCountry(multiLineAddress, country)
     }
 
     private fun hasAddressComponents(): Boolean = streetName != null || buildingName != null || buildingNumber != null
