@@ -1,44 +1,27 @@
 package uk.gov.communities.prsdb.webapp.journeys.systemOperator.landlordNotes
 
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.AbstractCompleteSystemOperatorNotesUpdateStep
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.AbstractCompleteSystemOperatorNotesUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import java.time.Instant
 
 @JourneyFrameworkComponent
 class CompleteSystemOperatorLandlordNotesUpdateStepConfig(
     private val landlordService: LandlordService,
-) : AbstractInternalStepConfig<Complete, UpdateSystemOperatorLandlordNotesJourneyState>() {
-    override fun mode(state: UpdateSystemOperatorLandlordNotesJourneyState): Complete = Complete.COMPLETE
-
-    override fun afterStepIsReached(state: UpdateSystemOperatorLandlordNotesJourneyState) {
-        try {
-            landlordService.updateSystemOperatorNotes(
-                landlordId = state.landlordId,
-                notes = state.notesStep.formModel.notes,
-                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-            )
-        } catch (ex: UpdateConflictException) {
-            state.deleteJourney()
-            throw ex
-        }
-    }
-
-    override fun resolveNextDestination(
-        state: UpdateSystemOperatorLandlordNotesJourneyState,
-        defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+) : AbstractCompleteSystemOperatorNotesUpdateStepConfig() {
+    override fun updateNotes(
+        recordId: Long,
+        notes: String,
+        initialLastModifiedDate: Instant,
+    ) = landlordService.updateSystemOperatorNotes(
+        landlordId = recordId,
+        notes = notes,
+        initialLastModifiedDate = initialLastModifiedDate,
+    )
 }
 
 @JourneyFrameworkComponent
 class CompleteSystemOperatorLandlordNotesUpdateStep(
     stepConfig: CompleteSystemOperatorLandlordNotesUpdateStepConfig,
-) : JourneyStep.InternalStep<Complete, UpdateSystemOperatorLandlordNotesJourneyState>(stepConfig)
+) : AbstractCompleteSystemOperatorNotesUpdateStep(stepConfig)

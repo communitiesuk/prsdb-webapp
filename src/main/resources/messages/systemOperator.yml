@@ -11,8 +11,11 @@ dashboard:
     button: Invite a local council admin
   metrics:
     button: View metrics
-landlordNotes:
-  fieldSetHeading: Notes on this landlord record
+notes:
+  key: System operator notes
+  notAdded: Not added
   fieldSetHint: Record what you changed, why, and on whose behalf you made the change. Only system operators can see these notes.
   error:
     tooLong: Notes must be 5,000 characters or fewer
+  landlord:
+    fieldSetHeading: Notes on this landlord record

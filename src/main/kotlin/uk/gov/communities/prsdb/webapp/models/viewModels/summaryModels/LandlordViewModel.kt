@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthCont
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -115,6 +116,11 @@ class LandlordViewModel(
                         withActionLink = withChangeLinks,
                     )
                 }
-                if (withSystemOperatorNotes) addSystemOperatorNotesRow(landlord)
+                if (withSystemOperatorNotes) {
+                    addSystemOperatorNotesRow(
+                        notes = landlord.systemOperatorNotes,
+                        changeLink = UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
+                    )
+                }
             }.toList()
 }

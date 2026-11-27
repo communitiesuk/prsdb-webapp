@@ -18,8 +18,8 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordN
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.systemOperator.landlordNotes.SystemOperatorLandlordNotesStep
 import uk.gov.communities.prsdb.webapp.journeys.systemOperator.landlordNotes.UpdateSystemOperatorLandlordNotesJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.AbstractSystemOperatorNotesStep
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
@@ -73,6 +73,6 @@ class UpdateSystemOperatorLandlordNotesController(
         fun getUpdateNotesStepPath(landlordId: Long): String =
             UriTemplate(UPDATE_SYSTEM_OPERATOR_LANDLORD_NOTES_ROUTE)
                 .expand(mapOf("id" to landlordId))
-                .toASCIIString() + "/${SystemOperatorLandlordNotesStep.ROUTE_SEGMENT}"
+                .toASCIIString() + "/${AbstractSystemOperatorNotesStep.ROUTE_SEGMENT}"
     }
 }

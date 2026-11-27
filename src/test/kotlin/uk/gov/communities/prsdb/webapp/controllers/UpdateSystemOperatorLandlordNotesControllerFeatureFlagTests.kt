@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagTestCallin
 import uk.gov.communities.prsdb.webapp.constants.ACT_AS_LANDLORD
 import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController.Companion.getUpdateNotesStepPath
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.systemOperator.landlordNotes.SystemOperatorLandlordNotesStep
 import uk.gov.communities.prsdb.webapp.journeys.systemOperator.landlordNotes.UpdateSystemOperatorLandlordNotesJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.AbstractSystemOperatorNotesStep
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -33,7 +33,7 @@ class UpdateSystemOperatorLandlordNotesControllerFeatureFlagTests : FeatureFlagT
     fun setUp() {
         whenever(landlordService.retrieveLandlordById(landlordId)).thenReturn(MockLandlordData.createIndividualLandlord())
         whenever(journeyFactory.createJourneySteps(landlordId))
-            .thenReturn(mapOf(SystemOperatorLandlordNotesStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(AbstractSystemOperatorNotesStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         whenever(stepLifecycleOrchestrator.getStepModelAndView()).thenReturn(ModelAndView("redirect:/next"))
     }
 

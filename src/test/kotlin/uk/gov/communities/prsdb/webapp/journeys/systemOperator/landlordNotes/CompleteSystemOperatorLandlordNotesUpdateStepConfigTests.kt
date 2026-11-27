@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.SystemOperatorNotesJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SystemOperatorNotesFormModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -21,7 +22,7 @@ class CompleteSystemOperatorLandlordNotesUpdateStepConfigTests {
     private lateinit var mockLandlordService: LandlordService
 
     @Mock
-    private lateinit var mockState: UpdateSystemOperatorLandlordNotesJourneyState
+    private lateinit var mockState: SystemOperatorNotesJourneyState
 
     @Mock
     private lateinit var mockNotesStep: SystemOperatorLandlordNotesStep
@@ -65,7 +66,7 @@ class CompleteSystemOperatorLandlordNotesUpdateStepConfigTests {
     }
 
     private fun setUpState() {
-        whenever(mockState.landlordId).thenReturn(landlordId)
+        whenever(mockState.recordId).thenReturn(landlordId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockState.notesStep).thenReturn(mockNotesStep)
         val formModel = SystemOperatorNotesFormModel()

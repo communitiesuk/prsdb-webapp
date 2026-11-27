@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNam
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordPhoneNumberController.Companion.UPDATE_ORG_PHONE_NUMBER_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -113,7 +114,12 @@ class OrgLandlordViewModel(
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
                 }
-                if (withSystemOperatorNotes) addSystemOperatorNotesRow(landlord)
+                if (withSystemOperatorNotes) {
+                    addSystemOperatorNotesRow(
+                        notes = landlord.systemOperatorNotes,
+                        changeLink = UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
+                    )
+                }
             }.toList()
 
     companion object {

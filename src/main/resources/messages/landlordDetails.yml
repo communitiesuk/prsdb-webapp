@@ -20,9 +20,6 @@ personalDetails:
   country: Country of residence
   nonEnglandOrWalesAddress: Address (outside UK)
   englandOrWalesAddress: UK contact address
-systemOperatorNotes:
-  key: System operator notes
-  notAdded: Not added
 registeredProperties:
   heading: Registered properties
   table:

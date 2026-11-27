@@ -11,6 +11,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.AbstractSystemOperatorNotesStep
+import uk.gov.communities.prsdb.webapp.journeys.systemOperator.notes.SystemOperatorNotesJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SystemOperatorNotesFormModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -24,7 +26,7 @@ class SystemOperatorLandlordNotesStepConfigTests {
     private lateinit var mockLandlordService: LandlordService
 
     @Mock
-    private lateinit var mockState: UpdateSystemOperatorLandlordNotesJourneyState
+    private lateinit var mockState: SystemOperatorNotesJourneyState
 
     private val landlordId = 123L
 
@@ -33,7 +35,7 @@ class SystemOperatorLandlordNotesStepConfigTests {
     @BeforeEach
     fun setUp() {
         stepConfig = SystemOperatorLandlordNotesStepConfig(mockLandlordService)
-        stepConfig.urlPath = SystemOperatorLandlordNotesStep.ROUTE_SEGMENT
+        stepConfig.urlPath = AbstractSystemOperatorNotesStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
     }
 
@@ -42,13 +44,13 @@ class SystemOperatorLandlordNotesStepConfigTests {
         val landlord = MockLandlordData.createIndividualLandlord()
         landlord.updateSystemOperatorNotes("Existing notes")
         whenever(mockState.notesInitialised).thenReturn(null)
-        whenever(mockState.landlordId).thenReturn(landlordId)
+        whenever(mockState.recordId).thenReturn(landlordId)
         whenever(mockLandlordService.retrieveLandlordById(landlordId)).thenReturn(landlord)
 
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockState).addStepData(
-            SystemOperatorLandlordNotesStep.ROUTE_SEGMENT,
+            AbstractSystemOperatorNotesStep.ROUTE_SEGMENT,
             SystemOperatorNotesFormModel().apply { notes = "Existing notes" }.toPageData(),
         )
         verify(mockState).notesInitialised = true
@@ -57,7 +59,7 @@ class SystemOperatorLandlordNotesStepConfigTests {
     @Test
     fun `afterStepIsReached when the landlord has no notes marks the state as initialised only`() {
         whenever(mockState.notesInitialised).thenReturn(null)
-        whenever(mockState.landlordId).thenReturn(landlordId)
+        whenever(mockState.recordId).thenReturn(landlordId)
         whenever(mockLandlordService.retrieveLandlordById(landlordId)).thenReturn(MockLandlordData.createIndividualLandlord())
 
         stepConfig.afterStepIsReached(mockState)
@@ -78,14 +80,14 @@ class SystemOperatorLandlordNotesStepConfigTests {
 
     @Test
     fun `mode returns COMPLETE when form model is present`() {
-        whenever(mockState.getStepData(SystemOperatorLandlordNotesStep.ROUTE_SEGMENT)).thenReturn(mapOf("notes" to "Some notes"))
+        whenever(mockState.getStepData(AbstractSystemOperatorNotesStep.ROUTE_SEGMENT)).thenReturn(mapOf("notes" to "Some notes"))
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
     }
 
     @Test
     fun `mode returns null when form model is not present`() {
-        whenever(mockState.getStepData(SystemOperatorLandlordNotesStep.ROUTE_SEGMENT)).thenReturn(null)
+        whenever(mockState.getStepData(AbstractSystemOperatorNotesStep.ROUTE_SEGMENT)).thenReturn(null)
 
         assertNull(stepConfig.mode(mockState))
     }

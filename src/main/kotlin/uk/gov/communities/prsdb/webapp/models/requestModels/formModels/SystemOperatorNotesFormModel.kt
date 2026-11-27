@@ -11,7 +11,7 @@ class SystemOperatorNotesFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "systemOperator.landlordNotes.error.tooLong",
+                messageKey = "systemOperator.notes.error.tooLong",
                 validatorType = LengthConstraintValidator::class,
                 validatorArgs = arrayOf("0", SYSTEM_OPERATOR_NOTES_MAX_LENGTH.toString()),
             ),

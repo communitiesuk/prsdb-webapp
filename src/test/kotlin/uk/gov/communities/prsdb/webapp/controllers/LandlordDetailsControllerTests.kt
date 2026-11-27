@@ -507,7 +507,7 @@ class LandlordDetailsControllerTests(
             val result = mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andReturn()
 
             val rows = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails
-            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
         }
 
         @Test
@@ -520,7 +520,7 @@ class LandlordDetailsControllerTests(
             val result = mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andReturn()
 
             val rows = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails
-            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
         }
     }
 
@@ -600,7 +600,7 @@ class LandlordDetailsControllerTests(
             val result = mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andReturn()
 
             val rows = (result.modelAndView?.model?.get("landlord") as LandlordViewModel).personalDetails
-            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
         }
     }
 
@@ -652,7 +652,7 @@ class LandlordDetailsControllerTests(
             val result = mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andReturn()
 
             val rows = (result.modelAndView?.model?.get("orgLandlord") as OrgLandlordViewModel).organisationDetails
-            assertTrue(rows.none { it.fieldHeading == "landlordDetails.systemOperatorNotes.key" })
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
         }
     }
 
@@ -759,7 +759,7 @@ class LandlordDetailsControllerTests(
 
             val notesRow = getIndividualLandlordNotesRow()
 
-            assertIsNotesRowWithChangeLink(notesRow, "landlordDetails.systemOperatorNotes.notAdded", landlord.id)
+            assertIsNotesRowWithChangeLink(notesRow, "systemOperator.notes.notAdded", landlord.id)
         }
 
         @Test
@@ -782,7 +782,7 @@ class LandlordDetailsControllerTests(
 
             val notesRow = getOrgLandlordNotesRow()
 
-            assertIsNotesRowWithChangeLink(notesRow, "landlordDetails.systemOperatorNotes.notAdded", orgLandlord.id)
+            assertIsNotesRowWithChangeLink(notesRow, "systemOperator.notes.notAdded", orgLandlord.id)
         }
 
         @Test
@@ -842,7 +842,7 @@ class LandlordDetailsControllerTests(
             expectedValue: Any,
             landlordId: Long,
         ) {
-            assertEquals("landlordDetails.systemOperatorNotes.key", notesRow.fieldHeading)
+            assertEquals("systemOperator.notes.key", notesRow.fieldHeading)
             assertEquals(expectedValue, notesRow.fieldValue)
             assertEquals(
                 listOf(
