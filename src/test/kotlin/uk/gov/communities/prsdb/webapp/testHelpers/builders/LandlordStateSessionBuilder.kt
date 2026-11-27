@@ -241,12 +241,21 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withLeadTrusteeAddressInUk(addressInUk: Boolean = true): LandlordStateSessionBuilder {
+        withSubmittedValue(
+            "${TrusteeAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { this.addressInUk = addressInUk },
+        )
+        return self()
+    }
+
     fun withLeadTrusteeAddress(): LandlordStateSessionBuilder {
-        // The lead trustee address is a routed instance of the shared address task, so its data is stored under
-        // keys prefixed with the task route. Provide a full "found and selected an address" path so the task is
-        // complete and the journey can proceed past it.
+        // The lead trustee address is a routed instance of the shared international address task, so its data is
+        // stored under keys prefixed with the task route. Provide a full "in the UK, found and selected an address"
+        // path so the task is complete and the journey can proceed past it.
         val routePrefix = TrusteeAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withLeadTrusteeAddressInUk()
         withAdditionalData(
             "$routePrefix/cachedAddresses",
             Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),

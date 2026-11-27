@@ -7,10 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AddressInUkFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
@@ -70,6 +72,10 @@ interface LeadTrusteeStateBuilder<SelfType : LeadTrusteeStateBuilder<SelfType>> 
         val routePrefix = TrusteeAddressTask.ROUTE_SEGMENT
         additionalDataMap["$routePrefix/cachedAddresses"] =
             Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44)))
+        withSubmittedValue(
+            "$routePrefix/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { addressInUk = true },
+        )
         withSubmittedValue(
             "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
             LookupAddressFormModel().apply {
