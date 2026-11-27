@@ -192,7 +192,7 @@ class OrganisationRegistrationHttpContractTests {
                         """<input type="radio" name="landlordType" value="INDIVIDUAL">""" +
                             """<input type="radio" name="landlordType" value="ORGANISATION">"""
                     "organisation-name" -> """<input name="orgName">"""
-                    "organisation-address/address-in-uk" ->
+                    "organisation-address/address-in-uk", "lead-trustee-address/address-in-uk" ->
                         """<input type="radio" name="addressInUk" value="true">""" +
                             """<input type="radio" name="addressInUk" value="false">"""
                     "organisation-type" ->
@@ -289,7 +289,9 @@ class OrganisationRegistrationHttpContractTests {
                     "lead-trustee-name" -> "lead-trustee-dob".also { record("leadTrustee", "name") }
                     "lead-trustee-dob" -> "lead-trustee-email"
                     "lead-trustee-email" -> "lead-trustee-phone".also { record("leadTrusteeEmail", "emailAddress") }
-                    "lead-trustee-phone" -> "lead-trustee-address/lookup-address"
+                    "lead-trustee-phone" -> "lead-trustee-address/address-in-uk"
+                    "lead-trustee-address/address-in-uk" ->
+                        "lead-trustee-address/lookup-address".takeIf { post.first("addressInUk") == "true" }
                     "organisation-charity" -> {
                         record("charity", "charity")
                         if (post.first("charity") == "true") "organisation-charity-registered-with" else "organisation-companies-house"

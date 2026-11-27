@@ -13,12 +13,13 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -362,7 +363,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `submitting a valid lead trustee phone number advances to the lead trustee address step`(page: Page) {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
             leadTrusteePhonePage.submitPhoneNumber("07123456789")
-            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressInUkFormPageLandlordRegistration::class)
         }
     }
 
@@ -410,9 +411,18 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class LeadTrusteeAddressTaskRoute {
         @Test
         fun `navigating to the bare lead trustee address task route redirects to the task's first step`() {
-            val leadTrusteeAddressLookupPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+            val leadTrusteeAddressInUkPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
 
-            assertThat(leadTrusteeAddressLookupPage.form.postcodeInput).isVisible()
+            assertThat(leadTrusteeAddressInUkPage.page.locator("h1")).containsText("Is the lead trustee’s contact address in the UK?")
+        }
+
+        @Test
+        fun `submitting without selecting an option on the lead trustee address in the UK page returns an error`() {
+            val leadTrusteeAddressInUkPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+            leadTrusteeAddressInUkPage.form.submit()
+
+            assertThat(leadTrusteeAddressInUkPage.form.getErrorMessage())
+                .containsText("Select if the lead trustee’s contact address is in the UK")
         }
     }
 
@@ -629,8 +639,23 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `submitting a charity number with wrong length returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("12345")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6, 7 or 8 digit number")
+        }
+
+        @Test
+        fun `submitting a nine digit charity number returns an error`() {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("123456789")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6, 7 or 8 digit number")
+        }
+
+        @Test
+        fun `submitting a six digit charity number advances to the organisation company registration page`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
             charityNumberPage.submitCharityNumber("123456")
-            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 7 or 8 digit number")
+
+            assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         }
     }
 

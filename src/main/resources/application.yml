@@ -145,6 +145,7 @@ plausible:
 gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
+  moto-api-key: ${GOV_UK_PAY_MOTO_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2026-11-01}
   connect-timeout: 5s

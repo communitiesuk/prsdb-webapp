@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeDobFormModel
@@ -104,7 +104,7 @@ class OrgTypeCyaStepConfigTests {
             whenever(mockState.getCyaJourneyId(mockLeadTrusteeTask.leadTrusteeDobStep)).thenReturn("cya-trustee-id")
             whenever(mockState.getCyaJourneyId(mockLeadTrusteeTask.leadTrusteeEmailStep)).thenReturn("cya-trustee-id")
             whenever(mockState.getCyaJourneyId(mockLeadTrusteeTask.leadTrusteePhoneStep)).thenReturn("cya-trustee-id")
-            whenever(mockState.getCyaJourneyId(mockLeadTrusteeTask.trusteeAddressTask.lookupAddressStep)).thenReturn("cya-trustee-id")
+            whenever(mockState.getCyaJourneyId(mockLeadTrusteeTask.trusteeAddressTask.addressInUkStep)).thenReturn("cya-trustee-id")
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -167,11 +167,11 @@ class OrgTypeCyaStepConfigTests {
         val phoneStep = mock<LeadTrusteePhoneStep> { on { formModel } doReturn phoneFormModel }
 
         val address = mock<AddressDataModel> { on { toMultiLineAddress() } doReturn "1 Test Street\nLondon\nSW1A 1AA" }
-        val lookupAddressStep = mock<LookupAddressStep>()
+        val addressInUkStep = mock<AddressInUkStep>()
         val addressTask =
             mock<TrusteeAddressTask> {
                 on { getAddress() } doReturn address
-                on { this.lookupAddressStep } doReturn lookupAddressStep
+                on { this.addressInUkStep } doReturn addressInUkStep
             }
 
         return mock<LeadTrusteeTask> {

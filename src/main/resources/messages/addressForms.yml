@@ -12,6 +12,11 @@ addressInUk:
     radios:
       error:
         missing: Select if the organisation is based in the UK
+  trusteeRegistration:
+    fieldSetHeading: Is the lead trustee’s contact address in the UK?
+    radios:
+      error:
+        missing: Select if the lead trustee’s contact address is in the UK
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your home address?

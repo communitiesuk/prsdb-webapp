@@ -11,11 +11,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressInUkFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeNameFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeNonUkAddressFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteePhoneFormPageUpdateOrganisationType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeFormPageUpdateOrganisationType
 
 @WithOrgLandlordProfile
@@ -189,7 +191,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
         }
 
         @Test
-        fun `Clicking change link on lead trustee address row navigates to the lead trustee address lookup page`(page: Page) {
+        fun `Clicking change link on lead trustee address row navigates to the lead trustee address in UK page`(page: Page) {
             val cyaPage =
                 navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
                     trusteeName = LEAD_TRUSTEE_NAME,
@@ -198,7 +200,33 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
                 )
 
             cyaPage.leadTrusteeCard.summaryList.addressRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
+            assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
+        }
+
+        @Test
+        fun `Changing the lead trustee address from a UK address to a non-UK address updates the CYA page`(page: Page) {
+            var cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 Example Street")
+
+            cyaPage.leadTrusteeCard.summaryList.addressRow.clickFirstActionLinkAndWait()
+            val addressInUkPage = assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
+            addressInUkPage.submitNo()
+
+            val nonUkAddressPage = assertPageIs(page, LeadTrusteeNonUkAddressFormPageUpdateOrganisationType::class)
+            nonUkAddressPage.submitAddress(
+                addressLineOne = "1 Rue de Rivoli",
+                townOrCity = "Paris",
+                postcode = "75001",
+            )
+
+            cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 Rue de Rivoli")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).not().containsText("1 Example Street")
         }
 
         @Test
