@@ -19,8 +19,15 @@
             th:text="#{${messagePrefix + '.checkInvitations.invitations.headingSingular'}}">
             checkInvitations.invitations.headingSingular
         </h2>
-        <p class="govuk-body" th:text="#{${messagePrefix + '.checkInvitations.invitations.body'}}">
+        <p class="govuk-body"
+           th:if="${invitationCount > 1}"
+           th:text="#{${messagePrefix + '.checkInvitations.invitations.body'}}">
             checkInvitations.invitations.body
+        </p>
+        <p class="govuk-body"
+           th:if="${invitationCount == 1}"
+           th:text="#{${messagePrefix + '.checkInvitations.invitations.bodySingular'}}">
+            checkInvitations.invitations.bodySingular
         </p>
         <div class="govuk-!-margin-bottom-6">
             <th:block th:each="invitation : ${invitations}">
