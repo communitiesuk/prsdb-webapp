@@ -7,7 +7,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.address.UpdateAddressJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 
 @WebMvcTest(UpdateLandlordAddressController::class)
 class UpdateLandlordAddressControllerTests(
@@ -21,10 +21,10 @@ class UpdateLandlordAddressControllerTests(
 
     override val updateStepRoute =
         UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE +
-            "/${LookupAddressStep.ROUTE_SEGMENT}"
+            "/${AddressInUkStep.ROUTE_SEGMENT}"
 
     override fun stubCreateJourneySteps() {
         whenever(mockJourneyFactory.createJourneySteps())
-            .thenReturn(mapOf(LookupAddressStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(AddressInUkStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }

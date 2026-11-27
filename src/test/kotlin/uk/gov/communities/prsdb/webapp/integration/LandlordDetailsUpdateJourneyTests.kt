@@ -8,16 +8,17 @@ import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.AddressInUkFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NonUkAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
@@ -116,6 +117,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             var landlordDetailsPage = navigator.goToLandlordDetails()
             landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink
                 .clickAndWait()
+            assertPageIs(page, AddressInUkFormPageUpdateLandlordDetails::class).submitYes()
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 
             // Lookup Address page
@@ -124,7 +126,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Select Address page
             val newSelectedAddress = "1 PRSDB Square, EG1 2AA"
-            BaseComponent.assertThat(selectAddressPage.warning).isVisible()
+            assertThat(selectAddressPage.warning).isVisible()
             selectAddressPage.selectAddressAndSubmit(newSelectedAddress)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
@@ -138,6 +140,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             var landlordDetailsPage = navigator.goToLandlordDetails()
             landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink
                 .clickAndWait()
+            assertPageIs(page, AddressInUkFormPageUpdateLandlordDetails::class).submitYes()
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 
             // Lookup Address page
@@ -152,11 +155,30 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val newFirstLine = "3 Example Road"
             val newTown = "Vilton"
             val newPostcode = "AB1 9YZ"
-            BaseComponent.assertThat(manualAddressPage.warning).isVisible()
+            assertThat(manualAddressPage.warning).isVisible()
             manualAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             // Check changes have occurred
+            val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
+            assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
+        }
+
+        @Test
+        fun `A landlord can update their address to a non-UK address`(page: Page) {
+            var landlordDetailsPage = navigator.goToLandlordDetails()
+            landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink
+                .clickAndWait()
+            assertPageIs(page, AddressInUkFormPageUpdateLandlordDetails::class).submitNo()
+
+            val newFirstLine = "1 Rue de Rivoli"
+            val newTown = "Paris"
+            val newPostcode = "75001"
+            val nonUkAddressPage = assertPageIs(page, NonUkAddressFormPageUpdateLandlordDetails::class)
+            assertThat(nonUkAddressPage.warning).isVisible()
+            nonUkAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
+            landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
             val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
         }

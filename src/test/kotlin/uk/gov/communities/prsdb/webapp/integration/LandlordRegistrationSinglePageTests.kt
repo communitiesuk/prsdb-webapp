@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NoAddressFoundFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonEnglandOrWalesAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonUkAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedInternationalPhoneNumber
 import kotlin.test.assertEquals
@@ -259,19 +259,26 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class LandlordRegistrationStepCountryOfResidence {
+    inner class LandlordRegistrationStepAddressInUk {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
-            val countryOfResidencePage = navigator.skipToLandlordRegistrationCountryOfResidencePage()
-            countryOfResidencePage.form.submit()
-            assertThat(countryOfResidencePage.form.getErrorMessage()).containsText("Select an option")
+            val addressInUkPage = navigator.skipToLandlordRegistrationAddressInUkPage()
+            addressInUkPage.form.submit()
+            assertThat(addressInUkPage.form.getErrorMessage()).containsText("Select if you live in the UK")
         }
 
         @Test
-        fun `Submitting the no radio redirects to the non-England or Wales address page`(page: Page) {
-            val countryOfResidencePage = navigator.skipToLandlordRegistrationCountryOfResidencePage()
-            countryOfResidencePage.submitNonUk()
-            assertPageIs(page, NonEnglandOrWalesAddressFormPageLandlordRegistration::class)
+        fun `Submitting the yes radio redirects to the lookup address page`(page: Page) {
+            val addressInUkPage = navigator.skipToLandlordRegistrationAddressInUkPage()
+            addressInUkPage.submitYes()
+            assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting the no radio redirects to the non-UK address page`(page: Page) {
+            val addressInUkPage = navigator.skipToLandlordRegistrationAddressInUkPage()
+            addressInUkPage.submitNo()
+            assertPageIs(page, NonUkAddressFormPageLandlordRegistration::class)
         }
     }
 

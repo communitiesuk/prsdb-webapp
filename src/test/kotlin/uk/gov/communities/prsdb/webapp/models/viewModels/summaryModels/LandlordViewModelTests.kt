@@ -12,8 +12,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordAddressController
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -224,6 +226,22 @@ class LandlordViewModelTests {
                 .single { it.fieldHeading == "landlordDetails.personalDetails.homeAddress" }
                 .getConvertedFieldValue()
         assertEquals(addressString, oneLineAddress)
+    }
+
+    @Test
+    fun `The home address change link goes to the address in UK step of the update address journey`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createIndividualLandlord()
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord)
+
+        // Assert
+        val addressRow = viewModel.personalDetails.single { it.fieldHeading == "landlordDetails.personalDetails.homeAddress" }
+        assertEquals(
+            "${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${AddressInUkStep.ROUTE_SEGMENT}",
+            addressRow.actions.single().url,
+        )
     }
 
     @Test

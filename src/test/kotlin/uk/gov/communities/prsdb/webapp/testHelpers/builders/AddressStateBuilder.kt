@@ -6,10 +6,10 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.integration.PropertyRegistrationJourneyTests
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AddressInUkFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
@@ -29,19 +29,18 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
         value: FormModel,
     ): SelfType
 
-    fun withEnglandOrWalesResidence(): SelfType {
-        val countryOfResidenceFormModel =
-            CountryOfResidenceFormModel().apply {
-                livesInEnglandOrWales = true
+    fun withAddressInUk(addressInUk: Boolean = true): SelfType {
+        val addressInUkFormModel =
+            AddressInUkFormModel().apply {
+                this.addressInUk = addressInUk
             }
-        withSubmittedValue(CountryOfResidenceStep.ROUTE_SEGMENT, countryOfResidenceFormModel)
+        withSubmittedValue(AddressInUkStep.ROUTE_SEGMENT, addressInUkFormModel)
         return self()
     }
 
     fun withLookupAddress(
         houseNameOrNumber: String = "4",
         postcode: String = "EG1 2AB",
-        isContactAddress: Boolean = false,
         wasFound: Boolean = true,
     ): SelfType {
         val addressFormModel =
@@ -49,10 +48,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
                 this.houseNameOrNumber = houseNameOrNumber
                 this.postcode = postcode
             }
-        withSubmittedValue(
-            if (isContactAddress) "lookup-contact-address" else "lookup-address",
-            addressFormModel,
-        )
+        withSubmittedValue("lookup-address", addressFormModel)
         if (wasFound) {
             withCachedAddresses(
                 listOf(AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)),
@@ -61,14 +57,13 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
         return self()
     }
 
-    fun withManualAddressSelected(isContactAddress: Boolean = false): SelfType {
+    fun withManualAddressSelected(): SelfType {
         withCachedAddresses(listOf(AddressDataModel("singleLineAddress", localCouncilId = 22, uprn = 44)))
-        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
             SelectAddressFormModel().apply {
                 address = MANUAL_ADDRESS_CHOSEN
             }
-        withSubmittedValue(selectAddressKey, selectAddressFormModel)
+        withSubmittedValue("select-address", selectAddressFormModel)
         additionalDataMap["cachedSelectedAddress"] = Json.encodeToString(serializer(), MANUAL_ADDRESS_CHOSEN)
 
         return self()
@@ -84,24 +79,20 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
         singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = PropertyRegistrationJourneyTests.uprnForSelectedAddress,
         localCouncil: LocalCouncil? = createLocalCouncil(),
-        isContactAddress: Boolean = false,
     ): SelfType {
         localCouncil?.let {
             whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
         }
 
-        if (!isContactAddress) {
-            withEnglandOrWalesResidence()
-        }
+        withAddressInUk()
 
         withCachedAddresses(listOf(AddressDataModel(singleLineAddress, localCouncilId = localCouncil?.id, uprn = uprn)))
 
-        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
             SelectAddressFormModel().apply {
                 address = singleLineAddress
             }
-        withSubmittedValue(selectAddressKey, selectAddressFormModel)
+        withSubmittedValue("select-address", selectAddressFormModel)
         additionalDataMap["cachedSelectedAddress"] = Json.encodeToString(serializer(), singleLineAddress)
 
         return self()
@@ -112,21 +103,17 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
         townOrCity: String = "City",
         postcode: String = "AB1 2CD",
         localCouncil: LocalCouncil? = null,
-        isContactAddress: Boolean = false,
     ): SelfType {
-        withManualAddressSelected(isContactAddress)
-        val manualAddressKey = if (isContactAddress) "manual-contact-address" else "manual-address"
+        withManualAddressSelected()
         val manualAddressFormModel =
             ManualAddressFormModel().apply {
                 this.addressLineOne = addressLineOne
                 this.townOrCity = townOrCity
                 this.postcode = postcode
             }
-        withSubmittedValue(manualAddressKey, manualAddressFormModel)
+        withSubmittedValue("manual-address", manualAddressFormModel)
 
-        if (!isContactAddress) {
-            withEnglandOrWalesResidence()
-        }
+        withAddressInUk()
 
         if (localCouncil != null) {
             whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
