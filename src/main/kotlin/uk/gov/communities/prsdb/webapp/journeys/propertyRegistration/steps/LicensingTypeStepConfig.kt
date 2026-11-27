@@ -34,15 +34,14 @@ class LicensingTypeStepConfig :
                         labelMsgKey = "licensing.licensingType.radios.option.selectiveLicence.label",
                         hintMsgKey = "licensing.licensingType.radios.option.selectiveLicence.hint",
                     ),
-                    // TODO PDJB-1753: Update the CYA and individual follow-up pages to the new licence wording, then can swap .pageLabel for .label
                     RadiosButtonViewModel(
                         value = LicensingType.HMO_MANDATORY_LICENCE,
-                        labelMsgKey = "licensing.licensingType.radios.option.hmoMandatory.pageLabel",
+                        labelMsgKey = "licensing.licensingType.radios.option.hmoMandatory.radioLabel",
                         hintMsgKey = "licensing.licensingType.radios.option.hmoMandatory.hint",
                     ),
                     RadiosButtonViewModel(
                         value = LicensingType.HMO_ADDITIONAL_LICENCE,
-                        labelMsgKey = "licensing.licensingType.radios.option.hmoAdditional.pageLabel",
+                        labelMsgKey = "licensing.licensingType.radios.option.hmoAdditional.radioLabel",
                         hintMsgKey = "licensing.licensingType.radios.option.hmoAdditional.hint",
                     ),
                     RadiosDividerViewModel("forms.radios.dividerText"),

@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HmoAdditionalLicenceFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.HMOAdditionalDetailModel
 
 @JourneyFrameworkComponent
 class HmoAdditionalLicenceStepConfig : AbstractRequestableStepConfig<Complete, HmoAdditionalLicenceFormModel, JourneyState>() {
@@ -15,14 +14,9 @@ class HmoAdditionalLicenceStepConfig : AbstractRequestableStepConfig<Complete, H
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "licensing.hmoAdditionalLicence.fieldSetHeading",
-            "label" to "licensing.hmoAdditionalLicence.label",
-            "detailSummary" to "licensing.hmoAdditionalLicence.detail.summary",
+            "detailSummary" to "licensing.licenceNumber.detail.summary",
+            "detailText" to "licensing.licenceNumber.detail.text",
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            "detailAdditionalContent" to
-                HMOAdditionalDetailModel(
-                    "licensing.hmoAdditionalLicence.detail.paragraph.two",
-                    "licensing.hmoAdditionalLicence.detail.paragraph.three",
-                ),
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/licenceNumberForm"
