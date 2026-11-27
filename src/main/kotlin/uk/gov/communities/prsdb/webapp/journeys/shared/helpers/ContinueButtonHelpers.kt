@@ -129,7 +129,8 @@ fun JourneyBuilder<*>.useContinueButtons(task: SuperiorLandlordsDetailsTask) {
         task.superiorLandlordProvideDetailsStep,
         task.superiorLandlordNameStep,
         task.superiorLandlordEmailStep,
-        task.superiorLandlordAddressTask.manualAddressStep,
+        task.superiorLandlordAddressTask.addressTask.manualAddressStep,
+        task.superiorLandlordAddressTask.internationalManualAddressStep,
         task.superiorLandlordsListStep,
         task.confirmRemoveSuperiorLandlordStep,
     )

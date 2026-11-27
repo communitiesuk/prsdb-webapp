@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.SuperiorLandlordDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -54,6 +55,12 @@ class SaveSuperiorLandlordStepConfigTests {
 
     @Mock
     lateinit var addressTask: SuperiorLandlordAddressTask
+
+    @Mock
+    lateinit var ukAddressTask: AddressTask
+
+    @Mock
+    lateinit var internationalManualAddressStep: ManualAddressStep
 
     @Mock
     lateinit var lookupAddressStep: LookupAddressStep
@@ -140,6 +147,7 @@ class SaveSuperiorLandlordStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = SELECTED_ADDRESS,
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = SELECTED_ADDRESS.singleLineAddress,
@@ -177,6 +185,7 @@ class SaveSuperiorLandlordStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = manualAddress,
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = MANUAL_ADDRESS_CHOSEN,
@@ -204,17 +213,18 @@ class SaveSuperiorLandlordStepConfigTests {
             }
         setupAddressAnswers(selectedAddress = previousSelection, manualFormModel = manualFormModel)
         val selectFormModel = SelectAddressFormModel().apply { address = previousSelection }
-        whenever(addressTask.selectAddressStep).thenReturn(selectAddressStep)
+        whenever(ukAddressTask.selectAddressStep).thenReturn(selectAddressStep)
         whenever(selectAddressStep.formModelOrNull).thenReturn(selectFormModel)
-        whenever(addressTask.cachedAddresses).thenReturn(emptyList())
-        whenever(addressTask.getMatchingAddress(any())).thenCallRealMethod()
-        whenever(addressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(ukAddressTask.cachedAddresses).thenReturn(emptyList())
+        whenever(ukAddressTask.getMatchingAddress(any())).thenCallRealMethod()
+        whenever(ukAddressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(ukAddressTask.getAddress()).thenCallRealMethod()
         whenever(addressTask.getAddress()).thenCallRealMethod()
 
         var cachedSelectedAddress: String? = previousSelection
-        whenever(addressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
+        whenever(ukAddressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
         doAnswer { cachedSelectedAddress = it.getArgument(0) }
-            .whenever(addressTask)
+            .whenever(ukAddressTask)
             .cachedSelectedAddress = anyOrNull()
 
         whenever(mockState.superiorLandlordsMap).thenReturn(emptyMap())
@@ -222,7 +232,7 @@ class SaveSuperiorLandlordStepConfigTests {
         whenever(mockState.nextSuperiorLandlordId).thenReturn(1)
 
         // Act
-        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(addressTask)
+        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(ukAddressTask)
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
@@ -231,12 +241,52 @@ class SaveSuperiorLandlordStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = MANUAL_ADDRESS_CHOSEN,
                 manualAddressLineOne = "2 Manual Road",
                 manualTownOrCity = "Manual Town",
                 manualPostcode = "MA1 1AA",
+            )
+        assertEquals(mapOf(1 to expectedSuperiorLandlord), captureSavedMap())
+    }
+
+    @Test
+    fun `afterStepIsReached saves the non-UK address answers when the address is not in the UK`() {
+        // Arrange
+        val stepConfig = SaveSuperiorLandlordStepConfig()
+        setupStepsWithAnswers(true, SuperiorLandlordContactType.POSTAL_ADDRESS, ENTERED_NAME)
+        val internationalManualFormModel =
+            ManualAddressFormModel().apply {
+                addressLineOne = "1 Rue de Rivoli"
+                townOrCity = "Paris"
+                postcode = "75001"
+                country = "France"
+            }
+        val internationalAddress = AddressDataModel(singleLineAddress = "1 Rue de Rivoli, Paris, 75001, France", isInternational = true)
+        whenever(addressTask.getAddress()).thenReturn(internationalAddress)
+        whenever(addressTask.addressInUk()).thenReturn(false)
+        whenever(addressTask.internationalManualAddressStep).thenReturn(internationalManualAddressStep)
+        whenever(internationalManualAddressStep.formModelOrNull).thenReturn(internationalManualFormModel)
+        whenever(mockState.superiorLandlordsMap).thenReturn(emptyMap())
+        whenever(mockState.editingSuperiorLandlordId).thenReturn(null)
+        whenever(mockState.nextSuperiorLandlordId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val expectedSuperiorLandlord =
+            SuperiorLandlordDataModel(
+                detailsKnown = true,
+                name = ENTERED_NAME,
+                address = internationalAddress,
+                addressInUk = false,
+                manualAddressLineOne = "1 Rue de Rivoli",
+                manualTownOrCity = "Paris",
+                manualPostcode = "75001",
+                manualCountry = "France",
             )
         assertEquals(mapOf(1 to expectedSuperiorLandlord), captureSavedMap())
     }
@@ -368,15 +418,17 @@ class SaveSuperiorLandlordStepConfigTests {
         selectedAddress: String?,
         manualFormModel: ManualAddressFormModel?,
     ) {
-        whenever(addressTask.lookupAddressStep).thenReturn(lookupAddressStep)
+        whenever(addressTask.addressInUk()).thenReturn(true)
+        whenever(addressTask.addressTask).thenReturn(ukAddressTask)
+        whenever(ukAddressTask.lookupAddressStep).thenReturn(lookupAddressStep)
         whenever(lookupAddressStep.formModelOrNull).thenReturn(
             LookupAddressFormModel().apply {
                 postcode = LOOKUP_POSTCODE
                 houseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER
             },
         )
-        whenever(addressTask.cachedSelectedAddress).thenReturn(selectedAddress)
-        whenever(addressTask.manualAddressStep).thenReturn(manualAddressStep)
+        whenever(ukAddressTask.cachedSelectedAddress).thenReturn(selectedAddress)
+        whenever(ukAddressTask.manualAddressStep).thenReturn(manualAddressStep)
         whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
     }
 

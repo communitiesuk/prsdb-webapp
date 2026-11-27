@@ -332,6 +332,11 @@ superiorLandlords:
       invalidFormat: Enter an email address in the correct format, like name@example.com
       duplicate: You’ve already used this email address for another person in the ownership chain - enter a different email address
   address:
+    inUk:
+      fieldSetHeading: Is {0}’s contact address in the UK?
+      radios:
+        error:
+          missing: Select if their contact address is in the UK
     lookup:
       fieldSetHeading: What is {0}’s address?
     select:

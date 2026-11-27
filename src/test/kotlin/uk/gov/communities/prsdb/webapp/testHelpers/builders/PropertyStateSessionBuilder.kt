@@ -332,9 +332,17 @@ class PropertyStateSessionBuilder(
                 .withSuperiorLandlordContactType(SuperiorLandlordContactType.EMAIL)
                 .apply { if (existingSuperiorLandlords != null) withSuperiorLandlords(existingSuperiorLandlords) }
 
-        fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
+        fun beforePropertyRegistrationSuperiorLandlordAddressInUk() =
             beforePropertyRegistrationSuperiorLandlordContactType()
                 .withSuperiorLandlordContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationSuperiorLandlordLookupAddress() =
+            beforePropertyRegistrationSuperiorLandlordAddressInUk()
+                .withSuperiorLandlordAddressInUk()
+
+        fun beforePropertyRegistrationSuperiorLandlordNonUkAddress() =
+            beforePropertyRegistrationSuperiorLandlordAddressInUk()
+                .withSuperiorLandlordAddressInUk(false)
 
         fun beforePropertyRegistrationSuperiorLandlordSelectAddress() =
             beforePropertyRegistrationSuperiorLandlordLookupAddress()

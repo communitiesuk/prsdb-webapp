@@ -32,12 +32,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnsPropertyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyManagerFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNoAddressFoundFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNonUkAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
@@ -641,6 +643,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             secondNamePage.submitName("Address superior landlord")
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+            assertPageIs(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class).submitYes()
             assertPageIs(page, SuperiorLandlordLookupAddressFormPagePropertyRegistration::class)
                 .submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
             assertPageIs(page, SuperiorLandlordSelectAddressFormPagePropertyRegistration::class)
@@ -694,6 +697,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                                     detailsKnown = true,
                                     name = "Superior Landlord With Address",
                                     address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                                    addressInUk = true,
                                     addressSearchPostcode = "FA1 1AA",
                                     addressSearchHouseNameOrNumber = "1",
                                     selectedAddress = MANUAL_ADDRESS_CHOSEN,
@@ -720,6 +724,10 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
 
+            val addressInUkPage = assertPageIs(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class)
+            assertEquals("true", addressInUkPage.form.radios.selectedValue)
+            addressInUkPage.form.submit()
+
             val lookupAddressPage = assertPageIs(page, SuperiorLandlordLookupAddressFormPagePropertyRegistration::class)
             assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
             assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
@@ -742,6 +750,76 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
             assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord With Address")
             assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("3 Changed Road")
+        }
+
+        @Test
+        fun `Choosing a non-UK postal address allows the superior landlord address to be entered manually`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            addressInUkPage.submitNo()
+
+            assertPageIs(page, SuperiorLandlordNonUkAddressFormPagePropertyRegistration::class).submitAddress(
+                addressLineOne = "1 Rue de Rivoli",
+                townOrCity = "Paris",
+                postcode = "75001",
+                country = "France",
+            )
+
+            val superiorLandlordsListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(superiorLandlordsListPage.getSummaryCard(0).summaryList).containsText("1 Rue de Rivoli")
+            superiorLandlordsListPage.submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Changing a superior landlord with a non-UK postal address pre-fills their non-UK address answers`(page: Page) {
+            val superiorLandlordsListPage =
+                navigator.skipToPropertyRegistrationSuperiorLandlordsListPage(
+                    superiorLandlords =
+                        mapOf(
+                            1 to
+                                SuperiorLandlordDataModel(
+                                    detailsKnown = true,
+                                    name = "Superior Landlord Abroad",
+                                    address = AddressDataModel.fromManualAddressData("1 Rue de Rivoli", "Paris", "75001"),
+                                    addressInUk = false,
+                                    manualAddressLineOne = "1 Rue de Rivoli",
+                                    manualAddressLineTwo = "Appartement 4",
+                                    manualTownOrCity = "Paris",
+                                    manualCounty = "Ile-de-France",
+                                    manualPostcode = "75001",
+                                    manualCountry = "France",
+                                ),
+                            2 to SuperiorLandlordDataModel(detailsKnown = false),
+                        ),
+                )
+
+            superiorLandlordsListPage
+                .getSummaryCard(0)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, SuperiorLandlordProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, SuperiorLandlordNameFormPagePropertyRegistration::class).form.submit()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+                .submitContactType(SuperiorLandlordContactType.POSTAL_ADDRESS)
+
+            val addressInUkPage = assertPageIs(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class)
+            assertEquals("false", addressInUkPage.form.radios.selectedValue)
+            addressInUkPage.form.submit()
+
+            val nonUkAddressPage = assertPageIs(page, SuperiorLandlordNonUkAddressFormPagePropertyRegistration::class)
+            assertThat(nonUkAddressPage.form.addressLineOneInput).hasValue("1 Rue de Rivoli")
+            assertThat(nonUkAddressPage.form.addressLineTwoInput).hasValue("Appartement 4")
+            assertThat(nonUkAddressPage.form.townOrCityInput).hasValue("Paris")
+            assertThat(nonUkAddressPage.form.countyInput).hasValue("Ile-de-France")
+            assertThat(nonUkAddressPage.form.postcodeInput).hasValue("75001")
+            assertThat(nonUkAddressPage.form.countryInput).hasValue("France")
+            nonUkAddressPage.form.addressLineOneInput.fill("2 Rue de Rivoli")
+            nonUkAddressPage.form.submit()
+
+            val updatedListPage = assertPageIs(page, SuperiorLandlordsListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Superior Landlord Abroad")
+            assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("2 Rue de Rivoli")
         }
 
         @Test

@@ -243,11 +243,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNonUkAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
@@ -360,6 +362,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.InternationalAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -1230,6 +1233,23 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(SuperiorLandlordEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, SuperiorLandlordEmailFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordAddressInUkPage(): SuperiorLandlordAddressInUkFormPagePropertyRegistration {
+        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordAddressInUk().build())
+        navigateToPropertyRegistrationJourneyStep(
+            "${SuperiorLandlordAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+        )
+        return createValidPage(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationSuperiorLandlordNonUkAddressPage(): SuperiorLandlordNonUkAddressFormPagePropertyRegistration {
+        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationSuperiorLandlordNonUkAddress().build())
+        navigateToPropertyRegistrationJourneyStep(
+            "${SuperiorLandlordAddressTask.ROUTE_SEGMENT}/" +
+                InternationalAddressTask.INTERNATIONAL_MANUAL_ADDRESS_ROUTE_SEGMENT,
+        )
+        return createValidPage(page, SuperiorLandlordNonUkAddressFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationSuperiorLandlordLookupAddressPage(): SuperiorLandlordLookupAddressFormPagePropertyRegistration {

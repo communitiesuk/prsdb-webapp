@@ -11,9 +11,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNameFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordNonUkAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -421,6 +424,43 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
     }
 
     @Nested
+    inner class SuperiorLandlordAddressInUkStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            assertThat(addressInUkPage.form.fieldsetHeading).containsText("Is Test Superior Landlord’s contact address in the UK?")
+        }
+
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            addressInUkPage.form.submit()
+            assertThat(addressInUkPage.form.getErrorMessage()).containsText("Select if their contact address is in the UK")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            addressInUkPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Selecting yes goes to the superior landlord lookup address page`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            addressInUkPage.submitYes()
+            assertPageIs(page, SuperiorLandlordLookupAddressFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Selecting no goes to the superior landlord non-UK address page`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationSuperiorLandlordAddressInUkPage()
+            addressInUkPage.submitNo()
+            assertPageIs(page, SuperiorLandlordNonUkAddressFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class SuperiorLandlordLookupAddressStep {
         @Test
         fun `The heading includes the superior landlord name`() {
@@ -429,10 +469,26 @@ class PropertyRegistrationSuperiorLandlordsSinglePageTests : IntegrationTestWith
         }
 
         @Test
-        fun `Back link returns to the superior landlord contact type page`(page: Page) {
+        fun `Back link returns to the superior landlord address in UK page`(page: Page) {
             val lookupAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordLookupAddressPage()
             lookupAddressPage.backLink.clickAndWait()
-            assertPageIs(page, SuperiorLandlordContactTypeFormPagePropertyRegistration::class)
+            assertPageIs(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class SuperiorLandlordNonUkAddressStep {
+        @Test
+        fun `The heading includes the superior landlord name`() {
+            val nonUkAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordNonUkAddressPage()
+            assertThat(nonUkAddressPage.heading).containsText("What is Test Superior Landlord’s address?")
+        }
+
+        @Test
+        fun `Back link returns to the superior landlord address in UK page`(page: Page) {
+            val nonUkAddressPage = navigator.skipToPropertyRegistrationSuperiorLandlordNonUkAddressPage()
+            nonUkAddressPage.backLink.clickAndWait()
+            assertPageIs(page, SuperiorLandlordAddressInUkFormPagePropertyRegistration::class)
         }
     }
 
