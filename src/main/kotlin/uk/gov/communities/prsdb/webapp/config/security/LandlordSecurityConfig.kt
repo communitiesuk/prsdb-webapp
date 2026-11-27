@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.ActingAsLandlordRedirectFi
 import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.INVITATION_REJECTED_PATH_SEGMENT
@@ -104,7 +105,7 @@ class LandlordSecurityConfig(
                     userInfo.oidcUserService(landlordOidcUserService())
                 }
                 oauth.redirectionEndpoint { redirection ->
-                    redirection.baseUri("/landlord/login/oauth2/code/one-login")
+                    redirection.baseUri("${LANDLORD_LOGIN_ROUTE_PREFIX}oauth2/code/one-login")
                 }
             }.addFilterAfter(ActingAsLandlordRedirectFilter(actingAsLandlordService), SecurityContextHolderFilter::class.java)
 
@@ -197,4 +198,8 @@ class LandlordSecurityConfig(
 
     @Bean
     fun csrfTokenRepository(): CsrfTokenRepository = HttpSessionCsrfTokenRepository()
+
+    companion object {
+        const val LANDLORD_LOGIN_ROUTE_PREFIX = "/$LANDLORD_PATH_SEGMENT/login/"
+    }
 }

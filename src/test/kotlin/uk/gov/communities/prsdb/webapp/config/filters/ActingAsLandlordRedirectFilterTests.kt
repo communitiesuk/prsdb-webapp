@@ -8,6 +8,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.ActingAsLandlordService
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -32,7 +34,7 @@ class ActingAsLandlordRedirectFilterTests {
 
         // Assert
         assertEquals(HttpServletResponse.SC_TEMPORARY_REDIRECT, response.status)
-        assertEquals("/system-operator$LANDLORD_ROUTE", response.getHeader(HttpHeaders.LOCATION))
+        assertEquals(ACTING_ROUTE, response.getHeader(HttpHeaders.LOCATION))
         assertFalse(chainInvoked)
     }
 
@@ -48,7 +50,7 @@ class ActingAsLandlordRedirectFilterTests {
 
         // Assert
         assertEquals(HttpServletResponse.SC_TEMPORARY_REDIRECT, response.status)
-        assertEquals("/system-operator$LANDLORD_ROUTE?$QUERY_STRING", response.getHeader(HttpHeaders.LOCATION))
+        assertEquals("$ACTING_ROUTE?$QUERY_STRING", response.getHeader(HttpHeaders.LOCATION))
         assertFalse(chainInvoked)
     }
 
@@ -81,7 +83,8 @@ class ActingAsLandlordRedirectFilterTests {
     }
 
     companion object {
-        private const val LANDLORD_ROUTE = "/landlord/dashboard"
+        private const val LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/dashboard"
+        private const val ACTING_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/dashboard"
         private const val LANDLORD_LOGIN_CALLBACK_ROUTE = "/landlord/login/oauth2/code/one-login"
         private const val QUERY_STRING = "foo=bar&baz=qux"
     }

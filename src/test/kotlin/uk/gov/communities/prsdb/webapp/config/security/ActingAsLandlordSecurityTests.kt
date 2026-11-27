@@ -17,9 +17,11 @@ import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.context.WebApplicationContext
@@ -119,8 +121,28 @@ class ActingAsLandlordSecurityTests(
         // Act, Assert
         mvc.get("$LANDLORD_ROUTE?$QUERY_STRING") { this.session = session }.andExpect {
             status { isTemporaryRedirect() }
-            header { string(HttpHeaders.LOCATION, "/$SYSTEM_OPERATOR_PATH_SEGMENT$LANDLORD_ROUTE?$QUERY_STRING") }
+            header { string(HttpHeaders.LOCATION, "$ACTING_ROUTE?$QUERY_STRING") }
         }
+    }
+
+    @Test
+    fun `a form submitted to a landlord route while acting is redirected to the acting route`() {
+        // Arrange
+        val session =
+            createSession(
+                SecurityContextImpl(createOneLoginToken(SYSTEM_OPERATOR_USER_ID, ROLE_SYSTEM_OPERATOR)),
+                actingAsUserId = LANDLORD_USER_ID,
+            )
+
+        // Act, Assert
+        mvc
+            .post(LANDLORD_ROUTE) {
+                this.session = session
+                with(csrf())
+            }.andExpect {
+                status { isTemporaryRedirect() }
+                header { string(HttpHeaders.LOCATION, ACTING_ROUTE) }
+            }
     }
 
     @Test
@@ -177,6 +199,7 @@ class ActingAsLandlordSecurityTests(
     companion object {
         private const val TEST_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/acting-test"
         private const val LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/dashboard"
+        private const val ACTING_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/dashboard"
         private const val QUERY_STRING = "foo=bar"
         private const val SYSTEM_OPERATOR_USER_ID = "system-operator-user-id"
         private const val LANDLORD_USER_ID = "landlord-user-id"
