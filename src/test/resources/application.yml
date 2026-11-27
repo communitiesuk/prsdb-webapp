@@ -82,6 +82,11 @@ gov-uk-pay:
   manual-intervention-email-address: payments-support@example.com
   payment-status-retry-delay: 0s
 
+encoded:
+  base-url: https://encoded.test/api/v1
+  connect-timeout: 5s
+  read-timeout: 10s
+
 cloudwatch-metrics:
   ecs:
     namespace: AWS/ECS

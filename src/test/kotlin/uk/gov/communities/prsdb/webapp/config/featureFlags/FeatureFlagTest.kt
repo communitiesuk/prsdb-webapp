@@ -11,8 +11,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
+import uk.gov.communities.prsdb.webapp.clients.EncodedClient
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.EncodedConfig
 import uk.gov.communities.prsdb.webapp.config.EpcRegisterConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
@@ -64,6 +66,12 @@ class FeatureFlagTest {
 
     @MockitoBean
     lateinit var epcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @MockitoBean
+    lateinit var encodedConfig: EncodedConfig
+
+    @MockitoBean
+    lateinit var encodedClient: EncodedClient
 
     // TODO 1021: Remove OS Download beans when ExampleOsDownloadsController is removed
     @MockitoBean
