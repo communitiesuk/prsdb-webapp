@@ -15,9 +15,9 @@ The system operator metrics page (`/system-operator/metrics`) shows a single sum
 The page (`MetricsController`) shows no rows until the operator submits a **reporting period** (From/To
 dates); on submit, five metric queries are run for that period and their results are rendered as one
 combined summary list (`getMetricRows`). Counts are formatted as integers, durations via
-`MetricsDurationHelper`, and rates/utilisations as `0.00%`. Any value that is missing — or whose upstream
-call failed — renders as **"No data"** rather than erroring the page. Row labels come from
-`messages/metrics.yml` (`metrics.rows.*`).
+`MetricsDurationHelper`, rates/utilisations as `0.00%`, and ElastiCache ECPU consumption as a numeric
+`0.00` count. Any value that is missing — or whose upstream call failed — renders as **"No data"**
+rather than erroring the page. Row labels come from `messages/metrics.yml` (`metrics.rows.*`).
 
 ## Dashboard rows
 
@@ -38,7 +38,7 @@ The summary list contains 19 rows, in display order:
 | 11 | Peak memory utilisation | CloudWatch (`CloudWatchMetricsService`) | See [CloudWatch infrastructure metrics](#cloudwatch-infrastructure-metrics). |
 | 12 | Average memory utilisation | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 13 | Peak CPU utilisation | CloudWatch (`CloudWatchMetricsService`) | See below. |
-| 14 | ElastiCache CPU utilisation | CloudWatch (`CloudWatchMetricsService`) | See below. |
+| 14 | ElastiCache ECPU consumption | CloudWatch (`CloudWatchMetricsService`) | ECPUs consumed during the selected period; displayed as a number, not a percentage. |
 | 15 | Client error rate (HTTP 4xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 16 | Server error rate (HTTP 5xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 17 | Total number of transactions | Plausible (`PlausibleMetricsService.getTransactionCounts`) | See [Transaction counts](#transaction-counts). |
@@ -166,9 +166,13 @@ enumerate or inspect billing views and does not use the billing console, so it d
 | Peak memory utilisation       | `AWS/ECS`               | `MemoryUtilization` | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
 | Average memory utilisation    | `AWS/ECS`               | `MemoryUtilization` | Average   | `ClusterName`, `ServiceName`            | `eu-west-2` |
 | Peak CPU utilisation          | `AWS/ECS`               | `CPUUtilization`    | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
-| ElastiCache CPU utilisation   | `AWS/ElastiCache`       | `CPUUtilization`    | Maximum   | `CacheClusterId`                        | `eu-west-2` |
+| ElastiCache ECPU consumption  | `AWS/ElastiCache`       | `ElastiCacheProcessingUnits` | Sum       | `clusterId` (cache name)                 | `eu-west-2` |
 | Client error rate (HTTP 4xx)  | `AWS/CloudFront`        | `4xxErrorRate`      | Average   | `DistributionId`, `Region=Global`       | `us-east-1` |
 | Server error rate (HTTP 5xx)  | `AWS/CloudFront`        | `5xxErrorRate`      | Average   | `DistributionId`, `Region=Global`       | `us-east-1` |
+
+Until the serverless cutover, the ElastiCache metric configuration defaults to the node-based
+`CPUUtilization` metric, `CacheClusterId` dimension, and `Maximum` statistic. The task definition switches
+these to `ElastiCacheProcessingUnits`, `clusterId` (the cache name), and `Sum` for Valkey Serverless.
 
 > **CloudFront is special.** CloudFront only publishes its metrics to **`us-east-1`** with a
 > `Region=Global` dimension, so they are queried through a separate `us-east-1` CloudWatch client

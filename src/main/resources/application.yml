@@ -162,7 +162,9 @@ cloudwatch-metrics:
     service-name: ${CLOUDWATCH_ECS_SERVICE_NAME:}
   elasticache:
     namespace: ${CLOUDWATCH_ELASTICACHE_NAMESPACE:AWS/ElastiCache}
-    cpu-utilisation-metric: ${CLOUDWATCH_ELASTICACHE_CPU_METRIC:CPUUtilization}
+    metric-name: ${CLOUDWATCH_ELASTICACHE_METRIC:${CLOUDWATCH_ELASTICACHE_CPU_METRIC:CPUUtilization}}
+    dimension-name: ${CLOUDWATCH_ELASTICACHE_DIMENSION:CacheClusterId}
+    statistic: ${CLOUDWATCH_ELASTICACHE_STATISTIC:MAXIMUM}
     cache-cluster-id: ${CLOUDWATCH_ELASTICACHE_CLUSTER_ID:}
   cloudfront:
     namespace: ${CLOUDWATCH_CLOUDFRONT_NAMESPACE:AWS/CloudFront}
@@ -269,6 +271,7 @@ spring:
     redis:
       host: ${ELASTICACHE_URL}
       port: ${ELASTICACHE_PORT}
+      username: ${ELASTICACHE_USERNAME:}
       password: ${ELASTICACHE_PASSWORD}
       ssl:
         enabled: true

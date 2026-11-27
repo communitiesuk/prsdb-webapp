@@ -18,7 +18,9 @@ class CloudWatchMetricsService(
     @Value("\${cloudwatch-metrics.ecs.cluster-name}") private val ecsClusterName: String,
     @Value("\${cloudwatch-metrics.ecs.service-name}") private val ecsServiceName: String,
     @Value("\${cloudwatch-metrics.elasticache.namespace}") private val elastiCacheNamespace: String,
-    @Value("\${cloudwatch-metrics.elasticache.cpu-utilisation-metric}") private val elastiCacheCpuMetric: String,
+    @Value("\${cloudwatch-metrics.elasticache.metric-name}") private val elastiCacheMetricName: String,
+    @Value("\${cloudwatch-metrics.elasticache.dimension-name}") private val elastiCacheDimensionName: String,
+    @Value("\${cloudwatch-metrics.elasticache.statistic}") private val elastiCacheStatistic: Statistic,
     @Value("\${cloudwatch-metrics.elasticache.cache-cluster-id}") private val elastiCacheClusterId: String,
     @Value("\${cloudwatch-metrics.cloudfront.namespace}") private val cloudFrontNamespace: String,
     @Value("\${cloudwatch-metrics.cloudfront.client-error-rate-metric}") private val cloudFrontClientErrorRateMetric: String,
@@ -33,13 +35,13 @@ class CloudWatchMetricsService(
                 safely { client.getMetricStatistic(ecsNamespace, ecsMemoryMetric, ecsDimensions(), Statistic.AVERAGE, period) },
             peakCpuUtilisation =
                 safely { client.getMetricStatistic(ecsNamespace, ecsCpuMetric, ecsDimensions(), Statistic.MAXIMUM, period) },
-            elastiCacheCpuUtilisation =
+            elastiCacheEcpuConsumption =
                 safely {
                     client.getMetricStatistic(
                         elastiCacheNamespace,
-                        elastiCacheCpuMetric,
+                        elastiCacheMetricName,
                         elastiCacheDimensions(),
-                        Statistic.MAXIMUM,
+                        elastiCacheStatistic,
                         period,
                     )
                 },
@@ -81,7 +83,7 @@ class CloudWatchMetricsService(
             Dimension.builder().name("ServiceName").value(ecsServiceName).build(),
         )
 
-    private fun elastiCacheDimensions() = listOf(Dimension.builder().name("CacheClusterId").value(elastiCacheClusterId).build())
+    private fun elastiCacheDimensions() = listOf(Dimension.builder().name(elastiCacheDimensionName).value(elastiCacheClusterId).build())
 
     private fun cloudFrontDimensions() =
         listOf(

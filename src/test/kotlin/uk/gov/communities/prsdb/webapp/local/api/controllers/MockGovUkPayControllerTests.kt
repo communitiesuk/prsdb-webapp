@@ -84,6 +84,36 @@ class MockGovUkPayControllerTests {
         return paymentId
     }
 
+    private fun createMotoBody() =
+        """
+        {"amount":12000,"reference":"REF-123","description":"Registration fee",
+         "authorisation_mode":"moto_api","delayed_capture":true}
+        """.trimIndent()
+
+    private fun createMotoPaymentAndGetIdAndToken(): Pair<String, String> {
+        val response =
+            mvc
+                .perform(
+                    post("/local/gov-uk-pay/v1/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createMotoBody()),
+                ).andReturn()
+                .response.contentAsString
+        val json = objectMapper.readTree(response)
+        return json.get("payment_id").asText() to json.at("/_links/auth_url_post/params/one_time_token").asText()
+    }
+
+    private fun authBody(
+        oneTimeToken: String,
+        cardNumber: String = "4444333322221111",
+    ) = """
+        {"one_time_token":"$oneTimeToken","card_number":"$cardNumber","cvc":"123","expiry_date":"02/30",
+         "cardholder_name":"Mycroft Holmes"}
+        """.trimIndent()
+
+    private fun authorise(body: String) =
+        mvc.perform(post("/local/gov-uk-pay/v1/auth").contentType(MediaType.APPLICATION_JSON).content(body))
+
     @Test
     fun `creating a payment returns 201 with created state and a next_url`() {
         mvc
@@ -180,6 +210,112 @@ class MockGovUkPayControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""{"amount":100,"reference":"R","return_url":"https://x"}"""),
             ).andExpect(status().isUnprocessableEntity)
+            .andExpect(jsonPath("$.code").value("P0101"))
+    }
+
+    @Test
+    fun `creating a moto_api payment without a return_url returns 201 with a one-time token and no next_url`() {
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createMotoBody()))
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.state.status").value("created"))
+            .andExpect(jsonPath("$.authorisation_mode").value("moto_api"))
+            .andExpect(jsonPath("$.return_url").doesNotExist())
+            .andExpect(jsonPath("$._links.next_url").doesNotExist())
+            .andExpect(jsonPath("$._links.auth_url_post.href").value("http://localhost:8080/local/gov-uk-pay/v1/auth"))
+            .andExpect(jsonPath("$._links.auth_url_post.method").value("POST"))
+            .andExpect(jsonPath("$._links.auth_url_post.params.one_time_token", matchesPattern("[0-9a-f-]{36}")))
+    }
+
+    @Test
+    fun `creating a web payment without a return_url returns 422 with an error body`() {
+        mvc
+            .perform(
+                post("/local/gov-uk-pay/v1/payments")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""{"amount":100,"reference":"R","description":"D"}"""),
+            ).andExpect(status().isUnprocessableEntity)
+            .andExpect(jsonPath("$.code").value("P0101"))
+    }
+
+    @Test
+    fun `authorising a moto_api payment with its one-time token returns 204 and moves it to capturable`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise(authBody(oneTimeToken)).andExpect(status().isNoContent)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("capturable"))
+            .andExpect(jsonPath("$.card_details.cardholder_name").value("Mycroft Holmes"))
+            .andExpect(jsonPath("$._links.auth_url_post").doesNotExist())
+            .andExpect(jsonPath("$._links.capture.method").value("POST"))
+    }
+
+    @Test
+    fun `authorising with a declined card number returns 402 and fails the payment`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise(authBody(oneTimeToken, cardNumber = "4000000000000002"))
+            .andExpect(status().isPaymentRequired)
+            .andExpect(jsonPath("$.code").value("P0010"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("failed"))
+    }
+
+    @Test
+    fun `authorising with a one-time token that has already been used returns 400 with P1212`() {
+        val (_, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+        authorise(authBody(oneTimeToken)).andExpect(status().isNoContent)
+
+        authorise(authBody(oneTimeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1212"))
+    }
+
+    @Test
+    fun `authorising a cancelled moto_api payment returns 400 with P1212 and leaves it cancelled`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/cancel")).andExpect(status().isNoContent)
+
+        authorise(authBody(oneTimeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1212"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("cancelled"))
+    }
+
+    @Test
+    fun `authorising with an unknown one-time token returns 400 with P1211`() {
+        authorise(authBody("not-a-real-token"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1211"))
+    }
+
+    @Test
+    fun `the one-time token of a web payment can't be used to authorise it`() {
+        val createResponse =
+            mvc
+                .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+                .andReturn()
+                .response.contentAsString
+        val chargeToken = objectMapper.readTree(createResponse).at("/_links/next_url_post/params/chargeTokenId").asText()
+
+        authorise(authBody(chargeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1211"))
+    }
+
+    @Test
+    fun `authorising without a card detail returns 422 with P0101`() {
+        val (_, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise("""{"one_time_token":"$oneTimeToken","card_number":"4444333322221111","cvc":"123","expiry_date":"02/30"}""")
+            .andExpect(status().isUnprocessableEntity)
             .andExpect(jsonPath("$.code").value("P0101"))
     }
 

@@ -91,7 +91,9 @@ cloudwatch-metrics:
     service-name: test-service
   elasticache:
     namespace: AWS/ElastiCache
-    cpu-utilisation-metric: CPUUtilization
+    metric-name: CPUUtilization
+    dimension-name: CacheClusterId
+    statistic: MAXIMUM
     cache-cluster-id: test-cache-cluster
   cloudfront:
     namespace: AWS/CloudFront
