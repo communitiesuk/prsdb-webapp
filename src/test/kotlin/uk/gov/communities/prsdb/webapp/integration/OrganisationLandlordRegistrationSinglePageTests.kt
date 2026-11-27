@@ -37,13 +37,13 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(landlordTypePage.page.locator("h1"))
                 .containsText("Are you registering as an individual or an organisation?")
             assertThat(landlordTypePage.page.locator(".govuk-details__summary-text"))
-                .containsText("Registering a partnership")
-            assertThat(landlordTypePage.page.locator("label[for='landlordType']")).containsText("An individual")
+                .containsText("Help with registering a partnership")
+            assertThat(landlordTypePage.page.locator("label[for='landlordType']")).hasText("Individual")
             assertThat(landlordTypePage.page.locator("#landlordType-INDIVIDUAL-hint"))
-                .containsText("You rent out a property as an individual, sole trader or joint landlord")
-            assertThat(landlordTypePage.page.locator("label[for='landlordType-ORGANISATION']")).containsText("An organisation")
+                .containsText("Individuals, sole traders and joint landlords")
+            assertThat(landlordTypePage.page.locator("label[for='landlordType-ORGANISATION']")).hasText("Organisation")
             assertThat(landlordTypePage.page.locator("#landlordType-ORGANISATION-hint"))
-                .containsText("You rent out a property as a company, charity or trust")
+                .containsText("Companies, charities and trusts")
         }
 
         @Test

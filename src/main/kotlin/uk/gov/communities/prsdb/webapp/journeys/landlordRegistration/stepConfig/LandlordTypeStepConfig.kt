@@ -16,8 +16,11 @@ class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, L
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.landlordType.fieldSetHeading",
             "partnershipSummary" to "registerAsALandlord.landlordType.partnership.summary",
-            "partnershipParagraphOne" to "registerAsALandlord.landlordType.partnership.paragraph.one",
-            "partnershipParagraphTwo" to "registerAsALandlord.landlordType.partnership.paragraph.two",
+            "englishPartnershipHeading" to "registerAsALandlord.landlordType.partnership.english.heading",
+            "englishPartnershipParagraphOne" to "registerAsALandlord.landlordType.partnership.english.paragraph.one",
+            "englishPartnershipParagraphTwo" to "registerAsALandlord.landlordType.partnership.english.paragraph.two",
+            "llpPartnershipHeading" to "registerAsALandlord.landlordType.partnership.llp.heading",
+            "llpPartnershipParagraph" to "registerAsALandlord.landlordType.partnership.llp.paragraph",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

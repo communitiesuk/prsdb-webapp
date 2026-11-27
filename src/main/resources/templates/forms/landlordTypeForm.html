@@ -1,8 +1,11 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="partnershipSummary" type="java.lang.String"*/-->
-<!--/*@thymesVar id="partnershipParagraphOne" type="java.lang.String"*/-->
-<!--/*@thymesVar id="partnershipParagraphTwo" type="java.lang.String"*/-->
+<!--/*@thymesVar id="englishPartnershipHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="englishPartnershipParagraphOne" type="java.lang.String"*/-->
+<!--/*@thymesVar id="englishPartnershipParagraphTwo" type="java.lang.String"*/-->
+<!--/*@thymesVar id="llpPartnershipHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="llpPartnershipParagraph" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!DOCTYPE html>
@@ -12,8 +15,11 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'landlordType', #{${fieldSetHeading}}, null)}">
         <details id="details" th:replace="~{fragments/details :: details(#{${partnershipSummary}}, ~{::#details/content()})}">
             <div class="govuk-details__text">
-                <p class="govuk-body" th:text="#{${partnershipParagraphOne}}"></p>
-                <p class="govuk-body" th:text="#{${partnershipParagraphTwo}}"></p>
+                <h3 class="govuk-heading-m" th:text="#{${englishPartnershipHeading}}"></h3>
+                <p class="govuk-body" th:utext="#{${englishPartnershipParagraphOne}}"></p>
+                <p class="govuk-body" th:text="#{${englishPartnershipParagraphTwo}}"></p>
+                <h3 class="govuk-heading-m" th:text="#{${llpPartnershipHeading}}"></h3>
+                <p class="govuk-body" th:utext="#{${llpPartnershipParagraph}}"></p>
             </div>
         </details>
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'landlordType',null, ${radioOptions})}"></th:block>
