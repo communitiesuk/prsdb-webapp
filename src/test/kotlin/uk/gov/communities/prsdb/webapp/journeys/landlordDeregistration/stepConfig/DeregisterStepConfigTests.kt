@@ -13,6 +13,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthenticationToken
+import uk.gov.communities.prsdb.webapp.constants.ROLE_INDIVIDUAL_LANDLORD
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
@@ -157,6 +159,22 @@ class DeregisterStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached does not refresh security context while acting as a landlord`() {
+        val stepConfig = setupStepConfig()
+        SecurityContextHolder.getContext().authentication =
+            ActingAsLandlordAuthenticationToken(
+                actingAsUserId = baseUserId,
+                landlordRoles = listOf(ROLE_INDIVIDUAL_LANDLORD),
+                systemOperatorId = "system-operator-id",
+            )
+        setupLandlordWithNoProperties()
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockSecurityContextService, never()).refreshContext()
+    }
+
+    @Test
     fun `afterStepIsReached uses the current user name in the with-properties confirmation email`() {
         val stepConfig = setupStepConfig()
         setupMocksForWithProperties()
@@ -220,6 +238,10 @@ class DeregisterStepConfigTests {
 
     private fun setupMocksForNoProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
+        setupLandlordWithNoProperties()
+    }
+
+    private fun setupLandlordWithNoProperties() {
         val landlord = MockLandlordData.createIndividualLandlord(email = landlordEmail, propertyOwnerships = emptySet())
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         setupCurrentUser()

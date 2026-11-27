@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -11,7 +12,10 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthenticationToken
+import uk.gov.communities.prsdb.webapp.constants.ROLE_ORG_ADMIN
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.CurrentUserService
@@ -46,6 +50,11 @@ class DeregisterStepConfigTests {
     @Mock
     lateinit var mockState: OrganisationalLandlordDeregistrationJourneyState
 
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
+    }
+
     @Test
     fun `afterStepIsReached deregisters the organisational landlord`() {
         val stepConfig = setupStepConfig()
@@ -64,6 +73,22 @@ class DeregisterStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockSecurityContextService).refreshContext()
+    }
+
+    @Test
+    fun `afterStepIsReached does not refresh security context while acting as a landlord`() {
+        val stepConfig = setupStepConfig()
+        SecurityContextHolder.getContext().authentication =
+            ActingAsLandlordAuthenticationToken(
+                actingAsUserId = "landlord-user-id",
+                landlordRoles = listOf(ROLE_ORG_ADMIN),
+                systemOperatorId = "system-operator-id",
+            )
+        setupMocks()
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockSecurityContextService, never()).refreshContext()
     }
 
     @Test

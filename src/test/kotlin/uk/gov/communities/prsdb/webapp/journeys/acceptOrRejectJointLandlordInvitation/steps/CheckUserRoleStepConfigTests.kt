@@ -11,10 +11,11 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.config.security.ActingAsLandlordAuthenticationToken
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockOidcPrincipal
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 
 @ExtendWith(MockitoExtension::class)
 class CheckUserRoleStepConfigTests {
@@ -78,7 +79,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets userIsLandlord to false when user does not have landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockOidcPrincipal(username)
+        setMockUser(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(false)
 
         // Act
@@ -94,7 +95,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets userIsLandlord to true when user has landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockOidcPrincipal(username)
+        setMockUser(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(true)
         whenever(mockState.getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt()).thenReturn(null)
 
@@ -109,7 +110,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets propertyOwnershipIdUserIsAlreadyLandlordOn when user is a landlord on the invited property`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockOidcPrincipal(username)
+        setMockUser(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(true)
         whenever(mockState.getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt()).thenReturn(propertyOwnershipId)
 
@@ -124,7 +125,7 @@ class CheckUserRoleStepConfigTests {
     fun `afterStepIsReached sets propertyOwnershipIdUserIsAlreadyLandlordOn to null when user is not a landlord on the invited property`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setMockOidcPrincipal(username)
+        setMockUser(username)
         whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(true)
         whenever(mockState.getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt()).thenReturn(null)
 
@@ -133,6 +134,25 @@ class CheckUserRoleStepConfigTests {
 
         // Assert
         verify(mockState).propertyOwnershipIdUserIsAlreadyLandlordOn = null
+    }
+
+    @Test
+    fun `afterStepIsReached checks the landlord role of the acted as user while acting as a landlord`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        SecurityContextHolder.getContext().authentication =
+            ActingAsLandlordAuthenticationToken(
+                actingAsUserId = username,
+                landlordRoles = emptyList(),
+                systemOperatorId = "system-operator-id",
+            )
+        whenever(mockUserRolesService.getUserHasLandlordRole(username)).thenReturn(false)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).userIsLandlord = false
     }
 
     private fun setupStepConfig(): CheckUserRoleStepConfig = CheckUserRoleStepConfig(mockUserRolesService)
