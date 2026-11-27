@@ -119,9 +119,9 @@ class ActingAsLandlordSecurityTests(
             )
 
         // Act, Assert
-        mvc.get("$LANDLORD_ROUTE?$QUERY_STRING") { this.session = session }.andExpect {
+        mvc.get("/$LANDLORD_ROUTE?$QUERY_STRING") { this.session = session }.andExpect {
             status { isTemporaryRedirect() }
-            header { string(HttpHeaders.LOCATION, "$ACTING_ROUTE?$QUERY_STRING") }
+            header { string(HttpHeaders.LOCATION, "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_ROUTE?$QUERY_STRING") }
         }
     }
 
@@ -136,12 +136,12 @@ class ActingAsLandlordSecurityTests(
 
         // Act, Assert
         mvc
-            .post(LANDLORD_ROUTE) {
+            .post("/$LANDLORD_ROUTE") {
                 this.session = session
                 with(csrf())
             }.andExpect {
                 status { isTemporaryRedirect() }
-                header { string(HttpHeaders.LOCATION, ACTING_ROUTE) }
+                header { string(HttpHeaders.LOCATION, "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_ROUTE") }
             }
     }
 
@@ -155,7 +155,7 @@ class ActingAsLandlordSecurityTests(
             )
 
         // Act, Assert
-        mvc.get(LANDLORD_ROUTE) { this.session = session }.andExpect {
+        mvc.get("/$LANDLORD_ROUTE") { this.session = session }.andExpect {
             header { doesNotExist(HttpHeaders.LOCATION) }
         }
     }
@@ -198,8 +198,7 @@ class ActingAsLandlordSecurityTests(
 
     companion object {
         private const val TEST_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/acting-test"
-        private const val LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/dashboard"
-        private const val ACTING_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/dashboard"
+        private const val LANDLORD_ROUTE = "$LANDLORD_PATH_SEGMENT/dashboard"
         private const val QUERY_STRING = "foo=bar"
         private const val SYSTEM_OPERATOR_USER_ID = "system-operator-user-id"
         private const val LANDLORD_USER_ID = "landlord-user-id"

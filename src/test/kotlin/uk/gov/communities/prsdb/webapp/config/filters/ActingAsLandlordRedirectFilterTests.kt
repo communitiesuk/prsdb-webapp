@@ -30,11 +30,11 @@ class ActingAsLandlordRedirectFilterTests {
         val response = MockHttpServletResponse()
 
         // Act
-        filter.doFilter(MockHttpServletRequest("GET", LANDLORD_ROUTE), response, chain)
+        filter.doFilter(MockHttpServletRequest("GET", "/$LANDLORD_ROUTE"), response, chain)
 
         // Assert
         assertEquals(HttpServletResponse.SC_TEMPORARY_REDIRECT, response.status)
-        assertEquals(ACTING_ROUTE, response.getHeader(HttpHeaders.LOCATION))
+        assertEquals("/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_ROUTE", response.getHeader(HttpHeaders.LOCATION))
         assertFalse(chainInvoked)
     }
 
@@ -42,7 +42,7 @@ class ActingAsLandlordRedirectFilterTests {
     fun `doFilter keeps the query string when redirecting while acting`() {
         // Arrange
         whenever(actingAsLandlordService.isActingAsLandlord()).thenReturn(true)
-        val request = MockHttpServletRequest("GET", LANDLORD_ROUTE).apply { queryString = QUERY_STRING }
+        val request = MockHttpServletRequest("GET", "/$LANDLORD_ROUTE").apply { queryString = QUERY_STRING }
         val response = MockHttpServletResponse()
 
         // Act
@@ -50,7 +50,7 @@ class ActingAsLandlordRedirectFilterTests {
 
         // Assert
         assertEquals(HttpServletResponse.SC_TEMPORARY_REDIRECT, response.status)
-        assertEquals("$ACTING_ROUTE?$QUERY_STRING", response.getHeader(HttpHeaders.LOCATION))
+        assertEquals("/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_ROUTE?$QUERY_STRING", response.getHeader(HttpHeaders.LOCATION))
         assertFalse(chainInvoked)
     }
 
@@ -61,7 +61,7 @@ class ActingAsLandlordRedirectFilterTests {
         val response = MockHttpServletResponse()
 
         // Act
-        filter.doFilter(MockHttpServletRequest("GET", LANDLORD_ROUTE), response, chain)
+        filter.doFilter(MockHttpServletRequest("GET", "/$LANDLORD_ROUTE"), response, chain)
 
         // Assert
         assertTrue(chainInvoked)
@@ -83,8 +83,7 @@ class ActingAsLandlordRedirectFilterTests {
     }
 
     companion object {
-        private const val LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/dashboard"
-        private const val ACTING_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/$LANDLORD_PATH_SEGMENT/dashboard"
+        private const val LANDLORD_ROUTE = "$LANDLORD_PATH_SEGMENT/dashboard"
         private const val LANDLORD_LOGIN_CALLBACK_ROUTE = "/landlord/login/oauth2/code/one-login"
         private const val QUERY_STRING = "foo=bar&baz=qux"
     }
