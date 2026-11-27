@@ -22,8 +22,8 @@ object IndividualLandlordRegistrationJourney {
     const val PHONE_SUBMIT_REQUEST = "Registration: submit phone"
     const val LANDLORD_TYPE_FORM_REQUEST = "Registration: landlord type form"
     const val LANDLORD_TYPE_SUBMIT_REQUEST = "Registration: submit landlord type"
-    const val COUNTRY_FORM_REQUEST = "Registration: country form"
-    const val COUNTRY_SUBMIT_REQUEST = "Registration: submit country"
+    const val ADDRESS_IN_UK_FORM_REQUEST = "Registration: address in UK form"
+    const val ADDRESS_IN_UK_SUBMIT_REQUEST = "Registration: submit address in UK"
     const val ADDRESS_LOOKUP_FORM_REQUEST = "Registration: address lookup form"
     const val ADDRESS_LOOKUP_SUBMIT_REQUEST = "Registration: submit address lookup"
     const val ADDRESS_SELECTION_FORM_REQUEST = "Registration: address selection form"
@@ -63,8 +63,8 @@ object IndividualLandlordRegistrationJourney {
                     PHONE_SUBMIT_REQUEST,
                     LANDLORD_TYPE_FORM_REQUEST,
                     LANDLORD_TYPE_SUBMIT_REQUEST,
-                    COUNTRY_FORM_REQUEST,
-                    COUNTRY_SUBMIT_REQUEST,
+                    ADDRESS_IN_UK_FORM_REQUEST,
+                    ADDRESS_IN_UK_SUBMIT_REQUEST,
                 ) + addressSteps +
                 listOf(
                     CHECK_ANSWERS_FORM_REQUEST,
@@ -157,17 +157,17 @@ object IndividualLandlordRegistrationJourney {
                     formPage(
                         config,
                         requestNamePrefix,
-                        COUNTRY_FORM_REQUEST,
+                        ADDRESS_IN_UK_FORM_REQUEST,
                         "registrationNextUrl",
-                        "livesInEnglandOrWales",
+                        "addressInUk",
                     ),
                 )
                 .exec(
                     submitForm(
                         config,
                         requestNamePrefix,
-                        COUNTRY_SUBMIT_REQUEST,
-                        mapOf("livesInEnglandOrWales" to "true"),
+                        ADDRESS_IN_UK_SUBMIT_REQUEST,
+                        mapOf("addressInUk" to "true"),
                     ),
                 )
                 .exec(formPage(config, requestNamePrefix, ADDRESS_LOOKUP_FORM_REQUEST, "registrationNextUrl", "postcode"))
