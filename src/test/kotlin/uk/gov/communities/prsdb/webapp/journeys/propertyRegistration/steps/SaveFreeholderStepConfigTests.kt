@@ -312,28 +312,6 @@ class SaveFreeholderStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached throws when the contact type is postal address but the address in UK answer is missing`() {
-        // Arrange
-        val stepConfig = SaveFreeholderStepConfig()
-        whenever(mockState.freeholderProvideDetailsStep).thenReturn(provideDetailsStep)
-        whenever(provideDetailsStep.formModelOrNull).thenReturn(FreeholderProvideDetailsFormModel(provideDetails = true))
-        whenever(mockState.freeholderNameStep).thenReturn(nameStep)
-        whenever(nameStep.formModelOrNull).thenReturn(FreeholderNameFormModel().apply { name = ENTERED_NAME })
-        whenever(mockState.freeholderContactTypeStep).thenReturn(contactTypeStep)
-        whenever(contactTypeStep.formModelOrNull)
-            .thenReturn(FreeholderContactTypeFormModel(contactType = FreeholderContactType.POSTAL_ADDRESS))
-        whenever(mockState.freeholderAddressTask).thenReturn(addressTask)
-        whenever(addressTask.addressInUk()).thenReturn(null)
-        whenever(mockState.journeyId).thenReturn(JOURNEY_ID)
-
-        // Act
-        val exception = assertThrows<PrsdbWebException> { stepConfig.afterStepIsReached(mockState) }
-
-        // Assert
-        assertEquals("Freeholder address in UK step data is missing for journey $JOURNEY_ID", exception.message)
-    }
-
-    @Test
     fun `afterStepIsReached clears the freeholder form data so the next freeholder starts empty`() {
         val stepConfig = SaveFreeholderStepConfig()
         setupStepsWithAnswers(false)

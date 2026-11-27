@@ -156,7 +156,7 @@ class FreeholdersDetailsTask(
                     }
                     withAdditionalContentProperties {
                         val editingFreeholder = journey.editingFreeholder
-                        if (editingFreeholder != null && editingFreeholder.addressInUk != false) {
+                        if (editingFreeholder != null) {
                             mapOf(
                                 LookupAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.addressSearchPostcode,
                                 LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to editingFreeholder.addressSearchHouseNameOrNumber,
@@ -171,9 +171,8 @@ class FreeholdersDetailsTask(
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
                     withAdditionalContentProperties {
-                        val editingFreeholder = journey.editingFreeholder?.takeIf { it.addressInUk != false }
                         mapOf(
-                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to editingFreeholder?.selectedAddress,
+                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to journey.editingFreeholder?.selectedAddress,
                         )
                     }
                 }
@@ -182,7 +181,8 @@ class FreeholdersDetailsTask(
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
                     withAdditionalContentProperties {
-                        manualAddressPrefill(journey.editingFreeholder?.takeIf { it.addressInUk != false })
+                        val editingFreeholder = journey.editingFreeholder
+                        if (editingFreeholder?.addressInUk == true) manualAddressPrefill(editingFreeholder) else emptyMap()
                     }
                 }
                 configureStep(journey.freeholderAddressTask.internationalManualAddressStep) {
@@ -190,7 +190,8 @@ class FreeholdersDetailsTask(
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
                     withAdditionalContentProperties {
-                        manualAddressPrefill(journey.editingFreeholder?.takeIf { it.addressInUk == false })
+                        val editingFreeholder = journey.editingFreeholder
+                        if (editingFreeholder?.addressInUk == false) manualAddressPrefill(editingFreeholder) else emptyMap()
                     }
                 }
             }
@@ -215,17 +216,13 @@ class FreeholdersDetailsTask(
             }
         }
 
-    private fun manualAddressPrefill(editingFreeholder: FreeholderDataModel?): Map<String, Any?> =
-        if (editingFreeholder?.manualAddressLineOne != null) {
-            mapOf(
-                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingFreeholder.manualAddressLineOne,
-                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingFreeholder.manualAddressLineTwo,
-                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingFreeholder.manualTownOrCity,
-                ManualAddressStepConfig.PREFILL_COUNTY to editingFreeholder.manualCounty,
-                ManualAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.manualPostcode,
-                ManualAddressStepConfig.PREFILL_COUNTRY to editingFreeholder.manualCountry,
-            )
-        } else {
-            emptyMap()
-        }
+    private fun manualAddressPrefill(freeholder: FreeholderDataModel): Map<String, Any?> =
+        mapOf(
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to freeholder.manualAddressLineOne,
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to freeholder.manualAddressLineTwo,
+            ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to freeholder.manualTownOrCity,
+            ManualAddressStepConfig.PREFILL_COUNTY to freeholder.manualCounty,
+            ManualAddressStepConfig.PREFILL_POSTCODE to freeholder.manualPostcode,
+            ManualAddressStepConfig.PREFILL_COUNTRY to freeholder.manualCountry,
+        )
 }

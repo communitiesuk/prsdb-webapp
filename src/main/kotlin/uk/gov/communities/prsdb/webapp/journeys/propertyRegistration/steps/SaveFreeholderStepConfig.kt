@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FreeholdersDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.clearFreeholderFormData
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
@@ -88,48 +88,34 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state: FreeholdersDetailsState,
         name: String,
     ): FreeholderDataModel {
-        val freeholderAddressTask = state.freeholderAddressTask
-        val addressInUk =
-            freeholderAddressTask.addressInUk()
-                ?: throw PrsdbWebException(
-                    "Freeholder address in UK step data is missing for journey ${state.journeyId}",
-                )
-        val freeholder =
-            FreeholderDataModel(
-                detailsKnown = true,
-                name = name,
-                address = freeholderAddressTask.getAddress(),
-                addressInUk = addressInUk,
-            )
+        val lookupFormModel: LookupAddressFormModel?
+        val selectedAddress: String?
+        val manualFormModel: ManualAddressFormModel?
 
-        return if (addressInUk) {
-            withUkAddressAnswers(freeholder, freeholderAddressTask.addressTask)
+        val addressTask = state.freeholderAddressTask
+        val address = addressTask.getAddress()
+        val addressInUk = addressTask.addressInUk()
+
+        if (addressInUk == false) {
+            lookupFormModel = null
+            selectedAddress = null
+            manualFormModel = addressTask.internationalManualAddressStep.formModelOrNull
         } else {
-            withManualAddressAnswers(freeholder, freeholderAddressTask.internationalManualAddressStep.formModelOrNull)
+            val ukAddressTask = addressTask.addressTask
+            lookupFormModel = ukAddressTask.lookupAddressStep.formModelOrNull
+            // Set by both the select address and no address found steps, so it reflects the user's latest choice
+            selectedAddress = ukAddressTask.cachedSelectedAddress
+            manualFormModel = ukAddressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
         }
-    }
 
-    private fun withUkAddressAnswers(
-        freeholder: FreeholderDataModel,
-        addressTask: AddressTask,
-    ): FreeholderDataModel {
-        val lookupFormModel = addressTask.lookupAddressStep.formModelOrNull
-        // Set by both the select address and no address found steps, so it reflects the user's latest choice
-        val selectedAddress = addressTask.cachedSelectedAddress
-        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
-
-        return withManualAddressAnswers(freeholder, manualFormModel).copy(
+        return FreeholderDataModel(
+            detailsKnown = true,
+            name = name,
+            address = address,
+            addressInUk = addressInUk,
             addressSearchPostcode = lookupFormModel?.postcode,
             addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
             selectedAddress = selectedAddress,
-        )
-    }
-
-    private fun withManualAddressAnswers(
-        freeholder: FreeholderDataModel,
-        manualFormModel: ManualAddressFormModel?,
-    ): FreeholderDataModel =
-        freeholder.copy(
             manualAddressLineOne = manualFormModel?.addressLineOne,
             manualAddressLineTwo = manualFormModel?.addressLineTwo,
             manualTownOrCity = manualFormModel?.townOrCity,
@@ -137,6 +123,7 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
             manualPostcode = manualFormModel?.postcode,
             manualCountry = manualFormModel?.country,
         )
+    }
 }
 
 @JourneyFrameworkComponent

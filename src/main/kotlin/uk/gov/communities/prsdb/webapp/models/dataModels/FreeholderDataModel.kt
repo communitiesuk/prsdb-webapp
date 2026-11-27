@@ -12,7 +12,6 @@ data class FreeholderDataModel(
     val name: String? = null,
     val email: String? = null,
     val address: AddressDataModel? = null,
-    // Null for freeholders without a postal address, or loaded from the database
     val addressInUk: Boolean? = null,
     val addressSearchPostcode: String? = null,
     val addressSearchHouseNameOrNumber: String? = null,
