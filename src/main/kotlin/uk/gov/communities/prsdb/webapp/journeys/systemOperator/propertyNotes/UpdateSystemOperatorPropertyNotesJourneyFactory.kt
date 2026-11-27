@@ -15,7 +15,8 @@ class UpdateSystemOperatorPropertyNotesJourneyFactory(
     stateFactory: ObjectFactory<UpdateSystemOperatorPropertyNotesJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractSystemOperatorNotesJourneyFactory<UpdateSystemOperatorPropertyNotesJourney>(stateFactory) {
-    override fun getRecordLastModifiedDate(recordId: Long): Instant = propertyOwnershipService.getLastModifiedDate(recordId)
+    override fun getRecordLastModifiedDate(recordId: Long): Instant =
+        propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(recordId).getMostRecentlyUpdated()
 
     override fun getRecordRoute(recordId: Long): String = PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(recordId)
 }

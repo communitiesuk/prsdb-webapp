@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createSuperiorLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -1218,7 +1219,7 @@ class PropertyDetailsControllerTests(
 
         @BeforeEach
         fun setUpPropertyOwnership() {
-            whenever(propertyOwnershipService.getPropertyOwnership(eq(1))).thenReturn(propertyOwnership)
+            whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(eq(1))).thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
         }
@@ -1258,8 +1259,29 @@ class PropertyDetailsControllerTests(
                 }
             }
 
-            verify(propertyOwnershipService).getPropertyOwnership(1L)
+            verify(propertyOwnershipService).retrievePropertyOwnershipByIdRegardlessOfActiveStatus(1L)
             verify(propertyOwnershipService, never()).getPropertyOwnershipIfCurrentUserAuthorized(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView shows the deactivated view of an inactive property`() {
+            val inactivePropertyOwnership = createPropertyOwnership(id = 2, isActive = false)
+            whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(2))
+                .thenReturn(inactivePropertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(inactivePropertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(2L)).andExpect {
+                status { isOk() }
+                view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
+                model {
+                    attribute("isDeactivated", true)
+                    attribute("isLandlordView", false)
+                    attributeDoesNotExist("notificationBanner", "reactivatePropertyUrl")
+                }
+                content { string(not(containsString("reactivate-property-panel"))) }
+            }
         }
 
         @Test
@@ -1288,7 +1310,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `getPropertyDetailsSystemOperatorView returns 404 when the property is not found`() {
-            whenever(propertyOwnershipService.getPropertyOwnership(eq(2)))
+            whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(eq(2)))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(2L)).andExpect {
@@ -1312,6 +1334,17 @@ class PropertyDetailsControllerTests(
             val notesRow = getSystemOperatorNotesRow()
 
             assertIsNotesRowWithChangeLink(notesRow, listOf("Line one", "Line two"))
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView shows the notes row with a change link when the property is inactive`() {
+            propertyOwnership.deactivate(LocalDate.of(2026, 1, 1))
+            propertyOwnership.updateSystemOperatorNotes("Some notes")
+
+            val notesRow = getSystemOperatorNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Some notes"))
         }
 
         private fun getSystemOperatorNotesRow(): SummaryListRowViewModel {

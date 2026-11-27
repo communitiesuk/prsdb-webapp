@@ -31,7 +31,8 @@ class UpdateSystemOperatorPropertyNotesControllerFeatureFlagTests : FeatureFlagT
 
     @BeforeEach
     fun setUp() {
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(AbstractSystemOperatorNotesStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         whenever(stepLifecycleOrchestrator.getStepModelAndView()).thenReturn(ModelAndView("redirect:/next"))

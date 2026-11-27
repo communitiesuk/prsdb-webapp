@@ -12,7 +12,7 @@ class SystemOperatorPropertyNotesStepConfig(
     override val fieldSetHeadingKey = "systemOperator.notes.property.fieldSetHeading"
 
     override fun getExistingNotes(recordId: Long): String? =
-        propertyOwnershipService.retrievePropertyOwnershipById(recordId)?.systemOperatorNotes
+        propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(recordId).systemOperatorNotes
 }
 
 @JourneyFrameworkComponent

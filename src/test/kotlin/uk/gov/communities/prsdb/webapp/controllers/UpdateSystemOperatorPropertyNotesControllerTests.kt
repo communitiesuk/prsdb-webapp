@@ -150,7 +150,7 @@ class UpdateSystemOperatorPropertyNotesControllerTests(
 
     private fun stubNewJourneyForMissingProperty() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId)).thenThrow(NoSuchJourneyException())
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+        whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId))
             .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
     }
 }
