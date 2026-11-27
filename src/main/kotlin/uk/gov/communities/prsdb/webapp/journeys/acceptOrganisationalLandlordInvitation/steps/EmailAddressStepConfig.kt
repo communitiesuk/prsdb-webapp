@@ -23,8 +23,8 @@ class EmailAddressStepConfig(
 
     override fun getStepSpecificContent(state: AcceptOrganisationalLandlordUserInvitationJourneyState): Map<String, Any?> {
         val invitation =
-            invitationService.getPendingInvitationForJourneyIdOrNull(state.journeyId)
-                ?: throw PrsdbWebException("Could not find a pending invitation for invitation journey ${state.journeyId}")
+            invitationService.getPendingInvitationForJourneyIdOrNull(state.baseJourneyId)
+                ?: throw PrsdbWebException("Could not find a pending invitation for invitation journey ${state.baseJourneyId}")
         val roleHintMessageKey =
             if (invitation.role == OrganisationalLandlordUserRole.ADMIN) {
                 "acceptOrganisationInvitation.email.hint.admin"

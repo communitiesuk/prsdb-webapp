@@ -70,18 +70,16 @@ class AcceptOrganisationalLandlordUserInvitationController(
     @AvailableWhenFeatureEnabled(MULTI_USER_ORGANISATIONS)
     @AllowIfOrgLandlordUser
     fun getConfirmation(): ModelAndView {
-        val emailAddress =
-            invitationService.getAcceptedInvitationEmailFromSession()
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No accepted organisational landlord invitation email was found in the session",
-                )
+        invitationService.getAcceptedInvitationEmailFromSession()
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No accepted organisational landlord invitation email was found in the session",
+            )
 
         return ModelAndView(
             "acceptOrganisationInvitationConfirmation",
             mapOf(
                 "organisationName" to userToLandlordService.getCurrentOrganisationLandlordForUser().name,
-                "emailAddress" to emailAddress,
                 "isAdmin" to organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions(),
                 "dashboardUrl" to LANDLORD_DASHBOARD_URL,
             ),
