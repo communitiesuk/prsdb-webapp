@@ -1083,7 +1083,7 @@ class PropertyDetailsViewModelTests {
 
         val addressRow = section[1]
         assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
-        assertEquals(listOf("Flat 2", "25 Contact Road", "Bristol", "BS1 2AB"), addressRow.fieldValue)
+        assertEquals(listOf("Flat 2", "25 Contact Road", "Bristol", "BS1 2AB", "England"), addressRow.fieldValue)
         assertTrue(addressRow.hasActions)
         val action = addressRow.actions.single()
         val expectedUrl =

@@ -74,7 +74,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         val sentEmail = emailModelCaptor.firstValue
         assertEquals("Lois", sentEmail.recipientName)
         assertEquals("very-real-email@example.com", sentEmail.invitedEmail)
-        assertEquals("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK", sentEmail.propertyAddress)
+        assertEquals("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK\nEngland", sentEmail.propertyAddress)
         assertEquals(propertyRecordUri, sentEmail.propertyRecordUri)
         assertEquals(28, sentEmail.expiryDays)
     }

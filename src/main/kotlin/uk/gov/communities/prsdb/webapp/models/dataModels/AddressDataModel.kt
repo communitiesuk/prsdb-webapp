@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import kotlinx.serialization.Serializable
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 
 @Serializable
 data class AddressDataModel(
@@ -33,7 +34,7 @@ data class AddressDataModel(
                 // of the address.
                 singleLineAddress.replace(", ", "\n")
             }
-        return appendPostcodeIfMissing(multiLineAddress)
+        return AddressHelper.appendCountry(appendPostcodeIfMissing(multiLineAddress), country)
     }
 
     private fun appendPostcodeIfMissing(multiLineAddress: String): String {

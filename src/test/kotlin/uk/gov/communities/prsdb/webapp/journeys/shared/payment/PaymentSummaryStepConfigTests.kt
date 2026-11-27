@@ -81,7 +81,7 @@ class PaymentSummaryStepConfigTests {
         assertEquals(today.toString(), content["quoteDate"])
         assertEquals(
             listOf(
-                SummaryListRowViewModel("payment.summary.summaryList.address", listOf("1 Example Road", "EG1 2AB")),
+                SummaryListRowViewModel("payment.summary.summaryList.address", listOf("1 Example Road", "EG1 2AB", "England")),
                 SummaryListRowViewModel("payment.summary.summaryList.payment", "£12.34"),
                 SummaryListRowViewModel(
                     "payment.summary.summaryList.paymentDate",
@@ -307,7 +307,7 @@ class PaymentSummaryStepConfigTests {
         quote: PropertyPaymentQuote,
         firstChargeableDate: LocalDate,
     ) {
-        whenever(mockDependencies.paymentSummaryAddressLines).thenReturn(listOf("1 Example Road", "EG1 2AB"))
+        whenever(mockDependencies.paymentSummaryAddressLines).thenReturn(listOf("1 Example Road", "EG1 2AB", "England"))
         whenever(mockPaymentHandler.getQuote(any())).thenReturn(quote)
         whenever(mockPaymentService.getAnnualFeeInPence()).thenReturn(2000)
         whenever(mockPaymentService.getFirstChargeableDate(quote.chargeablePeriodStartDate)).thenReturn(firstChargeableDate)

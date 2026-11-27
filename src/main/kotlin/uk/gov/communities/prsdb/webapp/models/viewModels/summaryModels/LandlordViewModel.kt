@@ -83,7 +83,7 @@ class LandlordViewModel(
                 if (isEnglandOrWalesResident) {
                     addRow(
                         "landlordDetails.personalDetails.homeAddress",
-                        landlord.address.singleLineAddress,
+                        landlord.address.toMultiLineAddress().split("\n"),
                         changeLinkMessageKey,
                         "$UPDATE_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",
                         withActionLink = withChangeLinks,
@@ -107,7 +107,7 @@ class LandlordViewModel(
                     )
                     addRow(
                         "landlordDetails.personalDetails.englandOrWalesAddress",
-                        landlord.address.singleLineAddress,
+                        landlord.address.toMultiLineAddress().split("\n"),
                         changeLinkMessageKey,
                         // TODO: PRSD-688 "$UPDATE_ROUTE/contact-address",
                         null,

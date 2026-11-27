@@ -66,7 +66,7 @@ class ConfirmOnlyLandlordStepConfigTests {
 
         val result = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals(listOf("123 Test Street", "AB1 2CD"), result["addressParts"])
+        assertEquals(listOf("123 Test Street", "AB1 2CD", "England"), result["addressParts"])
         assertEquals(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId), result["cancelLinkUrl"])
     }
 

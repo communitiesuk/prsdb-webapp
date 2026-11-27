@@ -331,7 +331,7 @@ class JointLandlordInvitationServiceTests {
                 .sendEmail(eq("landlord1@example.com"), emailModelCaptor.capture())
 
             assertEquals("John Smith", emailModelCaptor.firstValue.senderName)
-            assertEquals("123 Test Street\nLondon\nSW1A 1AA", emailModelCaptor.firstValue.propertyAddress)
+            assertEquals("123 Test Street\nLondon\nSW1A 1AA\nEngland", emailModelCaptor.firstValue.propertyAddress)
             assertEquals(mockUri, emailModelCaptor.firstValue.invitationUri)
         }
 
@@ -806,7 +806,7 @@ class JointLandlordInvitationServiceTests {
                 "landlord1@example.com",
                 JointLandlordInvitationEmail(
                     senderName = "John Smith",
-                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA",
+                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA\nEngland",
                     invitationUri = invitationUri,
                 ),
             )
@@ -843,7 +843,7 @@ class JointLandlordInvitationServiceTests {
                 "current-user@example.com",
                 JointLandlordInvitationConfirmationEmail(
                     senderName = invitingLandlord.name,
-                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA",
+                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA\nEngland",
                     jointLandlordEmails = invitedEmails,
                     propertyRecordUrl = propertyDetailsUri.toString(),
                 ),
@@ -852,7 +852,7 @@ class JointLandlordInvitationServiceTests {
                 existingLandlord,
                 JointLandlordInvitationNotifyExistingEmail(
                     recipientName = "Existing",
-                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA",
+                    propertyAddress = "123 Test Street\nLondon\nSW1A 1AA\nEngland",
                     jointLandlordEmails = invitedEmails,
                     propertyRecordUrl = propertyDetailsUri.toString(),
                 ),

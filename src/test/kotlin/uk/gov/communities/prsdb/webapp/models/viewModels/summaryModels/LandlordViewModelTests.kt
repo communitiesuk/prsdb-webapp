@@ -210,20 +210,20 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `England or Wales  landlord personal details shows the correct contact address`() {
+    fun `England or Wales landlord personal details shows the contact address over multiple lines`() {
         // Arrange
-        val oneLineAddress = "A test address"
-        val testLandlord = MockLandlordData.createIndividualLandlord(address = Address(AddressDataModel(oneLineAddress)))
+        val testLandlord =
+            MockLandlordData.createIndividualLandlord(address = Address(AddressDataModel("1 Test Street, Testville, TE1 1ST")))
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        val addressString =
+        val addressLines =
             viewModel.personalDetails
                 .single { it.fieldHeading == "landlordDetails.personalDetails.homeAddress" }
-                .getConvertedFieldValue()
-        assertEquals(addressString, oneLineAddress)
+                .fieldValue
+        assertEquals(listOf("1 Test Street", "Testville", "TE1 1ST", "England"), addressLines)
     }
 
     @Test
@@ -266,12 +266,11 @@ class LandlordViewModelTests {
     }
 
     @Test
-    fun `Non England or Wales landlord personal details shows the correct England or Wales contact address`() {
+    fun `Non England or Wales landlord personal details shows the England or Wales contact address over multiple lines`() {
         // Arrange
-        val oneLineAddress = "A test address"
         val testLandlord =
             MockLandlordData.createIndividualLandlord(
-                address = Address(AddressDataModel(oneLineAddress)),
+                address = Address(AddressDataModel("1 Test Street, Testville, TE1 1ST")),
                 nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
                 countryOfResidence = "USA",
             )
@@ -280,11 +279,11 @@ class LandlordViewModelTests {
         val viewModel = LandlordViewModel(testLandlord)
 
         // Assert
-        val addressString =
+        val addressLines =
             viewModel.personalDetails
                 .single { it.fieldHeading == "landlordDetails.personalDetails.englandOrWalesAddress" }
-                .getConvertedFieldValue()
-        assertEquals(addressString, oneLineAddress)
+                .fieldValue
+        assertEquals(listOf("1 Test Street", "Testville", "TE1 1ST", "England"), addressLines)
     }
 
     @ParameterizedTest

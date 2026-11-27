@@ -64,7 +64,7 @@ class SwapToIndividualNudgeEmailServiceTests {
 
         val sentEmail = emailCaptor.firstValue
         assertEquals("Alice", sentEmail.recipientName)
-        assertEquals("10 High Street\nLondon\nSW1A 1AA", sentEmail.propertyAddress)
+        assertEquals("10 High Street\nLondon\nSW1A 1AA\nEngland", sentEmail.propertyAddress)
         assertEquals(propertyRecordUri.toString(), sentEmail.propertyRecordUrl)
     }
 

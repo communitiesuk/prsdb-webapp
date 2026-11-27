@@ -10,6 +10,11 @@ import org.json.JSONObject
 import org.springframework.core.env.Environment
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND
+import uk.gov.communities.prsdb.webapp.constants.NORTHERN_IRELAND
+import uk.gov.communities.prsdb.webapp.constants.SCOTLAND
+import uk.gov.communities.prsdb.webapp.constants.UNASSIGNED
+import uk.gov.communities.prsdb.webapp.constants.WALES
 import uk.gov.communities.prsdb.webapp.database.dao.NgdAddressLoaderDao
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
@@ -378,7 +383,7 @@ class NgdAddressLoader(
                 "Modified Geometry And Attributes",
             )
 
-        private val validCountries = listOf("England", "Wales", "Scotland", "Northern Ireland", "Unassigned")
+        private val validCountries = listOf(ENGLAND, WALES, SCOTLAND, NORTHERN_IRELAND, UNASSIGNED)
 
         fun parseDataPackageProgress(comment: String?): DataPackageProgress? {
             if (comment == null) return null

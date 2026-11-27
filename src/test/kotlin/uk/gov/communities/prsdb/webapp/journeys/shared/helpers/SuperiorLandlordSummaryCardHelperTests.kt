@@ -116,7 +116,7 @@ class SuperiorLandlordSummaryCardHelperTests {
 
         assertEquals("James Hassan", card.title)
         assertEquals("registerProperty.superiorLandlords.list.postalAddress", card.summaryList.single().fieldHeading)
-        assertEquals(listOf("36 Sunnyside Lane", "Biggleswade", "SG18 9EJ"), card.summaryList.single().fieldValue)
+        assertEquals(listOf("36 Sunnyside Lane", "Biggleswade", "SG18 9EJ", "England"), card.summaryList.single().fieldValue)
         assertNull(card.bodyTextKey)
     }
 

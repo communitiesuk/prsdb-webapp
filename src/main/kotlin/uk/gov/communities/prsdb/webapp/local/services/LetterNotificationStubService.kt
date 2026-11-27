@@ -25,11 +25,10 @@ class LetterNotificationStubService<LetterModel : LetterTemplateModel> : LetterN
         recipientAddress: LetterAddressDataModel,
         letter: LetterModel,
     ) {
-        val postcode = recipientAddress.addressLines.last()
-        if (postcode == persistentExceptionPostcode) {
+        if (recipientAddress.hasPostcode(persistentExceptionPostcode)) {
             throw PersistentLetterSendException("Letters sent to $persistentExceptionPostcode always persistently fail")
         }
-        if (postcode == transientExceptionPostcode) {
+        if (recipientAddress.hasPostcode(transientExceptionPostcode)) {
             throw TransientLetterSendException("Letters sent to $transientExceptionPostcode always transiently fail")
         }
 
@@ -46,4 +45,7 @@ class LetterNotificationStubService<LetterModel : LetterTemplateModel> : LetterN
 
         println(consoleString)
     }
+
+    private fun LetterAddressDataModel.hasPostcode(postcode: String?): Boolean =
+        !postcode.isNullOrBlank() && addressLines.any { it.trim().endsWith(postcode) }
 }
