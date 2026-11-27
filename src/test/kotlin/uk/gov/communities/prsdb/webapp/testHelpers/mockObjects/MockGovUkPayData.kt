@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.http.HttpStatus
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedMotoPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayLink
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPayment
@@ -15,6 +16,8 @@ class MockGovUkPayData {
         const val DEFAULT_PAYMENT_ID = "payment-id"
 
         const val DEFAULT_NEXT_URL = "https://pay.example.test/next"
+
+        const val DEFAULT_ONE_TIME_TOKEN = "one-time-token"
 
         fun createGovUkPayPayment(
             paymentId: String = DEFAULT_PAYMENT_ID,
@@ -54,6 +57,16 @@ class MockGovUkPayData {
                     nextUrl = nextUrl,
                 ),
             nextUrl = nextUrl,
+        )
+
+        fun createGovUkPayCreatedMotoPayment(
+            paymentId: String = DEFAULT_PAYMENT_ID,
+            amount: Int = 1000,
+            reference: String = "reference",
+            oneTimeToken: String = DEFAULT_ONE_TIME_TOKEN,
+        ) = GovUkPayCreatedMotoPayment(
+            payment = createGovUkPayPayment(paymentId = paymentId, amount = amount, reference = reference),
+            oneTimeToken = oneTimeToken,
         )
 
         fun createGovUkPayUnavailableException() =

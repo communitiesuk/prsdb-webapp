@@ -129,6 +129,10 @@ class AddressServiceTests {
             listOf(
                 named("no local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = null)),
                 named("a local council", AddressDataModel("1 Example Road, EG1 2AB", localCouncilId = 1)),
+                named(
+                    "an international address",
+                    AddressDataModel("1 Rue Exemple, Paris, 75001", country = "France", isInternational = true),
+                ),
             )
     }
 }

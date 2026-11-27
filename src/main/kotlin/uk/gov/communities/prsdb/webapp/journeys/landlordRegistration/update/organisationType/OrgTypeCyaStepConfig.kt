@@ -96,8 +96,8 @@ class OrgTypeCyaStepConfig(
                     .toMultiLineAddress()
                     .split("\n"),
                 Destination.VisitableStep(
-                    leadTrusteeTask.trusteeAddressTask.lookupAddressStep,
-                    state.getCyaJourneyId(leadTrusteeTask.trusteeAddressTask.lookupAddressStep),
+                    leadTrusteeTask.trusteeAddressTask.addressInUkStep,
+                    state.getCyaJourneyId(leadTrusteeTask.trusteeAddressTask.addressInUkStep),
                 ),
             ),
         )

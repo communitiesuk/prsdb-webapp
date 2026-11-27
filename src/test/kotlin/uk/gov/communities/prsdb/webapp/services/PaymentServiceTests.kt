@@ -18,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -57,8 +58,10 @@ import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentStatusCheckDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
+import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreateMotoPaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayCreatePaymentRequest
 import uk.gov.communities.prsdb.webapp.models.dataModels.govUkPay.GovUkPayPaymentStatus
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedMotoPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayNotCapturableException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayPayment
@@ -987,7 +990,40 @@ class PaymentServiceTests {
 
             // Assert
             assertSame(violation, exception)
-            verify(mockGovUkPayClient, never()).cancelPayment(any())
+            verify(mockGovUkPayClient, never()).cancelPayment(any(), any())
+        }
+    }
+
+    @Nested
+    inner class CreateMotoPaymentTests {
+        @Test
+        fun `createMotoPayment creates a MOTO payment with GOV UK Pay and returns it without saving it`() {
+            // Arrange
+            val createdMotoPayment = createGovUkPayCreatedMotoPayment(amount = 1500, reference = "moto-reference")
+            whenever(
+                mockGovUkPayClient.createMotoPayment(GovUkPayCreateMotoPaymentRequest(1500, "moto-reference", "Register a property")),
+            ).thenReturn(createdMotoPayment)
+
+            // Act
+            val result = paymentService.createMotoPayment(1500, "moto-reference", "Register a property")
+
+            // Assert
+            assertSame(createdMotoPayment, result)
+            verifyNoInteractions(mockPaymentRepository)
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = [0, -1])
+        fun `createMotoPayment throws without calling GOV UK Pay when the amount is not positive`(amountInPence: Int) {
+            // Act
+            val exception =
+                assertThrows<IllegalStateException> {
+                    paymentService.createMotoPayment(amountInPence, "moto-reference", "Register a property")
+                }
+
+            // Assert
+            assertContains(exception.message!!, "GOV.UK Pay only accepts amounts greater than zero")
+            verifyNoInteractions(mockGovUkPayClient)
         }
     }
 
@@ -1230,7 +1266,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
             verify(mockTransactionManager, never()).commit(any())
-            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any(), any())
             // Marking waits for the claim's row lock, so it must come after the rollback releases it
             val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
             inOrder.verify(mockTransactionManager).rollback(any())
@@ -1383,7 +1419,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
             verify(mockTransactionManager).rollback(any())
-            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any(), any())
             verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
         }
 
@@ -1404,7 +1440,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.CANCELLED, status)
             verify(mockTransactionManager).rollback(any())
-            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any(), any())
             verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
         }
 
@@ -1423,7 +1459,7 @@ class PaymentServiceTests {
                 paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE, registrationData)
             }
             verify(mockTransactionManager, never()).commit(any())
-            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any(), any())
             val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
             inOrder.verify(mockTransactionManager).rollback(any())
             inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
@@ -1445,7 +1481,7 @@ class PaymentServiceTests {
             // Assert
             assertEquals(PaymentStatus.SUCCEEDED, status)
             verify(mockTransactionManager).rollback(any())
-            verify(mockGovUkPayClient, never()).capturePayment(any())
+            verify(mockGovUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
