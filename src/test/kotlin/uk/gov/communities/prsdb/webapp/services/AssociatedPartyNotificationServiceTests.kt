@@ -361,7 +361,7 @@ class AssociatedPartyNotificationServiceTests {
             SuperiorLandlordAddedToPropertyEmail(
                 superiorLandlordName = "Daniel Roberts",
                 superiorLandlordEmail = "daniel.roberts@example.com",
-                propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                propertyAddress = "12 Real Street\nBristol\nBS8 1AA\nEngland",
                 landlords = listOf("Jamie Jameson (jamie@example.com)"),
                 gdsStartPageUrl = GDS_START_PAGE_URL,
                 privacyNoticeUrl = "https://www.example.test/landlord/privacy-notice",
