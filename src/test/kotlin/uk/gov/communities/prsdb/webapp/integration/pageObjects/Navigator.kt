@@ -67,6 +67,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorPropertyNotesController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
@@ -102,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPrope
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorLandlordNotesFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorPropertyNotesFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.TeamMembersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptInvitationJourneyPages.CheckAnswersPage
@@ -1686,6 +1688,11 @@ class Navigator(
             PropertyDetailsPageSystemOperatorView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
+    }
+
+    fun goToSystemOperatorPropertyNotesForm(id: Long): SystemOperatorPropertyNotesFormPage {
+        navigate(UpdateSystemOperatorPropertyNotesController.getUpdateNotesStepPath(id))
+        return createValidPage(page, SystemOperatorPropertyNotesFormPage::class, mapOf("propertyOwnershipId" to id.toString()))
     }
 
     fun navigateToUpdatePropertyManagerJourney(

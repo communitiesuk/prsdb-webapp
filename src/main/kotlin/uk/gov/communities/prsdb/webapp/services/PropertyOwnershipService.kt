@@ -637,6 +637,18 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateSystemOperatorNotes(
+        id: Long,
+        notes: String,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.updateSystemOperatorNotes(notes.ifBlank { null })
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updateRentIncludesBills(
         id: Long,
         billsIncludedList: String?,

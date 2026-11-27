@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFreeholdersController
 import uk.gov.communities.prsdb.webapp.controllers.UpdatePropertyManagerController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorPropertyNotesController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -19,6 +20,7 @@ class PropertyDetailsViewModel(
     // TODO PDJB-2016: remove this parameter and the flag-off branches below with the flag. It
     //  defaults to the flag-on behaviour so that removing it leaves the right default.
     associatedPartiesEnabled: Boolean = true,
+    withSystemOperatorNotes: Boolean = false,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         viewType,
@@ -120,7 +122,14 @@ class PropertyDetailsViewModel(
         }
 
     val registrationDetails: List<SummaryListRowViewModel> =
-        listOf(registrationNumberRow(), registrationDateRow())
+        mutableListOf(registrationNumberRow(), registrationDateRow()).apply {
+            if (withSystemOperatorNotes) {
+                addSystemOperatorNotesRow(
+                    notes = propertyOwnership.systemOperatorNotes,
+                    changeLink = UpdateSystemOperatorPropertyNotesController.getUpdateNotesStepPath(propertyOwnership.id),
+                )
+            }
+        }
 
     val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
