@@ -519,6 +519,12 @@ epcTask:
   epcMissingOccupied:
     breakingLaw:
       heading: You’re breaking the law if tenants are living in this property
+    details:
+      summary: If your tenants moved in before 1 October 2008
+      paragraph:
+        one: You do not need an EPC if your tenants have continuously lived in the property since before 1 October 2008.
+        two: Continue without an EPC.
+        three: Your local council may contact you to ask why you have registered without one.
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
   epcMissingUnoccupied:
     epcRequirements:
