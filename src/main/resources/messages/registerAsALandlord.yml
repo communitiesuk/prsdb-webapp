@@ -120,17 +120,22 @@ privacyNotice:
 landlordType:
   fieldSetHeading: Are you registering as an individual or an organisation?
   partnership:
-    summary: Registering a partnership
-    paragraph:
-      one: All members of English business partnerships must register as individuals and follow the guidance for joint landlords.
-      two: Limited Liability Partnerships (LLPs) and Scottish partnerships must register as organisations.
+    summary: Help with registering a partnership
+    english:
+      heading: English business partnerships
+      paragraph:
+        one: All partners should register themselves as <strong>individuals</strong>.
+        two: When a partner registers a property, they must add the others as joint landlords.
+    llp:
+      heading: Limited Liability Partnerships (LLPs) and Scottish partnerships
+      paragraph: Register as an <strong>organisation</strong>.
   radios:
     individual:
-      label: An individual
-      hint: You rent out a property as an individual, sole trader or joint landlord
+      label: Individual
+      hint: Individuals, sole traders and joint landlords
     organisation:
-      label: An organisation
-      hint: You rent out a property as a company, charity or trust
+      label: Organisation
+      hint: Companies, charities and trusts
     error:
       missing: Select if you are registering as an individual or an organisation
 orgPhoneNumber:
@@ -205,7 +210,7 @@ orgGovBodyWhoToProvide:
     missing: Select who you are providing details for
 leadTrusteeName:
   fieldSetHeading: What is the lead trustee’s full name?
-  fieldSetHint: All trustees are equally legally responsible, but you must nominate one ‘lead’ trustee to be the main point of contact
+  fieldSetHint: All trustees have shared legal responsibility for registrations, but we need a ‘lead’ trustee to be a main contact
   error:
     missing: Enter the lead trustee’s full name
 orgGovBodyMemberDob:

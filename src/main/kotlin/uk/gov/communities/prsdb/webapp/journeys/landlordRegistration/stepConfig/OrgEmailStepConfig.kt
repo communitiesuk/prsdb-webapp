@@ -14,6 +14,7 @@ class OrgEmailStepConfig : AbstractRequestableStepConfig<Complete, EmailFormMode
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "forms.orgEmail.fieldSetHeading",
+            "fieldSetHint" to "forms.orgEmail.fieldSetHint",
             "submitButtonText" to "forms.buttons.continue",
         )
 
