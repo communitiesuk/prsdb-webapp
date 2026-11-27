@@ -202,6 +202,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
             cyaPage.leadTrusteeCard.summaryList.addressRow.clickFirstActionLinkAndWait()
             assertPageIs(page, LeadTrusteeAddressInUkFormPageUpdateOrganisationType::class)
         }
+
         @Test
         fun `Changing the lead trustee address from a UK address to a non-UK address updates the CYA page`(page: Page) {
             var cyaPage =
