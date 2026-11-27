@@ -22,9 +22,11 @@ import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.SimpleTransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.LAST_PROPERTY_REACTIVATION_WAS_PAID
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
@@ -33,7 +35,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyAlreadyReactivatedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ElectricalSafetyDetailsDataModel
@@ -44,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.TenancyDetailsDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.function.Consumer
@@ -97,6 +102,7 @@ class PropertyReactivationServiceTests {
             address = MockLandlordData.createAddress(uprn = uprn),
         )
     private val freeQuote = PropertyPaymentQuote(amountInPence = 0, quoteDate = TODAY, renewalDate = QUOTED_RENEWAL_DATE)
+    private val paidQuote = PropertyPaymentQuote(amountInPence = PAID_AMOUNT, quoteDate = TODAY, renewalDate = QUOTED_RENEWAL_DATE)
     private var isInTransaction = false
 
     private fun stubTransaction() {
@@ -123,6 +129,24 @@ class PropertyReactivationServiceTests {
         whenever(mockActivationService.claimPropertyForReactivation(propertyOwnershipId)).thenReturn(property)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockPaymentService.calculatePropertyReactivationPaymentQuote(eq(property), eq(landlord), any())).thenReturn(freeQuote)
+    }
+
+    private fun paymentForProperty(
+        quoteDate: LocalDate = TODAY,
+        amountInPence: Int = PAID_AMOUNT,
+        forPeriodEnding: LocalDate = QUOTED_RENEWAL_DATE,
+    ) = MockPaymentData.createReactivationPayment(
+        paymentId = "payment-id",
+        amountInPence = amountInPence,
+        quoteDate = quoteDate,
+        forPeriodEnding = forPeriodEnding,
+        status = PaymentStatus.SUCCEEDED,
+        propertyOwnership = propertyOwnership,
+    )
+
+    private fun stubClaimSucceeds() {
+        whenever(mockAddressAvailabilityService.hasAnotherActiveRegistration(uprn, propertyOwnershipId)).thenReturn(false)
+        whenever(mockActivationService.claimPropertyForReactivation(propertyOwnershipId)).thenReturn(propertyOwnership)
     }
 
     @Nested
@@ -351,6 +375,131 @@ class PropertyReactivationServiceTests {
         }
     }
 
+    @Nested
+    inner class ReactivatePropertyWithPayment {
+        @Test
+        fun `claims the property, saves the details, then reactivates it until the end of the paid period`() {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            stubClaimSucceeds()
+            whenever(mockPaymentService.calculatePropertyReactivationPaymentQuote(eq(propertyOwnership), eq(landlord), any()))
+                .thenReturn(paidQuote)
+            val licensing = LicensingDetailsDataModel(LicensingType.NO_LICENSING, null)
+
+            // Act
+            propertyReactivationService.reactivatePropertyWithPayment(
+                paymentForProperty(),
+                PropertyReactivationDataModel(licensing = licensing),
+            )
+
+            // Assert
+            inOrder(mockAddressAvailabilityService, mockActivationService, mockPaymentService, mockPropertyOwnershipService) {
+                verify(mockAddressAvailabilityService).hasAnotherActiveRegistration(uprn, propertyOwnershipId)
+                verify(mockActivationService).claimPropertyForReactivation(propertyOwnershipId)
+                verify(mockPaymentService).calculatePropertyReactivationPaymentQuote(eq(propertyOwnership), eq(landlord), any())
+                verify(mockPropertyOwnershipService).saveReactivationLicensing(propertyOwnership, licensing)
+                verify(mockActivationService).reactivateClaimedProperty(propertyOwnership, QUOTED_RENEWAL_DATE, QUOTED_RENEWAL_DATE)
+            }
+            verifyNoInteractions(mockTransactionTemplate, mockPaymentReconciliationService)
+        }
+
+        @Test
+        fun `records the paid reactivation in the session and sends the confirmation email`() {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(mockLandlordActiveStatusService.isCurrentLandlordInactive()).thenReturn(true)
+            stubClaimSucceeds()
+            whenever(mockPaymentService.calculatePropertyReactivationPaymentQuote(eq(propertyOwnership), eq(landlord), any()))
+                .thenReturn(paidQuote)
+
+            // Act
+            propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
+
+            // Assert
+            verify(mockSession).setAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+            verify(mockSession).setAttribute(LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION, true)
+            verify(mockSession).setAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID, true)
+            verify(mockPropertyReactivationEmailService).sendConfirmationEmail(propertyOwnershipId, landlordReactivated = true)
+        }
+
+        @Test
+        fun `throws a 404 without claiming when the current landlord isn't a landlord of the paid-for property`() {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
+
+            // Act & Assert
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
+                }
+
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+            verifyNoInteractions(mockActivationService, mockPropertyOwnershipService, mockSession)
+        }
+
+        @Test
+        fun `throws an EntityExistsException without claiming when another property has the address`() {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(mockAddressAvailabilityService.hasAnotherActiveRegistration(uprn, propertyOwnershipId)).thenReturn(true)
+
+            // Act & Assert
+            assertThrows<EntityExistsException> {
+                propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
+            }
+
+            verifyNoInteractions(mockActivationService, mockPropertyOwnershipService, mockSession)
+        }
+
+        @Test
+        fun `throws without saving when a joint landlord has already claimed the property`() {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(mockAddressAvailabilityService.hasAnotherActiveRegistration(uprn, propertyOwnershipId)).thenReturn(false)
+            whenever(mockActivationService.claimPropertyForReactivation(propertyOwnershipId))
+                .thenThrow(PropertyAlreadyReactivatedException(propertyOwnershipId))
+
+            // Act & Assert
+            assertThrows<PropertyAlreadyReactivatedException> {
+                propertyReactivationService.reactivatePropertyWithPayment(paymentForProperty(), PropertyReactivationDataModel())
+            }
+
+            verify(mockActivationService, never()).reactivateClaimedProperty(any(), any(), anyOrNull())
+            verifyNoInteractions(mockPaymentService, mockPropertyOwnershipService, mockSession)
+        }
+
+        @Test
+        fun `throws without saving when the payment wasn't quoted today`() {
+            assertQuoteExpiredWithoutReactivating(paymentForProperty(quoteDate = TODAY.minusDays(1)))
+        }
+
+        @Test
+        fun `throws without saving when today's quote is for a different amount`() {
+            assertQuoteExpiredWithoutReactivating(paymentForProperty(amountInPence = PAID_AMOUNT + 1))
+        }
+
+        @Test
+        fun `throws without saving when today's quote ends on a different date`() {
+            assertQuoteExpiredWithoutReactivating(paymentForProperty(forPeriodEnding = QUOTED_RENEWAL_DATE.plusDays(1)))
+        }
+
+        private fun assertQuoteExpiredWithoutReactivating(payment: Payment) {
+            // Arrange
+            whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            stubClaimSucceeds()
+            whenever(mockPaymentService.calculatePropertyReactivationPaymentQuote(eq(propertyOwnership), eq(landlord), any()))
+                .thenReturn(paidQuote)
+
+            // Act & Assert
+            assertThrows<PaymentQuoteExpiredException> {
+                propertyReactivationService.reactivatePropertyWithPayment(payment, PropertyReactivationDataModel())
+            }
+
+            verify(mockActivationService, never()).reactivateClaimedProperty(any(), any(), anyOrNull())
+            verifyNoInteractions(mockPropertyOwnershipService, mockSession, mockPropertyReactivationEmailService)
+        }
+    }
+
     @Test
     fun `wasLandlordReactivatedByLastReactivation returns true when the session flag is true`() {
         // Arrange
@@ -390,5 +539,6 @@ class PropertyReactivationServiceTests {
     companion object {
         private val TODAY = LocalDate.now(DateTimeHelper.UK_ZONE)
         private val QUOTED_RENEWAL_DATE = LocalDate.of(2028, 6, 1)
+        private const val PAID_AMOUNT = 1234
     }
 }

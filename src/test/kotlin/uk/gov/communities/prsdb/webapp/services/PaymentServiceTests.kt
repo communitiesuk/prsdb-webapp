@@ -1615,6 +1615,7 @@ class PaymentServiceTests {
             assertEquals(listOf(payment), changedPayments)
             val inOrder = inOrder(mockEntityManager, mockGovUkPayClient, mockTransactionManager)
             inOrder.verify(mockEntityManager).refresh(payment)
+            inOrder.verify(mockEntityManager).flush()
             inOrder.verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
             inOrder.verify(mockTransactionManager).commit(any())
             verifyNoInteractions(mockPropertyRegistrationService, mockSavedJourneyStateRepository)

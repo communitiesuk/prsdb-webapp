@@ -4,11 +4,13 @@ import jakarta.persistence.EntityManagerFactory
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,11 +27,13 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
+import uk.gov.communities.prsdb.webapp.constants.LAST_PROPERTY_REACTIVATION_WAS_PAID
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PropertyAlreadyReactivatedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
@@ -40,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyReactivationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayCreatedPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
+import java.sql.Date
 import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
@@ -183,6 +188,44 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     }
 
     @Test
+    fun `finalising a reactivation payment reactivates the property until the end of the paid period, then captures it`() {
+        JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
+        val paymentId = storePaymentMatchingTodaysQuote()
+
+        val status = finaliseReactivationPayment(paymentId)
+
+        assertEquals(PaymentStatus.SUCCEEDED, status)
+        verify(mockGovUkPayClient).capturePayment(paymentId)
+        val payment = paymentRepository.findById(paymentId).get()
+        val property =
+            jdbcTemplate.queryForMap(
+                "SELECT is_active, renewal_date, paid_for_until FROM property_ownership WHERE id = ?",
+                JOINT_PROPERTY_ID,
+            )
+        assertEquals(true, property["is_active"])
+        assertEquals(payment.forPeriodEnding, (property["renewal_date"] as Date).toLocalDate())
+        assertEquals(payment.forPeriodEnding, (property["paid_for_until"] as Date).toLocalDate())
+        assertEquals(PaymentStatus.SUCCEEDED, payment.status)
+        assertEquals(true, session.getAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID))
+    }
+
+    @Test
+    fun `finalising a reactivation payment after a joint landlord has reactivated the property cancels it without capturing it`() {
+        JourneyTestHelper.setMockUser(LANDLORD_1_USER_ID)
+        val paymentId = storePaymentMatchingTodaysQuote()
+        val renewalDateBefore = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().renewalDate
+        jdbcTemplate.update("UPDATE property_ownership SET is_active = true WHERE id = ?", JOINT_PROPERTY_ID)
+
+        assertThrows<PropertyAlreadyReactivatedException> { finaliseReactivationPayment(paymentId) }
+
+        verify(mockGovUkPayClient, never()).capturePayment(any())
+        verify(mockGovUkPayClient).cancelPayment(paymentId)
+        assertEquals(PaymentStatus.CANCELLED, paymentRepository.findStatusByPaymentId(paymentId))
+        assertEquals(renewalDateBefore, propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get().renewalDate)
+        assertNull(session.getAttribute(LAST_PROPERTY_REACTIVATION_WAS_PAID))
+    }
+
+    @Test
     fun `two landlords starting reactivation payments at once keep one CREATED payment and cancel the other on GOV UK Pay`() {
         val executor = Executors.newFixedThreadPool(2)
         val bothPaymentsCreatedOnGovUkPay = CyclicBarrier(2)
@@ -248,12 +291,36 @@ class PropertyReactivationPaymentPersistenceTests : IntegrationTestWithMutableDa
     private fun createStoredPropertyPayment(
         paymentId: String,
         payingUserId: String = LANDLORD_1_USER_ID,
+        amountInPence: Int = 1000,
+        quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+        forPeriodEnding: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE).plusYears(1),
     ) = createReactivationPayment(
         paymentId = paymentId,
+        amountInPence = amountInPence,
         reference = "reference-$paymentId",
+        quoteDate = quoteDate,
+        forPeriodEnding = forPeriodEnding,
         propertyOwnership = propertyOwnershipRepository.findById(JOINT_PROPERTY_ID).get(),
         payingUser = prsdbUserRepository.findById(payingUserId).get(),
     )
+
+    private fun storePaymentMatchingTodaysQuote(): String {
+        val quote = withOpenInViewEntityManager { paymentService.getPropertyReactivationPaymentQuote(JOINT_PROPERTY_ID) }
+        return paymentRepository
+            .saveAndFlush(
+                createStoredPropertyPayment(
+                    "reactivation-payment-id",
+                    amountInPence = quote.amountInPence,
+                    quoteDate = quote.quoteDate,
+                    forPeriodEnding = quote.renewalDate,
+                ),
+            ).paymentId
+    }
+
+    private fun finaliseReactivationPayment(paymentId: String) =
+        paymentService.finalisePayment(paymentId, PaymentStatus.CAPTURABLE) {
+            propertyReactivationService.reactivatePropertyWithPayment(it, PropertyReactivationDataModel())
+        }
 
     companion object {
         private const val JOINT_PROPERTY_ID = 2L

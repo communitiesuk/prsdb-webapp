@@ -3,15 +3,20 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
+import org.springframework.http.HttpStatus
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REACTIVATED_BY_LAST_PROPERTY_REACTIVATION
 import uk.gov.communities.prsdb.webapp.constants.LAST_PROPERTY_REACTIVATION_WAS_PAID
 import uk.gov.communities.prsdb.webapp.constants.REACTIVATED_PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NotificationHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyReactivationDataModel
 import java.time.LocalDate
 
@@ -55,6 +60,34 @@ class PropertyReactivationService(
         cancelCreatedPaymentAndLogFailures(propertyOwnershipId)
     }
 
+    @Transactional(Transactional.TxType.MANDATORY)
+    fun reactivatePropertyWithPayment(
+        payment: Payment,
+        reactivationData: PropertyReactivationDataModel,
+    ) {
+        val propertyOwnership = checkNotNull(payment.associatedProperty) { "Payment ${payment.paymentId} is not for a property" }
+        val reactivatingLandlord = userToLandlordService.getCurrentLandlordForUser()
+        if (propertyOwnership.landlords.none { it.id == reactivatingLandlord.id }) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Landlord ${reactivatingLandlord.id} is not a landlord of property ownership ${propertyOwnership.id}",
+            )
+        }
+        val landlordWillBeReactivated = landlordActiveStatusService.isCurrentLandlordInactive()
+        val claimedProperty = claimPropertyIfAddressAvailable(propertyOwnership)
+
+        val quote =
+            paymentService.calculatePropertyReactivationPaymentQuote(
+                claimedProperty,
+                reactivatingLandlord,
+                LocalDate.now(DateTimeHelper.UK_ZONE),
+            )
+        checkPaymentMatchesQuote(payment, quote)
+        saveReactivationData(claimedProperty, reactivationData)
+        activationService.reactivateClaimedProperty(claimedProperty, payment.forPeriodEnding, paidForUntil = payment.forPeriodEnding)
+        recordReactivationAfterCommit(claimedProperty.id, landlordWillBeReactivated, wasPaid = true)
+    }
+
     fun getLastPropertyOwnershipIdReactivatedThisSession(): Long? = session.getAttribute(REACTIVATED_PROPERTY_OWNERSHIP_ID) as? Long
 
     fun wasLandlordReactivatedByLastReactivation(): Boolean =
@@ -82,6 +115,22 @@ class PropertyReactivationService(
             )
         }
         return activationService.claimPropertyForReactivation(propertyOwnership.id)
+    }
+
+    private fun checkPaymentMatchesQuote(
+        payment: Payment,
+        quote: PropertyPaymentQuote,
+    ) {
+        if (payment.quoteDate != quote.quoteDate ||
+            payment.amountInPence != quote.amountInPence ||
+            payment.forPeriodEnding != quote.renewalDate
+        ) {
+            throw PaymentQuoteExpiredException(
+                "Payment ${payment.paymentId} for ${payment.amountInPence}p until ${payment.forPeriodEnding}, quoted on " +
+                    "${payment.quoteDate}, doesn't match the ${quote.quoteDate} quote of ${quote.amountInPence}p " +
+                    "until ${quote.renewalDate}",
+            )
+        }
     }
 
     private fun recordReactivationAfterCommit(
