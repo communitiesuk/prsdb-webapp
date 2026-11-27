@@ -174,7 +174,7 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.metricsList.rowValue(10)).containsText("73.40%")
         assertThat(reloadedPage.metricsList.rowValue(11)).containsText("41.20%")
         assertThat(reloadedPage.metricsList.rowValue(12)).containsText("62.50%")
-        assertThat(reloadedPage.metricsList.rowValue(13)).containsText("18.90%")
+        assertThat(reloadedPage.metricsList.rowValue(13)).containsText("18.90")
         assertThat(reloadedPage.metricsList.rowValue(14)).containsText("0.82%")
         assertThat(reloadedPage.metricsList.rowValue(15)).containsText("0.05%")
     }

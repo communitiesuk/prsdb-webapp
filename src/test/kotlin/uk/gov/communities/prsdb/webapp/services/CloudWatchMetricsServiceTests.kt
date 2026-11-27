@@ -30,24 +30,23 @@ class CloudWatchMetricsServiceTests {
         elastiCacheMetricName: String = "ElastiCacheProcessingUnits",
         elastiCacheDimensionName: String = "clusterId",
         elastiCacheStatistic: Statistic = Statistic.SUM,
-    ) =
-        CloudWatchMetricsService(
-            client,
-            ecsNamespace = "AWS/ECS",
-            ecsMemoryMetric = "MemoryUtilization",
-            ecsCpuMetric = "CPUUtilization",
-            ecsClusterName = "cluster",
-            ecsServiceName = "service",
-            elastiCacheNamespace = "AWS/ElastiCache",
-            elastiCacheMetricName = elastiCacheMetricName,
-            elastiCacheDimensionName = elastiCacheDimensionName,
-            elastiCacheStatistic = elastiCacheStatistic,
-            elastiCacheClusterId = "cache-cluster",
-            cloudFrontNamespace = "AWS/CloudFront",
-            cloudFrontClientErrorRateMetric = "4xxErrorRate",
-            cloudFrontServerErrorRateMetric = "5xxErrorRate",
-            cloudFrontDistributionId = "distribution",
-        )
+    ) = CloudWatchMetricsService(
+        client,
+        ecsNamespace = "AWS/ECS",
+        ecsMemoryMetric = "MemoryUtilization",
+        ecsCpuMetric = "CPUUtilization",
+        ecsClusterName = "cluster",
+        ecsServiceName = "service",
+        elastiCacheNamespace = "AWS/ElastiCache",
+        elastiCacheMetricName = elastiCacheMetricName,
+        elastiCacheDimensionName = elastiCacheDimensionName,
+        elastiCacheStatistic = elastiCacheStatistic,
+        elastiCacheClusterId = "cache-cluster",
+        cloudFrontNamespace = "AWS/CloudFront",
+        cloudFrontClientErrorRateMetric = "4xxErrorRate",
+        cloudFrontServerErrorRateMetric = "5xxErrorRate",
+        cloudFrontDistributionId = "distribution",
+    )
 
     @Test
     fun `getMetrics queries serverless ECPU sum using the cache name dimension`() {
