@@ -9,6 +9,7 @@ import {
 import {cloneForScanWorker, scanQueueArn, scanQueueName, scanQueueUrl} from './nft-scan-worker.mjs';
 import {restoreEnvironment} from './nft-restore.mjs';
 import {recoveryOwner, requireFreshAttempt, SafeRecoveryError, uploadRecoveryCheckpoints} from './nft-recovery-state.mjs';
+import {resizeDatabase} from './nft-rds-resize.mjs';
 
 function requireCondition(condition, message) {
   if (!condition) throw new SafeRecoveryError(message);
@@ -1077,7 +1078,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   let failureState;
   try {
     const command = process.argv[2];
-    if (['resolve-task-definition', 'snapshot-maintenance', 'stop', 'run', 'start', 'start-async'].includes(command)) {
+    if (['resolve-task-definition', 'snapshot-maintenance', 'stop', 'resize-up', 'run', 'start', 'start-async'].includes(command)) {
       requireFreshAttempt();
     }
     const path = process.env.NFT_RESTORE_STATE_PATH ||
@@ -1104,16 +1105,16 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     });
     failureState = state;
     if (command === 'start-async') config.taskDefinition = state.taskDefinition;
-    if (['cleanup', 'pause-maintenance', 'restore-maintenance', 'mark-qa-verified', 'start-after-reset', 'restore-async'].includes(command)) {
+    if (['cleanup', 'pause-maintenance', 'restore-maintenance', 'mark-qa-verified', 'resize-down', 'start-after-reset', 'restore-async'].includes(command)) {
       config.runId = recoveryOwner(state, {
         runId: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT,
       });
     }
-    const checkpoint = ['pause-maintenance', 'restore-maintenance'].includes(command)
+    const checkpoint = ['pause-maintenance', 'restore-maintenance', 'resize-up', 'resize-down'].includes(command)
       ? () => uploadRecoveryCheckpoints(dirname(path), {
         runId: process.env.GITHUB_RUN_ID,
         attempt: process.env.GITHUB_RUN_ATTEMPT,
-        phase: 'restore-state',
+        phase: command === 'resize-down' ? 'cleanup-state' : 'restore-state',
       })
       : async () => {};
     const deps = runtime({
@@ -1141,6 +1142,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     else if (command === 'stop') {
       requireCondition(config.expectedSha, 'EXPECTED_NFT_SHA is required before stopping the app');
       await stopNftWriters(config, deps);
+    }
+    else if (command === 'resize-up') await resizeDatabase(config.runId, 'up', deps);
+    else if (command === 'resize-down') {
+      requireCondition(config.resetVerified, 'A verified NFT reset is required before database recovery');
+      await resizeDatabase(config.runId, 'down', deps);
     }
     else if (command === 'run') await restoreInVpc(config, deps);
     else if (command === 'start') await startNftApp(deps);

@@ -144,7 +144,26 @@ succeed. If they fail or ownership state is unavailable, the async worker remain
 reconciliation to avoid writing to a potentially incomplete database. Preserve private recovery
 checkpoints and investigate a failed or missing-state cleanup before retrying; do not fabricate state. The manual
 **Reset Database - NFT** workflow can instead verify the existing QA baseline with `verify-only`.
-No unattended restoration of modified environment settings is claimed.
+Unverified restoration of modified environment settings requires operator intervention.
+
+The workflow also takes the shared NFT infrastructure lock in
+`tfstate-lock-nft` before changing the environment. After stopping writers it
+checks for pending RDS modifications and changes `nft-database` from
+`db.t4g.small` to `db.m8g.2xlarge`. It checkpoints the original class and resize
+intent before modifying RDS. After the QA reset it returns the database to the
+original class before starting the app or async worker. The lock is released
+only after database, application, worker and maintenance schedule recovery.
+
+An interrupted run or unverified recovery retains the lock and requires an
+operator. Inspect the owning run's private recovery checkpoint, the current RDS
+class, status and pending modifications, and the original writer and maintenance
+schedule states. Resume only a verified recovery belonging to that run; do not
+repeat a resize whose result is unknown or remove the lock while a resize or
+Terraform apply is in flight. If a failed seed restore prevents automatic reset,
+keep writers stopped and complete the database and service recovery manually.
+After recovery is verified, coordinate an owner-conditional release of the
+`nft-performance-operation` item; never remove a Terraform state lock. See the
+infrastructure repository's NFT lock instructions.
 
 Recovery checkpoints are stored in the private NFT seed bucket under
 `performance-recovery/<run-id>/<attempt>/` for seven days, not in GitHub artifacts. Gatling stdout,
