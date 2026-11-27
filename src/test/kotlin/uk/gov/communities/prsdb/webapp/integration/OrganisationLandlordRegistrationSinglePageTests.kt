@@ -571,7 +571,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(orgIsRegisteredCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
             assertThat(orgIsRegisteredCharityPage.page.locator("#charity-hint"))
                 .containsText(
-                    "This includes Charity of Commission of England and Wales, " +
+                    "This includes the Charity Commission of England and Wales, " +
                         "Charity Commission of Northern Ireland and Scottish Charity Regulator",
                 )
             assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity']")).containsText("Yes")

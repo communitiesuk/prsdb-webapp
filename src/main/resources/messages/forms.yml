@@ -119,11 +119,9 @@ orgGovBodyMustProvideInfo:
     linkText: enter your organisation’s details
     afterLink: .
   registerAsIndividual:
-    beforeLink: 'If you rent your property as a sole trader, an individual or joint landlord you should '
+    beforeLink: 'If you rent out your property as an individual, sole trader or joint landlord, then you should '
     linkText: register as an individual
     afterLink: .
-  getHelp:
-    heading: Get help with your registration
 orgGovBodyDetails:
   heading: Providing details about your organisation’s governing body
   body:
@@ -134,17 +132,17 @@ orgGovBodyDetails:
     two: trustees
     three: partners
     four: other members of the governing body
-  insetText: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
   details:
-    summary: Providing details for partners
+    summary: If you’re registering an English business partnership
     body:
       one:
-        beforeLink: Partners of English business partnerships should
-        link: register as individual landlords
-        afterLink: . One partner should then invite the others to join the property as joint landlords.
-      two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
+        beforeLink: You should go back and
+        link: register as an individual landlord
+        afterLink: ' instead.'
+      two: For English business partnerships, all partners must register as an individual landlord. When a partner registers a property, they must add the other partners as joint landlords.
+      three: If you’re registering a Limited Liability Partnership (LLP) or Scottish partnership, you can select <strong>Continue</strong> to provide details about partners.
   continueButton: Continue
-  noDetailsButton: I don’t have these details
+  noDetailsButton: I do not have these details
 orgGovBodyMemberName:
   fieldSetHeading: What is their full name?
   error:
