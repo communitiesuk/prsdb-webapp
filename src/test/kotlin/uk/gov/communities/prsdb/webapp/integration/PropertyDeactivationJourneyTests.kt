@@ -112,6 +112,7 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
         assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deactivate")
         assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
+        assertThat(checkInvitationsPage.invitationsBody).containsText("We’ll cancel these invitations")
         assertThat(checkInvitationsPage.invitationEmails).hasCount(2)
         checkInvitationsPage.submitContinue()
 
@@ -127,6 +128,19 @@ class PropertyDeactivationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertTrue(jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyWithPendingInvitationsId).isEmpty())
         verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.three@example.com"), any())
         verify(inviteeCancellationEmailSender).sendEmail(eq("jl.pending.four@example.com"), any())
+    }
+
+    @Test
+    fun `landlord with one pending joint landlord invitation sees singular content on the check invitations page`(page: Page) {
+        val invitations = jointLandlordInvitationRepository.findByRegisteredOwnershipId(propertyWithPendingInvitationsId)
+        jointLandlordInvitationRepository.delete(invitations.single { it.invitedEmail == "jl.pending.four@example.com" })
+
+        val checkInvitationsPage = navigator.goToPropertyDeactivationCheckInvitationsPage(propertyWithPendingInvitationsId)
+
+        assertThat(checkInvitationsPage.invitationsHeading).hasText("Cancel 1 invitation to a joint landlord")
+        assertThat(checkInvitationsPage.invitationsBody)
+            .hasText("We’ll cancel this invitation to a joint landlord to register onto the property:")
+        assertThat(checkInvitationsPage.invitationEmails).hasCount(1)
     }
 
     @Test
