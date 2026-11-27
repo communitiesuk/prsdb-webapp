@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -629,8 +630,23 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         @Test
         fun `submitting a charity number with wrong length returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("12345")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6, 7 or 8 digit number")
+        }
+
+        @Test
+        fun `submitting a nine digit charity number returns an error`() {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("123456789")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6, 7 or 8 digit number")
+        }
+
+        @Test
+        fun `submitting a six digit charity number advances to the organisation company registration page`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
             charityNumberPage.submitCharityNumber("123456")
-            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 7 or 8 digit number")
+
+            assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         }
     }
 
