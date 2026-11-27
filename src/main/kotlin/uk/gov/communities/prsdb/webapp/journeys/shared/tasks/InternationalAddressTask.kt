@@ -39,6 +39,10 @@ abstract class InternationalAddressTask(
     protected open val selectAddressContentProperties: Map<String, Any?> = emptyMap()
     protected open val manualAddressContentProperties: Map<String, Any?> = emptyMap()
 
+    // Defaults to the UK manual address content; a getter so it reads the subclass's override after initialisation
+    protected open val internationalManualAddressContentProperties: Map<String, Any?>
+        get() = manualAddressContentProperties
+
     protected open val lookupAddressTemplate: String = LookupAddressStepConfig.DEFAULT_TEMPLATE
 
     // The hooks are read through getters (not copied at construction) because subclass overrides aren't initialised
@@ -89,7 +93,7 @@ abstract class InternationalAddressTask(
                 routeSegment(INTERNATIONAL_MANUAL_ADDRESS_ROUTE_SEGMENT)
                 parents { journey.addressInUkStep.hasOutcome(YesOrNo.NO) }
                 nextStep { exitStep }
-                withAdditionalContentProperties { manualAddressContentProperties }
+                withAdditionalContentProperties { internationalManualAddressContentProperties }
             }
             exitStep {
                 parents {

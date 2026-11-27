@@ -10,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Free
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.clearFreeholderFormData
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
 class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, FreeholdersDetailsState>() {
@@ -86,16 +88,31 @@ class SaveFreeholderStepConfig : AbstractInternalStepConfig<Complete, Freeholder
         state: FreeholdersDetailsState,
         name: String,
     ): FreeholderDataModel {
+        val lookupFormModel: LookupAddressFormModel?
+        val selectedAddress: String?
+        val manualFormModel: ManualAddressFormModel?
+
         val addressTask = state.freeholderAddressTask
-        val lookupFormModel = addressTask.lookupAddressStep.formModelOrNull
-        // Set by both the select address and no address found steps, so it reflects the user's latest choice
-        val selectedAddress = addressTask.cachedSelectedAddress
-        val manualFormModel = addressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
+        val address = addressTask.getAddress()
+        val addressInUk = addressTask.addressInUk()
+
+        if (addressInUk == false) {
+            lookupFormModel = null
+            selectedAddress = null
+            manualFormModel = addressTask.internationalManualAddressStep.formModelOrNull
+        } else {
+            val ukAddressTask = addressTask.addressTask
+            lookupFormModel = ukAddressTask.lookupAddressStep.formModelOrNull
+            // Set by both the select address and no address found steps, so it reflects the user's latest choice
+            selectedAddress = ukAddressTask.cachedSelectedAddress
+            manualFormModel = ukAddressTask.manualAddressStep.formModelOrNull?.takeIf { selectedAddress == MANUAL_ADDRESS_CHOSEN }
+        }
 
         return FreeholderDataModel(
             detailsKnown = true,
             name = name,
-            address = addressTask.getAddress(),
+            address = address,
+            addressInUk = addressInUk,
             addressSearchPostcode = lookupFormModel?.postcode,
             addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
             selectedAddress = selectedAddress,

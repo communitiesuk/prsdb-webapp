@@ -264,12 +264,18 @@ freeholders:
       error:
         missing: Select which contact information you can provide
   address:
+    inUk:
+      fieldSetHeading: Is {0}’s contact address in the UK?
+      error:
+        missing: Select if their contact address is in the UK
     lookup:
       fieldSetHeading: What is {0}’s address?
     select:
       fieldSetHeading: Select {0}’s address
     manual:
       fieldSetHeading: What is {0}’s address?
+    nonUk:
+      fieldSetHeading: What is {0}’s contact address?
   list:
     heading:
       joint: '{0,choice,1#You’ve added 1 joint freeholder|1<You’ve added {0} joint freeholders}'

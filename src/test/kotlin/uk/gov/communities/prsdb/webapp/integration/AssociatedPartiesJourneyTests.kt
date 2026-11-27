@@ -17,12 +17,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmRemoveSuperiorLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderLookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNameFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNoAddressFoundFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderNonUkAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
@@ -276,6 +278,26 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
         }
 
         @Test
+        fun `Answering no to the address being in the UK allows a non-UK freeholder address to be entered`(page: Page) {
+            val addressInUkPage = navigator.skipToPropertyRegistrationFreeholderAddressInUkPage()
+            addressInUkPage.submitNo()
+
+            val nonUkAddressPage = assertPageIs(page, FreeholderNonUkAddressFormPagePropertyRegistration::class)
+            assertThat(nonUkAddressPage.heading).containsText("What is Test Freeholder’s contact address?")
+            nonUkAddressPage.submitAddress(
+                addressLineOne = "1 Rue Example",
+                townOrCity = "Paris",
+                postcode = "75001",
+                country = "France",
+            )
+
+            val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(freeholdersListPage.getSummaryCard(0).summaryList).containsText("1 Rue Example")
+            freeholdersListPage.submit()
+            assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
+        }
+
+        @Test
         fun `Choosing not to provide freeholder details skips the freeholder detail pages before leaving the task`(page: Page) {
             val freeholdersPage = navigator.skipToPropertyRegistrationFreeholdersInfoPage()
             freeholdersPage.submit()
@@ -312,6 +334,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             secondNamePage.submitName("Address freeholder")
             assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class)
                 .submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+            assertPageIs(page, FreeholderAddressInUkFormPagePropertyRegistration::class).submitYes()
             val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
             assertPageIs(page, FreeholderSelectAddressFormPagePropertyRegistration::class)
@@ -434,6 +457,7 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
                                     detailsKnown = true,
                                     name = "Freeholder With Address",
                                     address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                                    addressInUk = true,
                                     addressSearchPostcode = "FA1 1AA",
                                     addressSearchHouseNameOrNumber = "1",
                                     selectedAddress = MANUAL_ADDRESS_CHOSEN,
@@ -459,6 +483,10 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
             contactTypePage.form.submit()
 
+            val addressInUkPage = assertPageIs(page, FreeholderAddressInUkFormPagePropertyRegistration::class)
+            assertEquals("true", addressInUkPage.form.radios.selectedValue)
+            addressInUkPage.form.submit()
+
             val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPagePropertyRegistration::class)
             assertThat(lookupAddressPage.form.postcodeInput).hasValue("FA1 1AA")
             assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
@@ -481,6 +509,58 @@ class AssociatedPartiesJourneyTests : IntegrationTestWithImmutableData("data-loc
             val updatedListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
             assertThat(updatedListPage.getSummaryCard(0).title).hasText("Freeholder With Address")
             assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("3 Changed Road")
+        }
+
+        @Test
+        fun `editing a freeholder with a non-UK address preselects no and pre-fills their non-UK address`(page: Page) {
+            val freeholdersListPage =
+                navigator.skipToPropertyRegistrationFreeholdersListPage(
+                    freeholders =
+                        mapOf(
+                            1 to
+                                FreeholderDataModel(
+                                    detailsKnown = true,
+                                    name = "Overseas Freeholder",
+                                    address =
+                                        AddressDataModel
+                                            .fromManualAddressData("1 Rue Example", "Paris", "75001", country = "France")
+                                            .copy(isInternational = true),
+                                    addressInUk = false,
+                                    manualAddressLineOne = "1 Rue Example",
+                                    manualAddressLineTwo = "Appartement 4",
+                                    manualTownOrCity = "Paris",
+                                    manualCounty = "Ile-de-France",
+                                    manualPostcode = "75001",
+                                    manualCountry = "France",
+                                ),
+                        ),
+                )
+
+            freeholdersListPage
+                .getSummaryCard(0)
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitYes()
+            assertPageIs(page, FreeholderNameFormPagePropertyRegistration::class).form.submit()
+            assertPageIs(page, FreeholderContactTypeFormPagePropertyRegistration::class).form.submit()
+
+            val addressInUkPage = assertPageIs(page, FreeholderAddressInUkFormPagePropertyRegistration::class)
+            assertEquals("false", addressInUkPage.form.radios.selectedValue)
+            addressInUkPage.form.submit()
+
+            val nonUkAddressPage = assertPageIs(page, FreeholderNonUkAddressFormPagePropertyRegistration::class)
+            assertThat(nonUkAddressPage.form.addressLineOneInput).hasValue("1 Rue Example")
+            assertThat(nonUkAddressPage.form.addressLineTwoInput).hasValue("Appartement 4")
+            assertThat(nonUkAddressPage.form.townOrCityInput).hasValue("Paris")
+            assertThat(nonUkAddressPage.form.countyInput).hasValue("Ile-de-France")
+            assertThat(nonUkAddressPage.form.postcodeInput).hasValue("75001")
+            nonUkAddressPage.form.addressLineOneInput.fill("2 Rue Changed")
+            nonUkAddressPage.form.submit()
+
+            val updatedListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
+            assertThat(updatedListPage.getSummaryCard(0).title).hasText("Overseas Freeholder")
+            assertThat(updatedListPage.getSummaryCard(0).summaryList).containsText("2 Rue Changed")
         }
 
         @Test

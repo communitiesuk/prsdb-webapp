@@ -172,6 +172,43 @@ class AssociatedPartyNotificationServiceTests {
     }
 
     @Test
+    fun `freeholder letter destination includes country for an international address`() {
+        // Arrange
+        val internationalAddress =
+            AddressDataModel
+                .fromManualAddressData("1 Rue Example", "Paris", "75001", country = "France")
+                .copy(isInternational = true)
+        val freeholder = createFreeholderModel(name = "Sarah Thompson", address = internationalAddress)
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(singleLineAddress = "12 Real Street, Bristol, BS8 1AA"),
+                landlords = mutableSetOf(createIndividualLandlord(name = "Jamie Jameson", email = "jamie@example.com")),
+            )
+        val expectedLetter =
+            expectedFreeholderAddedToPropertyLetter.copy(
+                landlords = listOf("Jamie Jameson (jamie@example.com)"),
+                freeholderAddress = "1 Rue Example\nParis\n75001",
+            )
+        whenever(absoluteUrlProvider.buildLandlordPrivacyNoticeLetterDisplayUrl())
+            .thenReturn("example.test/landlord/privacy-notice")
+
+        // Act
+        val outcome =
+            associatedPartyNotificationService.sendNotificationToFreeholderAddedToProperty(
+                freeholder,
+                propertyOwnership,
+            )
+
+        // Assert
+        assertEquals(AssociatedPartyNotificationOutcome.LETTER_SENT, outcome)
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(listOf("Sarah Thompson", "1 Rue Example", "Paris", "75001", "France")),
+            expectedLetter,
+        )
+        verifyNoInteractions(emailNotificationService)
+    }
+
+    @Test
     fun `freeholder with no name does not receive a notification`() {
         // Arrange
         val freeholder = createFreeholderModel(address = postalAddress)
@@ -667,6 +704,45 @@ class AssociatedPartyNotificationServiceTests {
                     "Rose Court",
                     "High Street, Example Locality, London",
                     "SW1A 1AA",
+                ),
+            ),
+            letter,
+        )
+    }
+
+    @Test
+    fun `sendNotification condenses a long international address while keeping the postcode and country separate`() {
+        // Arrange
+        val fullAddress =
+            AddressDataModel(
+                singleLineAddress =
+                    "Example Organisation, Flat 2, 12 High Street, Example Locality, London, SW1A 1AA",
+                organisation = "Example Organisation",
+                subBuilding = "Flat 2",
+                buildingNumber = "12",
+                streetName = "High Street",
+                locality = "Example Locality",
+                townName = "London",
+                postcode = "SW1A 1AA",
+                country = "France",
+                isInternational = true,
+            )
+        val freeholder = createFreeholderModel(name = "Daniel Roberts", address = fullAddress)
+
+        // Act
+        sendNotificationToFreeholder(freeholder)
+
+        // Assert
+        verify(letterNotificationService).sendLetter(
+            LetterAddressDataModel(
+                listOf(
+                    "Daniel Roberts",
+                    "Example Organisation",
+                    "Flat 2",
+                    "12 High Street",
+                    "Example Locality, London",
+                    "SW1A 1AA",
+                    "France",
                 ),
             ),
             letter,

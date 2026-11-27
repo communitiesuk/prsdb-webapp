@@ -200,6 +200,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderAddressInUkFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderContactTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderEmailFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderLookupAddressFormPagePropertyRegistration
@@ -1129,6 +1130,20 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(FreeholderEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, FreeholderEmailFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationFreeholderAddressInUkPage(
+        freeholderName: String = "Test Freeholder",
+        jointFreeholders: Boolean = true,
+    ): FreeholderAddressInUkFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationFreeholderAddressInUk(
+                freeholderName = freeholderName,
+                jointFreeholders = jointFreeholders,
+            ).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep("${FreeholderAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}")
+        return createValidPage(page, FreeholderAddressInUkFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationFreeholderLookupAddressPage(

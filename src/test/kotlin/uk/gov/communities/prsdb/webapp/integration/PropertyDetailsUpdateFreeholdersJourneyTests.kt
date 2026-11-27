@@ -23,8 +23,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailCyaPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CorrespondenceEmailFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderAddressInUkFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderLookupAddressFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderManualAddressFormPageFreeholdersUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderNonUkAddressFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderProvideDetailsFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholderSelectAddressFormPageFreeholdersUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FreeholdersListFormPageFreeholdersUpdate
@@ -103,6 +105,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Postal Address Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
@@ -157,6 +160,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Joint Postal Address Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
@@ -219,6 +223,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).submitName("Postcode Validation Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("", "1")
 
@@ -304,6 +309,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         FreeholderNameFormPagePropertyRegistration(page).form.submit()
         val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
         contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
@@ -341,6 +347,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         FreeholderNameFormPagePropertyRegistration(page).form.submit()
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
@@ -355,6 +362,50 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
             postcode = "EG1 2AA",
         )
         assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments).submit()
+
+        val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+        val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
+        assertEquals("Existing Freeholder", freeholderCard.title.getText())
+        assertThat(freeholderCard.bodyText).hasText(
+            "A postal address was provided for this freeholder. We’ve used this to tell them that they’re named on this registration.",
+        )
+        val savedFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        assertEquals(originalFreeholder.id, savedFreeholder.id)
+        assertNull(savedFreeholder.email)
+    }
+
+    @Test
+    fun `a freeholder can be given a non-UK postal address during an update`(page: Page) {
+        val originalFreeholder = freeholderRepository.findAllByPropertyOwnership_Id(propertyOwnershipId).single()
+        originalFreeholder.name = "Existing Freeholder"
+        originalFreeholder.email = "existing@example.com"
+        freeholderRepository.save(originalFreeholder)
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToPeopleResponsible()
+        page
+            .getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("Add, change or remove freeholders"))
+            .click()
+
+        assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+            .getSummaryCard("Existing Freeholder")
+            .getAction("Change")
+            .link
+            .clickAndWait()
+        assertPageIs(page, FreeholderProvideDetailsFormPageFreeholdersUpdate::class, urlArguments).submitYes()
+        FreeholderNameFormPagePropertyRegistration(page).form.submit()
+        FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitNo()
+
+        val nonUkAddressPage = assertPageIs(page, FreeholderNonUkAddressFormPageFreeholdersUpdate::class, urlArguments)
+        nonUkAddressPage.submitAddress(
+            addressLineOne = "1 Rue Example",
+            townOrCity = "Paris",
+            postcode = "75001",
+            country = "France",
+        )
+        val freeholdersListPage = assertPageIs(page, FreeholdersListFormPageFreeholdersUpdate::class, urlArguments)
+        assertThat(freeholdersListPage.getSummaryCard("Existing Freeholder")).containsText("1 Rue Example")
+        freeholdersListPage.submit()
 
         val updatedPropertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         val freeholderCard = updatedPropertyDetailsPage.freeholderCards.single()
@@ -392,6 +443,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         assertNull(contactTypePage.form.radios.selectedValue)
         contactTypePage.submitContactType(FreeholderContactType.POSTAL_ADDRESS)
 
+        val addressInUkPage = assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments)
+        assertNull(addressInUkPage.form.radios.selectedValue)
+        addressInUkPage.submitYes()
+
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(lookupAddressPage.form.postcodeInput).hasValue("")
         assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("")
@@ -409,6 +464,7 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         FreeholderNameFormPagePropertyRegistration(page).submitName("Current Journey Postal Freeholder")
         FreeholderContactTypeFormPagePropertyRegistration(page).submitContactType(FreeholderContactType.POSTAL_ADDRESS)
 
+        assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments).submitYes()
         val lookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
         val selectAddressPage = assertPageIs(page, FreeholderSelectAddressFormPageFreeholdersUpdate::class, urlArguments)
@@ -430,6 +486,10 @@ class PropertyDetailsUpdateFreeholdersJourneyTests : IntegrationTestWithMutableD
         val contactTypePage = FreeholderContactTypeFormPagePropertyRegistration(page)
         assertEquals(FreeholderContactType.POSTAL_ADDRESS.name, contactTypePage.form.radios.selectedValue)
         contactTypePage.form.submit()
+
+        val addressInUkPage = assertPageIs(page, FreeholderAddressInUkFormPageFreeholdersUpdate::class, urlArguments)
+        assertEquals("true", addressInUkPage.form.radios.selectedValue)
+        addressInUkPage.form.submit()
 
         val refilledLookupAddressPage = assertPageIs(page, FreeholderLookupAddressFormPageFreeholdersUpdate::class, urlArguments)
         assertThat(refilledLookupAddressPage.form.postcodeInput).hasValue("EG1 2AA")

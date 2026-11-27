@@ -118,7 +118,8 @@ fun JourneyBuilder<*>.useContinueButtons(task: FreeholdersDetailsTask) {
         task.freeholderProvideDetailsStep,
         task.freeholderNameStep,
         task.freeholderEmailStep,
-        task.freeholderAddressTask.manualAddressStep,
+        task.freeholderAddressTask.addressTask.manualAddressStep,
+        task.freeholderAddressTask.internationalManualAddressStep,
         task.freeholdersListStep,
         task.confirmRemoveFreeholderStep,
     )

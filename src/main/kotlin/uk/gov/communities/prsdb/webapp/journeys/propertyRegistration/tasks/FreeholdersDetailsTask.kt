@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SetStateForFreeholderEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
@@ -141,7 +142,15 @@ class FreeholdersDetailsTask(
                 parents { journey.freeholderContactTypeStep.hasOutcome(FreeholderContactType.POSTAL_ADDRESS) }
                 nextStep { journey.saveFreeholderStep }
                 savable()
-                configureStep(journey.freeholderAddressTask.lookupAddressStep) {
+                configureStep(journey.freeholderAddressTask.addressInUkStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        mapOf(AddressInUkStepConfig.PREFILL_ADDRESS_IN_UK to journey.editingFreeholder?.addressInUk)
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.addressTask.lookupAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
@@ -157,7 +166,7 @@ class FreeholdersDetailsTask(
                         }
                     }
                 }
-                configureStep(journey.freeholderAddressTask.selectAddressStep) {
+                configureStep(journey.freeholderAddressTask.addressTask.selectAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
@@ -167,24 +176,22 @@ class FreeholdersDetailsTask(
                         )
                     }
                 }
-                configureStep(journey.freeholderAddressTask.manualAddressStep) {
+                configureStep(journey.freeholderAddressTask.addressTask.manualAddressStep) {
                     withAdditionalContentProperty {
                         "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
                     }
                     withAdditionalContentProperties {
                         val editingFreeholder = journey.editingFreeholder
-                        if (editingFreeholder?.manualAddressLineOne != null) {
-                            mapOf(
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingFreeholder.manualAddressLineOne,
-                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingFreeholder.manualAddressLineTwo,
-                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingFreeholder.manualTownOrCity,
-                                ManualAddressStepConfig.PREFILL_COUNTY to editingFreeholder.manualCounty,
-                                ManualAddressStepConfig.PREFILL_POSTCODE to editingFreeholder.manualPostcode,
-                                ManualAddressStepConfig.PREFILL_COUNTRY to editingFreeholder.manualCountry,
-                            )
-                        } else {
-                            emptyMap()
-                        }
+                        if (editingFreeholder?.addressInUk == true) manualAddressPrefill(editingFreeholder) else emptyMap()
+                    }
+                }
+                configureStep(journey.freeholderAddressTask.internationalManualAddressStep) {
+                    withAdditionalContentProperty {
+                        "fieldSetHeadingParam" to journey.freeholderNameStep.formModelOrNull?.name
+                    }
+                    withAdditionalContentProperties {
+                        val editingFreeholder = journey.editingFreeholder
+                        if (editingFreeholder?.addressInUk == false) manualAddressPrefill(editingFreeholder) else emptyMap()
                     }
                 }
             }
@@ -208,4 +215,14 @@ class FreeholdersDetailsTask(
                 }
             }
         }
+
+    private fun manualAddressPrefill(freeholder: FreeholderDataModel): Map<String, Any?> =
+        mapOf(
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to freeholder.manualAddressLineOne,
+            ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to freeholder.manualAddressLineTwo,
+            ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to freeholder.manualTownOrCity,
+            ManualAddressStepConfig.PREFILL_COUNTY to freeholder.manualCounty,
+            ManualAddressStepConfig.PREFILL_POSTCODE to freeholder.manualPostcode,
+            ManualAddressStepConfig.PREFILL_COUNTRY to freeholder.manualCountry,
+        )
 }

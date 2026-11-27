@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FreeholderContactTypeFormModel
@@ -52,6 +53,12 @@ class SaveFreeholderStepConfigTests {
 
     @Mock
     lateinit var addressTask: FreeholderAddressTask
+
+    @Mock
+    lateinit var ukAddressTask: AddressTask
+
+    @Mock
+    lateinit var internationalManualAddressStep: ManualAddressStep
 
     @Mock
     lateinit var lookupAddressStep: LookupAddressStep
@@ -153,6 +160,7 @@ class SaveFreeholderStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = SELECTED_ADDRESS,
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = SELECTED_ADDRESS.singleLineAddress,
@@ -190,6 +198,7 @@ class SaveFreeholderStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = manualAddress,
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = MANUAL_ADDRESS_CHOSEN,
@@ -217,17 +226,18 @@ class SaveFreeholderStepConfigTests {
             }
         setupAddressAnswers(selectedAddress = previousSelection, manualFormModel = manualFormModel)
         val selectFormModel = SelectAddressFormModel().apply { address = previousSelection }
-        whenever(addressTask.selectAddressStep).thenReturn(selectAddressStep)
+        whenever(ukAddressTask.selectAddressStep).thenReturn(selectAddressStep)
         whenever(selectAddressStep.formModelOrNull).thenReturn(selectFormModel)
-        whenever(addressTask.cachedAddresses).thenReturn(emptyList())
-        whenever(addressTask.getMatchingAddress(any())).thenCallRealMethod()
-        whenever(addressTask.getManualAddressOrNull()).thenCallRealMethod()
-        whenever(addressTask.getAddress()).thenCallRealMethod()
+        whenever(ukAddressTask.cachedAddresses).thenReturn(emptyList())
+        whenever(ukAddressTask.getMatchingAddress(any())).thenCallRealMethod()
+        whenever(ukAddressTask.getManualAddressOrNull()).thenCallRealMethod()
+        whenever(ukAddressTask.getAddress()).thenCallRealMethod()
+        whenever(addressTask.getAddress()).thenAnswer { ukAddressTask.getAddress() }
 
         var cachedSelectedAddress: String? = previousSelection
-        whenever(addressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
+        whenever(ukAddressTask.cachedSelectedAddress).thenAnswer { cachedSelectedAddress }
         doAnswer { cachedSelectedAddress = it.getArgument(0) }
-            .whenever(addressTask)
+            .whenever(ukAddressTask)
             .cachedSelectedAddress = anyOrNull()
 
         whenever(mockState.freeholdersMap).thenReturn(emptyMap())
@@ -235,7 +245,7 @@ class SaveFreeholderStepConfigTests {
         whenever(mockState.nextFreeholderId).thenReturn(1)
 
         // Act
-        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(addressTask)
+        NoAddressFoundStepConfig(mock()).afterStepDataIsAdded(ukAddressTask)
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
@@ -244,12 +254,59 @@ class SaveFreeholderStepConfigTests {
                 detailsKnown = true,
                 name = ENTERED_NAME,
                 address = AddressDataModel.fromManualAddressData("2 Manual Road", "Manual Town", "MA1 1AA"),
+                addressInUk = true,
                 addressSearchPostcode = LOOKUP_POSTCODE,
                 addressSearchHouseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER,
                 selectedAddress = MANUAL_ADDRESS_CHOSEN,
                 manualAddressLineOne = "2 Manual Road",
                 manualTownOrCity = "Manual Town",
                 manualPostcode = "MA1 1AA",
+            )
+        assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
+    }
+
+    @Test
+    fun `afterStepIsReached saves the non-UK manual address answers when the address is outside the UK`() {
+        // Arrange
+        val stepConfig = SaveFreeholderStepConfig()
+        setupStepsWithAnswers(true, FreeholderContactType.POSTAL_ADDRESS)
+        whenever(addressTask.addressInUk()).thenReturn(false)
+        whenever(addressTask.internationalManualAddressStep).thenReturn(internationalManualAddressStep)
+        whenever(internationalManualAddressStep.formModelOrNull).thenReturn(
+            ManualAddressFormModel().apply {
+                addressLineOne = "1 Rue Example"
+                addressLineTwo = "Appartement 4"
+                townOrCity = "Paris"
+                county = "Ile-de-France"
+                postcode = "75001"
+                country = "France"
+            },
+        )
+        val internationalAddress =
+            AddressDataModel
+                .fromManualAddressData("1 Rue Example", "Paris", "75001", country = "France")
+                .copy(isInternational = true)
+        whenever(addressTask.getAddress()).thenReturn(internationalAddress)
+        whenever(mockState.freeholdersMap).thenReturn(emptyMap())
+        whenever(mockState.editingFreeholderId).thenReturn(null)
+        whenever(mockState.nextFreeholderId).thenReturn(1)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        val expectedFreeholder =
+            FreeholderDataModel(
+                detailsKnown = true,
+                name = ENTERED_NAME,
+                address = internationalAddress,
+                addressInUk = false,
+                manualAddressLineOne = "1 Rue Example",
+                manualAddressLineTwo = "Appartement 4",
+                manualTownOrCity = "Paris",
+                manualCounty = "Ile-de-France",
+                manualPostcode = "75001",
+                manualCountry = "France",
             )
         assertEquals(mapOf(1 to expectedFreeholder), captureSavedMap())
     }
@@ -350,15 +407,17 @@ class SaveFreeholderStepConfigTests {
         selectedAddress: String?,
         manualFormModel: ManualAddressFormModel?,
     ) {
-        whenever(addressTask.lookupAddressStep).thenReturn(lookupAddressStep)
+        whenever(addressTask.addressInUk()).thenReturn(true)
+        whenever(addressTask.addressTask).thenReturn(ukAddressTask)
+        whenever(ukAddressTask.lookupAddressStep).thenReturn(lookupAddressStep)
         whenever(lookupAddressStep.formModelOrNull).thenReturn(
             LookupAddressFormModel().apply {
                 postcode = LOOKUP_POSTCODE
                 houseNameOrNumber = LOOKUP_HOUSE_NAME_OR_NUMBER
             },
         )
-        whenever(addressTask.cachedSelectedAddress).thenReturn(selectedAddress)
-        whenever(addressTask.manualAddressStep).thenReturn(manualAddressStep)
+        whenever(ukAddressTask.cachedSelectedAddress).thenReturn(selectedAddress)
+        whenever(ukAddressTask.manualAddressStep).thenReturn(manualAddressStep)
         whenever(manualAddressStep.formModelOrNull).thenReturn(manualFormModel)
     }
 

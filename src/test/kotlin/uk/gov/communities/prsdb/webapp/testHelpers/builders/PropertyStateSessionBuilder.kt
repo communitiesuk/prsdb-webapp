@@ -270,11 +270,17 @@ class PropertyStateSessionBuilder(
             .withFreeholderContactType(FreeholderContactType.EMAIL)
             .apply { if (existingFreeholders != null) withFreeholders(existingFreeholders) }
 
-        fun beforePropertyRegistrationFreeholderLookupAddress(
+        fun beforePropertyRegistrationFreeholderAddressInUk(
             jointFreeholders: Boolean = true,
             freeholderName: String = "Test Freeholder",
         ) = beforePropertyRegistrationFreeholderContactType(jointFreeholders, freeholderName)
             .withFreeholderContactType(FreeholderContactType.POSTAL_ADDRESS)
+
+        fun beforePropertyRegistrationFreeholderLookupAddress(
+            jointFreeholders: Boolean = true,
+            freeholderName: String = "Test Freeholder",
+        ) = beforePropertyRegistrationFreeholderAddressInUk(jointFreeholders, freeholderName)
+            .withFreeholderAddressInUk()
 
         fun beforePropertyRegistrationFreeholderSelectAddress(
             jointFreeholders: Boolean = true,
@@ -745,8 +751,6 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber() =
             beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber()
                 .withAcceptedEpcFoundByCertificateNumber()
-
-        fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
 
         fun beforeTenancyDetailsHouseholds() = beforeTenancyDetails().withHouseholds()
 
