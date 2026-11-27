@@ -96,6 +96,7 @@ email:
     invalidFormat: Enter an email address in the right format
 orgEmail:
   fieldSetHeading: What is your organisation’s email address?
+  fieldSetHint: We’ll send notifications about your landlord and property registrations to this email address
 name:
   fieldSetHeading: What is your full name?
   fieldSetHint: Enter your name as it’s written on your passport or driving licence.
