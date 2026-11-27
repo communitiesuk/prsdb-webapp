@@ -15,8 +15,9 @@ checkInvitations:
     heading: "Cancel {0} invitations to joint landlords"
     headingSingular: "Cancel 1 invitation to a joint landlord"
     body: "We’ll cancel these invitations to joint landlords to register onto the property:"
+    bodySingular: "We’ll cancel this invitation to a joint landlord to register onto the property:"
     sentOn: "Sent on {0}"
-  cancelLink: Cancel (go back to property record)
+  cancelLink: Cancel (go back to property registration)
 confirm:
   heading: Are you sure you want to deactivate this property?
   paragraph:

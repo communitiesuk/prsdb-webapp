@@ -22,6 +22,9 @@ class CheckInvitationsPagePropertyDeactivation(
     val invitationsHeading
         get() = page.locator("main h2")
 
+    val invitationsBody
+        get() = page.locator("main h2 + p")
+
     val invitationEmails
         get() = page.locator("main .govuk-body.govuk-\\!-margin-bottom-1")
 

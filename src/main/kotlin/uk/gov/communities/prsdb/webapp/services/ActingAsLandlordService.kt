@@ -12,7 +12,6 @@ class ActingAsLandlordService(
 ) {
     fun getActingAsUserId(): String? = session.getAttribute(ACTING_AS_USER_ID) as? String
 
-    // TODO PDJB-1904: Use this to redirect /landlord/** requests to /system-operator/landlord/** while acting
     fun isActingAsLandlord(): Boolean = getActingAsUserId() != null
 
     // TODO PDJB-1907: Call this from the start acting endpoint, after resetting the session (PDJB-1902)
