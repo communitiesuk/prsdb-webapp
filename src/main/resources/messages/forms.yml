@@ -119,11 +119,9 @@ orgGovBodyMustProvideInfo:
     linkText: enter your organisation’s details
     afterLink: .
   registerAsIndividual:
-    beforeLink: 'If you rent your property as a sole trader, an individual or joint landlord you should '
+    beforeLink: 'If you rent out your property as an individual, sole trader or joint landlord, then you should '
     linkText: register as an individual
     afterLink: .
-  getHelp:
-    heading: Get help with your registration
 orgGovBodyDetails:
   heading: Providing details about your organisation’s governing body
   body:
