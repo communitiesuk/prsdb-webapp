@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
@@ -19,8 +20,7 @@ class EpcMissingFormPagePropertyRegistration(
 
     // Only present on the occupied variant
     val warning = Warning.default(page)
-
-    // Only present on the occupied variant
+    val tenantsMovedInBefore2008Details: Locator = page.locator(".govuk-details")
     val continueAnywayButton = Button.byText(page, "Continue anyway")
 
     // Only present on the unoccupied variant

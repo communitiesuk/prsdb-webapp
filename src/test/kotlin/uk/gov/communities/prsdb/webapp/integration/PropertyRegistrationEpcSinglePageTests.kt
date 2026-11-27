@@ -135,6 +135,12 @@ class PropertyRegistrationEpcSinglePageTests : IntegrationTestWithImmutableData(
         }
 
         @Test
+        fun `The occupied variant shows details for tenants who moved in before 1 October 2008`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = true)
+            assertThat(epcMissingPage.tenantsMovedInBefore2008Details).containsText("If your tenants moved in before 1 October 2008")
+        }
+
+        @Test
         fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
             val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = false)
             BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")

@@ -24,6 +24,13 @@
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading}">propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading</h2>
+            <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.epcMissingOccupied.details.summary}, ~{::#details-content/content()})}">
+                <div class="govuk-details__text">
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.one}">propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.one</p>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.two}">propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.two</p>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.three}">propertyCompliance.epcTask.epcMissingOccupied.details.paragraph.three</p>
+                </div>
+            </details>
             <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.epcTask.epcMissingOccupied.warning})}"></div>
         </section>
     </th:block>
