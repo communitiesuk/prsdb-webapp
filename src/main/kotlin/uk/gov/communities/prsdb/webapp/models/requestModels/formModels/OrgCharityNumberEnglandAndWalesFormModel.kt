@@ -22,7 +22,7 @@ class OrgCharityNumberEnglandAndWalesFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "forms.orgCharityNumberEnglandAndWales.error.length",
                 validatorType = LengthConstraintValidator::class,
-                validatorArgs = ["7", "8"],
+                validatorArgs = ["6", "8"],
             ),
         ],
     )

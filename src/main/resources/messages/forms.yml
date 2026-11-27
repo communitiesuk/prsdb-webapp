@@ -63,7 +63,7 @@ orgCharityNumberEnglandAndWales:
   error:
     missing: Enter a charity number
     nonNumeric: Charity number must only include numbers
-    length: Enter a 7 or 8 digit number
+    length: Enter a 6, 7 or 8 digit number
 orgCharityNumberNorthernIreland:
   error:
     missing: Enter a charity number
