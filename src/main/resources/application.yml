@@ -152,6 +152,11 @@ gov-uk-pay:
   manual-intervention-email-address: ${GOV_UK_PAY_MANUAL_INTERVENTION_EMAIL_ADDRESS:Team-PRSDB+payment-manual-intervention@softwire.com}
   payment-status-retry-delay: 2s
 
+encoded:
+  base-url: ${ENCODED_BASE_URL}
+  connect-timeout: 5s
+  read-timeout: 10s
+
 cloudwatch-metrics:
   ecs:
     namespace: ${CLOUDWATCH_ECS_NAMESPACE:AWS/ECS}
@@ -256,6 +261,11 @@ spring:
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
             scope:
+          encoded:
+            client-id: ${ENCODED_CLIENT_ID}
+            client-secret: ${ENCODED_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: read,write
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
@@ -263,6 +273,8 @@ spring:
             issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+          encoded:
+            token-uri: ${ENCODED_TOKEN_URI}
 
   data:
     redis:

@@ -130,6 +130,9 @@ gov-uk-pay:
   mock-failing-calls-from-capture: ${MOCK_GOV_UK_PAY_FAILING_CALLS_FROM_CAPTURE:0}
   mock-failing-capture-takes-payment: ${MOCK_GOV_UK_PAY_FAILING_CAPTURE_TAKES_PAYMENT:true}
 
+encoded:
+  base-url: http://localhost:${server.port}/local/encoded/api/v1
+
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 
@@ -224,6 +227,11 @@ spring:
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
             scope:
+          encoded:
+            client-id: local-encoded-client-id
+            client-secret: local-encoded-client-secret # pragma: allowlist secret
+            authorization-grant-type: client_credentials
+            scope: read,write
         provider:
           one-login:
             authorization-uri: http://localhost:${server.port}/local/one-login/authorize
@@ -239,6 +247,8 @@ spring:
             userNameAttribute: "sub"
           epc-register:
             token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
+          encoded:
+            token-uri: http://localhost:${server.port}/local/encoded/auth2/oauth2/token
 
 one-login.did.uri: http://localhost:${server.port}/local/one-login/.well-known/did.json
 
@@ -280,6 +290,11 @@ spring:
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
             scope:
+          encoded:
+            client-id: local-encoded-client-id
+            client-secret: local-encoded-client-secret # pragma: allowlist secret
+            authorization-grant-type: client_credentials
+            scope: read,write
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
@@ -287,6 +302,8 @@ spring:
             issuer-uri: https://sso.service.security.gov.uk
           epc-register:
             token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
+          encoded:
+            token-uri: http://localhost:${server.port}/local/encoded/auth2/oauth2/token
 
 ---
 
