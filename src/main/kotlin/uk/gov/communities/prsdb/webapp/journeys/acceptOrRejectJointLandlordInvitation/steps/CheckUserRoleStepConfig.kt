@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -41,8 +40,8 @@ class CheckUserRoleStepConfig(
         }
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
-        val principal = SecurityContextHolder.getContext().authentication!!.principal as OidcUser
-        val userIsLandlord = userRolesService.getUserHasLandlordRole(principal.name)
+        val userId = SecurityContextHolder.getContext().authentication!!.name
+        val userIsLandlord = userRolesService.getUserHasLandlordRole(userId)
         state.userIsLandlord = userIsLandlord
         state.propertyOwnershipIdUserIsAlreadyLandlordOn =
             if (userIsLandlord) state.getInvitedPropertyOwnershipIdIfCurrentUserIsLandlordOnIt() else null
