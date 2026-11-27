@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
@@ -62,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNonUkAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
@@ -328,6 +330,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
         orgNamePage.submitName("Test Organisation Name")
+
+        val orgAddressInUkPage = assertPageIs(page, OrgAddressInUkFormPageLandlordRegistration::class)
+        orgAddressInUkPage.submitYes()
 
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
         orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -601,6 +606,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationAddressRow.clickNamedActionLinkAndWait("Change")
 
+        val orgAddressInUkPage = assertPageIs(page, OrgAddressInUkFormPageLandlordRegistration::class)
+        orgAddressInUkPage.submitYes()
+
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
         orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
@@ -609,6 +617,40 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
         assertThat(updatedCheckAnswersPage.landlordDetails.organisationAddressRow).containsText("1 PRSDB Square")
+    }
+
+    @Test
+    fun `Selecting no on organisation based in the UK goes to the non-UK address page then the organisation email page`(page: Page) {
+        val orgAddressInUkPage = navigator.skipToOrgLandlordRegistrationOrgAddressInUkPage()
+        orgAddressInUkPage.submitNo()
+
+        val orgNonUkAddressPage = assertPageIs(page, OrgNonUkAddressFormPageLandlordRegistration::class)
+        orgNonUkAddressPage.submitAddress(
+            addressLineOne = "1 Rue de Rivoli",
+            townOrCity = "Paris",
+            postcode = "75001",
+        )
+
+        assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The organisation address change link can switch to a non-UK address and returns to the org check answers page`(page: Page) {
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationAddressRow.clickNamedActionLinkAndWait("Change")
+
+        val orgAddressInUkPage = assertPageIs(page, OrgAddressInUkFormPageLandlordRegistration::class)
+        orgAddressInUkPage.submitNo()
+
+        val orgNonUkAddressPage = assertPageIs(page, OrgNonUkAddressFormPageLandlordRegistration::class)
+        orgNonUkAddressPage.submitAddress(
+            addressLineOne = "1 Rue de Rivoli",
+            townOrCity = "Paris",
+            postcode = "75001",
+        )
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationAddressRow).containsText("1 Rue de Rivoli")
     }
 
     @Test

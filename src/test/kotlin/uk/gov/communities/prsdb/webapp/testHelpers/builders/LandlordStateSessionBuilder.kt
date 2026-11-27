@@ -108,6 +108,14 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgAddressInUk(addressInUk: Boolean = true): LandlordStateSessionBuilder {
+        withSubmittedValue(
+            "${OrgAddressTask.ROUTE_SEGMENT}/${AddressInUkStep.ROUTE_SEGMENT}",
+            AddressInUkFormModel().apply { this.addressInUk = addressInUk },
+        )
+        return self()
+    }
+
     fun withOrgAddress(): LandlordStateSessionBuilder {
         val routePrefix = OrgAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
@@ -384,7 +392,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgName() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
-        fun beforeOrgAddress() = beforeOrgName().withOrgName()
+        fun beforeOrgAddressInUk() = beforeOrgName().withOrgName()
+
+        fun beforeOrgAddress() = beforeOrgAddressInUk().withOrgAddressInUk()
 
         fun beforeOrgManualAddress() = beforeOrgAddress().withOrgManualAddressSelected()
 

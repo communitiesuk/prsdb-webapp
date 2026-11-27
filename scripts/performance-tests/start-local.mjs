@@ -84,7 +84,8 @@ try {
     stdio: 'inherit',
     env: {
       ...process.env,
-      SPRING_PROFILES_ACTIVE: 'local,local-no-auth',
+      SPRING_PROFILES_ACTIVE: process.argv.includes('--performance-dependencies') ?
+        'local,local-no-auth,performance-test' : 'local,local-no-auth',
       SERVER_PORT: appPort,
       POSTGRES_PORT: port('POSTGRES_PORT', '5433'),
       REDIS_PORT: port('REDIS_PORT', '6379'),

@@ -63,7 +63,7 @@ orgCharityNumberEnglandAndWales:
   error:
     missing: Enter a charity number
     nonNumeric: Charity number must only include numbers
-    length: Enter a 7 or 8 digit number
+    length: Enter a 6, 7 or 8 digit number
 orgCharityNumberNorthernIreland:
   error:
     missing: Enter a charity number
@@ -180,7 +180,7 @@ checkAnswers:
 identityNotVerified:
   heading: You have not proven your identity using GOV.UK One Login
   paragraph:
-    one: For this private beta, you can continue to use the service without proving your identity.
+    one: Select continue to use the service without proving your identity.
 confirmDetails:
   heading: Confirm your name and date of birth
   summary: 'Check these details from your GOV.UK One Login:'

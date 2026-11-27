@@ -16,6 +16,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordInc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageSystemOperatorView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import kotlin.test.assertEquals
@@ -318,6 +321,40 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             assertThat(detailsPage.leadTrusteeCard.getAction("Change")).isHidden()
             assertThat(detailsPage.governingBodyMembersLink).isHidden()
+        }
+    }
+
+    @Nested
+    inner class LandlordDetailsSystemOperatorView : NestedIntegrationTestWithImmutableData("data-local.sql") {
+        @Test
+        fun `in the registered properties table the property address link goes to the system operator view of the property's details`(
+            page: Page,
+        ) {
+            val propertyOwnershipId = 1
+            val detailsPage = navigator.goToLandlordDetailsAsASystemOperator(1)
+            detailsPage.tabs.goToRegisteredProperties()
+
+            detailsPage.getPropertyAddressLink("1, Example Road, EG").clickAndWait()
+
+            val propertyDetailsView =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageSystemOperatorView::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+
+            propertyDetailsView.backLink.clickAndWait()
+            val detailsPageAfterBack = assertPageIs(page, SystemOperatorViewLandlordDetailsPage::class, mapOf("id" to "1"))
+            assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+        }
+
+        @Test
+        fun `the back link goes to the system operator dashboard`(page: Page) {
+            val detailsPage = navigator.goToLandlordDetailsAsASystemOperator(1)
+
+            detailsPage.backLink.clickAndWait()
+
+            assertPageIs(page, SystemOperatorDashboardPage::class)
         }
     }
 

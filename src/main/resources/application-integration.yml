@@ -58,3 +58,7 @@ argon2:
 gov-uk-pay:
   annual-payment-amount-in-pence: 6500
   gratis-period-end-date: 2027-01-01
+
+aws-security-agent:
+  # Not sensitive: this token is served publicly at /.well-known/aws/securityagent-domain-verification.json
+  domain-verification-tokens: AQ-yYECRH2N8hfMBY5ZwGg

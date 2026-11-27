@@ -192,6 +192,9 @@ class OrganisationRegistrationHttpContractTests {
                         """<input type="radio" name="landlordType" value="INDIVIDUAL">""" +
                             """<input type="radio" name="landlordType" value="ORGANISATION">"""
                     "organisation-name" -> """<input name="orgName">"""
+                    "organisation-address/address-in-uk", "lead-trustee-address/address-in-uk" ->
+                        """<input type="radio" name="addressInUk" value="true">""" +
+                            """<input type="radio" name="addressInUk" value="false">"""
                     "organisation-type" ->
                         listOf(0 to "COMPANY", 1 to "CHARITY", 2 to "TRUST", 4 to "NONE").joinToString("") { (index, value) ->
                             """<input type="checkbox" name="orgTypes[$index]" value="$value">""" +
@@ -200,9 +203,6 @@ class OrganisationRegistrationHttpContractTests {
                     "lead-trustee-name", "organisation-governing-body-member-name" -> """<input name="name">"""
                     "lead-trustee-dob", "organisation-governing-body-member-dob" ->
                         """<input name="day"><input name="month"><input name="year">"""
-                    "lead-trustee-address/address-in-uk" ->
-                        """<input type="radio" name="addressInUk" value="true">""" +
-                            """<input type="radio" name="addressInUk" value="false">"""
                     "organisation-charity" ->
                         """<input type="radio" name="charity" value="true"><input type="radio" name="charity" value="false">"""
                     "organisation-charity-registered-with" ->
@@ -276,7 +276,9 @@ class OrganisationRegistrationHttpContractTests {
                     "email" -> "phone-number"
                     "phone-number" -> "landlord-type"
                     "landlord-type" -> "organisation-name".takeIf { post.first("landlordType") == "ORGANISATION" }
-                    "organisation-name" -> "organisation-address/lookup-address".also { record("name", "orgName") }
+                    "organisation-name" -> "organisation-address/address-in-uk".also { record("name", "orgName") }
+                    "organisation-address/address-in-uk" ->
+                        "organisation-address/lookup-address".takeIf { post.first("addressInUk") == "true" }
                     "organisation-email" -> "organisation-phone-number".also { record("email", "emailAddress") }
                     "organisation-phone-number" -> "organisation-type"
                     "organisation-type" -> {

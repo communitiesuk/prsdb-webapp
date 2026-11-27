@@ -121,6 +121,7 @@ data class AddressDataModel(
                 postcode = address.postcode,
                 country = address.country,
                 gss = address.gss,
+                isInternational = address.isInternational,
             )
     }
 }

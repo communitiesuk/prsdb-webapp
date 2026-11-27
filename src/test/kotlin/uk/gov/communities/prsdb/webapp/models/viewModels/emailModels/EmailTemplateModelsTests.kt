@@ -446,6 +446,15 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordOtherLandlordLeftNotification.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordPropertyReactivatedNotification(
+                        recipientName = "Bob",
+                        multiLineAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 123456L).toString(),
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordPropertyReactivatedNotification.md",
+                ),
                 // TODO PDJB-2149: Remove this entry when the ACTIVE_INACTIVE flag is removed
                 EmailTemplateTestData(
                     JointLandlordOtherLandlordLeftNotification(
@@ -682,6 +691,17 @@ class EmailTemplateModelsTests {
                         privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
                     ),
                     "/emails/FreeholderAddedToPropertyEmail.md",
+                ),
+                EmailTemplateTestData(
+                    SuperiorLandlordAddedToPropertyEmail(
+                        superiorLandlordName = "James Smith",
+                        superiorLandlordEmail = "james.smith@example.com",
+                        propertyAddress = "12 Real Street\nBristol\nBS8 1AA",
+                        landlords = listOf("Jamie Jameson (jamie.jameson@example.com)"),
+                        gdsStartPageUrl = "https://example.test/gds-start-page",
+                        privacyNoticeUrl = "https://example.test/landlord/privacy-notice",
+                    ),
+                    "/emails/SuperiorLandlordAddedToPropertyEmail.md",
                 ),
                 EmailTemplateTestData(
                     PassphraseEmail("time anything costume"),

@@ -155,6 +155,14 @@ SPRING_PROFILES_ACTIVE=local,web-server-deactivated,nft-data-seeder ./gradlew bo
 | `nft-seed.random-seed`        | `NFT_SEED_RANDOM_SEED`          | 239              | Seed for the random generator, so a given configuration produces deterministic output.                      |
 | `nft-seed.reference-date`     | `NFT_SEED_REFERENCE_DATE`       | (blank = now)    | Set to an ISO date (e.g. `2026-01-01`) to make generated dates (registration dates etc.) fully reproducible. |
 | `nft-seed.generated-addresses`| `NFT_SEED_GENERATED_ADDRESSES`  | 1000             | Number of fictional addresses to generate before seeding. `0` reuses the real NGD address data already in the database (this is what a real NFT/deployed run does — only set a non-zero value for local testing without full NGD address data loaded). |
+| `nft-seed.certificate-object-key` | `NFT_SEED_CERTIFICATE_OBJECT_KEY` | `seeding/certificate_template.png` | Seeded certificate object key; deployed runs can use a per-run reference copy. |
+| `nft-seed.certificate-version-id` | `NFT_SEED_CERTIFICATE_VERSION_ID` | `local-file-uploader` | Exact immutable S3 `VersionId` for the seeded certificate object in deployed environments. |
+
+The local `local-file-uploader` value is only stored as local file metadata: `LocalFileDownloader` resolves files by
+object key and does not use an S3 version. Deployed seeding must set `NFT_SEED_CERTIFICATE_VERSION_ID` to the exact S3
+`VersionId` for the configured key; the deployed version default is blank and `NftDataSeeder` fails closed. The legacy
+default key is `seeding/certificate_template.png`; per-run reference keys use
+`seeding/certificate-references/<run-id>-<attempt>.png` with positive numeric IDs.
 
 NGD addresses are loaded in supplier CSV order. The seeder reads eligible property addresses in ID order and shuffles
 within each batch; this does not guarantee a geographically representative sample for council-search performance tests.
@@ -177,11 +185,11 @@ doesn't hit the `exitProcess()` behaviour described above.
 Run Performance Tests restores the seed dataset for a fresh workflow run. At the end, including after a test failure,
 its recovery jobs restore the original app configuration, stop the simulator, remove owned temporary access, stop
 actual database writers, reset to the QA baseline, and verify app health and the QA fixtures. The recorded async worker
-count is restored independently after a successful reset, even if app/QA verification fails.
+revision and count are restored only after the reset, app recovery and QA verification succeed.
 
-Recovery jobs can be retried within the same workflow run. Their artifacts remain attempt-versioned, but recovery
-selects the latest validated checkpoints belonging to that run rather than requiring the current attempt to have
-created them. The checkpoints retain the original task revisions and ownership information.
+Recovery jobs can be retried within the same workflow run. Their private S3 checkpoints are attempt-versioned;
+recovery selects the latest validated checkpoints belonging to that run rather than requiring the current attempt to
+have created them. The checkpoints retain the original task revisions and ownership information.
 
 To retry the performance workload, start a **new workflow run** so the seed dataset is restored again. Re-running
 failed jobs or all jobs does not rerun dataset restoration or Gatling: these stages reject later attempts before
@@ -191,8 +199,9 @@ consumed its exclusive fixtures.
 Recovery must not be reported as successful unless its checks pass. Missing/corrupt state, an unexpected deployment,
 or an unverified writer/restore-task shutdown blocks automatic reset and requires operator recovery. Use the retained
 checkpoints and job errors to reconcile the original services and database; do not bypass the ownership guards or
-start another load run until the QA baseline and services are verified. No reset or deployment is performed merely
-by merging these workflow changes.
+start another load run until the QA baseline and services are verified. Private report retrieval and recovery
+instructions are in [the Gatling guide](docs/GatlingPerformanceTestsReadMe.md#nft-workflow-and-recovery).
+No reset or deployment is performed merely by merging these workflow changes.
 
 ### Scripts
 

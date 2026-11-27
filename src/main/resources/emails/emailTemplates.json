@@ -499,6 +499,13 @@
     "bodyLocation": "/emails/FreeholderAddedToPropertyEmail.md"
   },
   {
+    "test_id": "084cf861-bae6-4d9f-aa17-1f21247dc1ce",
+    "prod_id": "fc0c3011-e644-4045-a1f7-e0588c6ce13b",
+    "enumName": "SUPERIOR_LANDLORD_ADDED_TO_PROPERTY_EMAIL",
+    "subject": "You’ve been listed as part of the ownership chain of a rental property",
+    "bodyLocation": "/emails/SuperiorLandlordAddedToPropertyEmail.md"
+  },
+  {
     "test_id": "fdfc9429-ea11-4042-a681-10c42201e1e7",
     "prod_id": "89ad7bb0-4c8f-4461-9c7e-24266791e4ca",
     "enumName": "PASSPHRASE_EMAIL",
@@ -511,5 +518,12 @@
     "enumName": "PROPERTY_MANAGER_ADDED_TO_PROPERTY",
     "subject": "You’ve been listed as the property manager of a rental property",
     "bodyLocation": "/emails/PropertyManagerAddedToProperty.md"
+  },
+  {
+    "test_id": "85537491-2296-47db-ae43-9dbd1cc1b495",
+    "prod_id": "c05fcce1-0436-4f60-909a-2b96d69ba325",
+    "enumName": "JOINT_LANDLORD_PROPERTY_REACTIVATED_NOTIFICATION",
+    "subject": "A joint landlord reactivated a property",
+    "bodyLocation": "/emails/JointLandlordPropertyReactivatedNotification.md"
   }
 ]

@@ -32,7 +32,7 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
         BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText(
-            "Letting agent or property manager can no longer provide details",
+            "Letting agent or property manager removed",
         )
         assertThat(confirmationPage.lettingAgentEmail).hasText(lettingAgentEmail)
         confirmationPage.continueButton.clickAndWait()
