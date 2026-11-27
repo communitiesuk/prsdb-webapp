@@ -53,6 +53,12 @@ class PaymentReconciliationService(
         return getStoredPaymentStatus(paymentId)
     }
 
+    fun cancelCreatedPaymentForProperty(propertyOwnershipId: Long): PaymentStatus? {
+        val createdPayment =
+            paymentRepository.findByAssociatedProperty_IdAndStatus(propertyOwnershipId, PaymentStatus.CREATED) ?: return null
+        return markForCancellation(createdPayment.paymentId)
+    }
+
     fun recordManualIntervention(
         paymentId: String,
         reason: PaymentManualInterventionReason,

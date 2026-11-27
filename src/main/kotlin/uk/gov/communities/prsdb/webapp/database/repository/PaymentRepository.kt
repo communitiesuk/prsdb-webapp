@@ -10,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Payment
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.Instant
 
+// The underscore tells JPA to access fields relating to the referenced table
+@Suppress("ktlint:standard:function-naming")
 interface PaymentRepository : JpaRepository<Payment, String> {
     fun findByAssociatedIncompletePropertyAndStatus(
         associatedIncompleteProperty: LandlordIncompleteProperty,
@@ -24,6 +26,17 @@ interface PaymentRepository : JpaRepository<Payment, String> {
     fun findFirstByAssociatedPropertyAndStatusOrderByPaymentCreatedAtDesc(
         associatedProperty: PropertyOwnership,
         status: PaymentStatus,
+    ): Payment?
+
+    fun findByAssociatedProperty_IdAndStatus(
+        propertyOwnershipId: Long,
+        status: PaymentStatus,
+    ): Payment?
+
+    fun findByReferenceAndAssociatedProperty_IdAndPayingUser_Id(
+        reference: String,
+        propertyOwnershipId: Long,
+        payingUserId: String,
     ): Payment?
 
     fun findAllByStatus(status: PaymentStatus): List<Payment>

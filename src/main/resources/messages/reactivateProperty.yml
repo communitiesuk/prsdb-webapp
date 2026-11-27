@@ -27,6 +27,7 @@ checkAnswers:
   insetText: You’ll be able to change the property’s other details after reactivating its registration.
   warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
   submitButton: Confirm details
+paymentDescription: Reactivate your rental property
 confirmation:
   heading: Property reactivated
   youHaveReactivated: 'You have reactivated:'

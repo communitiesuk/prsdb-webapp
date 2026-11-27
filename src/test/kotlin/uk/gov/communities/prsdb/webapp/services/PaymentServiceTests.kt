@@ -32,6 +32,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -40,6 +41,7 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.TransactionSystemException
 import org.springframework.transaction.support.SimpleTransactionStatus
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.clients.GovUkPayClient
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentFailureType
@@ -47,11 +49,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PaymentManualIntervention
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.GovUkPayException
 import uk.gov.communities.prsdb.webapp.exceptions.PaymentQuoteExpiredException
+import uk.gov.communities.prsdb.webapp.exceptions.PropertyAlreadyReactivatedException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RenewalDateHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.PaymentCreationResult
@@ -65,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.createGovUkPayUnavailableException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createReactivationPayment
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyRegistrationData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.io.ByteArrayOutputStream
@@ -123,6 +129,9 @@ class PaymentServiceTests {
     private val journeyId = "journey-123"
     private val userId = "user-123"
     private val returnUrl = "https://example.test/landlord/register-property/payment-return?journeyId=journey-123"
+    private val reactivationReturnUrl = "https://example.test/landlord/reactivate-property/1/payment-return?journeyId=journey-123"
+    private val reactivationQuote =
+        PropertyPaymentQuote(amountInPence = 1234, quoteDate = LocalDate.of(2028, 1, 1), renewalDate = LocalDate.of(2028, 6, 1))
     private val email = "landlord@example.com"
     private val pastGratisPeriodEndDate = "2020-01-01"
 
@@ -692,6 +701,27 @@ class PaymentServiceTests {
                 paymentService.getPropertyReactivationPaymentQuote(propertyOwnershipId, LocalDate.of(2028, 1, 15))
             }
         }
+
+        @Test
+        fun `calculatePropertyReactivationPaymentQuote quotes a given property and landlord without looking them up`() {
+            // Arrange
+            val landlord = MockLandlordData.createIndividualLandlord().apply { setAnniversaryIfAbsent(MonthDay.of(Month.JUNE, 1)) }
+            val claimedProperty =
+                MockLandlordData.createPropertyOwnership(
+                    isActive = true,
+                    renewalDate = LocalDate.of(2028, 3, 1),
+                    paidForUntil = LocalDate.of(2028, 3, 1),
+                )
+
+            // Act
+            val quote = paymentService.calculatePropertyReactivationPaymentQuote(claimedProperty, landlord, LocalDate.of(2028, 1, 1))
+
+            // Assert
+            assertEquals(LocalDate.of(2028, 6, 1), quote.renewalDate)
+            assertEquals(LocalDate.of(2028, 3, 1), quote.chargeablePeriodStartDate)
+            assertTrue(quote.amountInPence > 0)
+            verifyNoInteractions(mockPropertyOwnershipService, mockUserToLandlordService)
+        }
     }
 
     @Nested
@@ -992,6 +1022,126 @@ class PaymentServiceTests {
     }
 
     @Nested
+    inner class CreatePropertyReactivationPaymentTests {
+        @Test
+        fun `createPropertyReactivationPayment saves a CREATED payment for the property and payer and returns the next url`() {
+            // Arrange
+            val propertyOwnership = setUpInactivePropertyForCurrentLandlord()
+            val payingUser = stubPayingUser()
+            stubGovUkPayCreatePayment(paymentId = "new-payment-id", nextUrl = "https://pay.example.test/next") {
+                stubReactivationPaymentReturnUrl()
+            }
+            whenever(mockPropertyOwnershipService.isPropertyOwnershipInactive(PROPERTY_ID)).thenReturn(true)
+
+            // Act
+            val result = paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+
+            // Assert
+            assertEquals(PaymentCreationResult.NewPayment("https://pay.example.test/next"), result)
+            val request =
+                argumentCaptor<GovUkPayCreatePaymentRequest>().also { verify(mockGovUkPayClient).createPayment(it.capture()) }.firstValue
+            assertEquals(reactivationQuote.amountInPence, request.amount)
+            assertEquals("Reactivate your rental property", request.description)
+            assertEquals(email, request.email)
+            assertEquals(reactivationReturnUrl, request.returnUrl)
+            verify(mockAbsoluteUrlProvider).buildPropertyReactivationPaymentReturnUri(PROPERTY_ID, journeyId, request.reference)
+            val payment = argumentCaptor<Payment>().also { verify(mockPaymentRepository).saveAndFlush(it.capture()) }.firstValue
+            assertEquals("new-payment-id", payment.paymentId)
+            assertEquals(PaymentStatus.CREATED, payment.status)
+            assertEquals(reactivationQuote.quoteDate, payment.quoteDate)
+            assertEquals(reactivationQuote.renewalDate, payment.forPeriodEnding)
+            assertSame(propertyOwnership, payment.associatedProperty)
+            assertSame(payingUser, payment.payingUser)
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment cancels the property's created payment before creating a new one`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord()
+            stubPayingUser()
+            stubGovUkPayCreatePayment { stubReactivationPaymentReturnUrl() }
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.CANCELLED)
+            whenever(mockPropertyOwnershipService.isPropertyOwnershipInactive(PROPERTY_ID)).thenReturn(true)
+
+            // Act
+            paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+
+            // Assert
+            val inOrder = inOrder(mockPaymentReconciliationService, mockGovUkPayClient)
+            inOrder.verify(mockPaymentReconciliationService).cancelCreatedPaymentForProperty(PROPERTY_ID)
+            inOrder.verify(mockGovUkPayClient).createPayment(any())
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment throws without creating a payment when the created payment it cancels has succeeded`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord()
+            whenever(mockPaymentReconciliationService.cancelCreatedPaymentForProperty(PROPERTY_ID)).thenReturn(PaymentStatus.SUCCEEDED)
+
+            // Act, Assert
+            assertThrows<PropertyAlreadyReactivatedException> {
+                paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+            }
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment returns ConcurrentPaymentStarted and cancels its payment when another was saved first`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord()
+            stubPayingUser()
+            stubGovUkPayCreatePayment(paymentId = "new-payment-id") { stubReactivationPaymentReturnUrl() }
+            whenever(mockPaymentRepository.saveAndFlush(any<Payment>()))
+                .thenThrow(constraintViolation("uc_payment_one_created_per_property"))
+
+            // Act
+            val result = paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+
+            // Assert
+            assertEquals(PaymentCreationResult.ConcurrentPaymentStarted, result)
+            verify(mockGovUkPayClient).cancelPayment("new-payment-id")
+            verify(mockPropertyOwnershipService, never()).isPropertyOwnershipInactive(any())
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment cancels its payment and throws when the property was reactivated meanwhile`() {
+            // Arrange
+            setUpInactivePropertyForCurrentLandlord()
+            stubPayingUser()
+            stubGovUkPayCreatePayment(paymentId = "new-payment-id") { stubReactivationPaymentReturnUrl() }
+            whenever(mockPropertyOwnershipService.isPropertyOwnershipInactive(PROPERTY_ID)).thenReturn(false)
+
+            // Act, Assert
+            assertThrows<PropertyAlreadyReactivatedException> {
+                paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+            }
+            verify(mockPaymentReconciliationService).markForCancellation("new-payment-id")
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment throws without calling GOV UK Pay when the current user can't reactivate the property`() {
+            // Arrange
+            whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(PROPERTY_ID))
+                .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+
+            // Act, Assert
+            assertThrows<ResponseStatusException> {
+                paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote)
+            }
+            verifyNoInteractions(mockGovUkPayClient, mockPaymentReconciliationService)
+        }
+
+        @Test
+        fun `createPropertyReactivationPayment throws without calling GOV UK Pay when nothing is due`() {
+            // Act, Assert
+            assertThrows<IllegalStateException> {
+                paymentService.createPropertyReactivationPayment(PROPERTY_ID, journeyId, email, reactivationQuote.copy(amountInPence = 0))
+            }
+            verifyNoInteractions(mockGovUkPayClient, mockPaymentReconciliationService)
+        }
+    }
+
+    @Nested
     inner class GetGovUkPayPaymentStatusTests {
         @ParameterizedTest
         @MethodSource("uk.gov.communities.prsdb.webapp.services.PaymentServiceTests#provideGovUkPayStatusesAndExpectedStatuses")
@@ -1108,7 +1258,7 @@ class PaymentServiceTests {
             whenever(
                 mockPaymentReconciliationService.recordManualIntervention(
                     PAYMENT_ID,
-                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_REGISTERED,
+                    PaymentManualInterventionReason.CAPTURED_BUT_NOT_APPLIED,
                     PaymentStatus.CREATED,
                 ),
             ).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
@@ -1351,7 +1501,7 @@ class PaymentServiceTests {
             whenever(
                 mockPaymentReconciliationService.recordManualIntervention(
                     PAYMENT_ID,
-                    PaymentManualInterventionReason.REGISTRATION_DID_NOT_COMMIT,
+                    PaymentManualInterventionReason.CHANGES_DID_NOT_COMMIT,
                     PaymentStatus.CREATED,
                 ),
             ).thenReturn(PaymentStatus.MANUAL_INTERVENTION)
@@ -1447,6 +1597,48 @@ class PaymentServiceTests {
             verify(mockTransactionManager).rollback(any())
             verify(mockGovUkPayClient, never()).capturePayment(any())
         }
+
+        @Test
+        fun `finalisePayment applies the given changes to the claimed payment then captures it`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            val payment = createReactivationPayment(paymentId = PAYMENT_ID)
+            stubStoredPayment(payment)
+            val changedPayments = mutableListOf<Payment>()
+
+            // Act
+            val status = paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE) { changedPayments.add(it) }
+
+            // Assert
+            assertEquals(PaymentStatus.SUCCEEDED, status)
+            assertEquals(listOf(payment), changedPayments)
+            val inOrder = inOrder(mockEntityManager, mockGovUkPayClient, mockTransactionManager)
+            inOrder.verify(mockEntityManager).refresh(payment)
+            inOrder.verify(mockGovUkPayClient).capturePayment(PAYMENT_ID)
+            inOrder.verify(mockTransactionManager).commit(any())
+            verifyNoInteractions(mockPropertyRegistrationService, mockSavedJourneyStateRepository)
+        }
+
+        @Test
+        fun `finalisePayment cancels the payment without capturing it and rethrows when the given changes find it already reactivated`() {
+            // Arrange
+            stubConditionalUpdate(PaymentStatus.CREATED, PaymentStatus.SUCCEEDED)
+            stubTransaction()
+            stubStoredPayment(createReactivationPayment(paymentId = PAYMENT_ID))
+            whenever(mockPaymentReconciliationService.markForCancellation(PAYMENT_ID)).thenReturn(PaymentStatus.CANCELLED)
+
+            // Act, Assert
+            assertThrows<PropertyAlreadyReactivatedException> {
+                paymentService.finalisePayment(PAYMENT_ID, PaymentStatus.CAPTURABLE) {
+                    throw PropertyAlreadyReactivatedException(PROPERTY_ID)
+                }
+            }
+            verify(mockGovUkPayClient, never()).capturePayment(any())
+            val inOrder = inOrder(mockTransactionManager, mockPaymentReconciliationService)
+            inOrder.verify(mockTransactionManager).rollback(any())
+            inOrder.verify(mockPaymentReconciliationService).markForCancellation(PAYMENT_ID)
+        }
     }
 
     @Nested
@@ -1498,6 +1690,45 @@ class PaymentServiceTests {
             // Assert
             assertContains(exception.message!!, journeyId)
             assertContains(exception.message!!, PAYMENT_REFERENCE)
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+    }
+
+    @Nested
+    inner class GetStoredPropertyReactivationPaymentStatusTests {
+        @Test
+        fun `getStoredPropertyReactivationPaymentStatus returns the stored status of the current user's payment`() {
+            // Arrange
+            setMockPrincipal(userId)
+            val payment = createReactivationPayment(paymentId = PAYMENT_ID, reference = PAYMENT_REFERENCE)
+            whenever(mockPaymentRepository.findByReferenceAndAssociatedProperty_IdAndPayingUser_Id(PAYMENT_REFERENCE, PROPERTY_ID, userId))
+                .thenReturn(payment)
+            whenever(mockPaymentRepository.findStatusByPaymentId(PAYMENT_ID)).thenReturn(PaymentStatus.CREATED)
+
+            // Act
+            val paymentStatusCheck = paymentService.getStoredPropertyReactivationPaymentStatus(PROPERTY_ID, PAYMENT_REFERENCE)
+
+            // Assert
+            assertEquals(PaymentStatusCheckDataModel(PAYMENT_ID, PaymentStatus.CREATED), paymentStatusCheck)
+            verifyNoInteractions(mockGovUkPayClient)
+        }
+
+        @Test
+        fun `getStoredPropertyReactivationPaymentStatus throws when the current user has no payment with the reference for the property`() {
+            // Arrange
+            setMockPrincipal(userId)
+            whenever(mockPaymentRepository.findByReferenceAndAssociatedProperty_IdAndPayingUser_Id(PAYMENT_REFERENCE, PROPERTY_ID, userId))
+                .thenReturn(null)
+
+            // Act
+            val exception =
+                assertThrows<IllegalStateException> {
+                    paymentService.getStoredPropertyReactivationPaymentStatus(PROPERTY_ID, PAYMENT_REFERENCE)
+                }
+
+            // Assert
+            assertContains(exception.message!!, PAYMENT_REFERENCE)
+            assertContains(exception.message!!, PROPERTY_ID.toString())
             verifyNoInteractions(mockGovUkPayClient)
         }
     }
@@ -1584,8 +1815,9 @@ class PaymentServiceTests {
         paymentId: String = "new-payment-id",
         nextUrl: String = "https://pay.example.test/next",
         createdDate: Instant = Instant.now(),
+        stubReturnUrl: () -> Unit = { stubPaymentReturnUrl() },
     ) {
-        stubPaymentReturnUrl()
+        stubReturnUrl()
         // GOV.UK Pay echoes the requested amount and reference back in the created payment
         whenever(mockGovUkPayClient.createPayment(any())).thenAnswer { invocation ->
             val request = invocation.getArgument<GovUkPayCreatePaymentRequest>(0)
@@ -1601,6 +1833,24 @@ class PaymentServiceTests {
 
     private fun stubPaymentReturnUrl() {
         whenever(mockAbsoluteUrlProvider.buildPropertyRegistrationPaymentReturnUri(eq(journeyId), any())).thenReturn(URI(returnUrl))
+    }
+
+    private fun stubReactivationPaymentReturnUrl() {
+        whenever(mockAbsoluteUrlProvider.buildPropertyReactivationPaymentReturnUri(eq(PROPERTY_ID), eq(journeyId), any()))
+            .thenReturn(URI(reactivationReturnUrl))
+    }
+
+    private fun setUpInactivePropertyForCurrentLandlord(): PropertyOwnership {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = PROPERTY_ID, isActive = false)
+        whenever(mockPropertyOwnershipService.getInactivePropertyOwnershipForCurrentLandlord(PROPERTY_ID)).thenReturn(propertyOwnership)
+        return propertyOwnership
+    }
+
+    private fun stubPayingUser(): PrsdbUser {
+        setMockPrincipal(userId)
+        val user = MockLandlordData.createPrsdbUser(userId)
+        whenever(mockEntityManager.getReference(PrsdbUser::class.java, userId)).thenReturn(user)
+        return user
     }
 
     private fun setMockPrincipal(name: String) {
@@ -1674,6 +1924,7 @@ class PaymentServiceTests {
         private const val PAYMENT_ID = "payment-id"
         private const val PAYMENT_REFERENCE = "payment-reference"
         private const val OTHER_PAYMENT_ID = "other-payment-id"
+        private const val PROPERTY_ID = 1L
 
         @JvmStatic
         fun provideWorkedExamples() =

@@ -264,6 +264,9 @@ class PropertyOwnershipService(
         return propertyOwnership
     }
 
+    fun isPropertyOwnershipInactive(propertyOwnershipId: Long): Boolean =
+        propertyOwnershipRepository.existsByIdAndIsActiveFalse(propertyOwnershipId)
+
     fun getActivePropertiesForLandlordUser(
         landlord: Landlord,
         currentUrlFragment: String? = null,

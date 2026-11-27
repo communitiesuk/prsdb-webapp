@@ -3,8 +3,11 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import uk.gov.communities.prsdb.webapp.constants.enums.PaymentStatus
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperty
 import uk.gov.communities.prsdb.webapp.database.entity.Payment
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockGovUkPayData.Companion.DEFAULT_PAYMENT_ID
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPrsdbUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData.Companion.createSavedJourneyState
 import java.time.Instant
@@ -30,6 +33,28 @@ class MockPaymentData {
             forPeriodEnding = forPeriodEnding,
             status = status,
             incompleteProperty = incompleteProperty,
+        )
+
+        fun createReactivationPayment(
+            paymentId: String = DEFAULT_PAYMENT_ID,
+            amountInPence: Int = 1000,
+            reference: String = "reference",
+            paymentCreatedAt: Instant = Instant.now(),
+            quoteDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+            forPeriodEnding: LocalDate = LocalDate.of(2027, 3, 1),
+            status: PaymentStatus = PaymentStatus.CREATED,
+            propertyOwnership: PropertyOwnership = createPropertyOwnership(),
+            payingUser: PrsdbUser = createPrsdbUser(),
+        ) = Payment(
+            paymentId = paymentId,
+            amountInPence = amountInPence,
+            reference = reference,
+            paymentCreatedAt = paymentCreatedAt,
+            quoteDate = quoteDate,
+            forPeriodEnding = forPeriodEnding,
+            status = status,
+            propertyOwnership = propertyOwnership,
+            payingUser = payingUser,
         )
     }
 }

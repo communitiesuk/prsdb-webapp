@@ -19,9 +19,8 @@ class CompleteReactivationStepConfig(
 
     override fun afterStepIsReached(state: PropertyReactivationJourneyState) {
         try {
-            propertyReactivationService.reactivatePropertyIfAddressAvailable(
+            propertyReactivationService.reactivatePropertyWithoutPayment(
                 state.propertyOwnershipId,
-                state.uprn,
                 propertyReactivationDataModelFactory.fromJourneyState(state),
             )
         } catch (_: EntityExistsException) {
