@@ -271,6 +271,7 @@ class PropertyDetailsController(
                 viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 messageSource = messageSource,
                 associatedPartiesEnabled = featureFlagManager.checkFeature(ASSOCIATED_PARTIES),
+                withSystemOperatorNotes = viewType == PropertyDetailsCouncilViewType.SystemOperatorView,
             )
 
         val landlordSummaryCards =

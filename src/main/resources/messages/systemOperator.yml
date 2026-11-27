@@ -19,3 +19,5 @@ notes:
     tooLong: Notes must be 5,000 characters or fewer
   landlord:
     fieldSetHeading: Notes on this landlord record
+  property:
+    fieldSetHeading: Notes on this property record

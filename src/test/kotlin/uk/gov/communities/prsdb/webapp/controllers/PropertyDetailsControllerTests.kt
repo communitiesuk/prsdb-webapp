@@ -29,8 +29,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummary
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.PropertyManagerSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.SuperiorLandlordSummaryCardHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -49,6 +52,8 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.statusDerivingService
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @WebMvcTest(PropertyDetailsController::class)
 class PropertyDetailsControllerTests(
@@ -190,6 +195,22 @@ class PropertyDetailsControllerTests(
                 }
 
             verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
+        }
+
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getPropertyDetails does not show the system operator notes row to landlords`() {
+            val propertyOwnership = createPropertyOwnership()
+            propertyOwnership.updateSystemOperatorNotes("Some notes")
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            val result = mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id)).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("propertyDetails") as PropertyDetailsViewModel).registrationDetails
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
         }
 
         @Test
@@ -1140,6 +1161,21 @@ class PropertyDetailsControllerTests(
             }
         }
 
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView does not show the system operator notes row to local council users`() {
+            val propertyOwnership = createPropertyOwnership()
+            propertyOwnership.updateSystemOperatorNotes("Some notes")
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1))).thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            val result = mvc.get(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(1L)).andReturn()
+
+            val rows = (result.modelAndView?.model?.get("propertyDetails") as PropertyDetailsViewModel).registrationDetails
+            assertTrue(rows.none { it.fieldHeading == "systemOperator.notes.key" })
+        }
+
         // TODO PDJB-2016: delete this class when the ASSOCIATED_PARTIES feature flag is removed
         @Nested
         inner class BeforeAssociatedParties {
@@ -1258,6 +1294,46 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(2L)).andExpect {
                 status { isNotFound() }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView shows not added in the notes row when the property has no notes`() {
+            val notesRow = getSystemOperatorNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, "systemOperator.notes.notAdded")
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getPropertyDetailsSystemOperatorView shows the notes split into lines when the property has notes`() {
+            propertyOwnership.updateSystemOperatorNotes("Line one\nLine two")
+
+            val notesRow = getSystemOperatorNotesRow()
+
+            assertIsNotesRowWithChangeLink(notesRow, listOf("Line one", "Line two"))
+        }
+
+        private fun getSystemOperatorNotesRow(): SummaryListRowViewModel {
+            val result = mvc.get(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(1L)).andReturn()
+            return (result.modelAndView?.model?.get("propertyDetails") as PropertyDetailsViewModel).registrationDetails.last()
+        }
+
+        private fun assertIsNotesRowWithChangeLink(
+            notesRow: SummaryListRowViewModel,
+            expectedValue: Any,
+        ) {
+            assertEquals("systemOperator.notes.key", notesRow.fieldHeading)
+            assertEquals(expectedValue, notesRow.fieldValue)
+            assertEquals(
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        UpdateSystemOperatorPropertyNotesController.getUpdateNotesStepPath(propertyOwnership.id),
+                    ),
+                ),
+                notesRow.actions,
+            )
         }
     }
 

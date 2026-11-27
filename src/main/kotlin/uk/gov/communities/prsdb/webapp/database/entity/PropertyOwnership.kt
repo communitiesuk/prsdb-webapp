@@ -179,6 +179,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var paidForUntil: LocalDate
         private set
 
+    @Column(name = "system_operator_notes")
+    var systemOperatorNotes: String? = null
+        private set
+
     constructor(
         ownershipType: OwnershipType,
         ownershipTypeBeforePdjb955: OwnershipTypeBeforePdjb955,
@@ -290,5 +294,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     fun updateRenewalDate(newRenewalDate: LocalDate) {
         renewalDate = newRenewalDate
+    }
+
+    fun updateSystemOperatorNotes(notes: String?) {
+        systemOperatorNotes = notes
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -96,6 +98,7 @@ import java.time.LocalDate
 import java.time.MonthDay
 import java.time.temporal.ChronoUnit
 import java.util.Optional
+import kotlin.reflect.full.hasAnnotation
 
 @ExtendWith(MockitoExtension::class)
 class PropertyOwnershipServiceTests {
@@ -2807,6 +2810,56 @@ class PropertyOwnershipServiceTests {
                 "The property ownership record has been updated since this update session started.",
                 exception.message,
             )
+        }
+    }
+
+    @Nested
+    inner class UpdateSystemOperatorNotes {
+        @Test
+        fun `updateSystemOperatorNotes saves the notes on the property`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateSystemOperatorNotes(
+                propertyOwnership.id,
+                "Changed bedrooms at landlord's request",
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals("Changed bedrooms at landlord's request", propertyOwnership.systemOperatorNotes)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["", "   ", "\n\t"])
+        fun `updateSystemOperatorNotes stores blank notes as null`(notes: String) {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            propertyOwnership.updateSystemOperatorNotes("Existing notes")
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            propertyOwnershipService.updateSystemOperatorNotes(propertyOwnership.id, notes, propertyOwnership.getMostRecentlyUpdated())
+
+            assertNull(propertyOwnership.systemOperatorNotes)
+        }
+
+        @Test
+        fun `updateSystemOperatorNotes throws an UpdateConflictException if the property has been updated since the journey started`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updateSystemOperatorNotes(
+                    propertyOwnership.id,
+                    "notes",
+                    propertyOwnership.getMostRecentlyUpdated().minusSeconds(60),
+                )
+            }
+            verify(mockPropertyOwnershipRepository, never()).save(any())
+        }
+
+        @Test
+        fun `updateSystemOperatorNotes is annotated with @Transactional`() {
+            assertTrue(propertyOwnershipService::updateSystemOperatorNotes.hasAnnotation<Transactional>())
         }
     }
 

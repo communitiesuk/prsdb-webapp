@@ -75,6 +75,7 @@ abstract class PropertyDetailsBasePage(
         val furnishedStatusRow = getRow("Furniture provided")
         val rentFrequencyRow = getRow("When rent is paid")
         val rentAmountRow = getRow("Rent amount")
+        val systemOperatorNotesRow = getRow("System operator notes")
     }
 
     class PropertyComplianceSummaryList(
