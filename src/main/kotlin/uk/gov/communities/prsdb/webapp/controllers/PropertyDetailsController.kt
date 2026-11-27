@@ -246,7 +246,7 @@ class PropertyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
     ): String {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId)
 
         return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, PropertyDetailsCouncilViewType.SystemOperatorView)
     }
@@ -315,10 +315,14 @@ class PropertyDetailsController(
         model.addAllAttributes(associatedPartySummaryCards(propertyOwnership, propertyDetails))
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        model.addAttribute(
-            "notificationBanner",
-            buildNotificationBanner(isLandlordView = false, propertyDetails, complianceStatus),
-        )
+        if (propertyOwnership.isActive) {
+            model.addAttribute(
+                "notificationBanner",
+                buildNotificationBanner(isLandlordView = false, propertyDetails, complianceStatus),
+            )
+        } else {
+            model.addAttribute("isDeactivated", true)
+        }
         model.addAttribute("isLandlordView", false)
 
         val backUrl =

@@ -2818,7 +2818,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `updateSystemOperatorNotes saves the notes on the property`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findById(propertyOwnership.id)).thenReturn(Optional.of(propertyOwnership))
 
             propertyOwnershipService.updateSystemOperatorNotes(
                 propertyOwnership.id,
@@ -2830,12 +2830,27 @@ class PropertyOwnershipServiceTests {
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
 
+        @Test
+        fun `updateSystemOperatorNotes saves the notes for an inactive property`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(isActive = false)
+            whenever(mockPropertyOwnershipRepository.findById(propertyOwnership.id)).thenReturn(Optional.of(propertyOwnership))
+
+            propertyOwnershipService.updateSystemOperatorNotes(
+                propertyOwnership.id,
+                "Some notes",
+                propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            assertEquals("Some notes", propertyOwnership.systemOperatorNotes)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
         @ParameterizedTest
         @ValueSource(strings = ["", "   ", "\n\t"])
         fun `updateSystemOperatorNotes stores blank notes as null`(notes: String) {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             propertyOwnership.updateSystemOperatorNotes("Existing notes")
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findById(propertyOwnership.id)).thenReturn(Optional.of(propertyOwnership))
 
             propertyOwnershipService.updateSystemOperatorNotes(propertyOwnership.id, notes, propertyOwnership.getMostRecentlyUpdated())
 
@@ -2845,7 +2860,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `updateSystemOperatorNotes throws an UpdateConflictException if the property has been updated since the journey started`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(mockPropertyOwnershipRepository.findById(propertyOwnership.id)).thenReturn(Optional.of(propertyOwnership))
 
             assertThrows<UpdateConflictException> {
                 propertyOwnershipService.updateSystemOperatorNotes(

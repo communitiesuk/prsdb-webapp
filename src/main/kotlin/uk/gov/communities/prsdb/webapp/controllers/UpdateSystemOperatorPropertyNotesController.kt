@@ -57,7 +57,7 @@ class UpdateSystemOperatorPropertyNotesController(
             rawStepPath = stepPath,
             createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
             initialiseJourney = {
-                val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+                val propertyOwnership = propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId)
                 journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal), propertyOwnership.getMostRecentlyUpdated())
             },
             dispatch = dispatch,

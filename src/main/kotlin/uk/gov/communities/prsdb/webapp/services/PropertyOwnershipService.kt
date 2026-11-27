@@ -310,7 +310,7 @@ class PropertyOwnershipService(
     fun retrievePropertyOwnershipById(propertyOwnershipId: Long): PropertyOwnership? =
         propertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)
 
-    private fun retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId: Long): PropertyOwnership =
+    fun retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId: Long): PropertyOwnership =
         propertyOwnershipRepository.findById(propertyOwnershipId).orElseThrow {
             ResponseStatusException(HttpStatus.NOT_FOUND, "Property ownership $propertyOwnershipId not found")
         }
@@ -642,7 +642,7 @@ class PropertyOwnershipService(
         notes: String,
         initialLastModifiedDate: Instant,
     ) {
-        val propertyOwnership = getPropertyOwnership(id)
+        val propertyOwnership = retrievePropertyOwnershipByIdRegardlessOfActiveStatus(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.updateSystemOperatorNotes(notes.ifBlank { null })
         propertyOwnershipRepository.save(propertyOwnership)

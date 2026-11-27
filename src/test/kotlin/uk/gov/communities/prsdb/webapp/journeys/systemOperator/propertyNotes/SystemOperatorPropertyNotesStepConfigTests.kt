@@ -45,7 +45,8 @@ class SystemOperatorPropertyNotesStepConfigTests {
         propertyOwnership.updateSystemOperatorNotes("Existing notes")
         whenever(mockState.notesInitialised).thenReturn(null)
         whenever(mockState.recordId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -60,7 +61,7 @@ class SystemOperatorPropertyNotesStepConfigTests {
     fun `afterStepIsReached when the property has no notes marks the state as initialised only`() {
         whenever(mockState.notesInitialised).thenReturn(null)
         whenever(mockState.recordId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId))
+        whenever(mockPropertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership())
 
         stepConfig.afterStepIsReached(mockState)
