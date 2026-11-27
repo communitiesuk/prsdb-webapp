@@ -14,5 +14,5 @@ class ConfirmationPage(
     val confirmationEmail = page.locator("#confirmation-email")
     val accessLevel = page.locator("#access-level")
     val permissions = page.locator("#permissions li")
-    val goToDashboardLink = Link(page.locator("#go-to-dashboard"))
+    val goToDashboardLink = Link(page.locator("a.govuk-button"))
 }

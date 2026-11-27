@@ -127,7 +127,6 @@ class AcceptOrganisationalLandlordUserInvitationControllerTests(
                 view { name("acceptOrganisationInvitationConfirmation") }
                 model {
                     attribute("organisationName", "Test Organisation")
-                    attribute("emailAddress", "invitee@example.com")
                     attribute("isAdmin", isAdmin)
                     attribute("dashboardUrl", LANDLORD_DASHBOARD_URL)
                 }

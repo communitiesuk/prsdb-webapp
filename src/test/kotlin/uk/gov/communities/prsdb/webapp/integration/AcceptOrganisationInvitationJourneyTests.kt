@@ -199,11 +199,11 @@ class AcceptOrganisationInvitationJourneyTests : IntegrationTestWithMutableData(
         assertFalse(URI(page.url()).query.orEmpty().contains("journeyId="))
         assertEquals("Invitation accepted", confirmationPage.heading.getText())
         assertThat(confirmationPage.joinedOrganisation).containsText("Local Organisation Landlord")
-        assertThat(confirmationPage.confirmationEmail).containsText("invitee@example.com")
+        assertThat(confirmationPage.confirmationEmail).hasText("We’ve sent you a confirmation email.")
 
         val isAdmin = expectedRole == OrganisationalLandlordUserRole.ADMIN
         assertThat(confirmationPage.accessLevel)
-            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}, you can:")
+            .hasText("Your access level is ${if (isAdmin) "administrator" else "editor"}.")
         val expectedPermissions =
             if (isAdmin) {
                 arrayOf(
