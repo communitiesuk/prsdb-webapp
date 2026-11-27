@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthCont
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateSystemOperatorLandlordNotesController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class LandlordViewModel(
     private val landlord: IndividualLandlord,
     private val withChangeLinks: Boolean = true,
+    private val withSystemOperatorNotes: Boolean = false,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
@@ -112,6 +114,12 @@ class LandlordViewModel(
                         // TODO: PRSD-688 "$UPDATE_ROUTE/contact-address",
                         null,
                         withActionLink = withChangeLinks,
+                    )
+                }
+                if (withSystemOperatorNotes) {
+                    addSystemOperatorNotesRow(
+                        notes = landlord.systemOperatorNotes,
+                        changeLink = UpdateSystemOperatorLandlordNotesController.getUpdateNotesStepPath(landlord.id),
                     )
                 }
             }.toList()

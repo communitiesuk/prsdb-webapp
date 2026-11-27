@@ -5,3 +5,6 @@ const val EXEMPTION_OTHER_REASON_MAX_LENGTH = 200
 const val BETA_FEEDBACK_MAX_LENGTH = 1200
 
 const val CUSTOM_BILLS_INCLUDED_MAX_LENGTH = 200
+
+// No limit was specified, so this was chosen to be generous enough for notes from several updates
+const val SYSTEM_OPERATOR_NOTES_MAX_LENGTH = 5000
