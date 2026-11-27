@@ -121,8 +121,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteOrganisationalLandlordUserJourneyPages.InviteOrganisationalLandlordUserFormPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.AddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
@@ -252,11 +252,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SuperiorLandlordsListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.AddressInUkFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeTrustInterruptionPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
@@ -538,10 +538,10 @@ class Navigator(
         return createValidPage(page, PhoneNumberFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationCountryOfResidencePage(): CountryOfResidenceFormPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeCountryOfResidence().build())
-        navigateToLandlordRegistrationJourneyStep(CountryOfResidenceStep.ROUTE_SEGMENT)
-        return createValidPage(page, CountryOfResidenceFormPageLandlordRegistration::class)
+    fun skipToLandlordRegistrationAddressInUkPage(): AddressInUkFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeAddressInUk().build())
+        navigateToLandlordRegistrationJourneyStep(AddressInUkStep.ROUTE_SEGMENT)
+        return createValidPage(page, AddressInUkFormPageLandlordRegistration::class)
     }
 
     fun skipToLandlordRegistrationLookupAddressPage(): LookupAddressFormPageLandlordRegistration {
@@ -1580,8 +1580,13 @@ class Navigator(
         return createValidPage(page, SystemOperatorViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
+    fun goToUpdateLandlordDetailsUpdateAddressInUkPage(): AddressInUkFormPageUpdateLandlordDetails {
+        navigate("${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${AddressInUkStep.ROUTE_SEGMENT}")
+        return createValidPage(page, AddressInUkFormPageUpdateLandlordDetails::class)
+    }
+
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        navigate("${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
+        goToUpdateLandlordDetailsUpdateAddressInUkPage().submitYes()
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 

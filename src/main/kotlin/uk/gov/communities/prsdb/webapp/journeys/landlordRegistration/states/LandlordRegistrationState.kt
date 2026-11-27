@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordLocationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateState
@@ -17,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 
 interface LandlordRegistrationState :
     CheckYourAnswersJourneyState,
@@ -24,7 +24,7 @@ interface LandlordRegistrationState :
     OrgTypeUpdateState {
     val emailStep: EmailStep
     val phoneNumberStep: PhoneNumberStep
-    val individualLandlordLocationTask: IndividualLandlordLocationTask
+    val individualLandlordAddressTask: LandlordAddressTask
     val orgLandlordRegistrationTask: OrgLandlordRegistrationTask
     val landlordTypeStep: LandlordTypeStep
     val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep

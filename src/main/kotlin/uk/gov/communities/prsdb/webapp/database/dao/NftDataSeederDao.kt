@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.database.dao
 
 import org.hibernate.StatelessSession
+import uk.gov.communities.prsdb.webapp.constants.DEPRECATED
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND
-import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import java.sql.Connection
@@ -99,12 +99,13 @@ class NftDataSeederDao(
     }
 
     fun prepareIndividualLandlordStatement(): PreparedStatement {
+        // TODO PDJB-2309: remove individual_country_of_residence from this insert once the column is dropped
         val query =
             """
             INSERT INTO landlord 
             (id, created_date, last_modified_date, individual_subject_identifier, individual_name, individual_email, individual_phone_number, individual_address_id, individual_date_of_birth, 
              registration_number_id, individual_is_verified, anniversary_day, anniversary_month, has_registered_property, individual_country_of_residence, is_active, individual_has_accepted_privacy_notice, landlord_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '$DEPRECATED', true, true, 0)
             """
         return connection.prepareStatement(query)
     }

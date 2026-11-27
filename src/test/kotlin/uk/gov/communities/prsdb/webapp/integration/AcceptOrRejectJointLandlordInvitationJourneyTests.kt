@@ -12,10 +12,10 @@ import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitati
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AddressInUkFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CountryOfResidenceFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.EmailFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationRejectedConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
@@ -157,8 +157,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val landlordTypePage = assertPageIs(page, LandlordTypeFormPageAcceptJointLandlordInvitation::class)
             landlordTypePage.submitIndividual()
 
-            val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageAcceptJointLandlordInvitation::class)
-            countryOfResidencePage.submitUk()
+            assertPageIs(page, AddressInUkFormPageAcceptJointLandlordInvitation::class).submitYes()
 
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageAcceptJointLandlordInvitation::class)
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")

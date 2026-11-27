@@ -377,7 +377,7 @@ class LandlordStateSessionBuilder(
 
         fun beforePhoneNumber() = beforeEmail().withEmail()
 
-        fun beforeCountryOfResidence() =
+        fun beforeAddressInUk() =
             beforeLandlordType()
                 .withLandlordType(LandlordType.INDIVIDUAL)
 
@@ -446,7 +446,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCheckAnswers() = beforeOrgMainContact().withOrgMainContact()
 
-        fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
+        fun beforeLookupAddress() = beforeAddressInUk().withAddressInUk()
 
         fun beforeSelectAddress() = beforeLookupAddress().withLookupAddress()
 

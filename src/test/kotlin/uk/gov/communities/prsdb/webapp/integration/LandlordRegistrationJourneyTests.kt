@@ -19,17 +19,18 @@ import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVE
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.AddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CompaniesHouseInterruptionPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
@@ -43,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NonUkAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressInUkFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
@@ -70,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -84,6 +87,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
@@ -138,8 +142,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitUk()
+        val addressInUkPage = assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
+        addressInUkPage.submitYes()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -206,8 +210,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitUk()
+        val addressInUkPage = assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
+        addressInUkPage.submitYes()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -269,8 +273,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        countryOfResidencePage.submitUk()
+        val addressInUkPage = assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
+        addressInUkPage.submitYes()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
@@ -301,6 +305,48 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(confirmationPage.whatYouCanDoNowHeading).not().isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can register with a non-UK address`(page: Page) {
+        val addressInUkPage = navigator.skipToLandlordRegistrationAddressInUkPage()
+        addressInUkPage.submitNo()
+
+        val nonUkAddressPage = assertPageIs(page, NonUkAddressFormPageLandlordRegistration::class)
+        nonUkAddressPage.submitAddress(
+            addressLineOne = "1 Rue de Rivoli",
+            townOrCity = "Paris",
+            postcode = "75001",
+        )
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.summaryList.homeAddressRow).containsText("1 Rue de Rivoli")
+        checkAnswersPage.confirmAndSubmit()
+
+        assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        val createdLandlord =
+            assertIs<IndividualLandlord>(
+                assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY")),
+            )
+        assertEquals(
+            AddressDataModel.manualAddressDataToSingleLineAddress("1 Rue de Rivoli", "Paris", "75001"),
+            createdLandlord.address.singleLineAddress,
+        )
+    }
+
+    @Test
+    fun `The home address change link starts at the address in UK page and can switch to a non-UK address`(page: Page) {
+        val checkAnswersPage = navigator.skipToLandlordRegistrationCheckAnswersPage()
+        checkAnswersPage.summaryList.homeAddressRow.clickNamedActionLinkAndWait("Change")
+
+        val addressInUkPage = assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
+        addressInUkPage.submitNo()
+
+        val nonUkAddressPage = assertPageIs(page, NonUkAddressFormPageLandlordRegistration::class)
+        nonUkAddressPage.submitAddress(addressLineOne = "1 Rue de Rivoli", townOrCity = "Paris", postcode = "75001")
+
+        val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.summaryList.homeAddressRow).containsText("1 Rue de Rivoli")
     }
 
     @Test
@@ -443,7 +489,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -691,7 +737,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        assertPageIs(page, AddressInUkFormPageLandlordRegistration::class)
     }
 
     @Test

@@ -13,7 +13,7 @@ object LandlordAddressUpdateJourney {
 
     fun requestNames(manual: Boolean): List<String> {
         val names =
-            listOf("details", "start", "lookup form", "lookup", "selection form", "select") +
+            listOf("details", "start", "in UK form", "in UK", "lookup form", "lookup", "selection form", "select") +
                 (if (manual) listOf("manual form", "submit manual") else emptyList()) +
                 listOf("saved details")
         return names.map { label(manual, it) }
@@ -47,6 +47,8 @@ object LandlordAddressUpdateJourney {
                         .check(status().`is`(302))
                         .check(header("Location").saveAs("addressNextUrl")),
                 ).exitHereIfFailed()
+                .exec(formPage(config, prefix, label(manual, "in UK form"), "input[name=addressInUk]"))
+                .exec(submitForm(config, prefix, label(manual, "in UK"), mapOf("addressInUk" to "true")))
                 .exec(formPage(config, prefix, label(manual, "lookup form"), "input[name=postcode]"))
                 .exec(submitForm(config, prefix, label(manual, "lookup"), mapOf("postcode" to "EG1 2AA", "houseNameOrNumber" to "1")))
                 .exec(

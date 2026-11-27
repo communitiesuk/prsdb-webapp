@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordLocationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 
 @ExtendWith(MockitoExtension::class)
 class LandlordTypeChangeRedirectStepConfigTests {
@@ -86,10 +86,10 @@ class LandlordTypeChangeRedirectStepConfigTests {
     }
 
     private fun setupIndividualTaskExitOutcome(outcome: SubjourneyComplete?) {
-        val mockTask = mock<IndividualLandlordLocationTask>()
+        val mockTask = mock<LandlordAddressTask>()
         val exitStep = mockExitStep(outcome)
         whenever(mockTask.exitStep).thenReturn(exitStep)
-        whenever(mockState.individualLandlordLocationTask).thenReturn(mockTask)
+        whenever(mockState.individualLandlordAddressTask).thenReturn(mockTask)
     }
 
     private fun mockExitStep(outcome: SubjourneyComplete?): SubjourneyExitStep {

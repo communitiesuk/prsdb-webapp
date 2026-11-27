@@ -21,8 +21,8 @@ class AddressUpdateHttpContractTests {
             val result = runSimulation(server)
 
             assertEquals(0, result.exitCode, result.output)
-            assertEquals(32, server.requests.size)
-            assertEquals(10, server.requests.count { it.first == "POST" })
+            assertEquals(40, server.requests.size)
+            assertEquals(14, server.requests.count { it.first == "POST" })
         }
     }
 
@@ -43,7 +43,7 @@ class AddressUpdateHttpContractTests {
 
             assertEquals(2, result.exitCode, result.output)
             assertTrue(server.requests.any { it.first == "POST" })
-            assertEquals(7, server.requests.size)
+            assertEquals(9, server.requests.size)
             assertEquals(2, server.requests.count { it.second == "/landlord/landlord-details" })
         }
     }
@@ -108,11 +108,21 @@ class AddressUpdateHttpContractTests {
                     path == "/landlord/landlord-details" -> {
                         exchange.responseHeaders.add("Set-Cookie", "SESSION=address-session; Path=/")
                         body = """<div class="govuk-summary-list__row"><span class="govuk-summary-list__value">$address</span>
-                            <a href="/landlord/landlord-details/update-address/lookup-address">Change</a></div>"""
+                            <a href="/landlord/landlord-details/update-address/address-in-uk">Change</a></div>"""
                     }
 
-                    path.endsWith("/lookup-address") && exchange.requestURI.rawQuery == null ->
+                    path.endsWith("/address-in-uk") && exchange.requestURI.rawQuery == null ->
                         redirect("$path?journeyId=address-contract")
+
+                    path.endsWith("/address-in-uk") && method == "GET" ->
+                        body =
+                            form(
+                                """<input type="radio" name="addressInUk" value="true">
+                                    <input type="radio" name="addressInUk" value="false">""",
+                            )
+
+                    path.endsWith("/address-in-uk") && fields["addressInUk"] == "true" ->
+                        redirect("/address/lookup-address?journeyId=address-contract")
 
                     path.endsWith("/lookup-address") && method == "GET" ->
                         body = form("""<input name="postcode"><input name="houseNameOrNumber">""")

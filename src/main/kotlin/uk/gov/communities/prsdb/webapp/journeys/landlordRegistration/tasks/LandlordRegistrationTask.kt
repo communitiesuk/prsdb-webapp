@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys.OrgCompaniesHouseChangeGovBodyTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys.orgCompaniesHouseChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
@@ -50,8 +49,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
@@ -59,7 +58,7 @@ class LandlordRegistrationTask(
     override val identityTask: IdentityTask,
     override val emailStep: EmailStep,
     override val phoneNumberStep: PhoneNumberStep,
-    override val individualLandlordLocationTask: IndividualLandlordLocationTask,
+    override val individualLandlordAddressTask: LandlordAddressTask,
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
     override val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep,
@@ -114,9 +113,9 @@ class LandlordRegistrationTask(
                 parents { journey.phoneNumberStep.isComplete() }
                 nextStep {
                     when (journey.landlordTypeStep.outcome) {
-                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask.firstStep
+                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordAddressTask.firstStep
                         LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.firstStep
-                        null -> journey.individualLandlordLocationTask.firstStep
+                        null -> journey.individualLandlordAddressTask.firstStep
                     }
                 }
             }
@@ -124,7 +123,7 @@ class LandlordRegistrationTask(
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { journey.cyaStep }
             }
-            task(journey.individualLandlordLocationTask) {
+            task(journey.individualLandlordAddressTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { journey.cyaStep }
             }
@@ -133,7 +132,7 @@ class LandlordRegistrationTask(
                 parents {
                     OrParents(
                         AndParents(
-                            journey.individualLandlordLocationTask.isComplete(),
+                            journey.individualLandlordAddressTask.isComplete(),
                             journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
                         ),
                         AndParents(
@@ -146,7 +145,7 @@ class LandlordRegistrationTask(
                     when (journey.landlordTypeStep.outcome) {
                         LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.exitStep.backUrl
 
-                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask.exitStep.backUrl
+                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordAddressTask.exitStep.backUrl
 
                         null -> throw IllegalStateException(
                             "landlordTypeStep must have an outcome for the check your answers step to be reachable",
@@ -185,15 +184,8 @@ class LandlordRegistrationTask(
                         checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
                     }
 
-                    CountryOfResidenceStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(
-                            journey.individualLandlordLocationTask.countryOfResidenceStep,
-                            CountryOfResidenceStep.ROUTE_SEGMENT,
-                        )
-                    }
-
-                    LookupAddressStep.ROUTE_SEGMENT -> {
-                        checkAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
+                    AddressInUkStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.individualLandlordAddressTask, null)
                     }
 
                     LandlordTypeStep.ROUTE_SEGMENT -> {
@@ -213,7 +205,7 @@ class LandlordRegistrationTask(
                                     }
 
                                     LandlordTypeChangeDestination.INDIVIDUAL_TASK -> {
-                                        Destination(journey.individualLandlordLocationTask.firstStep)
+                                        Destination(journey.individualLandlordAddressTask.firstStep)
                                     }
 
                                     LandlordTypeChangeDestination.ORGANISATION_TASK -> {
@@ -222,7 +214,7 @@ class LandlordRegistrationTask(
                                 }
                             }
                         }
-                        task(journey.individualLandlordLocationTask) {
+                        task(journey.individualLandlordAddressTask) {
                             parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                             nextStep { journey.finishCyaStep }
                         }
