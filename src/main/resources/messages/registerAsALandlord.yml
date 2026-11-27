@@ -210,7 +210,7 @@ orgGovBodyWhoToProvide:
     missing: Select who you are providing details for
 leadTrusteeName:
   fieldSetHeading: What is the lead trustee’s full name?
-  fieldSetHint: All trustees are equally legally responsible, but you must nominate one ‘lead’ trustee to be the main point of contact
+  fieldSetHint: All trustees have shared legal responsibility for registrations, but we need a ‘lead’ trustee to be a main contact
   error:
     missing: Enter the lead trustee’s full name
 orgGovBodyMemberDob:
