@@ -276,6 +276,20 @@ class MockGovUkPayControllerTests {
     }
 
     @Test
+    fun `authorising a cancelled moto_api payment returns 400 with P1212 and leaves it cancelled`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/cancel")).andExpect(status().isNoContent)
+
+        authorise(authBody(oneTimeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1212"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("cancelled"))
+    }
+
+    @Test
     fun `authorising with an unknown one-time token returns 400 with P1211`() {
         authorise(authBody("not-a-real-token"))
             .andExpect(status().isBadRequest)
