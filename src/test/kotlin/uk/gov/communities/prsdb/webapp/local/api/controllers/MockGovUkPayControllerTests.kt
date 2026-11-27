@@ -8,7 +8,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.boot.env.YamlPropertySourceLoader
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
+import org.springframework.core.env.Profiles
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
+import org.springframework.mock.env.MockEnvironment
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -22,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PaymentRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPaymentData.Companion.createPayment
 import java.time.Instant
 import java.util.Optional
+import kotlin.test.assertEquals
 
 class MockGovUkPayControllerTests {
     private lateinit var mvc: MockMvc
@@ -37,10 +43,11 @@ class MockGovUkPayControllerTests {
         cardEntryDelaySeconds: Long = 0,
         failingCallsFromCapture: Int = 0,
         failingCaptureTakesPayment: Boolean = true,
+        mockBaseUrl: String = "http://localhost:8080/local/gov-uk-pay",
     ) = MockMvcBuilders
         .standaloneSetup(
             MockGovUkPayController(
-                "8080",
+                mockBaseUrl,
                 cardEntryDelaySeconds,
                 failingCallsFromCapture,
                 failingCaptureTakesPayment,
@@ -77,6 +84,36 @@ class MockGovUkPayControllerTests {
         return paymentId
     }
 
+    private fun createMotoBody() =
+        """
+        {"amount":12000,"reference":"REF-123","description":"Registration fee",
+         "authorisation_mode":"moto_api","delayed_capture":true}
+        """.trimIndent()
+
+    private fun createMotoPaymentAndGetIdAndToken(): Pair<String, String> {
+        val response =
+            mvc
+                .perform(
+                    post("/local/gov-uk-pay/v1/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createMotoBody()),
+                ).andReturn()
+                .response.contentAsString
+        val json = objectMapper.readTree(response)
+        return json.get("payment_id").asText() to json.at("/_links/auth_url_post/params/one_time_token").asText()
+    }
+
+    private fun authBody(
+        oneTimeToken: String,
+        cardNumber: String = "4444333322221111",
+    ) = """
+        {"one_time_token":"$oneTimeToken","card_number":"$cardNumber","cvc":"123","expiry_date":"02/30",
+         "cardholder_name":"Mycroft Holmes"}
+        """.trimIndent()
+
+    private fun authorise(body: String) =
+        mvc.perform(post("/local/gov-uk-pay/v1/auth").contentType(MediaType.APPLICATION_JSON).content(body))
+
     @Test
     fun `creating a payment returns 201 with created state and a next_url`() {
         mvc
@@ -92,6 +129,68 @@ class MockGovUkPayControllerTests {
             .andExpect(
                 jsonPath("$._links.next_url.href", startsWith("http://localhost:8080/local/gov-uk-pay/mock-card-page/")),
             )
+    }
+
+    @Test
+    fun `payment card link uses the configured app-hosted mock origin`() {
+        mvc = createMvc(mockBaseUrl = "https://nft.example.test/local/gov-uk-pay")
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+            .andExpect(status().isCreated)
+            .andExpect(
+                jsonPath("$._links.next_url.href", startsWith("https://nft.example.test/local/gov-uk-pay/mock-card-page/")),
+            )
+    }
+
+    @Test
+    fun `payment mock is limited to local or non-production NFT performance profiles`() {
+        for ((profiles, enabled) in listOf(
+            arrayOf("local") to true,
+            arrayOf("nft") to false,
+            arrayOf("performance-test") to false,
+            arrayOf("nft", "performance-test") to true,
+            arrayOf("nft", "performance-test", "production") to false,
+        )) {
+            AnnotationConfigApplicationContext().use { context ->
+                val environment = MockEnvironment()
+                environment.setActiveProfiles(*profiles)
+                environment.setProperty("server.port", "8080")
+                environment.setProperty("gov-uk-pay.mock-card-entry-delay-seconds", "0")
+                environment.setProperty("gov-uk-pay.mock-failing-calls-from-capture", "0")
+                environment.setProperty("gov-uk-pay.mock-failing-capture-takes-payment", "true")
+                environment.setProperty("gov-uk-pay.mock-base-url", "http://localhost:8080/local/gov-uk-pay")
+                context.setEnvironment(environment)
+                context.beanFactory.registerSingleton("objectMapper", objectMapper)
+                context.beanFactory.registerSingleton("paymentRepository", mockPaymentRepository)
+                context.register(MockGovUkPayController::class.java)
+                context.refresh()
+                assertEquals(enabled, context.getBeansOfType(MockGovUkPayController::class.java).isNotEmpty())
+            }
+        }
+    }
+
+    @Test
+    fun `performance payment configuration is limited to non-production local and NFT runs`() {
+        val source =
+            YamlPropertySourceLoader()
+                .load("performance-test", ClassPathResource("application-performance-test.yml"))
+                .single { it.getProperty("gov-uk-pay.api-key") == "performance-test" }
+        val activation = Profiles.of(source.getProperty("spring.config.activate.on-profile") as String)
+
+        for ((profiles, enabled) in listOf(
+            arrayOf("performance-test") to false,
+            arrayOf("integration", "performance-test") to false,
+            arrayOf("production", "performance-test") to false,
+            arrayOf("nft") to false,
+            arrayOf("local", "performance-test") to true,
+            arrayOf("nft", "performance-test") to true,
+            arrayOf("nft", "performance-test", "production") to false,
+        )) {
+            val environment = MockEnvironment()
+            environment.setActiveProfiles(*profiles)
+            assertEquals(enabled, environment.acceptsProfiles(activation), "Unexpected payment configuration activation")
+        }
     }
 
     @Test
@@ -111,6 +210,112 @@ class MockGovUkPayControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""{"amount":100,"reference":"R","return_url":"https://x"}"""),
             ).andExpect(status().isUnprocessableEntity)
+            .andExpect(jsonPath("$.code").value("P0101"))
+    }
+
+    @Test
+    fun `creating a moto_api payment without a return_url returns 201 with a one-time token and no next_url`() {
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createMotoBody()))
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.state.status").value("created"))
+            .andExpect(jsonPath("$.authorisation_mode").value("moto_api"))
+            .andExpect(jsonPath("$.return_url").doesNotExist())
+            .andExpect(jsonPath("$._links.next_url").doesNotExist())
+            .andExpect(jsonPath("$._links.auth_url_post.href").value("http://localhost:8080/local/gov-uk-pay/v1/auth"))
+            .andExpect(jsonPath("$._links.auth_url_post.method").value("POST"))
+            .andExpect(jsonPath("$._links.auth_url_post.params.one_time_token", matchesPattern("[0-9a-f-]{36}")))
+    }
+
+    @Test
+    fun `creating a web payment without a return_url returns 422 with an error body`() {
+        mvc
+            .perform(
+                post("/local/gov-uk-pay/v1/payments")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""{"amount":100,"reference":"R","description":"D"}"""),
+            ).andExpect(status().isUnprocessableEntity)
+            .andExpect(jsonPath("$.code").value("P0101"))
+    }
+
+    @Test
+    fun `authorising a moto_api payment with its one-time token returns 204 and moves it to capturable`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise(authBody(oneTimeToken)).andExpect(status().isNoContent)
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("capturable"))
+            .andExpect(jsonPath("$.card_details.cardholder_name").value("Mycroft Holmes"))
+            .andExpect(jsonPath("$._links.auth_url_post").doesNotExist())
+            .andExpect(jsonPath("$._links.capture.method").value("POST"))
+    }
+
+    @Test
+    fun `authorising with a declined card number returns 402 and fails the payment`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise(authBody(oneTimeToken, cardNumber = "4000000000000002"))
+            .andExpect(status().isPaymentRequired)
+            .andExpect(jsonPath("$.code").value("P0010"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("failed"))
+    }
+
+    @Test
+    fun `authorising with a one-time token that has already been used returns 400 with P1212`() {
+        val (_, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+        authorise(authBody(oneTimeToken)).andExpect(status().isNoContent)
+
+        authorise(authBody(oneTimeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1212"))
+    }
+
+    @Test
+    fun `authorising a cancelled moto_api payment returns 400 with P1212 and leaves it cancelled`() {
+        val (paymentId, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+        mvc.perform(post("/local/gov-uk-pay/v1/payments/$paymentId/cancel")).andExpect(status().isNoContent)
+
+        authorise(authBody(oneTimeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1212"))
+
+        mvc
+            .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
+            .andExpect(jsonPath("$.state.status").value("cancelled"))
+    }
+
+    @Test
+    fun `authorising with an unknown one-time token returns 400 with P1211`() {
+        authorise(authBody("not-a-real-token"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1211"))
+    }
+
+    @Test
+    fun `the one-time token of a web payment can't be used to authorise it`() {
+        val createResponse =
+            mvc
+                .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(createBody()))
+                .andReturn()
+                .response.contentAsString
+        val chargeToken = objectMapper.readTree(createResponse).at("/_links/next_url_post/params/chargeTokenId").asText()
+
+        authorise(authBody(chargeToken))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("P1211"))
+    }
+
+    @Test
+    fun `authorising without a card detail returns 422 with P0101`() {
+        val (_, oneTimeToken) = createMotoPaymentAndGetIdAndToken()
+
+        authorise("""{"one_time_token":"$oneTimeToken","card_number":"4444333322221111","cvc":"123","expiry_date":"02/30"}""")
+            .andExpect(status().isUnprocessableEntity)
             .andExpect(jsonPath("$.code").value("P0101"))
     }
 

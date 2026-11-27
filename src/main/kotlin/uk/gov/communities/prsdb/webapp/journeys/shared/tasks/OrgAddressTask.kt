@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AddressInUkStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -10,17 +11,28 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 @JourneyFrameworkComponent
 class OrgAddressTask(
     journeyStateService: JourneyStateService,
+    addressInUkStep: AddressInUkStep,
     lookupAddressStep: LookupAddressStep,
     selectAddressStep: SelectAddressStep,
     noAddressFoundStep: NoAddressFoundStep,
     manualAddressStep: ManualAddressStep,
-) : AddressTask(
+    internationalManualAddressStep: ManualAddressStep,
+) : InternationalAddressTask(
         journeyStateService,
+        addressInUkStep,
         lookupAddressStep,
         selectAddressStep,
         noAddressFoundStep,
         manualAddressStep,
+        internationalManualAddressStep,
     ) {
+    override val addressInUkContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "addressForms.addressInUk.organisationLandlordRegistration.fieldSetHeading",
+        )
+
+    override val addressInUkMissingAnswerErrorKey = "addressForms.addressInUk.organisationLandlordRegistration.radios.error.missing"
+
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "addressForms.lookupAddress.organisationLandlordRegistration.fieldSetHeading",

@@ -87,6 +87,9 @@ nft-seed:
   # Number of fictional addresses to generate before seeding. 0 uses the addresses already in the database (the real
   # NGD data loaded by NgdAddressLoader), which is what deployed NFT does.
   generated-addresses: ${NFT_SEED_GENERATED_ADDRESSES:0}
+  # Deployed seeding must pin the immutable S3 object version; the blank default fails closed in NftDataSeeder.
+  certificate-version-id: ${NFT_SEED_CERTIFICATE_VERSION_ID:}
+  certificate-object-key: ${NFT_SEED_CERTIFICATE_OBJECT_KEY:seeding/certificate_template.png}
   # Keep this many eligible addresses unallocated for registration journeys after seeding.
   minimum-free-addresses: ${NFT_SEED_MINIMUM_FREE_ADDRESSES:0}
 
@@ -142,6 +145,7 @@ plausible:
 gov-uk-pay:
   base-url: https://publicapi.payments.service.gov.uk
   api-key: ${GOV_UK_PAY_API_KEY}
+  moto-api-key: ${GOV_UK_PAY_MOTO_API_KEY}
   annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
   gratis-period-end-date: ${GRATIS_PERIOD_END_DATE:2026-11-01}
   connect-timeout: 5s
@@ -158,7 +162,9 @@ cloudwatch-metrics:
     service-name: ${CLOUDWATCH_ECS_SERVICE_NAME:}
   elasticache:
     namespace: ${CLOUDWATCH_ELASTICACHE_NAMESPACE:AWS/ElastiCache}
-    cpu-utilisation-metric: ${CLOUDWATCH_ELASTICACHE_CPU_METRIC:CPUUtilization}
+    metric-name: ${CLOUDWATCH_ELASTICACHE_METRIC:${CLOUDWATCH_ELASTICACHE_CPU_METRIC:CPUUtilization}}
+    dimension-name: ${CLOUDWATCH_ELASTICACHE_DIMENSION:CacheClusterId}
+    statistic: ${CLOUDWATCH_ELASTICACHE_STATISTIC:MAXIMUM}
     cache-cluster-id: ${CLOUDWATCH_ELASTICACHE_CLUSTER_ID:}
   cloudfront:
     namespace: ${CLOUDWATCH_CLOUDFRONT_NAMESPACE:AWS/CloudFront}
@@ -265,6 +271,7 @@ spring:
     redis:
       host: ${ELASTICACHE_URL}
       port: ${ELASTICACHE_PORT}
+      username: ${ELASTICACHE_USERNAME:}
       password: ${ELASTICACHE_PASSWORD}
       ssl:
         enabled: true

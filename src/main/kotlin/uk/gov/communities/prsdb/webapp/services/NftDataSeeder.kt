@@ -4,13 +4,11 @@ import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
-import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.CoreLandlordDetails
@@ -21,9 +19,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setLongOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadEicrStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
 import java.sql.Date
@@ -59,11 +54,23 @@ class NftDataSeeder(
     private val referenceDate: String,
     @Value("\${nft-seed.generated-addresses}")
     private val numOfGeneratedAddresses: Int,
+    @Value("\${nft-seed.certificate-version-id}")
+    private val certificateObjectVersionId: String,
     @Value("\${nft-seed.minimum-free-addresses:0}")
     private val minimumFreeAddresses: Int = 0,
     @Value("\${nft-seed.incomplete-properties:0}")
     private val numOfIncompleteProperties: Int = 0,
+    @Value("\${nft-seed.certificate-object-key}")
+    private val certificateObjectKey: String = "seeding/certificate_template.png",
 ) {
+    init {
+        require(certificateObjectVersionId.isNotBlank()) { "nft-seed.certificate-version-id must be configured" }
+        require(
+            certificateObjectKey == "seeding/certificate_template.png" ||
+                certificateObjectKey.matches(Regex("seeding/certificate-references/[1-9][0-9]*-[1-9][0-9]*\\.png")),
+        ) { "nft-seed.certificate-object-key must identify a supported seed certificate" }
+    }
+
     private lateinit var nftDataSeederDao: NftDataSeederDao
     private lateinit var startingIds: Map<String, Long>
     private var eligibleAddressCount = 0
@@ -102,7 +109,7 @@ class NftDataSeeder(
                     startingIds = nftDataSeederDao.findStartingIds()
                     nftDataSeederDao.updateIdSequences()
                     seedGeneratedAddressData()
-                    nftDataSeederDao.snapshotIncompleteAddressAllocations()
+                    nftDataSeederDao.snapshotUnavailablePropertyAddresses()
                     eligibleAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = false)
                     remainingAvailableAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable = true)
                     check(totalProperties.toLong() + minimumFreeAddresses <= remainingAvailableAddressCount) {
@@ -953,9 +960,7 @@ class NftDataSeeder(
             val gasSafetyUploadId = startingIds.getValue("file_upload") + ++updatedFileUploadCount
             addFileUploadToBatch(
                 fileUploadStmt,
-                propertyOwnershipId,
                 createdDate,
-                CertificateType.GasSafetyCert,
                 gasSafetyUploadId,
             )
             gasSafetyFileUploadsStmt.setLong(1, complianceId)
@@ -972,9 +977,7 @@ class NftDataSeeder(
             val electricalSafetyUploadId = startingIds.getValue("file_upload") + ++updatedFileUploadCount
             addFileUploadToBatch(
                 fileUploadStmt,
-                propertyOwnershipId,
                 createdDate,
-                complianceData.electricalCertType!!,
                 electricalSafetyUploadId,
             )
             electricalSafetyFileUploadsStmt.setLong(1, complianceId)
@@ -1010,30 +1013,18 @@ class NftDataSeeder(
     // TODO PDJB-239: Upload files to S3
     private fun addFileUploadToBatch(
         fileUploadStmt: PreparedStatement,
-        propertyOwnershipId: Long,
         createdDate: Timestamp,
-        certificateType: CertificateType,
         fileUploadId: Long,
     ) {
-        val stepName = getUploadStepName(certificateType)
-        val fakeJourneyId = "seed-$propertyOwnershipId"
-        val fakeMemberId = "member-$fileUploadId"
-
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        fileUploadStmt.setString(4, CertificateFilenameHelper.getCertFilename(fakeJourneyId, stepName, fakeMemberId))
+        fileUploadStmt.setString(4, certificateObjectKey)
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
         fileUploadStmt.setString(6, "fake-certificate.png")
+        fileUploadStmt.setString(7, certificateObjectVersionId)
         fileUploadStmt.addBatch()
     }
-
-    private fun getUploadStepName(certificateType: CertificateType): String =
-        when (certificateType) {
-            CertificateType.GasSafetyCert -> UploadGasCertStep.ROUTE_SEGMENT
-            CertificateType.Eic -> UploadEicStep.ROUTE_SEGMENT
-            CertificateType.Eicr -> UploadEicrStep.ROUTE_SEGMENT
-        }
 
     private fun log(message: String) {
         println("${LocalDateTime.now()} $message")

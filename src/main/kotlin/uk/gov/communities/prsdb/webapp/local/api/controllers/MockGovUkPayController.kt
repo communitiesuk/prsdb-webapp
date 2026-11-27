@@ -29,7 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 /**
- * Mocks the GOV.UK Pay endpoints we use, for local development. Only the standard `web` payment journey is supported.
+ * Mocks the GOV.UK Pay endpoints we use, for local development. The standard `web` payment journey and the `moto_api`
+ * (MOTO payments authorised by sending card details through the API) journey are supported.
  *
  * API reference: https://docs.payments.service.gov.uk/api_reference/#api-reference
  *
@@ -42,6 +43,11 @@ import kotlin.random.Random
  * since the app started. Any other payment (e.g. seeded by data-local.sql) is rebuilt from our payment table, using
  * the status we last recorded for it.
  *
+ * A `moto_api` payment is authorised by POSTing its card details and one-time token to `/v1/auth`. The payment moves
+ * straight to capturable (delayed capture) or success, or to failed if using the declined card number. Only payments
+ * created through this mock since the app started can be authorised, because one-time tokens aren't stored in our
+ * payment table.
+ *
  * After the mock card page, a payment stays in progress for `gov-uk-pay.mock-card-entry-delay-seconds`, as a real
  * payment can while GOV.UK Pay finishes processing it, so that our payment processing page can be seen locally.
  *
@@ -49,11 +55,11 @@ import kotlin.random.Random
  * with its first capture, and `gov-uk-pay.mock-failing-capture-takes-payment` to choose whether that failing capture
  * still takes the payment.
  */
-@Profile("local")
+@Profile("local | (performance-test & nft & !production)")
 @PrsdbRestController
 @RequestMapping("/local/gov-uk-pay")
 class MockGovUkPayController(
-    @Value("\${server.port}") private val serverPort: String,
+    @Value("\${gov-uk-pay.mock-base-url:http://localhost:\${server.port}/local/gov-uk-pay}") private val baseUrl: String,
     @Value("\${gov-uk-pay.mock-card-entry-delay-seconds}") private val cardEntryDelaySeconds: Long,
     @Value("\${gov-uk-pay.mock-failing-calls-from-capture}") private val failingCallsFromCapture: Int,
     @Value("\${gov-uk-pay.mock-failing-capture-takes-payment}") private val failingCaptureTakesPayment: Boolean,
@@ -61,8 +67,6 @@ class MockGovUkPayController(
     private val paymentRepository: PaymentRepository,
 ) {
     private val payments = ConcurrentHashMap<String, StoredPayment>()
-
-    private val baseUrl get() = "http://localhost:$serverPort/local/gov-uk-pay"
 
     @PostMapping("/v1/payments")
     fun createPayment(
@@ -74,8 +78,9 @@ class MockGovUkPayController(
         val reference = request.optString("reference", "")
         val description = request.optString("description", "")
         val returnUrl = request.optString("return_url", "")
+        val authorisationMode = request.optString("authorisation_mode", "web")
 
-        validateCreatePaymentRequest(amount, reference, description, returnUrl)?.let { error ->
+        validateCreatePaymentRequest(amount, reference, description, returnUrl, authorisationMode)?.let { error ->
             return jsonResponse(HttpStatus.UNPROCESSABLE_ENTITY, error)
         }
 
@@ -91,7 +96,7 @@ class MockGovUkPayController(
                 email = request.optStringOrNull("email"),
                 delayedCapture = request.optBoolean("delayed_capture", false),
                 moto = request.optBoolean("moto", false),
-                authorisationMode = request.optString("authorisation_mode", "web"),
+                authorisationMode = authorisationMode,
                 metadata = request.optJSONObject("metadata"),
                 cardholderName = prefilledDetails?.optStringOrNull("cardholder_name"),
                 billingAddress = prefilledDetails?.optJSONObject("billing_address"),
@@ -101,6 +106,35 @@ class MockGovUkPayController(
             )
         payments[payment.paymentId] = payment
         return jsonResponse(HttpStatus.CREATED, payment.toResponseJson())
+    }
+
+    // Stands in for sending card details through the API to authorise a moto_api payment, as Encoded will. It needs no
+    // bearer token: the one-time token identifies the payment, and can only be used once.
+    @PostMapping("/v1/auth")
+    fun authorisePayment(
+        @RequestBody body: String,
+    ): ResponseEntity<String> {
+        val request = JSONObject(body)
+        MOTO_AUTH_REQUIRED_FIELDS.firstOrNull { request.optString(it, "").isBlank() }?.let { missingField ->
+            return jsonResponse(HttpStatus.UNPROCESSABLE_ENTITY, errorJson("P0101", "Missing mandatory attribute: $missingField"))
+        }
+
+        val oneTimeToken = request.getString("one_time_token")
+        val payment =
+            payments.values.firstOrNull { it.authorisationMode == MOTO_API_AUTHORISATION_MODE && it.chargeToken == oneTimeToken }
+                ?: return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P1211", "No payment matches the one_time_token"))
+        if (!payment.useOneTimeToken()) {
+            return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P1212", "The one_time_token has already been used"))
+        }
+
+        val cardNumber = request.getString("card_number")
+        payment.cardholderName = request.getString("cardholder_name")
+        if (cardNumber == DECLINED_CARD_NUMBER) {
+            payment.markFailed()
+            return jsonResponse(HttpStatus.PAYMENT_REQUIRED, errorJson("P0010", "The payment was rejected"))
+        }
+        payment.authorise()
+        return ResponseEntity.noContent().build()
     }
 
     // Stands in for GOV.UK Pay's hosted card page: handed to the client as next_url, it "completes" card entry and
@@ -203,12 +237,15 @@ class MockGovUkPayController(
         reference: String,
         description: String,
         returnUrl: String,
+        authorisationMode: String,
     ): String? =
         when {
             amount <= 0 -> errorJson("P0102", "Invalid attribute value: amount. Must be a positive integer in pence")
             reference.isBlank() -> errorJson("P0101", "Missing mandatory attribute: reference")
             description.isBlank() -> errorJson("P0101", "Missing mandatory attribute: description")
-            returnUrl.isBlank() -> errorJson("P0101", "Missing mandatory attribute: return_url")
+            returnUrl.isBlank() && authorisationMode != MOTO_API_AUTHORISATION_MODE ->
+                errorJson("P0101", "Missing mandatory attribute: return_url")
+
             else -> null
         }
 
@@ -217,6 +254,7 @@ class MockGovUkPayController(
             buildString {
                 email?.let { append(""","email":${JSONObject.quote(it)}""") }
                 metadata?.let { append(""","metadata":$it""") }
+                if (authorisationMode != MOTO_API_AUTHORISATION_MODE) append(""","return_url":${JSONObject.quote(returnUrl)}""")
                 if (cardEntered) {
                     append(""","provider_id":"$providerId"""")
                     append(""","card_details":${cardDetailsJson()}""")
@@ -236,7 +274,6 @@ class MockGovUkPayController(
                 "settlement_summary": ${settlementSummaryJson()},
                 "delayed_capture": $delayedCapture,
                 "moto": $moto,
-                "return_url": ${JSONObject.quote(returnUrl)},
                 "authorisation_mode": ${JSONObject.quote(authorisationMode)},
                 "_links": ${linksJson()}$conditionalFields
             }
@@ -290,11 +327,18 @@ class MockGovUkPayController(
         val stateLinks =
             when (status) {
                 GovUkPayPaymentStatus.CREATED ->
-                    """
-                    ,"next_url": { "href": "$cardPage", "method": "GET" }
-                    ,"next_url_post": { "type": "application/x-www-form-urlencoded", "params": { "chargeTokenId": "$chargeToken" }, "href": "$cardPage", "method": "POST" }
-                    ,"cancel": { "href": "$payment/cancel", "method": "POST" }
-                    """.trimIndent()
+                    if (authorisationMode == MOTO_API_AUTHORISATION_MODE) {
+                        """
+                        ,"auth_url_post": { "type": "application/json", "params": { "one_time_token": "$chargeToken" }, "href": "$baseUrl/v1/auth", "method": "POST" }
+                        ,"cancel": { "href": "$payment/cancel", "method": "POST" }
+                        """.trimIndent()
+                    } else {
+                        """
+                        ,"next_url": { "href": "$cardPage", "method": "GET" }
+                        ,"next_url_post": { "type": "application/x-www-form-urlencoded", "params": { "chargeTokenId": "$chargeToken" }, "href": "$cardPage", "method": "POST" }
+                        ,"cancel": { "href": "$payment/cancel", "method": "POST" }
+                        """.trimIndent()
+                    }
 
                 GovUkPayPaymentStatus.CAPTURABLE ->
                     """
@@ -349,7 +393,7 @@ class MockGovUkPayController(
         val moto: Boolean,
         val authorisationMode: String,
         val metadata: JSONObject?,
-        val cardholderName: String?,
+        var cardholderName: String?,
         val billingAddress: JSONObject?,
         val providerId: String,
         val chargeToken: String,
@@ -369,8 +413,23 @@ class MockGovUkPayController(
 
         private var cardEntryCompletesAt: Instant? = null
 
+        private var isOneTimeTokenUsed = false
+
         private var haveFailingCallsStarted = false
         private var failingCallsRemaining = 0
+
+        // A payment can't be authorised once it's been cancelled, so its token counts as used
+        @Synchronized
+        fun useOneTimeToken(): Boolean {
+            if (isOneTimeTokenUsed || status != GovUkPayPaymentStatus.CREATED) return false
+            isOneTimeTokenUsed = true
+            return true
+        }
+
+        @Synchronized
+        fun authorise() {
+            if (delayedCapture) markCapturable() else markCaptured()
+        }
 
         @Synchronized
         fun startFailingCalls(calls: Int) {
@@ -403,11 +462,7 @@ class MockGovUkPayController(
             if (status != GovUkPayPaymentStatus.CREATED) {
                 return
             }
-            if (delayedCapture) {
-                markCapturable()
-            } else {
-                markCaptured()
-            }
+            authorise()
         }
 
         fun markCapturable() {
@@ -428,5 +483,13 @@ class MockGovUkPayController(
         fun markCancelled() {
             status = GovUkPayPaymentStatus.CANCELLED
         }
+    }
+
+    companion object {
+        private const val MOTO_API_AUTHORISATION_MODE = "moto_api"
+
+        private val MOTO_AUTH_REQUIRED_FIELDS = listOf("one_time_token", "card_number", "cvc", "expiry_date", "cardholder_name")
+
+        private const val DECLINED_CARD_NUMBER = "4000000000000002"
     }
 }

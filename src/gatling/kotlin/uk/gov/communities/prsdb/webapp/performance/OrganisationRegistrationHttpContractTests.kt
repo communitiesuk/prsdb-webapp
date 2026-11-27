@@ -192,6 +192,9 @@ class OrganisationRegistrationHttpContractTests {
                         """<input type="radio" name="landlordType" value="INDIVIDUAL">""" +
                             """<input type="radio" name="landlordType" value="ORGANISATION">"""
                     "organisation-name" -> """<input name="orgName">"""
+                    "organisation-address/address-in-uk", "lead-trustee-address/address-in-uk" ->
+                        """<input type="radio" name="addressInUk" value="true">""" +
+                            """<input type="radio" name="addressInUk" value="false">"""
                     "organisation-type" ->
                         listOf(0 to "COMPANY", 1 to "CHARITY", 2 to "TRUST", 4 to "NONE").joinToString("") { (index, value) ->
                             """<input type="checkbox" name="orgTypes[$index]" value="$value">""" +
@@ -273,7 +276,9 @@ class OrganisationRegistrationHttpContractTests {
                     "email" -> "phone-number"
                     "phone-number" -> "landlord-type"
                     "landlord-type" -> "organisation-name".takeIf { post.first("landlordType") == "ORGANISATION" }
-                    "organisation-name" -> "organisation-address/lookup-address".also { record("name", "orgName") }
+                    "organisation-name" -> "organisation-address/address-in-uk".also { record("name", "orgName") }
+                    "organisation-address/address-in-uk" ->
+                        "organisation-address/lookup-address".takeIf { post.first("addressInUk") == "true" }
                     "organisation-email" -> "organisation-phone-number".also { record("email", "emailAddress") }
                     "organisation-phone-number" -> "organisation-type"
                     "organisation-type" -> {
@@ -284,7 +289,9 @@ class OrganisationRegistrationHttpContractTests {
                     "lead-trustee-name" -> "lead-trustee-dob".also { record("leadTrustee", "name") }
                     "lead-trustee-dob" -> "lead-trustee-email"
                     "lead-trustee-email" -> "lead-trustee-phone".also { record("leadTrusteeEmail", "emailAddress") }
-                    "lead-trustee-phone" -> "lead-trustee-address/lookup-address"
+                    "lead-trustee-phone" -> "lead-trustee-address/address-in-uk"
+                    "lead-trustee-address/address-in-uk" ->
+                        "lead-trustee-address/lookup-address".takeIf { post.first("addressInUk") == "true" }
                     "organisation-charity" -> {
                         record("charity", "charity")
                         if (post.first("charity") == "true") "organisation-charity-registered-with" else "organisation-companies-house"

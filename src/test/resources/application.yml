@@ -74,6 +74,7 @@ plausible:
 gov-uk-pay:
   base-url: https://gov-uk-pay.test
   api-key: test-api-key
+  moto-api-key: test-moto-api-key
   annual-payment-amount-in-pence: 2000
   gratis-period-end-date: 2020-01-01
   connect-timeout: 5s
@@ -90,7 +91,9 @@ cloudwatch-metrics:
     service-name: test-service
   elasticache:
     namespace: AWS/ElastiCache
-    cpu-utilisation-metric: CPUUtilization
+    metric-name: CPUUtilization
+    dimension-name: CacheClusterId
+    statistic: MAXIMUM
     cache-cluster-id: test-cache-cluster
   cloudfront:
     namespace: AWS/CloudFront

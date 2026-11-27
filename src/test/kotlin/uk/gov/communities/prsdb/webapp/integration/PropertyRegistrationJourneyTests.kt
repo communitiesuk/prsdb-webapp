@@ -107,7 +107,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcSuperseededFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholderProvideDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersInfoFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FreeholdersListFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
@@ -167,9 +166,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Cert
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FreeholdType
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipKind
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentFailedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentReturnStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentFailedStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentReturnStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.payment.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyPaymentQuote
@@ -316,7 +315,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
         }
         govUkPayPaymentStatus = GovUkPayPaymentStatus.CAPTURABLE
-        whenever(govUkPayClient.getPayment(any())).thenAnswer { invocation ->
+        whenever(govUkPayClient.getPayment(any(), any())).thenAnswer { invocation ->
             MockGovUkPayData.createGovUkPayPayment(paymentId = invocation.getArgument(0), status = govUkPayPaymentStatus)
         }
     }
@@ -491,7 +490,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertPageIs(page, PaymentReturnFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.CREATED, getCreatedPayment().status)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
@@ -573,7 +572,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(paymentFailedPage.tryAgainLink).isVisible()
             assertEquals(PaymentStatus.CANCELLING, paymentRepository.findStatusByPaymentId(replacedPayment.paymentId))
             verify(govUkPayClient).cancelPayment(replacedPayment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
@@ -631,7 +630,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val payment = getCreatedPayment()
             assertEquals(PaymentStatus.CANCELLED, payment.status)
             verify(govUkPayClient).cancelPayment(payment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
             verify(propertyOwnershipRepository, never()).save(any())
         }
     }
@@ -762,7 +761,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, PaymentSummaryFormPagePropertyRegistration::class)
             assertEquals(PaymentStatus.CANCELLED, paymentRepository.findById(payment.paymentId).get().status)
             verify(govUkPayClient).cancelPayment(payment.paymentId)
-            verify(govUkPayClient, never()).capturePayment(any())
+            verify(govUkPayClient, never()).capturePayment(any(), any())
         }
     }
 
@@ -1220,9 +1219,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val freeholdTypePage = assertPageIs(page, FreeholdTypeFormPagePropertyRegistration::class)
         freeholdTypePage.submitFreeholdType(FreeholdType.JOINT_TENANTS)
         assertPageIs(page, FreeholdersInfoFormPagePropertyRegistration::class).submit()
-        assertPageIs(page, FreeholderProvideDetailsFormPagePropertyRegistration::class).submitNo()
         val freeholdersListPage = assertPageIs(page, FreeholdersListFormPagePropertyRegistration::class)
         assertThat(freeholdersListPage.heading).containsText("added 1 joint freeholder")
+        assertThat(freeholdersListPage.getSummaryCard(0).title).hasText(LOGGED_IN_LANDLORD_NAME)
         freeholdersListPage.submit()
         assertPageIs(page, AnyoneInOwnershipChainFormPagePropertyRegistration::class).submitNo()
         val propertyManagerPage = assertPageIs(page, PropertyManagerFormPagePropertyRegistration::class)
@@ -2545,7 +2544,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
+    fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`() {
         val taskListPage = navigator.startPropertyRegistration()
 
         val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
@@ -3459,5 +3458,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .minus(DatePeriod(years = EIC_VALIDITY_YEARS, days = 5))
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
+
+        // The logged-in mock user's landlord record in data-local.sql
+        private const val LOGGED_IN_LANDLORD_NAME = "Alexander Smith"
     }
 }

@@ -12,7 +12,6 @@ const val ROLE_LOCAL_COUNCIL_USER = "ROLE_LOCAL_COUNCIL_USER"
 
 const val ROLE_SYSTEM_OPERATOR = "ROLE_SYSTEM_OPERATOR"
 
-// TODO PDJB-1903: Require this role on the acting as landlord security filter chain
 const val ROLE_ACTING_AS_LANDLORD = "ROLE_ACTING_AS_LANDLORD"
 
 // The set of roles granted access by @AllowIfLandlord, for use where the "any landlord" authorities

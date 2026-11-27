@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateSuperiorLandlordsContro
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeactivationJourneyPages.ConfirmPagePropertyDeactivation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
@@ -796,6 +797,28 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsSystemOperatorView {
+        @Test
+        fun `the landlord cards link to the system operator view of the landlord record`() {
+            val detailsPage = navigator.goToPropertyDetailsAsASystemOperator(8)
+            detailsPage.tabs.goToPeopleResponsible()
+
+            val actionLink = detailsPage.landlordSummaryCards[0].getAction("View landlord record").link
+            assertThat(actionLink).hasAttribute("href", Pattern.compile("/system-operator/landlord-details/1.*"))
+            assertThat(actionLink).hasAttribute("target", "_blank")
+        }
+
+        @Test
+        fun `the back link goes to the system operator dashboard`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsAsASystemOperator(1)
+
+            detailsPage.backLink.clickAndWait()
+
+            assertPageIs(page, SystemOperatorDashboardPage::class)
         }
     }
 

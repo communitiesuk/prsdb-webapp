@@ -70,6 +70,10 @@ class Address() : ModifiableAuditableEntity() {
     var gss: String? = null
         private set
 
+    @Column(nullable = false)
+    var isInternational: Boolean = false
+        private set
+
     constructor(addressDataModel: AddressDataModel, localCouncil: LocalCouncil? = null) : this() {
         this.uprn = addressDataModel.uprn
         this.singleLineAddress = addressDataModel.singleLineAddress
@@ -84,6 +88,7 @@ class Address() : ModifiableAuditableEntity() {
         this.localCouncil = localCouncil
         this.country = addressDataModel.country
         this.gss = addressDataModel.gss
+        this.isInternational = addressDataModel.isInternational
     }
 
     fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
