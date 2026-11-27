@@ -46,7 +46,6 @@ class LetterNotificationStubService<LetterModel : LetterTemplateModel> : LetterN
         println(consoleString)
     }
 
-    // The postcode isn't always the last line, since the country can follow it
     private fun LetterAddressDataModel.hasPostcode(postcode: String?): Boolean =
         !postcode.isNullOrBlank() && addressLines.any { it.trim().endsWith(postcode) }
 }
