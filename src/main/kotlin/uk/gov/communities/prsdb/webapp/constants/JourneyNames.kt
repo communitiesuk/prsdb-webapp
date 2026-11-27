@@ -2,7 +2,11 @@ package uk.gov.communities.prsdb.webapp.constants
 
 // These need to be constants as we cannot use the urlPathSegment from the JourneyType directly in the RequestMapping Annotation
 const val REGISTER_LANDLORD_JOURNEY_URL: String = "register-as-a-landlord"
+
+// TODO PDJB-2149: Remove this constant when the ACTIVE_INACTIVE flag is removed
 const val DEREGISTER_LANDLORD_JOURNEY_URL: String = "deregister-landlord"
+
+// TODO PDJB-2149: Remove this constant when the ACTIVE_INACTIVE flag is removed
 const val DEREGISTER_ORGANISATIONAL_LANDLORD_JOURNEY_URL: String = "deregister-organisational-landlord"
 const val REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL: String = "register-local-council-user"
 const val REGISTER_PROPERTY_JOURNEY_URL: String = "register-property"

@@ -15,6 +15,7 @@ interface IndividualLandlordRepository :
 
     fun findByBaseUser_IdIn(subjectIds: Collection<String>): List<IndividualLandlord>
 
+    // TODO PDJB-2149: Remove this function when the ACTIVE_INACTIVE flag is removed
     fun deleteByBaseUser_Id(subjectId: String)
 
     fun countByCreatedDateBetween(

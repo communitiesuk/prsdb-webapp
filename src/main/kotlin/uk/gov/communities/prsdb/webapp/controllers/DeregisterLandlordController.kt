@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -22,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
+// TODO PDJB-2149: Remove this controller when the ACTIVE_INACTIVE flag is removed
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
@@ -31,12 +34,14 @@ class DeregisterLandlordController(
 ) {
     @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
     @GetMapping("/{*stepPath}")
+    @AvailableWhenFeatureDisabled(ACTIVE_INACTIVE)
     fun getJourneyStep(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('INDIVIDUAL_LANDLORD')")
     @PostMapping("/{*stepPath}")
+    @AvailableWhenFeatureDisabled(ACTIVE_INACTIVE)
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
@@ -54,6 +59,7 @@ class DeregisterLandlordController(
         )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(ACTIVE_INACTIVE)
     fun getConfirmation(): String {
         if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
             throw ResponseStatusException(

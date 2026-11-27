@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintVal
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
+// TODO PDJB-2149: Remove this class when the ACTIVE_INACTIVE flag is removed
 @IsValidPrioritised
 class LandlordDeregistrationAreYouSureFormModel(
     @ValidatedBy(

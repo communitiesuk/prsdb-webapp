@@ -23,7 +23,15 @@ enum class EmailTemplate {
     PROPERTY_DEREGISTRATION_CONFIRMATION,
     AUTOMATED_PROPERTY_DEACTIVATION,
     PROPERTY_DEREGISTRATION_INVITEE_CANCELLATION,
+
+    // TODO PDJB-2149: Remove this entry, its emailTemplates.json entry, its .md file
+    //  (emails/LandlordNoPropertiesDeregistrationConfirmation.md) and the corresponding Notify template
+    //  when the ACTIVE_INACTIVE flag is removed
     LANDLORD_NO_PROPERTIES_DEREGISTRATION_CONFIRMATION,
+
+    // TODO PDJB-2149: Remove this entry, its emailTemplates.json entry, its .md file
+    //  (emails/LandlordWithPropertiesDeregistrationConfirmation.md) and the corresponding Notify template
+    //  when the ACTIVE_INACTIVE flag is removed
     LANDLORD_WITH_PROPERTIES_DEREGISTRATION_CONFIRMATION,
     VIRUS_SCAN_UNSUCCESSFUL,
     PROPERTY_UPDATE_CONFIRMATION,
@@ -66,6 +74,10 @@ enum class EmailTemplate {
 
     // TODO PDJB-2149: Remove this (and its emailTemplates.json entry and .md file) when the ACTIVE_INACTIVE flag is removed
     ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL_BEFORE_844,
+
+    // TODO PDJB-2149: Remove this entry, its emailTemplates.json entry, its .md file
+    //  (emails/OrganisationalLandlordDeregistrationConfirmation.md) and the corresponding Notify template
+    //  when the ACTIVE_INACTIVE flag is removed
     ORGANISATIONAL_LANDLORD_DEREGISTRATION_CONFIRMATION_EMAIL,
     ORGANISATIONAL_LANDLORD_UPDATE_CONFIRMATION,
     ORGANISATIONAL_LANDLORD_INVITATION_EMAIL,

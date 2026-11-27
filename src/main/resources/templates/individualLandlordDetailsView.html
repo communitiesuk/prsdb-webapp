@@ -8,8 +8,8 @@
     <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
     <h1 class="govuk-heading-l" th:text="${landlord.name}">Name</h1>
 
-    <!--/* TODO PDJB-2030: Hide the delete link when the deregistration journey is removed */-->
-    <p class="govuk-body">
+    <!--/* TODO PDJB-2149: Remove this link and the th:if when the ACTIVE_INACTIVE feature flag is removed */-->
+    <p class="govuk-body" th:if="${deleteLandlordRecordUrl}">
         <a class="govuk-link" th:href="@{${deleteLandlordRecordUrl}}" th:text="#{landlordDetails.removeRecord}">landlordDetails.removeRecord</a>
     </p>
 

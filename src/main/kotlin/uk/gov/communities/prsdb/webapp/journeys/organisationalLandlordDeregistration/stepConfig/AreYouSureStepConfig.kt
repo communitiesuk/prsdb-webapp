@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistra
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
+// TODO PDJB-2149: Remove this file when the ACTIVE_INACTIVE flag is removed
 @JourneyFrameworkComponent("organisationalLandlordDeregistrationAreYouSureStepConfig")
 class AreYouSureStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, OrganisationalLandlordDeregistrationJourneyState>() {

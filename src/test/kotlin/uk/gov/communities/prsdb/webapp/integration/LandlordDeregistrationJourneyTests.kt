@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -11,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -21,7 +23,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
+// TODO PDJB-2149: Delete this test class along with the landlord deregistration journey when the ACTIVE_INACTIVE flag is removed
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
+    @BeforeEach
+    fun disableActiveInactive() {
+        featureFlagManager.disableFeature(ACTIVE_INACTIVE)
+    }
+
     @MockitoBean
     private lateinit var swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 

@@ -285,6 +285,70 @@ class LandlordDetailsControllerTests(
             }
         }
 
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
+        @Test
+        @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
+        fun `getUserLandlordDetails does not add a delete record url for an individual landlord when ACTIVE_INACTIVE is enabled`() {
+            // Arrange
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            // Act, Assert
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                model {
+                    attributeDoesNotExist("deleteLandlordRecordUrl")
+                    attribute("showDeleteLandlordRecordLink", false)
+                }
+            }
+        }
+
+        // TODO PDJB-2149: Delete this test when the ACTIVE_INACTIVE feature flag is removed
+        @Test
+        @WithMockUser(roles = ["ORG_ADMIN"])
+        fun `getUserLandlordDetails hides the delete link for an org admin when ACTIVE_INACTIVE is enabled`() {
+            // Arrange
+            whenever(featureFlagManager.checkFeature(ACTIVE_INACTIVE)).thenReturn(true)
+            val orgLandlord = MockLandlordData.createOrgLandlord(registrantRole = OrganisationalLandlordUserRole.ADMIN)
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(
+                propertyOwnershipService.getActivePropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = ACTIVE_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(
+                propertyOwnershipService.getDeactivatedPropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = DEACTIVATED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+            whenever(organisationPermissionsProvider.canCurrentUserPerformOrgAdminActions()).thenReturn(true)
+
+            // Act, Assert
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attributeDoesNotExist("deleteLandlordRecordUrl")
+                    attribute("showDeleteLandlordRecordLink", false)
+                }
+            }
+        }
+
         @Test
         @WithMockUser(roles = ["INDIVIDUAL_LANDLORD"])
         fun `getUserLandlordDetails hides change links and shows the inactive banner for an inactive individual landlord`() {

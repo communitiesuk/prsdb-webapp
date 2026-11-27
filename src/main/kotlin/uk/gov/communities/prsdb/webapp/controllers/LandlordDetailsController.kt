@@ -91,6 +91,8 @@ class LandlordDetailsController(
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
+        model.addDeleteLandlordUrlAttributes(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(landlord, model)
         }
@@ -119,17 +121,16 @@ class LandlordDetailsController(
             ),
         )
         model.addAttribute("isLandlordView", true)
-        // TODO PDJB-2030: Hide the delete link when the deregistration journey is removed
-        model.addAttribute("showDeleteLandlordRecordLink", canPerformOrgAdminActions)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
+        model.addDeleteLandlordUrlAttributes(
+            DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
+            canPerformOrgAdminActions,
+        )
+
         if (isInactiveVariant) {
             addInactiveLandlordBannerDetails(orgLandlord, model)
         }
-        model.addAttribute(
-            "deleteLandlordRecordUrl",
-            DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
-        )
 
         return "orgLandlordDetailsView"
     }
@@ -190,8 +191,20 @@ class LandlordDetailsController(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
         )
-        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+    }
+
+    // TODO PDJB-2149: Remove this function and all calls to it when the ACTIVE_INACTIVE feature flag is removed
+    private fun Model.addDeleteLandlordUrlAttributes(
+        url: String,
+        canEdit: Boolean = true,
+    ) {
+        if (featureFlagManager.checkFeature(ACTIVE_INACTIVE)) {
+            addAttribute("showDeleteLandlordRecordLink", false)
+        } else {
+            addAttribute("deleteLandlordRecordUrl", url)
+            addAttribute("showDeleteLandlordRecordLink", canEdit)
+        }
     }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")

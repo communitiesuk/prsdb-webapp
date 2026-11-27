@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlor
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
+// TODO PDJB-2149: Remove this class when the ACTIVE_INACTIVE flag is removed
 @PrsdbWebService
 class LandlordDeregistrationService(
     private val individualLandlordRepository: IndividualLandlordRepository,

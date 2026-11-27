@@ -22,7 +22,6 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         val detailsPage = navigator.goToOrgLandlordDetails()
 
         assertThat(page.locator("#main-content h1")).containsText("Local Organisation Landlord")
-        assertThat(detailsPage.deleteOrganisationLink).isVisible()
         assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
     }
 
@@ -123,9 +122,8 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         }
 
         @Test
-        fun `an org admin sees the contacts change links and the delete organisation link`() {
+        fun `an org admin sees the contacts change links`() {
             val detailsPage = navigator.goToOrgLandlordDetails()
-            assertThat(detailsPage.deleteOrganisationLink).isVisible()
 
             detailsPage.tabs.goToOrganisationContacts()
 
@@ -136,9 +134,10 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Nested
-    inner class OrgEditor : NestedIntegrationTestWithImmutableData(
-        listOf("data-mockuser-org-landlord-trust.sql", "data-org-landlord-user-is-editor.sql"),
-    ) {
+    inner class OrgEditor :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-org-landlord-trust.sql", "data-org-landlord-user-is-editor.sql"),
+        ) {
         // TODO PDJB-1828: Remove this setup when the MULTI_USER_ORGANISATIONS feature flag is removed
         @BeforeEach
         fun enableMultiUserOrganisations() {
@@ -200,9 +199,10 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Nested
-    inner class InactiveOrgAdmin : NestedIntegrationTestWithImmutableData(
-        listOf("data-mockuser-org-landlord-trust.sql", "data-overlay-org-landlord-is-inactive.sql"),
-    ) {
+    inner class InactiveOrgAdmin :
+        NestedIntegrationTestWithImmutableData(
+            listOf("data-mockuser-org-landlord-trust.sql", "data-overlay-org-landlord-is-inactive.sql"),
+        ) {
         // TODO PDJB-1828: Remove the MULTI_USER_ORGANISATIONS setup when the flag is removed
         // TODO PDJB-2149: Remove the ACTIVE_INACTIVE setup when the flag is removed
         @BeforeEach
@@ -256,12 +256,29 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
             val detailsPage = navigator.goToOrgLandlordDetails()
 
             assertThat(detailsPage.organisationNameChangeLink).isVisible()
-            assertThat(detailsPage.deleteOrganisationLink).isVisible()
 
             detailsPage.tabs.goToOrganisationContacts()
 
             assertThat(detailsPage.mainContactCard.getAction("Change")).isVisible()
             assertThat(detailsPage.governingBodyMembersLink).isVisible()
+        }
+    }
+
+    // TODO PDJB-2149: Delete this nested class when the ACTIVE_INACTIVE feature flag is removed
+    // When the ACTIVE_INACTIVE flag is switched on the deregistration journey should be hidden.
+    @Nested
+    inner class DeleteOrganisationLinkBeforeActiveInactive :
+        NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-trust.sql") {
+        @BeforeEach
+        fun disableActiveInactive() {
+            featureFlagManager.disableFeature(ACTIVE_INACTIVE)
+        }
+
+        @Test
+        fun `an org admin sees the delete organisation link`() {
+            val detailsPage = navigator.goToOrgLandlordDetails()
+
+            assertThat(detailsPage.deleteOrganisationLink).isVisible()
         }
     }
 

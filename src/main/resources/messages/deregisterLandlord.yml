@@ -1,3 +1,4 @@
+# TODO PDJB-2149: Delete this file when the ACTIVE_INACTIVE feature flag is removed
 organisational:
   areYouSure:
     heading: Are you sure you want to delete your organisation?
