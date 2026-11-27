@@ -40,7 +40,8 @@ class PropertyDetailsControllerFeatureFlagTests : FeatureFlagTestCallingEndpoint
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         val complianceStatus = statusDerivingService.getComplianceStatus(propertyCompliance)
 
-        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(propertyOwnershipService.retrievePropertyOwnershipByIdRegardlessOfActiveStatus(propertyOwnershipId))
+            .thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any())).thenReturn(propertyCompliance)
         whenever(propertyComplianceService.getComplianceStatus(any())).thenReturn(complianceStatus)
         whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
