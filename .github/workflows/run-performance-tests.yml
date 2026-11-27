@@ -88,9 +88,10 @@ jobs:
     outputs:
       restore-task-definition: ${{ steps.resolve_restore.outputs.task_definition }}
       recovery-required: ${{ steps.recovery_status.outputs.recovery_required }}
+      lock-acquired: ${{ steps.acquire_lock.outcome }}
     environment: nft
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       NFT_RESTORE_TASK_DEFINITION: ${{ inputs.restore-task-definition }}
       EXPECTED_NFT_SHA: ${{ inputs.expected-app-sha || needs.changes.outputs.sha }}
@@ -119,6 +120,9 @@ jobs:
           role-session-name: nft-readiness-${{ github.run_id }}
           aws-region: eu-west-2
           role-duration-seconds: 3600
+      - name: Acquire shared NFT infrastructure lock
+        id: acquire_lock
+        run: node scripts/performance-tests/nft-rds-resize.mjs acquire
       - name: Resolve and checkpoint the active managed restore task
         id: resolve_restore
         env:
@@ -141,6 +145,22 @@ jobs:
       - name: Store writer-stop recovery checkpoint privately, including partial failure
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload restore-state
+      - name: Refresh credentials before the database resize
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-database-resize-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Resize the stopped NFT database for performance testing
+        run: node scripts/performance-tests/nft-vpc-restore.mjs resize-up
+      - name: Refresh credentials after the database resize
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-seed-restore-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
       - name: Restore pinned seed dump inside the NFT VPC
         run: node scripts/performance-tests/nft-vpc-restore.mjs run
       - name: Migrate and verify the restored NFT database through SSM
@@ -1042,13 +1062,51 @@ jobs:
       contents: read
       id-token: write
 
-  restore-app-after-database-reset:
-    name: Start NFT app and verify all QA fixtures after reset
+  resize-database-after-reset:
+    name: Restore NFT database instance class after reset
     needs: [changes, restore-dataset, reset-database]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
       needs.reset-database.result == 'success'
+    environment: nft
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      NFT_RESTORE_TASK_DEFINITION: ${{ needs.restore-dataset.outputs.restore-task-definition }}
+      NFT_DATABASE_RESET_PASSED: ${{ needs.reset-database.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::448120078528:role/nft-performance-test-orchestrator-access
+          role-session-name: nft-database-recovery-${{ github.run_id }}
+          aws-region: eu-west-2
+          role-duration-seconds: 3600
+      - name: Retrieve private recovery checkpoints
+        run: node scripts/performance-tests/nft-recovery-state.mjs download
+      - name: Select the latest validated recovery checkpoints from this run
+        run: node scripts/performance-tests/nft-recovery-state.mjs select
+      - name: Restore the NFT database instance class before restarting services
+        run: node scripts/performance-tests/nft-vpc-restore.mjs resize-down
+      - name: Store database recovery checkpoint privately
+        if: always()
+        run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+
+  restore-app-after-database-reset:
+    name: Start NFT app and verify all QA fixtures after reset
+    needs: [changes, restore-dataset, reset-database, resize-database-after-reset]
+    if: >-
+      always() && needs.changes.result == 'success' &&
+      needs.changes.outputs.run == 'true' &&
+      needs.reset-database.result == 'success' &&
+      needs.resize-database-after-reset.result == 'success'
     environment: nft
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -1101,11 +1159,12 @@ jobs:
 
   restore-async-after-database-reset:
     name: Restore async service after QA reset
-    needs: [changes, restore-dataset, reset-database, restore-app-after-database-reset]
+    needs: [changes, restore-dataset, reset-database, resize-database-after-reset, restore-app-after-database-reset]
     if: >-
       always() && needs.changes.result == 'success' &&
       needs.changes.outputs.run == 'true' &&
       needs.reset-database.result == 'success' &&
+      needs.resize-database-after-reset.result == 'success' &&
       needs.restore-app-after-database-reset.result == 'success'
     environment: nft
     runs-on: ubuntu-latest
@@ -1177,6 +1236,8 @@ jobs:
       - name: Store final recovery checkpoint privately
         if: always()
         run: node scripts/performance-tests/nft-recovery-state.mjs upload cleanup-state
+      - name: Release the NFT infrastructure lock after verified recovery
+        run: node scripts/performance-tests/nft-rds-resize.mjs release
 
   maintenance-recovery-required:
     name: Report incomplete NFT maintenance recovery
@@ -1210,6 +1271,20 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
           echo '::error::NFT maintenance or writer recovery is incomplete; operator action is required.'
+          exit 1
+
+  nft-lock-recovery-required:
+    name: Report retained NFT infrastructure lock
+    needs: [restore-dataset, restore-maintenance-schedules]
+    if: >-
+      always() && needs.restore-dataset.outputs.lock-acquired != '' &&
+      needs.restore-dataset.outputs.lock-acquired != 'skipped' &&
+      needs.restore-maintenance-schedules.result != 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require operator recovery
+        run: |
+          echo '::error::The NFT infrastructure lock may remain held. Verify database, services, schedules and the owning run before recovery.'
           exit 1
 
   marker:
