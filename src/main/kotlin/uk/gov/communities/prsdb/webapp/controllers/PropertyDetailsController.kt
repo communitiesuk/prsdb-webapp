@@ -10,10 +10,12 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AllowIfLandlord
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ACTIVE_INACTIVE
+import uk.gov.communities.prsdb.webapp.constants.ACT_AS_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ASSOCIATED_PARTIES
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -21,9 +23,11 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PEOPLE_RESPONSIBLE_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.FreeholderSummaryCardHelper
@@ -43,6 +47,11 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+
+enum class PropertyDetailsCouncilViewType {
+    LocalCouncilView,
+    SystemOperatorView,
+}
 
 @PrsdbController
 @RequestMapping
@@ -226,6 +235,29 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
+        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, PropertyDetailsCouncilViewType.LocalCouncilView)
+    }
+
+    @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
+    @GetMapping(SYSTEM_OPERATOR_PROPERTY_DETAILS_ROUTE)
+    // TODO PDJB-2288: Remove this annotation when the ACT_AS_LANDLORD flag is removed
+    @AvailableWhenFeatureEnabled(ACT_AS_LANDLORD)
+    fun getPropertyDetailsSystemOperatorView(
+        @PathVariable propertyOwnershipId: Long,
+        model: Model,
+    ): String {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+
+        return buildLocalCouncilViewOfPropertyDetails(propertyOwnership, model, PropertyDetailsCouncilViewType.SystemOperatorView)
+    }
+
+    private fun buildLocalCouncilViewOfPropertyDetails(
+        propertyOwnership: PropertyOwnership,
+        model: Model,
+        viewType: PropertyDetailsCouncilViewType,
+    ): String {
+        val propertyOwnershipId = propertyOwnership.id
+
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(PEOPLE_RESPONSIBLE_FRAGMENT)
 
         val propertyCompliance =
@@ -245,9 +277,14 @@ class PropertyDetailsController(
             PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
                 propertyOwnership.landlords,
                 landlordDetailsUrlProvider = { landlord ->
-                    LandlordDetailsController
-                        .getLandlordDetailsForLocalCouncilUserPath(landlord.id)
-                        .overrideBackLinkForUrl(backUrlKey)
+                    val landlordDetailsPath =
+                        when (viewType) {
+                            PropertyDetailsCouncilViewType.LocalCouncilView ->
+                                LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                            PropertyDetailsCouncilViewType.SystemOperatorView ->
+                                LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(landlord.id)
+                        }
+                    landlordDetailsPath.overrideBackLinkForUrl(backUrlKey)
                 },
             )
         model.addAttribute("landlordSummaryCards", landlordSummaryCards)
@@ -283,7 +320,12 @@ class PropertyDetailsController(
         )
         model.addAttribute("isLandlordView", false)
 
-        model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+        val backUrl =
+            when (viewType) {
+                PropertyDetailsCouncilViewType.LocalCouncilView -> LOCAL_COUNCIL_DASHBOARD_URL
+                PropertyDetailsCouncilViewType.SystemOperatorView -> SYSTEM_OPERATOR_DASHBOARD_URL
+            }
+        model.addAttribute("backUrl", backUrl)
 
         return PROPERTY_DETAILS_VIEW
     }
@@ -341,13 +383,17 @@ class PropertyDetailsController(
 
         const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
-        fun getPropertyDetailsPath(
-            propertyOwnershipId: Long,
-            isLocalCouncilView: Boolean = false,
-        ): String =
-            UriTemplate(if (isLocalCouncilView) LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE else LANDLORD_PROPERTY_DETAILS_ROUTE)
-                .expand(propertyOwnershipId)
-                .toASCIIString()
+        const val SYSTEM_OPERATOR_PROPERTY_DETAILS_ROUTE =
+            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+
+        fun getPropertyDetailsPath(propertyOwnershipId: Long): String =
+            UriTemplate(LANDLORD_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getPropertyDetailsForLocalCouncilUserPath(propertyOwnershipId: Long): String =
+            UriTemplate(LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
+        fun getPropertyDetailsForSystemOperatorPath(propertyOwnershipId: Long): String =
+            UriTemplate(SYSTEM_OPERATOR_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()

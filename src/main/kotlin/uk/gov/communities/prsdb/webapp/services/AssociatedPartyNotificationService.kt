@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.AssociatedPartyNotificationOutcome
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getContactEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.LandlordExtensions.Companion.getDisplayEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FreeholderDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LetterAddressDataModel
@@ -29,14 +29,19 @@ class AssociatedPartyNotificationService(
     fun sendNotificationToFreeholderAddedToProperty(
         freeholder: FreeholderDataModel,
         propertyOwnership: PropertyOwnership,
-    ): AssociatedPartyNotificationOutcome =
-        sendNotificationToAssociatedParty(
+    ): AssociatedPartyNotificationOutcome {
+        if (freeholder.suppressNotification) {
+            return AssociatedPartyNotificationOutcome.NOT_SENT_IS_LANDLORD
+        }
+
+        return sendNotificationToAssociatedParty(
             name = freeholder.name,
             emailAddress = freeholder.email,
             postalAddress = freeholder.address,
             buildEmail = { buildFreeholderAddedToPropertyEmail(freeholder, propertyOwnership) },
             buildLetter = { buildFreeholderAddedToPropertyLetter(freeholder, propertyOwnership) },
         )
+    }
 
     internal fun buildFreeholderAddedToPropertyLetter(
         freeholder: FreeholderDataModel,
@@ -102,7 +107,7 @@ class AssociatedPartyNotificationService(
 
     private fun landlordsRentingOutProperty(propertyOwnership: PropertyOwnership): List<String> =
         propertyOwnership.landlords.sortedBy { it.name }.map { landlord ->
-            "${landlord.name} (${landlord.getContactEmail()})"
+            "${landlord.name} (${landlord.getDisplayEmail()})"
         }
 
     fun sendNotificationToPropertyManagerAddedToProperty(

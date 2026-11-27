@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -617,7 +618,7 @@ class LandlordDetailsControllerTests(
                 .thenReturn(MockLandlordData.createIndividualLandlord())
             whenever(landlordService.retrieveLandlordById(orgLandlordId)).thenReturn(MockLandlordData.createOrgLandlord())
             whenever(landlordService.retrieveLandlordById(unknownLandlordId)).thenReturn(null)
-            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(any(), anyOrNull())).thenReturn(emptyList())
+            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(any(), anyOrNull(), any())).thenReturn(emptyList())
         }
 
         @Test
@@ -676,6 +677,20 @@ class LandlordDetailsControllerTests(
                     attribute("backUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
                 }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getLandlordDetailsAsSystemOperator requests property record links to the system operator view`() {
+            mvc.get(LandlordDetailsController.getLandlordDetailsForSystemOperatorPath(individualLandlordId)).andExpect {
+                status { isOk() }
+            }
+
+            verify(propertyOwnershipService).getRegisteredPropertiesForLandlord(
+                any(),
+                eq(REGISTERED_PROPERTIES_FRAGMENT),
+                eq(true),
+            )
         }
 
         @Test

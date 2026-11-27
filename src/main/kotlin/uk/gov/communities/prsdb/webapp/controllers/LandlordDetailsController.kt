@@ -279,11 +279,11 @@ class LandlordDetailsController(
             propertyOwnershipService.getRegisteredPropertiesForLandlord(
                 landlordId,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                isSystemOperatorView = viewType == LandlordDetailsViewType.SystemOperatorView,
             )
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
-        // TODO PDJB-1910: Return system operators to the landlord search results
         val backUrl = if (viewType == LandlordDetailsViewType.SystemOperatorView) SYSTEM_OPERATOR_DASHBOARD_URL else "/"
         model.addAttribute("backUrl", backUrl)
     }

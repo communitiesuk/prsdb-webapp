@@ -95,6 +95,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEnt
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageSystemOperatorView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
@@ -1654,7 +1655,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = false))
+        navigate(PropertyDetailsController.getPropertyDetailsPath(id))
         return createValidPage(
             page,
             PropertyDetailsPageLandlordView::class,
@@ -1663,10 +1664,19 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLocalCouncilView(id: Long): PropertyDetailsPageLocalCouncilView {
-        navigate(PropertyDetailsController.getPropertyDetailsPath(id, isLocalCouncilView = true))
+        navigate(PropertyDetailsController.getPropertyDetailsForLocalCouncilUserPath(id))
         return createValidPage(
             page,
             PropertyDetailsPageLocalCouncilView::class,
+            mapOf("propertyOwnershipId" to id.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsAsASystemOperator(id: Long): PropertyDetailsPageSystemOperatorView {
+        navigate(PropertyDetailsController.getPropertyDetailsForSystemOperatorPath(id))
+        return createValidPage(
+            page,
+            PropertyDetailsPageSystemOperatorView::class,
             mapOf("propertyOwnershipId" to id.toString()),
         )
     }

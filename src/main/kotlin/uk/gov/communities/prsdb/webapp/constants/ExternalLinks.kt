@@ -110,8 +110,6 @@ const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.
 
 const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_eaItOU1N1mExcgu"
 
-const val LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL = "https://qualtricsxmzfj3gmx5r.qualtrics.com/jfe/form/SV_9SqRP5awKt4XqoC"
-
 const val ENGLAND_AND_WALES_CHARITY_REGISTER_URL = "https://register-of-charities.charitycommission.gov.uk/charity-search"
 
 const val SCOTLAND_CHARITY_REGISTER_URL = "https://www.oscr.org.uk/"

@@ -185,11 +185,11 @@ doesn't hit the `exitProcess()` behaviour described above.
 Run Performance Tests restores the seed dataset for a fresh workflow run. At the end, including after a test failure,
 its recovery jobs restore the original app configuration, stop the simulator, remove owned temporary access, stop
 actual database writers, reset to the QA baseline, and verify app health and the QA fixtures. The recorded async worker
-count is restored independently after a successful reset, even if app/QA verification fails.
+revision and count are restored only after the reset, app recovery and QA verification succeed.
 
-Recovery jobs can be retried within the same workflow run. Their artifacts remain attempt-versioned, but recovery
-selects the latest validated checkpoints belonging to that run rather than requiring the current attempt to have
-created them. The checkpoints retain the original task revisions and ownership information.
+Recovery jobs can be retried within the same workflow run. Their private S3 checkpoints are attempt-versioned;
+recovery selects the latest validated checkpoints belonging to that run rather than requiring the current attempt to
+have created them. The checkpoints retain the original task revisions and ownership information.
 
 To retry the performance workload, start a **new workflow run** so the seed dataset is restored again. Re-running
 failed jobs or all jobs does not rerun dataset restoration or Gatling: these stages reject later attempts before
@@ -199,8 +199,9 @@ consumed its exclusive fixtures.
 Recovery must not be reported as successful unless its checks pass. Missing/corrupt state, an unexpected deployment,
 or an unverified writer/restore-task shutdown blocks automatic reset and requires operator recovery. Use the retained
 checkpoints and job errors to reconcile the original services and database; do not bypass the ownership guards or
-start another load run until the QA baseline and services are verified. No reset or deployment is performed merely
-by merging these workflow changes.
+start another load run until the QA baseline and services are verified. Private report retrieval and recovery
+instructions are in [the Gatling guide](docs/GatlingPerformanceTestsReadMe.md#nft-workflow-and-recovery).
+No reset or deployment is performed merely by merging these workflow changes.
 
 ### Scripts
 

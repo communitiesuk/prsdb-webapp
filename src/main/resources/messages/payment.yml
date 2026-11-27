@@ -1,0 +1,40 @@
+summary:
+  heading: Property fee
+  annualFee: The annual property fee is {0}. You are paying an adjusted (pro-rated) fee.
+  preGratisPeriod: There is no charge for the service until {0}. You are paying for {0} to your renewal date.
+  postGratisPeriod: You are paying for {0} to your renewal date.
+  renewalDateExplanation: Your renewal date is 1 year from when you registered your first property.
+  guidance:
+    prefix: Find out more about
+    link: the annual property fee (opens in new tab)
+    afterLink: .
+  summaryList:
+    heading: Payment summary
+    address: Property address
+    payment: Payment
+    paymentDate: Payment date
+    renewalDate: Renewal date
+  button: Go to payment
+processing:
+  heading: Your payment is processing
+  js:
+    doNotClose: Do not close or refresh this tab.
+    redirect: When your payment is processed you will be automatically redirected.
+  noJs:
+    notConfirmed: We have not yet received confirmation that your payment was successful.
+    checkStatus: Select Check payment status to see if your payment has been completed.
+    button: Check payment status
+tryAgainLink: Go back to try the payment again
+failed:
+  heading: Your payment has been declined
+  contactBank: Contact your bank for more details. No money has been taken from your account.
+  getHelp: Get help with payment
+notCompleted:
+  heading: Your payment was not completed
+  canHappenIf: 'This can happen if:'
+  bullet:
+    one: you made a payment for this property in a different tab or window
+    two: there was a problem with GOV.UK Pay
+  insetText: Any money taken from your account will be refunded.
+  whatYouNeedToDo:
+    heading: What you need to do
